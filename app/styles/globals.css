@@ -1,0 +1,79 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+
+  --breakpoint-sm: 24.5625rem; /* 393px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 90rem; /* 1440px */
+
+  --color-black: oklch(0 0 0);
+  --color-white: oklch(1 0 89.8756);
+
+  --color-gray-100: oklch(0.9794 0.0013 286.3756);
+  --color-gray-200: oklch(0.9581 0 89.8756);
+  --color-gray-300: oklch(0.9216 0.0013 106.4255);
+  --color-gray-400: oklch(0.8758 0.0014 106.4272);
+  --color-gray-500: oklch(0.8078 0 89.8756);
+  --color-gray-600: oklch(0.7228 0.0012 17.1858);
+  --color-gray-700: oklch(0.6301 0 89.8756);
+  --color-gray-800: oklch(0.5693 0 89.8756);
+  --color-gray-900: oklch(0.4855 0 89.8756);
+  --color-gray-1000: oklch(0.3639 0 89.8756);
+  --color-gray-1100: oklch(0.2459 0.004 128.6429);
+  --color-Fill_Primary: var(--color-gray-1100);
+  --color-Fill_Secondary: var(--color-gray-900);
+  --color-Fill_Tertiary: var(--color-gray-400);
+  --color-Fill_Quandary: var(--color-gray-200);
+
+  --color-green-100: oklch(0.9792 0.0588 120.8671);
+  --color-green-200: oklch(0.9586 0.1221 122.23);
+  --color-green-300: oklch(0.9515 0.1639 120.0353);
+  --color-green-400: oklch(0.9396 0.1823 123.9508);
+  --color-green-500: oklch(0.9261 0.2052 124.8636);
+  --color-green-600: oklch(0.9203 0.2343 126.8178);
+  --color-green-700: oklch(0.8816 0.2233 127.0206);
+  --color-green-800: oklch(0.8301 0.2176 128.188);
+  --color-green-900: oklch(0.683 0.1807 128.8139);
+
+  --color-blue-300: oklch(0.9206 0.0384 277.586);
+  --color-blue-400: oklch(0.7573 0.1248 275.4718);
+  --color-blue-500: oklch(0.6041 0.2144 271.0585);
+  --color-blue-600: oklch(0.4634 0.2293 267.4494);
+  --color-Fill_Success: var(--color-blue-500);
+
+  --color-red-300: oklch(0.9217 0.0401 16.0045);
+  --color-red-400: oklch(0.7905 0.1212 19.5141);
+  --color-red-500: oklch(0.6837 0.205 23.7213);
+  --color-red-600: oklch(0.6287 0.2103 24.8488);
+  --color-Fill_Error: var(--color-red-500);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
