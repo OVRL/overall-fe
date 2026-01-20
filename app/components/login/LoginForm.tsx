@@ -37,7 +37,7 @@ export default function LoginForm({ onBack }: LoginFormProps) {
         // Dark Theme for both Mobile and PC
         <div className="flex flex-col h-full w-full bg-black text-white p-6 lg:p-12 lg:pt-20 relative">
             {/* Header */}
-            <div className="flex items-center justify-center relative mb-10 mt-2 lg:mb-16">
+            <div className="flex items-center justify-center relative mb-10 mt-2 lg:mb-8 lg:mt-0">
                 {/* Back Button */}
                 {onBack && (
                     <button onClick={onBack} className="absolute left-0 p-2 text-white hover:text-[#D2FF00] transition-colors">
@@ -74,8 +74,8 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                 </button> */}
             </div>
 
-            {/* Form Fields - More compact spacing on PC */}
-            <form className="flex-1 flex flex-col gap-10 lg:gap-8" onSubmit={(e) => e.preventDefault()}>
+            {/* Form Fields - More compact spacing on PC, centered and narrower */}
+            <form className="flex-1 flex flex-col gap-10 lg:gap-8 lg:max-w-lg lg:mx-auto w-full" onSubmit={(e) => e.preventDefault()}>
                 <Input
                     label="이메일"
                     value={email}

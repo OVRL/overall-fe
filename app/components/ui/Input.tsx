@@ -28,7 +28,7 @@ export default function Input({ label, className = "", onClear, errorMessage, ..
                         props.onBlur?.(e);
                     }}
                     className={`
-                        w-full bg-transparent text-[16px] py-3 pr-10 outline-none border-b transition-colors duration-200
+                        w-full bg-transparent text-[16px] lg:text-[18px] py-3 pr-10 outline-none border-b transition-colors duration-200
                         text-white placeholder:text-gray-500 border-white/20
                         ${isFocused ? 'border-[#D2FF00]' : ''}
                         ${errorMessage ? 'border-red-500' : ''}
@@ -62,7 +62,7 @@ export default function Input({ label, className = "", onClear, errorMessage, ..
 
             {/* Error Message */}
             {errorMessage && (
-                <p className="text-xs text-red-500 pl-1 mt-1">{errorMessage}</p>
+                <p className="text-red-500 pl-1 mt-3" style={{ fontSize: '13px', lineHeight: '1.5' }}>{errorMessage}</p>
             )}
         </div>
     );

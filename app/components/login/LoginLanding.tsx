@@ -7,7 +7,7 @@ interface LoginLandingProps {
 
 export default function LoginLanding({ onEmailLoginClick }: LoginLandingProps) {
     return (
-        <div className="flex flex-col h-full w-full justify-between items-center bg-[#1E2414] relative overflow-hidden">
+        <div className="flex flex-col h-full w-full justify-between items-center bg-gradient-to-br from-[#C2FF34] via-[#3A4A2A] to-black relative overflow-hidden">
             {/* Background Image: bg_zlatan.webp - positioned at bottom center */}
             <div className="absolute inset-0 z-0 flex items-end justify-center">
                 <img
@@ -26,7 +26,7 @@ export default function LoginLanding({ onEmailLoginClick }: LoginLandingProps) {
                 {/* LOGO Area: ovr_rogo.webp - larger size */}
                 <div className="mb-6 animate-in zoom-in duration-700">
                     <img
-                        src="/images/ovr_rogo.webp"
+                        src="/images/ovr.png"
                         alt="OVR Logo"
                         width={220}
                         height={220}
