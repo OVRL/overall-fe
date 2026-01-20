@@ -40,7 +40,7 @@ export default function LoginForm({ onBack }: LoginFormProps) {
             <div className="flex items-center justify-center relative mb-10 mt-2 lg:mb-8 lg:mt-0">
                 {/* Back Button */}
                 {onBack && (
-                    <button onClick={onBack} className="absolute left-0 p-2 text-white hover:text-[#D2FF00] transition-colors">
+                    <button onClick={onBack} className="absolute left-0 p-2 text-white hover:text-[#D2FF00] transition-colors lg:-mt-2">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19L5 12L12 5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
