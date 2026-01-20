@@ -55,14 +55,14 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                     onClick={() => setLoginType("individual")}
                     className="flex items-center gap-2 cursor-pointer group"
                 >
-                    {loginType === 'individual' && <span className="text-[#D2FF00] font-bold">✔</span>}
-                    <span className={`text-[15px] font-bold transition-colors ${loginType === 'individual' ? 'text-white' : 'text-gray-500'
+                    {/* {loginType === 'individual' && <span className="text-[#D2FF00] font-bold">✔</span>} */}
+                    {/* <span className={`text-[15px] font-bold transition-colors ${loginType === 'individual' ? 'text-white' : 'text-gray-500'
                         }`}>
                         개인
-                    </span>
+                    </span> */}
                 </button>
 
-                <button
+                {/* <button
                     onClick={() => setLoginType("team")}
                     className="flex items-center gap-2 cursor-pointer group"
                 >
@@ -71,7 +71,7 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                         }`}>
                         팀
                     </span>
-                </button>
+                </button> */}
             </div>
 
             {/* Form Fields - More compact spacing on PC */}
