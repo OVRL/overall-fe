@@ -2,7 +2,7 @@ import React from "react";
 
 const Icons = {
     kakao: (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-[#3A1D1D]">
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-kakao-icon">
             <path d="M12 3C5.925 3 1 6.925 1 11.775C1 14.65 2.875 17.225 5.675 18.725C5.45 19.55 4.75 21.325 4.675 21.65C4.6 21.9 4.9 22.025 5.125 21.875C6.15 21.2 8.35 19.725 9.4 19.025C10.225 19.15 11.1 19.2 12 19.2C18.075 19.2 23 15.275 23 10.425C23 5.575 18.075 3 12 3Z" />
         </svg>
     ),
@@ -27,8 +27,8 @@ interface SocialButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 export default function SocialButton({ provider, children, className = "", ...props }: SocialButtonProps) {
 
     const providerStyles = {
-        kakao: "bg-[#FEE500] text-[#191919] hover:bg-[#FDD835]",
-        naver: "bg-[#03C75A] text-white hover:bg-[#02B350]",
+        kakao: "bg-kakao text-kakao-text hover:bg-kakao-hover",
+        naver: "bg-naver text-white hover:bg-naver-hover",
         email: "bg-white text-black hover:bg-gray-100",
     };
 

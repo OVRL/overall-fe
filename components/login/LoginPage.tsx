@@ -22,7 +22,7 @@ function LoginContent() {
         <main className="w-full h-[100dvh] bg-black min-w-[280px] overflow-x-hidden">
 
             {!showForm && (
-                <div className="w-full h-full bg-[#1E2414]">
+                <div className="w-full h-full bg-bg-dark">
                     <LoginLanding onEmailLoginClick={handleEmailLoginClick} />
                 </div>
             )}

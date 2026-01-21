@@ -12,7 +12,7 @@ interface LoginLandingProps {
 
 export default function LoginLanding({ onEmailLoginClick }: LoginLandingProps) {
     return (
-        <div className="flex flex-col h-full w-full justify-between items-center bg-gradient-to-br from-[#C2FF34] via-[#3A4A2A] to-black relative overflow-hidden">
+        <div className="flex flex-col h-full w-full justify-between items-center bg-gradient-to-br from-primary-light via-dark-olive to-black relative overflow-hidden">
             <div className="absolute inset-0 z-0 flex items-end justify-center">
                 <div className="relative w-full h-[60%] opacity-50">
                     <Image
@@ -23,7 +23,7 @@ export default function LoginLanding({ onEmailLoginClick }: LoginLandingProps) {
                         priority
                     />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-[#3A4A2A]/40 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-dark-olive/40 via-transparent to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
             </div>
             <LoginLogo />
