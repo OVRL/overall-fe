@@ -33,6 +33,7 @@
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);
 
+  --color-gray-90: oklch(0.987 0.003 280);
   --color-gray-100: oklch(0.9794 0.0013 286.3756);
   --color-gray-200: oklch(0.9581 0 89.8756);
   --color-gray-300: oklch(0.9216 0.0013 106.4255);
@@ -70,6 +71,11 @@
   --color-red-500: oklch(0.6837 0.205 23.7213);
   --color-red-600: oklch(0.6287 0.2103 24.8488);
   --color-Fill_Error: var(--color-red-500);
+
+  --color-Position-FW-Red: oklch(0.627 0.258 29.2);
+  --color-Position-MF-Green: oklch(0.866 0.176 142.1);
+  --color-Position-DF-Blue: oklch(0.862 0.106 257.6);
+  --color-Position-GK-Yellow: oklch(0.871 0.15 85.3);
 }
 
 body {
