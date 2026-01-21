@@ -22,11 +22,8 @@ export default function Button({
     };
 
     const variantStyles = {
-        // Acid Green
         primary: "bg-[#D2FF00] hover:bg-[#c2eb00] text-black shadow-lg shadow-[#D2FF00]/20",
-        // White/Gray
         secondary: "bg-white hover:bg-gray-100 text-black border border-gray-200",
-        // Transparent
         ghost: "bg-transparent hover:bg-white/10 text-white",
     };
 

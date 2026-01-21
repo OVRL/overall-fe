@@ -1,6 +1,5 @@
 import React from "react";
 
-// Icons for Social Providers
 const Icons = {
     kakao: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-[#3A1D1D]">
@@ -9,11 +8,10 @@ const Icons = {
     ),
     naver: (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white">
-            {/* Naver 'N' Shape approximation */}
             <path d="M16.42 20H21V4H16.33L7.75 15.68V4H3V20H7.8L16.42 20Z" />
         </svg>
     ),
-    mail: ( // Simple Mail Icon for Email Login button variant if needed here, or keep generic
+    mail: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <rect x="2" y="4" width="20" height="16" rx="2" />
             <path d="M22 6L12 13L2 6" />

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Button from "../ui/Button";
-import Input from "../ui/Input";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 interface LoginFormProps {
     onBack?: () => void;
@@ -14,7 +14,6 @@ export default function LoginForm({ onBack }: LoginFormProps) {
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
 
-    // Email validation
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email && !emailRegex.test(email)) {
@@ -30,13 +29,10 @@ export default function LoginForm({ onBack }: LoginFormProps) {
         validateEmail(value);
     };
 
-    // Check if form has values for button activation
     const isFormFilled = email.length > 0 && password.length > 0;
 
     return (
-        // Dark Theme for both Mobile and PC
         <div className="flex flex-col h-full w-full bg-black text-white p-6 lg:p-12 lg:pt-20 relative">
-            {/* Header */}
             <div className="flex items-center justify-center relative mb-10 mt-2 lg:mb-8 lg:mt-0">
                 {/* Back Button */}
                 {onBack && (
@@ -49,32 +45,17 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                 <h1 className="text-[20px] lg:text-[24px] font-bold">오버롤 로그인</h1>
             </div>
 
-            {/* Tabs: Individual / Team - Hidden on PC, visible on mobile */}
             <div className="flex gap-6 mb-12 ml-2 lg:hidden">
                 <button
                     onClick={() => setLoginType("individual")}
                     className="flex items-center gap-2 cursor-pointer group"
                 >
-                    {/* {loginType === 'individual' && <span className="text-[#D2FF00] font-bold">✔</span>} */}
-                    {/* <span className={`text-[15px] font-bold transition-colors ${loginType === 'individual' ? 'text-white' : 'text-gray-500'
-                        }`}>
-                        개인
-                    </span> */}
+
                 </button>
 
-                {/* <button
-                    onClick={() => setLoginType("team")}
-                    className="flex items-center gap-2 cursor-pointer group"
-                >
-                    {loginType === 'team' && <span className="text-[#D2FF00] font-bold">✔</span>}
-                    <span className={`text-[15px] font-bold transition-colors ${loginType === 'team' ? 'text-white' : 'text-gray-500'
-                        }`}>
-                        팀
-                    </span>
-                </button> */}
+
             </div>
 
-            {/* Form Fields - More compact spacing on PC, centered and narrower */}
             <form className="flex-1 flex flex-col gap-10 lg:gap-8 lg:max-w-lg lg:mx-auto w-full" onSubmit={(e) => e.preventDefault()}>
                 <Input
                     label="이메일"
@@ -84,7 +65,7 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                         setEmail("");
                         setEmailError("");
                     }}
-                    placeholder="아이디를 입력해주세요"
+                    placeholder="아이디(이메일)를 입력해주세요"
                     errorMessage={emailError}
                 />
 
@@ -98,7 +79,6 @@ export default function LoginForm({ onBack }: LoginFormProps) {
                 />
 
                 <div className="mt-8 lg:mt-6">
-                    {/* Button: Same for Mobile and PC - Inactive(Gray) -> Active(Acid Green) */}
                     <Button
                         size="full"
                         className={`

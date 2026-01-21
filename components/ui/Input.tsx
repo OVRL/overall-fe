@@ -13,7 +13,6 @@ export default function Input({ label, className = "", onClear, errorMessage, ..
 
     return (
         <div className={`flex flex-col gap-1 w-full ${className}`} >
-            {/* Label - Dark theme only */}
             {label && <label className="text-xs pl-1 font-bold text-white/60 transition-colors">{label}</label>}
 
             <div className="relative w-full">
