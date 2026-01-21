@@ -25,10 +25,14 @@
     sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
     "Noto Color Emoji";
 
-  --breakpoint-sm: 24.5625rem; /* 393px */
-  --breakpoint-md: 48rem; /* 768px */
-  --breakpoint-lg: 64rem; /* 1024px */
-  --breakpoint-xl: 90rem; /* 1440px */
+  --breakpoint-sm: 24.5625rem;
+  /* 393px */
+  --breakpoint-md: 48rem;
+  /* 768px */
+  --breakpoint-lg: 64rem;
+  /* 1024px */
+  --breakpoint-xl: 90rem;
+  /* 1440px */
 
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);
@@ -71,6 +75,34 @@
   --color-red-500: oklch(0.6837 0.205 23.7213);
   --color-red-600: oklch(0.6287 0.2103 24.8488);
   --color-Fill_Error: var(--color-red-500);
+
+  /* Brand Primary Colors */
+  --color-primary: oklch(0.98 0.25 128);
+  /* #D2FF00 - Bright lime green */
+  --color-primary-hover: oklch(0.92 0.23 128);
+  /* #c2eb00 - Darker lime green */
+  --color-primary-light: oklch(0.96 0.22 125);
+  /* #C2FF34 - Light lime green for gradients */
+
+  /* Social Login Brand Colors */
+  --color-kakao: oklch(0.96 0.18 100);
+  /* #FEE500 - Kakao yellow */
+  --color-kakao-hover: oklch(0.94 0.19 98);
+  /* #FDD835 - Kakao yellow hover */
+  --color-kakao-text: oklch(0.17 0.01 0);
+  /* #191919 - Kakao text */
+  --color-kakao-icon: oklch(0.25 0.04 30);
+  /* #3A1D1D - Kakao icon */
+  --color-naver: oklch(0.65 0.17 155);
+  /* #03C75A - Naver green */
+  --color-naver-hover: oklch(0.60 0.16 155);
+  /* #02B350 - Naver green hover */
+
+  /* App Theme Colors */
+  --color-dark-olive: oklch(0.30 0.04 120);
+  /* #3A4A2A - Dark olive green for gradients */
+  --color-bg-dark: oklch(0.15 0.02 120);
+  /* #1E2414 - Dark background */
 
   --color-Position-FW-Red: oklch(0.627 0.258 29.2);
   --color-Position-MF-Green: oklch(0.866 0.176 142.1);

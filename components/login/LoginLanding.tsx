@@ -2,7 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
-import SocialButton from "@/components/ui/SocialButton";
+import LoginLogo from "@/components/login/LoginLogo";
+import SocialLoginButtons from "@/components/login/SocialLoginButtons";
+import AuthLinks from "@/components/login/AuthLinks";
 
 interface LoginLandingProps {
     onEmailLoginClick: () => void;
@@ -24,38 +26,12 @@ export default function LoginLanding({ onEmailLoginClick }: LoginLandingProps) {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#3A4A2A]/40 via-transparent to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30" />
             </div>
-            <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center p-8 mt-6">
-                <div className="mb-6 animate-in zoom-in duration-700">
-                    <Image
-                        src="/images/ovr.png"
-                        alt="OVR Logo"
-                        width={220}
-                        height={220}
-                        className="object-contain drop-shadow-2xl"
-                        priority
-                    />
-                </div>
-            </div>
+            <LoginLogo />
 
 
             <div className="relative z-10 w-full p-6 pb-12 lg:pb-20 flex flex-col gap-3 max-w-sm mx-auto animate-in slide-in-from-bottom duration-500 fade-in">
-                <SocialButton provider="kakao" onClick={() => console.log("Kakao Login")}>
-                    카카오 로그인
-                </SocialButton>
-                <SocialButton provider="naver" onClick={() => console.log("Naver Login")}>
-                    네이버 로그인
-                </SocialButton>
-                <SocialButton provider="email" onClick={onEmailLoginClick}>
-                    이메일로 로그인
-                </SocialButton>
-
-                <div className="flex items-center justify-center gap-4 mt-4 text-[13px] text-white/50">
-                    <button className="hover:text-white transition-colors">아이디찾기</button>
-                    <span className="w-[1px] h-3 bg-white/20"></span>
-                    <button className="hover:text-white transition-colors">비밀번호찾기</button>
-                    <span className="w-[1px] h-3 bg-white/20"></span>
-                    <button className="hover:text-white transition-colors">회원가입</button>
-                </div>
+                <SocialLoginButtons onEmailLoginClick={onEmailLoginClick} />
+                <AuthLinks />
             </div>
         </div>
     );

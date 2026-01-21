@@ -3,7 +3,7 @@
 import React, { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginLanding from "@/components/login/LoginLanding";
-import LoginForm from "@/components/login/LoginForm";
+import EmailLoginPage from "@/components/login/EmailLoginPage";
 
 function LoginContent() {
     const router = useRouter();
@@ -30,7 +30,7 @@ function LoginContent() {
 
             {showForm && (
                 <div className="w-full h-full bg-black animate-in fade-in slide-in-from-right-10 duration-300">
-                    <LoginForm onBack={handleBack} />
+                    <EmailLoginPage onBack={handleBack} />
                 </div>
             )}
         </main>

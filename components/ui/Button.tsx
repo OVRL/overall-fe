@@ -22,7 +22,7 @@ export default function Button({
     };
 
     const variantStyles = {
-        primary: "bg-[#D2FF00] hover:bg-[#c2eb00] text-black shadow-lg shadow-[#D2FF00]/20",
+        primary: "bg-primary hover:bg-primary-hover text-black shadow-lg shadow-primary/20",
         secondary: "bg-white hover:bg-gray-100 text-black border border-gray-200",
         ghost: "bg-transparent hover:bg-white/10 text-white",
     };
