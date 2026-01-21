@@ -4,6 +4,17 @@ const nextConfig = {
   images: {
     unoptimized: true, // 정적 내보내기 시 Next.js 이미지 최적화 기능을 꺼야 에러가 안 납니다.
   },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['turbopack-inline-svg-loader'],
+        as: '*.js',
+        condition: {
+          content: /^[\s\S]{0,4000}$/, 
+        },
+      },
+    },
+  },
 }
 
 export default nextConfig;
