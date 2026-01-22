@@ -61,6 +61,20 @@
   --color-white: oklch(1 0 89.8756);
   --color-card-bg: oklch(0.145 0 0);
 
+  /* Background Color Hierarchy */
+  --color-gray-10: oklch(0.213 0 0);
+  /* #1A1A1A */
+  --color-surface-primary: oklch(0.13 0 0);
+  /* #0a0a0a - 가장 어두운 배경 (페이지 배경) */
+  --color-surface-secondary: oklch(0.16 0 0);
+  /* #141414 - 카드/섹션 배경 */
+  --color-surface-tertiary: var(--color-gray-10);
+  /* #1a1a1a - 내부 요소 배경 */
+  --color-surface-elevated: oklch(0.22 0 0);
+  /* #252525 - 호버/강조 배경 */
+
+  --color-black: oklch(0 0 0);
+  --color-white: oklch(1 0 89.8756);
   --color-gray-90: oklch(0.987 0.003 280);
   --color-gray-100: oklch(0.9794 0.0013 286.3756);
   --color-gray-200: oklch(0.9581 0 89.8756);
@@ -107,7 +121,6 @@
   --color-primary: oklch(0.98 0.25 128);
   --color-primary-hover: oklch(0.92 0.23 128);
   --color-primary-light: oklch(0.96 0.22 125);
-
   --color-kakao: oklch(0.96 0.18 100);
   --color-kakao-hover: oklch(0.94 0.19 98);
   --color-kakao-text: oklch(0.17 0.01 0);
