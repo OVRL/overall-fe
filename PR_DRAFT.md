@@ -1,58 +1,96 @@
-# PR Title: ✨ Feat: 메인페이지 반응형 및 모바일 리팩토링
+# PR Title: ✨ Implement Home Page UI with Starting XI Formation
 
 ## 📌 Summary
-홈 페이지의 모바일 및 태블릿 반응형 UI를 구현하고, 코드 품질 향상을 위해 주요 컴포넌트를 **마이크로 컴포넌트(Micro-components)** 단위로 리팩토링했습니다.
-특히 `PlayerCard`, `UpcomingMatch` 등 핵심 컴포넌트를 더 잘게 분리하여 재사용성과 유지보수성을 높였습니다.
+홈 페이지 UI를 구현하고, 재사용 가능한 컴포넌트로 모듈화했습니다. Starting XI 포메이션, 선수 카드, 선수 목록 등 주요 기능을 포함하며, **디자인 토큰을 최대한 활용**하여 일관된 스타일을 유지했습니다.
 
-> ⚠️ **Note**: 팀 데이터 관련 기능은 현재 **프로토타입(Prototype)** 단계로 구현되었으며, 디자인 고도화는 추후 별도 작업으로 진행될 예정입니다.
+> ⚠️ **Note**: 일부 디자인이 아직 확정되지 않아 임의로 설정한 항목이 있습니다. 디자인 확정 시 수정이 필요합니다.
+
+## 🎯 디자인 미확정 항목 (추후 수정 필요)
+
+| 항목 | 현재 상태 | 비고 |
+|-----|---------|------|
+| 선수 카드 그라디언트 | `from-[#667eea] to-[#764ba2]` | 디자인 확정 시 토큰화 필요 |
+| 팀 로고 배경색 | `#004d98`, `#c41e3a` | 팀별 동적 색상 필요 |
+| 감독/선수 데이터 | 하드코딩 (정태우, 30경기 등) | API 연동 필요 |
+| 선수 목록 탭 기능 | 탭 UI만 구현 (필터 미동작) | 로직 추가 필요 |
+
+---
 
 ## 🛠 Key Changes
 
-### 1. 반응형 레이아웃 구현 (Responsive UI)
-- **`component_main_schedule`**: PC/Mobile/Tablet 레이아웃 분기 및 최적화.
-- **Breakpoints**: `lg` (1024px), `md` (768px) 기준 분기 설정.
+### 1. Home Page Components 구현
+| 컴포넌트 | 설명 |
+|---------|------|
+| `Header.tsx` | 로고 이미지 + 팀 선택기 + 네비게이션 메뉴 |
+| `UpcomingMatch.tsx` | 다가오는 경기 정보 카드 |
+| `StartingXI.tsx` | 4-2-3-1 포메이션, 드래그 앤 드롭 |
+| `PlayerPositionCard.tsx` | 포메이션 내 선수 카드 |
+| `PlayerCard.tsx` | 선수 상세 정보 카드 |
+| `PlayerList.tsx` | 선수 목록 테이블 (헤더 포함) |
 
-### 2. 코드 품질 개선 (Refactoring)
-- **Arrow Function Conversion**: 모든 컴포넌트 정의를 `export default function`에서 `const Component = () => {}` 형태로 통일.
-- **Micro-components Extraction**:
-    - **`PlayerCard`**: `PlayerAvatar`, `PlayerStats` 등으로 분리.
-    - **`UpcomingMatch`**: 헤더, 모바일/PC 뷰, 액션 버튼 분리.
-    - **`StartingXI`**: 포메이션 헤더, 필드, 감독 정보 분리.
-    - **`PlayerList`**: 헤더, 아이템 분리.
-- **Button Component**: `PlayerCard`의 더보기 버튼을 재사용 가능한 `Button` 컴포넌트로 교체.
-- **Semantic Markup**: `PlayerCard` 스탯 그리드를 `dl`/`dt`/`dd` 구조로 변경하여 의미론적 구조 강화.
-- **Improvements**:
-    - `StartingXI`: PC 뷰에서 ST 포지션이 잘리는 문제 수정 (`top: 10%` -> `13%`).
-    - `PlayerList`: 탭 메뉴 데이터를 상수로 추출하여 가독성 개선 및 유지보수 용이성 확보.
-    - `ManagerStats`: 반복되는 스탯 UI를 `ManagerStatItem`으로 분리하여 코드 중복 제거.
-    - `UpcomingMatch`: 반복되는 팀 정보(로고/이름)를 `TeamInfo` 컴포넌트로 분리하고 `reverse` props로 좌우 반전 로직을 유연하게 처리.
-    - `Header`: `TeamSelector`와 `HeaderNavigation` 컴포넌트로 분리하여 구조 개선.
-    - `Header`: 로고 클릭 시 `/home`으로 이동하도록 `Link` 적용.
-    - `SeasonChip`: 시즌 배지(26 Normal, World Best) 컴포넌트 추가 및 동적 데이터 연동 (`PlayerList`, `PlayerPositionCard`에 `season`/`seasonType` 적용).
-    - `Layout`: 메인 컨텐츠 너비를 `max-w-[1400px]`(픽셀)에서 `max-w-[87.5rem]`(rem)으로 변경하여 반응형 단위 일관성 확보.
+### 2. Design Token 추가 (`globals.css`)
+```css
+/* 신규 추가된 디자인 토큰 */
+--color-gray-10: oklch(0.213 0 0);           /* #1A1A1A */
+--color-surface-primary: oklch(0.13 0 0);    /* #0a0a0a - 페이지 배경 */
+--color-surface-secondary: oklch(0.16 0 0);  /* #141414 - 카드 배경 */
+--color-surface-tertiary: var(--color-gray-10); /* #1a1a1a - 내부 요소 */
+--color-surface-elevated: oklch(0.22 0 0);   /* #252525 - 호버 배경 */
+```
 
-### 3. 디자인 토큰 및 스타일링
-- `tailwind.config` 및 `globals.css`의 디자인 토큰 준수.
-- `UpcomingMatch`의 SVG 아이콘 색상을 `currentColor`(`text-primary`)로 변경하여 유지보수성 향상.
+### 3. 기존 디자인 토큰 활용
+- **`PositionChip`** 컴포넌트 - 포지션별 색상 토큰 (FW/MF/DF/GK)
+- **`bg-primary`**, **`text-primary`** - 연두색 버튼/텍스트
+
+### 4. Code Quality & Best Practices
+- **Absolute Imports (@/)**: 상대 경로 → 절대 경로 전환
+- **`next/image`**: 모든 이미지에 최적화 적용
+- **TypeScript Interfaces**: Player, FormationPosition 등 타입 정의
+- **Next.js App Router**: 공식 문서 권장 구조 적용
+
+---
 
 ## 📁 File Changes
 
-### Feature: `component_main_schedule`
-- `app/home/page.tsx`
-- `components/layout/Header.tsx`
-- `components/home/UpcomingMatch.tsx` (Refactored)
-- `components/home/StartingXI.tsx` (Refactored)
+### Design System
+- `styles/globals.css` - Surface color tokens 추가
 
-### Feature: `Player Info`
-- `components/home/PlayerCard.tsx` (Refactored)
-- `components/home/PlayerPositionCard.tsx` (Arrow Func)
+### New Components
+- `components/home/StartingXI.tsx`
+- `components/home/PlayerPositionCard.tsx`
+- `components/home/PlayerCard.tsx`
+- `components/home/PlayerList.tsx`
+- `components/home/UpcomingMatch.tsx`
 
-### Feature: `Player Info Row`
-- `components/home/PlayerList.tsx` (Refactored)
+### Modified Files
+- `components/layout/Header.tsx` - 로고 이미지 및 팀 선택기 추가
+- `app/home/page.tsx` - 컴포넌트 조합 및 레이아웃
+
+---
+
+## 🎨 Design Token Usage
+
+| 컴포넌트 | 사용된 토큰 |
+|---------|-----------|
+| `home/page.tsx` | `bg-surface-primary` |
+| `Header.tsx` | `bg-surface-primary`, `bg-primary` |
+| `StartingXI.tsx` | `bg-surface-secondary/tertiary`, `bg-primary` |
+| `UpcomingMatch.tsx` | `bg-surface-secondary`, `bg-primary` |
+| `PlayerCard.tsx` | `bg-surface-tertiary`, `bg-primary` |
+| `PlayerList.tsx` | `surface-*`, `text-primary`, `PositionChip` |
+| `PlayerPositionCard.tsx` | `bg-surface-tertiary` |
+
+---
+
+## ✅ Verification
+- [x] `npm run build` 성공 (Static Export 확인)
+- [x] 홈 페이지 UI 정상 렌더링
+- [x] 로그인 페이지 정상 유지 (수정 없음)
+- [x] 11명 선수 스크롤 없이 표시
+- [x] 감독 정보 가로 레이아웃 적용
+- [x] 디자인 토큰 일관성 검증
+
+---
 
 ## 📸 Screenshots
-(스크린샷 첨부 예정)
-
-## 💬 Focus Areas for Review
-- 분리된 마이크로 컴포넌트(`PlayerAvatar` 등)의 구조가 적절한지 확인 부탁드립니다.
-- 리팩토링 후 기존 기능(드래그 앤 드롭 등)이 정상 작동하는지 확인 바랍니다.
+(홈 페이지 스크린샷 첨부)

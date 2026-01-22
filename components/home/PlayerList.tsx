@@ -11,6 +11,7 @@ interface Player {
     position: string;
     number: number;
     overall: number;
+    nationality?: string;
     image?: string;
 }
 
@@ -27,16 +28,16 @@ export default function PlayerList({ players }: PlayerListProps) {
     const [activeTab, setActiveTab] = useState("전체");
 
     return (
-        <div className="bg-[#141414] rounded-[20px] p-5 mt-5">
+        <div className="bg-surface-secondary rounded-[20px] p-5 mt-5">
             {/* 탭 메뉴 */}
-            <div className="flex gap-2 mb-5 bg-[#0a0a0a] p-1 rounded-xl">
+            <div className="flex gap-2 mb-4 bg-surface-primary p-1 rounded-xl">
                 {["전체", "선발", "교체", "OVR"].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${activeTab === tab
-                                ? "bg-[#1a1a1a] text-white"
-                                : "text-gray-500 hover:text-gray-300"
+                            ? "bg-surface-tertiary text-white"
+                            : "text-gray-500 hover:text-gray-300"
                             }`}
                     >
                         {tab}
@@ -44,8 +45,16 @@ export default function PlayerList({ players }: PlayerListProps) {
                 ))}
             </div>
 
+            {/* 테이블 헤더 */}
+            <div className="grid grid-cols-[60px_50px_1fr_50px] items-center gap-4 px-3 py-2 text-gray-500 text-xs border-b border-gray-800">
+                <span>포지션</span>
+                <span className="text-center">등번호</span>
+                <span>선수명</span>
+                <span className="text-right">OVR</span>
+            </div>
+
             {/* 선수 목록 */}
-            <div className="space-y-2">
+            <div className="divide-y divide-gray-800/50">
                 {players.map((player) => (
                     <PlayerListItem key={player.id} player={player} />
                 ))}
@@ -59,7 +68,7 @@ function PlayerListItem({ player }: { player: Player }) {
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="grid grid-cols-[60px_50px_1fr_50px] items-center gap-4 p-3 bg-[#0a0a0a] rounded-xl">
+        <div className="grid grid-cols-[60px_50px_1fr_50px] items-center gap-4 py-2 px-3 hover:bg-gray-800/30 transition-colors">
             {/* 포지션 배지 */}
             <PositionChip position={player.position as Position} variant="filled" />
 
@@ -68,7 +77,8 @@ function PlayerListItem({ player }: { player: Player }) {
 
             {/* 선수 정보 */}
             <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 bg-[#1a1a1a] rounded-full overflow-hidden flex-shrink-0">
+                {/* 선수 이미지 */}
+                <div className="relative w-9 h-9 bg-surface-tertiary rounded-full overflow-hidden flex-shrink-0">
                     <Image
                         src={playerImage}
                         alt={player.name}
@@ -76,11 +86,15 @@ function PlayerListItem({ player }: { player: Player }) {
                         className="object-cover"
                         onError={() => setImageError(true)}
                     />
-                    <div className="absolute -bottom-0.5 -right-0.5 bg-gray-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
-                        {player.number}
-                    </div>
                 </div>
-                <span className="text-white font-medium">{player.name}</span>
+
+                {/* 연도 배지 */}
+                <div className="w-6 h-4 bg-gray-700 rounded-sm flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0">
+                    26
+                </div>
+
+                {/* 선수 이름 */}
+                <span className="text-white font-medium truncate">{player.name}</span>
             </div>
 
             {/* OVR */}

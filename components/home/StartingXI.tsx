@@ -75,7 +75,7 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
     };
 
     return (
-        <div className="bg-[#141414] rounded-[20px] p-6">
+        <div className="bg-surface-secondary rounded-[20px] p-6">
             {/* 헤더 */}
             <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[28px] font-black text-white">STARTING XI</h2>
@@ -85,8 +85,8 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-5 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === tab
-                                    ? "bg-primary text-black"
-                                    : "bg-transparent border border-gray-700 text-gray-500 hover:border-gray-500"
+                                ? "bg-primary text-black"
+                                : "bg-transparent border border-gray-700 text-gray-500 hover:border-gray-500"
                                 }`}
                         >
                             {tab}
@@ -96,18 +96,15 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
             </div>
 
             {/* 필드 */}
-            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-gradient-to-b from-[#1a4d1a] to-[#0d260d] p-8">
-                {/* 중앙선 */}
-                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/30" />
-
-                {/* 중앙 원 */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-2 border-white/30 rounded-full" />
-
-                {/* 상단 패널티 박스 */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-24 border-2 border-white/30 border-t-0 rounded-b-xl" />
-
-                {/* 하단 패널티 박스 */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-24 border-2 border-white/30 border-b-0 rounded-t-xl" />
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
+                {/* 필드 이미지 배경 */}
+                <Image
+                    src="/images/object_field.png"
+                    alt="Soccer Field"
+                    fill
+                    className="object-cover"
+                    priority
+                />
 
                 {/* 선수 배치 */}
                 {players.slice(0, 11).map((player, index) => {
@@ -130,9 +127,10 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
             </div>
 
             {/* 감독 정보 */}
-            <div className="text-center mt-5">
-                <div className="inline-block relative">
-                    <div className="w-14 h-14 bg-[#1a1a1a] rounded-full border-2 border-gray-700 overflow-hidden relative mx-auto">
+            <div className="flex items-center justify-center gap-6 mt-5">
+                {/* 감독 사진 */}
+                <div className="relative flex-shrink-0">
+                    <div className="w-14 h-14 bg-surface-tertiary rounded-full border-2 border-gray-700 overflow-hidden relative">
                         <Image
                             src="/images/ovr.png"
                             alt="Manager"
@@ -144,10 +142,27 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
                         30
                     </div>
                 </div>
-                <div className="mt-2">
+
+                {/* 감독 정보 */}
+                <div className="text-left">
                     <p className="text-gray-500 text-xs">감독</p>
-                    <p className="text-white font-bold">정태우</p>
-                    <p className="text-gray-500 text-xs mt-1">경기수: 30 | 20/5/5 | 팀 승률: 60%</p>
+                    <p className="text-white font-bold text-lg">정태우</p>
+                </div>
+
+                {/* 스탯 */}
+                <div className="flex gap-6 text-center">
+                    <div>
+                        <p className="text-gray-500 text-xs">경기수</p>
+                        <p className="text-white font-bold">30</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500 text-xs">승/무/패</p>
+                        <p className="text-white font-bold">20/5/5</p>
+                    </div>
+                    <div>
+                        <p className="text-gray-500 text-xs">팀 승률</p>
+                        <p className="text-white font-bold">60%</p>
+                    </div>
                 </div>
             </div>
         </div>
