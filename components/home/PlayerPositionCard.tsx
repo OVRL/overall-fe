@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
-import SeasonChip from "@/components/ui/SeasonChip";
 
 interface Player {
     id: number;
@@ -11,8 +10,6 @@ interface Player {
     number: number;
     overall: number;
     image?: string;
-    season?: string;
-    seasonType?: "general" | "worldBest";
 }
 
 interface PlayerPositionCardProps {
@@ -20,22 +17,20 @@ interface PlayerPositionCardProps {
     onDragStart: (e: React.DragEvent) => void;
     onDrop: (e: React.DragEvent) => void;
     onDragOver: (e: React.DragEvent) => void;
-    onClick?: () => void;
 }
 
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 
 /**
- * 포메이션 내 선수 카드 컴포넌트
+ * 포메이션 내 선수 카드 컴포넌트 (HTML 스타일 기반)
  */
-const PlayerPositionCard = ({
+export default function PlayerPositionCard({
     player,
     onDragStart,
     onDrop,
-    onDragOver,
-    onClick
-}: PlayerPositionCardProps) => {
-    const [imageError, setImageError] = useState(false);
+    onDragOver
+}: PlayerPositionCardProps) {
+    const [imageError, setImageError] = React.useState(false);
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
@@ -44,44 +39,37 @@ const PlayerPositionCard = ({
             onDragStart={onDragStart}
             onDrop={onDrop}
             onDragOver={onDragOver}
-            onClick={onClick}
-            className="flex flex-col items-center gap-1 md:gap-2 cursor-pointer hover:scale-105 transition-transform"
+            className="flex flex-col items-center gap-2 cursor-move hover:scale-105 transition-transform"
         >
             {/* 선수 아바타 */}
             <div className="relative">
-                <div className="w-14 h-20 md:w-20 md:h-28 relative -mt-4 md:-mt-8">
+                <div className="w-14 h-14 bg-[#1a1a1a] rounded-full border-[3px] border-gray-700 overflow-hidden relative">
                     <Image
                         src={playerImage}
                         alt={player.name}
                         fill
-                        className="object-contain"
+                        className="object-cover"
                         onError={() => setImageError(true)}
                     />
                 </div>
 
-                {/* 등번호 배지 제거됨 */}
+                {/* 등번호 배지 */}
+                <div className="absolute -top-1 -right-1 bg-gray-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold">
+                    {player.number}
+                </div>
 
                 {/* 주장 배지 (첫 번째 선수에만) */}
                 {player.id === 5 && (
-                    <div className="absolute top-0 left-0 bg-yellow-400 text-black w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[10px] md:text-xs font-black shadow-sm">
+                    <div className="absolute top-0 left-0 bg-yellow-400 text-black w-5 h-5 rounded-full flex items-center justify-center text-xs font-black">
                         C
                     </div>
                 )}
             </div>
 
             {/* 선수 이름 */}
-            <div className="flex items-center gap-0.5 md:gap-1.5 -mt-3 md:-mt-5 max-w-[64px] md:max-w-none justify-center z-10">
-                <SeasonChip
-                    season={player.season || "26"}
-                    type={player.seasonType || "general"}
-                    className="scale-[0.8] md:scale-100 shadow-sm flex-shrink-0"
-                />
-                <span className="text-[9px] md:text-[14px] text-white font-bold whitespace-nowrap drop-shadow-md truncate">
-                    {player.name}
-                </span>
+            <div className="bg-[#1a1a1a] px-3 py-1 rounded-md text-[13px] text-white font-semibold whitespace-nowrap">
+                {player.name}
             </div>
         </div>
     );
-};
-
-export default PlayerPositionCard;
+}
