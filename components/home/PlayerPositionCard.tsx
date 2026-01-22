@@ -43,7 +43,7 @@ export default function PlayerPositionCard({
         >
             {/* 선수 아바타 */}
             <div className="relative">
-                <div className="w-14 h-14 bg-[#1a1a1a] rounded-full border-[3px] border-gray-700 overflow-hidden relative">
+                <div className="w-14 h-14 bg-surface-tertiary rounded-full border-[3px] border-gray-700 overflow-hidden relative">
                     <Image
                         src={playerImage}
                         alt={player.name}
@@ -67,7 +67,7 @@ export default function PlayerPositionCard({
             </div>
 
             {/* 선수 이름 */}
-            <div className="bg-[#1a1a1a] px-3 py-1 rounded-md text-[13px] text-white font-semibold whitespace-nowrap">
+            <div className="bg-surface-tertiary px-3 py-1 rounded-md text-[13px] text-white font-semibold whitespace-nowrap">
                 {player.name}
             </div>
         </div>

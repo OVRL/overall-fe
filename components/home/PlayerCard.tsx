@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import PositionChip from "@/components/PositionChip";
-import type { Position } from "@/components/PositionChip";
 
 interface Player {
     id: number;
@@ -34,7 +32,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="bg-[#1a1a1a] rounded-2xl p-5">
+        <div className="bg-surface-tertiary rounded-2xl p-5">
             {/* 선수 헤더 */}
             <div className="flex gap-4 mb-5">
                 {/* 선수 사진 */}
@@ -72,7 +70,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                         <span className="text-white font-bold">{player.passing}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-gray-500">기경</span>
+                        <span className="text-gray-500">기점</span>
                         <span className="text-white font-bold">{player.defending}</span>
                     </div>
                     <div className="flex justify-between">

@@ -8,7 +8,7 @@ import Image from "next/image";
  */
 export default function UpcomingMatch() {
     return (
-        <div className="bg-[#141414] rounded-[20px] p-6 mb-5">
+        <div className="bg-surface-secondary rounded-[20px] p-6 mb-5">
             {/* 헤더 */}
             <div className="flex justify-between items-center">
                 <div>

@@ -37,7 +37,7 @@ export default function HomePage() {
     ]);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a]">
+        <div className="min-h-screen bg-surface-primary">
             <Header showTeamSelector selectedTeam="바르셀로나 FC" />
 
             <main className="max-w-[1400px] mx-auto p-8">
