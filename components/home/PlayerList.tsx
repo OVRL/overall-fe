@@ -1,122 +1,90 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import PlayerInfoList, { PlayerListHeader } from "./PlayerInfoList";
-import type { Player } from "./PlayerInfoList";
+import React, { useState } from "react";
+import Image from "next/image";
+import PositionChip from "@/components/PositionChip";
+import type { Position } from "@/components/PositionChip";
+
+interface Player {
+    id: number;
+    name: string;
+    position: string;
+    number: number;
+    overall: number;
+    image?: string;
+}
+
+interface PlayerListProps {
+    players: Player[];
+}
+
+const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 
 /**
- * 탭 메뉴 컴포넌트
+ * 선수 목록 테이블 컴포넌트 (HTML 스타일 기반)
  */
-const DISPLAY_GROUPS = [
-    { id: "attack", label: "공격", positions: ["ST", "FW", "LW", "RW"] },
-    { id: "mid", label: "미드", positions: ["CAM", "CDM", "LM", "RM", "MF"] },
-    { id: "defense", label: "수비", positions: ["CB", "LB", "RB", "DF", "WB", "GK"] },
-];
-
-/**
- * 탭 메뉴 컴포넌트
- */
-const PlayerListTabs = ({
-    activeTab,
-    onTabChange
-}: {
-    activeTab: string;
-    onTabChange: (id: string) => void;
-}) => (
-    <div className="flex gap-2 mb-4 bg-surface-primary p-1 rounded-xl sticky top-0 z-10">
-        {DISPLAY_GROUPS.map((group) => (
-            <button
-                key={group.id}
-                onClick={() => onTabChange(group.id)}
-                className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${activeTab === group.id
-                    ? "bg-surface-tertiary text-white"
-                    : "text-gray-500 hover:text-gray-300"
-                    }`}
-            >
-                {group.label}
-            </button>
-        ))}
-    </div>
-);
-
-/**
- * 선수 목록 리스트 컴포넌트
- */
-const PlayerList = ({ players, onPlayerSelect }: { players: Player[]; onPlayerSelect?: (player: Player) => void }) => {
-    const [activeTab, setActiveTab] = useState("attack");
-    const listRef = React.useRef<HTMLDivElement>(null);
-
-    const groupedPlayers = useMemo(() => {
-        const groups: Record<string, Player[]> = {
-            attack: [],
-            mid: [],
-            defense: []
-        };
-
-        players.forEach(p => {
-            const pos = p.position;
-            if (DISPLAY_GROUPS[0].positions.includes(pos)) groups.attack.push(p);
-            else if (DISPLAY_GROUPS[1].positions.includes(pos)) groups.mid.push(p);
-            else groups.defense.push(p);
-        });
-
-        // Sort Defense group: Generic defenders first, GK last
-        // If needed, you can add more specific sorting logic here
-        groups.defense.sort((a, b) => {
-            const isAGK = a.position === 'GK';
-            const isBGK = b.position === 'GK';
-            if (isAGK && !isBGK) return 1;
-            if (!isAGK && isBGK) return -1;
-            return 0;
-        });
-
-        return groups;
-    }, [players]);
-
-    const scrollToSection = (id: string) => {
-        setActiveTab(id);
-        const element = document.getElementById(`section-${id}`);
-        if (element && listRef.current) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    };
+export default function PlayerList({ players }: PlayerListProps) {
+    const [activeTab, setActiveTab] = useState("전체");
 
     return (
-        <div className="bg-surface-secondary rounded-[20px] p-4 md:p-5 mt-4 md:mt-5 h-[600px] flex flex-col">
-            <PlayerListTabs activeTab={activeTab} onTabChange={scrollToSection} />
-
-            {/* Main Header (Rendered Once) */}
-            <div className="mb-2">
-                <PlayerListHeader />
+        <div className="bg-[#141414] rounded-[20px] p-5 mt-5">
+            {/* 탭 메뉴 */}
+            <div className="flex gap-2 mb-5 bg-[#0a0a0a] p-1 rounded-xl">
+                {["전체", "선발", "교체", "OVR"].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${activeTab === tab
+                                ? "bg-[#1a1a1a] text-white"
+                                : "text-gray-500 hover:text-gray-300"
+                            }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
             </div>
 
-            <div
-                ref={listRef}
-                className="flex-1 overflow-y-auto scroll-smooth pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            >
-                {DISPLAY_GROUPS.map(group => {
-                    const groupPlayers = groupedPlayers[group.id];
-                    if (!groupPlayers || groupPlayers.length === 0) return null;
-
-                    return (
-                        <div key={group.id} id={`section-${group.id}`} className="scroll-mt-4">
-                            {/* No intermediate headers here */}
-                            <PlayerInfoList
-                                players={groupPlayers}
-                                onPlayerSelect={onPlayerSelect}
-                                showHeader={false}
-                            />
-                        </div>
-                    );
-                })}
-
-                {/* Empty State */}
-                {players.length === 0 && (
-                    <div className="text-gray-500 text-center py-10">선수가 없습니다.</div>
-                )}
+            {/* 선수 목록 */}
+            <div className="space-y-2">
+                {players.map((player) => (
+                    <PlayerListItem key={player.id} player={player} />
+                ))}
             </div>
         </div>
     );
-};
+}
 
-export default PlayerList;
+function PlayerListItem({ player }: { player: Player }) {
+    const [imageError, setImageError] = React.useState(false);
+    const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
+
+    return (
+        <div className="grid grid-cols-[60px_50px_1fr_50px] items-center gap-4 p-3 bg-[#0a0a0a] rounded-xl">
+            {/* 포지션 배지 */}
+            <PositionChip position={player.position as Position} variant="filled" />
+
+            {/* 등번호 */}
+            <span className="text-white font-bold text-center">{player.number}</span>
+
+            {/* 선수 정보 */}
+            <div className="flex items-center gap-3">
+                <div className="relative w-10 h-10 bg-[#1a1a1a] rounded-full overflow-hidden flex-shrink-0">
+                    <Image
+                        src={playerImage}
+                        alt={player.name}
+                        fill
+                        className="object-cover"
+                        onError={() => setImageError(true)}
+                    />
+                    <div className="absolute -bottom-0.5 -right-0.5 bg-gray-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
+                        {player.number}
+                    </div>
+                </div>
+                <span className="text-white font-medium">{player.name}</span>
+            </div>
+
+            {/* OVR */}
+            <span className="text-primary font-bold text-lg text-right">{player.overall}</span>
+        </div>
+    );
+}
