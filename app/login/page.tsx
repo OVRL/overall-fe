@@ -6,8 +6,6 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import SocialButton from "@/components/ui/SocialButton";
-import Icon from "@/components/Icon";
-import arrowBack from "@/public/icons/arrow_back.svg";
 
 // ============================================================
 // 서브 컴포넌트: LoginLogo
@@ -113,9 +111,9 @@ function LoginHeader({ onBack }: LoginHeaderProps) {
             {onBack && (
                 <button
                     onClick={onBack}
-                    className="absolute left-0 p-2  hover:text-primary transition-colors"
+                    className="absolute left-0 p-2 text-white hover:text-primary transition-colors"
                 >
-                    <Icon src={arrowBack} color="black" />
+                    <Image src="/icons/arrow_back.svg" alt="back" width={24} height={24} />
                 </button>
             )}
             <h1 className="text-[20px] lg:text-[24px] font-bold">오버롤 로그인</h1>
