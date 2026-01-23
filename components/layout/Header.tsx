@@ -18,8 +18,8 @@ interface HeaderProps {
 }
 
 const defaultMenuItems: MenuItem[] = [
-    { label: "팀 관리", href: "#" },
-    { label: "팀 데이터", href: "#" },
+    { label: "팀 관리", href: "/home" },
+    { label: "팀 데이터", href: "/team-data" },
     { label: "선수 목록", href: "#" },
     { label: "경기 기록", href: "#" },
     { label: "경기 일정", href: "#" },
@@ -37,10 +37,10 @@ export default function Header({
     onMenuClick,
 }: HeaderProps) {
     return (
-        <nav className="flex justify-between items-center px-8 py-4 bg-surface-primary border-b border-gray-800">
+        <nav className="flex justify-between items-center px-4 lg:px-8 py-3 lg:py-4 bg-surface-primary border-b border-gray-800">
             {/* 왼쪽: 로고 + 팀 선택기 */}
-            <div className="flex items-center gap-4">
-                <div className="relative w-20 h-10">
+            <div className="flex items-center gap-3 lg:gap-4">
+                <div className="relative w-16 lg:w-20 h-8 lg:h-10">
                     <Image
                         src="/images/logo_OVR_head.png"
                         alt="OVR Logo"
@@ -53,9 +53,9 @@ export default function Header({
                 {showTeamSelector && (
                     <button
                         onClick={onTeamSelect}
-                        className="flex items-center gap-2 bg-primary px-4 py-2 rounded-full cursor-pointer hover:bg-primary-hover transition-colors"
+                        className="flex items-center gap-1.5 lg:gap-2 bg-primary px-3 lg:px-4 py-1.5 lg:py-2 rounded-full cursor-pointer hover:bg-primary-hover transition-colors"
                     >
-                        <div className="w-5 h-5 bg-[#004d98] rounded-full relative overflow-hidden">
+                        <div className="w-4 lg:w-5 h-4 lg:h-5 bg-[#004d98] rounded-full relative overflow-hidden">
                             <Image
                                 src="/images/ovr.png"
                                 alt="Team"
@@ -63,23 +63,26 @@ export default function Header({
                                 className="object-cover"
                             />
                         </div>
-                        <span className="text-black text-sm font-medium">{selectedTeam}</span>
+                        <span className="text-black text-xs lg:text-sm font-medium truncate max-w-[80px] lg:max-w-none">{selectedTeam}</span>
                         <span className="text-black text-xs">▼</span>
                     </button>
                 )}
             </div>
 
-            {/* 오른쪽: 메뉴 */}
-            <div className="flex items-center gap-10">
-                {menuItems.map((item) => (
-                    <a
-                        key={item.label}
-                        href={item.href}
-                        className="text-gray-500 hover:text-white transition-colors text-sm"
-                    >
-                        {item.label}
-                    </a>
-                ))}
+            {/* 오른쪽: 메뉴 (모바일에서 숨김, 햄버거만 표시) */}
+            <div className="flex items-center gap-6 lg:gap-10">
+                {/* 데스크톱 메뉴 */}
+                <div className="hidden lg:flex items-center gap-10">
+                    {menuItems.map((item) => (
+                        <a
+                            key={item.label}
+                            href={item.href}
+                            className="text-gray-500 hover:text-white transition-colors text-sm"
+                        >
+                            {item.label}
+                        </a>
+                    ))}
+                </div>
 
                 {showHamburger && (
                     <button
