@@ -20,7 +20,6 @@ interface RankingCardProps {
     title: string;
     players: Player[];
     onMoreClick?: () => void;
-    onPlayerClick?: (playerName: string) => void;
 }
 
 // ============================================================
@@ -33,15 +32,7 @@ interface StatsModalProps {
     allData: Record<string, Player[]>;
 }
 
-interface StatsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    initialCategory: string;
-    allData: Record<string, Player[]>;
-    onPlayerClick?: (playerName: string) => void;
-}
-
-function StatsModal({ isOpen, onClose, initialCategory, allData, onPlayerClick }: StatsModalProps) {
+function StatsModal({ isOpen, onClose, initialCategory, allData }: StatsModalProps) {
     const [activeCategory, setActiveCategory] = useState(initialCategory);
     const categories = Object.keys(allData);
     const tabContainerRef = useRef<HTMLDivElement>(null);
@@ -135,8 +126,7 @@ function StatsModal({ isOpen, onClose, initialCategory, allData, onPlayerClick }
                     {top10Players.map((player, index) => (
                         <div
                             key={player.id}
-                            className="flex items-center gap-4 px-5 py-4 border-b border-gray-700/50 hover:bg-surface-tertiary transition-colors cursor-pointer"
-                            onClick={() => onPlayerClick?.(player.name)}
+                            className="flex items-center gap-4 px-5 py-4 border-b border-gray-700/50 hover:bg-surface-tertiary transition-colors"
                         >
                             {/* 순위 */}
                             <div className={`w-6 text-center font-bold text-sm ${index < 3 ? "text-yellow-400" : "text-gray-600"}`}>
@@ -144,7 +134,7 @@ function StatsModal({ isOpen, onClose, initialCategory, allData, onPlayerClick }
                             </div>
 
                             {/* 선수 이미지 */}
-                            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface-tertiary flex-shrink-0">
                                 <Image
                                     src={player.image || "/images/ovr.png"}
                                     alt={player.name}
@@ -179,17 +169,10 @@ interface PlayerCardModalProps {
     seasonStats: Record<string, string>;
     cumulativeStats: Record<string, string>;
     singleRecordStats: Record<string, string>;
-    initialTab?: string;
 }
 
-function PlayerCardModal({ isOpen, onClose, player, seasonStats, cumulativeStats, singleRecordStats, initialTab = "시즌 기록" }: PlayerCardModalProps) {
-    const [activeTab, setActiveTab] = useState(initialTab);
-
-    useEffect(() => {
-        if (isOpen) {
-            setActiveTab(initialTab);
-        }
-    }, [isOpen, initialTab]);
+function PlayerCardModal({ isOpen, onClose, player, seasonStats, cumulativeStats, singleRecordStats }: PlayerCardModalProps) {
+    const [activeTab, setActiveTab] = useState("시즌 기록");
     const tabs = ["시즌 기록", "누적 기록", "단일 기록"];
 
     if (!isOpen || !player) return null;
@@ -226,7 +209,7 @@ function PlayerCardModal({ isOpen, onClose, player, seasonStats, cumulativeStats
                 <div className="p-6">
                     {/* 선수 프로필 */}
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="relative w-20 h-20 rounded-full overflow-hidden">
+                        <div className="relative w-20 h-20 rounded-full overflow-hidden bg-surface-tertiary border-2 border-primary">
                             <Image
                                 src={player.image || "/images/ovr.png"}
                                 alt={player.name}
@@ -277,7 +260,7 @@ function PlayerCardModal({ isOpen, onClose, player, seasonStats, cumulativeStats
 // ============================================================
 // 순위 카드 컴포넌트
 // ============================================================
-function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCardProps) {
+function RankingCard({ title, players, onMoreClick }: RankingCardProps) {
     const medals = ["🥇", "🥈", "🥉"];
 
     return (
@@ -291,7 +274,6 @@ function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCard
                     <div
                         key={player.id}
                         className="flex items-center gap-3 py-2 hover:bg-surface-tertiary rounded-lg transition-colors cursor-pointer px-2"
-                        onClick={() => onPlayerClick?.(player.name)}
                     >
                         {/* 순위 */}
                         <div className={`flex items-center gap-1 font-black text-sm w-8 ${index < 3 ? "text-yellow-400" : "text-gray-600"}`}>
@@ -300,7 +282,7 @@ function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCard
                         </div>
 
                         {/* 선수 이미지 */}
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <div className="relative w-10 h-10 bg-surface-tertiary rounded-full overflow-hidden flex-shrink-0">
                             <Image
                                 src={player.image || "/images/ovr.png"}
                                 alt={player.name}
@@ -407,10 +389,9 @@ function TabMenu() {
 interface RankingCardsCarouselProps {
     statsData: Record<string, Player[]>;
     onCategoryClick?: (category: string) => void;
-    onPlayerClick?: (playerName: string) => void;
 }
 
-function RankingCardsCarousel({ statsData, onCategoryClick, onPlayerClick }: RankingCardsCarouselProps) {
+function RankingCardsCarousel({ statsData, onCategoryClick }: RankingCardsCarouselProps) {
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -521,7 +502,6 @@ function RankingCardsCarousel({ statsData, onCategoryClick, onPlayerClick }: Ran
                             title={title}
                             players={players.slice(0, 4)}
                             onMoreClick={() => onCategoryClick?.(title)}
-                            onPlayerClick={onPlayerClick}
                         />
                     ))}
                 </div>
@@ -540,300 +520,300 @@ export default function TeamDataPage() {
     // 누적 기록 데이터 (2022-2025 합산) - 10명
     const cumulativeData = {
         출장수: [
-            { id: 1, name: "박무드", team: "대한민국", value: "120경기", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "112경기", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "호남두호남두", team: "대한민국", value: "108경기", image: "/images/player/img_player-3.png" },
-            { id: 4, name: "가갑밤베스", team: "대한민국", value: "98경기", image: "/images/player/img_player-4.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "95경기", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "렌디", team: "대한민국", value: "88경기", image: "/images/player/img_player-6.png" },
-            { id: 7, name: "제스퍼", team: "대한민국", value: "82경기", image: "/images/player/img_player-7.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "75경기", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "68경기", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "62경기", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "120경기" },
+            { id: 2, name: "알베스", team: "대한민국", value: "112경기" },
+            { id: 3, name: "호남두호남두", team: "대한민국", value: "108경기" },
+            { id: 4, name: "가갑밤베스", team: "대한민국", value: "98경기" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "95경기" },
+            { id: 6, name: "렌디", team: "대한민국", value: "88경기" },
+            { id: 7, name: "제스퍼", team: "대한민국", value: "82경기" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "75경기" },
+            { id: 9, name: "김민수", team: "대한민국", value: "68경기" },
+            { id: 10, name: "이준호", team: "대한민국", value: "62경기" },
         ],
         득점: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "87골", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "72골", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "알베스", team: "대한민국", value: "56골", image: "/images/player/img_player-2.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "45골", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "38골", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "32골", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "25골", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "18골", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "이준호", team: "대한민국", value: "12골", image: "/images/player/img_player-10.png" },
-            { id: 10, name: "다라에밤베스", team: "대한민국", value: "8골", image: "/images/player/img_player-8.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "87골" },
+            { id: 2, name: "박무드", team: "대한민국", value: "72골" },
+            { id: 3, name: "알베스", team: "대한민국", value: "56골" },
+            { id: 4, name: "렌디", team: "대한민국", value: "45골" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "38골" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "32골" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "25골" },
+            { id: 8, name: "김민수", team: "대한민국", value: "18골" },
+            { id: 9, name: "이준호", team: "대한민국", value: "12골" },
+            { id: 10, name: "다라에밤베스", team: "대한민국", value: "8골" },
         ],
         도움: [
-            { id: 1, name: "알베스", team: "대한민국", value: "52개", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "41개", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "제스퍼", team: "대한민국", value: "35개", image: "/images/player/img_player-7.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "28개", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "24개", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "20개", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "15개", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "12개", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "8개", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "5개", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "52개" },
+            { id: 2, name: "박무드", team: "대한민국", value: "41개" },
+            { id: 3, name: "제스퍼", team: "대한민국", value: "35개" },
+            { id: 4, name: "렌디", team: "대한민국", value: "28개" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "24개" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "20개" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "15개" },
+            { id: 8, name: "김민수", team: "대한민국", value: "12개" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "8개" },
+            { id: 10, name: "이준호", team: "대한민국", value: "5개" },
         ],
         공격포인트: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "139P", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "108P", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "박무드", team: "대한민국", value: "113P", image: "/images/player/img_player-1.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "73P", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "58P", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "47P", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "40P", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "30P", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "16P", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "17P", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "139P" },
+            { id: 2, name: "알베스", team: "대한민국", value: "108P" },
+            { id: 3, name: "박무드", team: "대한민국", value: "113P" },
+            { id: 4, name: "렌디", team: "대한민국", value: "73P" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "58P" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "47P" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "40P" },
+            { id: 8, name: "김민수", team: "대한민국", value: "30P" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "16P" },
+            { id: 10, name: "이준호", team: "대한민국", value: "17P" },
         ],
         클린시트: [
-            { id: 1, name: "박무드", team: "대한민국", value: "48회", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "가갑밤베스", team: "대한민국", value: "38회", image: "/images/player/img_player-4.png" },
-            { id: 3, name: "다라에밤베스", team: "대한민국", value: "32회", image: "/images/player/img_player-8.png" },
-            { id: 4, name: "호남두호남두", team: "대한민국", value: "28회", image: "/images/player/img_player-3.png" },
-            { id: 5, name: "알베스", team: "대한민국", value: "20회", image: "/images/player/img_player-2.png" },
-            { id: 6, name: "김민수", team: "대한민국", value: "15회", image: "/images/player/img_player-9.png" },
-            { id: 7, name: "이준호", team: "대한민국", value: "12회", image: "/images/player/img_player-10.png" },
-            { id: 8, name: "렌디", team: "대한민국", value: "10회", image: "/images/player/img_player-6.png" },
-            { id: 9, name: "제스퍼", team: "대한민국", value: "8회", image: "/images/player/img_player-7.png" },
-            { id: 10, name: "수원알베스", team: "대한민국", value: "5회", image: "/images/player/img_player-5.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "48회" },
+            { id: 2, name: "가갑밤베스", team: "대한민국", value: "38회" },
+            { id: 3, name: "다라에밤베스", team: "대한민국", value: "32회" },
+            { id: 4, name: "호남두호남두", team: "대한민국", value: "28회" },
+            { id: 5, name: "알베스", team: "대한민국", value: "20회" },
+            { id: 6, name: "김민수", team: "대한민국", value: "15회" },
+            { id: 7, name: "이준호", team: "대한민국", value: "12회" },
+            { id: 8, name: "렌디", team: "대한민국", value: "10회" },
+            { id: 9, name: "제스퍼", team: "대한민국", value: "8회" },
+            { id: 10, name: "수원알베스", team: "대한민국", value: "5회" },
         ],
         OVR: [
-            { id: 1, name: "알베스", team: "대한민국", value: "92", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "89", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "87", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "85", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "84", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "82", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "80", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "78", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "76", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "74", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "92" },
+            { id: 2, name: "박무드", team: "대한민국", value: "89" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "87" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "85" },
+            { id: 5, name: "렌디", team: "대한민국", value: "84" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "82" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "80" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "78" },
+            { id: 9, name: "김민수", team: "대한민국", value: "76" },
+            { id: 10, name: "이준호", team: "대한민국", value: "74" },
         ],
         TOP3: [
-            { id: 1, name: "알베스", team: "대한민국", value: "95회", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "88회", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "72회", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "58회", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "제스퍼", team: "대한민국", value: "45회", image: "/images/player/img_player-7.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "38회", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "28회", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "20회", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "15회", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "10회", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "95회" },
+            { id: 2, name: "박무드", team: "대한민국", value: "88회" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "72회" },
+            { id: 4, name: "렌디", team: "대한민국", value: "58회" },
+            { id: 5, name: "제스퍼", team: "대한민국", value: "45회" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "38회" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "28회" },
+            { id: 8, name: "김민수", team: "대한민국", value: "20회" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "15회" },
+            { id: 10, name: "이준호", team: "대한민국", value: "10회" },
         ],
         개인승점: [
-            { id: 1, name: "알베스", team: "대한민국", value: "245점", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "228점", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "198점", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "175점", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "152점", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "128점", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "105점", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "82점", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "65점", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "48점", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "245점" },
+            { id: 2, name: "박무드", team: "대한민국", value: "228점" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "198점" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "175점" },
+            { id: 5, name: "렌디", team: "대한민국", value: "152점" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "128점" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "105점" },
+            { id: 8, name: "김민수", team: "대한민국", value: "82점" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "65점" },
+            { id: 10, name: "이준호", team: "대한민국", value: "48점" },
         ],
     };
 
     // 단일 기록 데이터 (최고 기록 + 년도) - 10명
     const singleRecordData = {
         출장수: [
-            { id: 1, name: "박무드", team: "대한민국", value: "32경기 (2024년)", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "30경기 (2023년)", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "호남두호남두", team: "대한민국", value: "29경기 (2024년)", image: "/images/player/img_player-3.png" },
-            { id: 4, name: "가갑밤베스", team: "대한민국", value: "28경기 (2025년)", image: "/images/player/img_player-4.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "27경기 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "렌디", team: "대한민국", value: "26경기 (2023년)", image: "/images/player/img_player-6.png" },
-            { id: 7, name: "제스퍼", team: "대한민국", value: "25경기 (2022년)", image: "/images/player/img_player-7.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "24경기 (2024년)", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "22경기 (2023년)", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "20경기 (2025년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "32경기 (2024년)" },
+            { id: 2, name: "알베스", team: "대한민국", value: "30경기 (2023년)" },
+            { id: 3, name: "호남두호남두", team: "대한민국", value: "29경기 (2024년)" },
+            { id: 4, name: "가갑밤베스", team: "대한민국", value: "28경기 (2025년)" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "27경기 (2024년)" },
+            { id: 6, name: "렌디", team: "대한민국", value: "26경기 (2023년)" },
+            { id: 7, name: "제스퍼", team: "대한민국", value: "25경기 (2022년)" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "24경기 (2024년)" },
+            { id: 9, name: "김민수", team: "대한민국", value: "22경기 (2023년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "20경기 (2025년)" },
         ],
         득점: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "28골 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "24골 (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "알베스", team: "대한민국", value: "18골 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "15골 (2022년)", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "12골 (2023년)", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "10골 (2024년)", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "8골 (2022년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "6골 (2025년)", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "이준호", team: "대한민국", value: "5골 (2023년)", image: "/images/player/img_player-10.png" },
-            { id: 10, name: "다라에밤베스", team: "대한민국", value: "4골 (2024년)", image: "/images/player/img_player-8.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "28골 (2024년)" },
+            { id: 2, name: "박무드", team: "대한민국", value: "24골 (2023년)" },
+            { id: 3, name: "알베스", team: "대한민국", value: "18골 (2024년)" },
+            { id: 4, name: "렌디", team: "대한민국", value: "15골 (2022년)" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "12골 (2023년)" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "10골 (2024년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "8골 (2022년)" },
+            { id: 8, name: "김민수", team: "대한민국", value: "6골 (2025년)" },
+            { id: 9, name: "이준호", team: "대한민국", value: "5골 (2023년)" },
+            { id: 10, name: "다라에밤베스", team: "대한민국", value: "4골 (2024년)" },
         ],
         도움: [
-            { id: 1, name: "알베스", team: "대한민국", value: "16개 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "14개 (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "제스퍼", team: "대한민국", value: "12개 (2025년)", image: "/images/player/img_player-7.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "10개 (2023년)", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "8개 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "7개 (2022년)", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "5개 (2024년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "4개 (2023년)", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "3개 (2025년)", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "2개 (2022년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "16개 (2024년)" },
+            { id: 2, name: "박무드", team: "대한민국", value: "14개 (2023년)" },
+            { id: 3, name: "제스퍼", team: "대한민국", value: "12개 (2025년)" },
+            { id: 4, name: "렌디", team: "대한민국", value: "10개 (2023년)" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "8개 (2024년)" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "7개 (2022년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "5개 (2024년)" },
+            { id: 8, name: "김민수", team: "대한민국", value: "4개 (2023년)" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "3개 (2025년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "2개 (2022년)" },
         ],
         공격포인트: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "44P (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "34P (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "박무드", team: "대한민국", value: "38P (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "25P (2022년)", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "19P (2023년)", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "17P (2024년)", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "13P (2022년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "10P (2025년)", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "7P (2023년)", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "7P (2024년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "44P (2024년)" },
+            { id: 2, name: "알베스", team: "대한민국", value: "34P (2024년)" },
+            { id: 3, name: "박무드", team: "대한민국", value: "38P (2023년)" },
+            { id: 4, name: "렌디", team: "대한민국", value: "25P (2022년)" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "19P (2023년)" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "17P (2024년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "13P (2022년)" },
+            { id: 8, name: "김민수", team: "대한민국", value: "10P (2025년)" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "7P (2023년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "7P (2024년)" },
         ],
         클린시트: [
-            { id: 1, name: "박무드", team: "대한민국", value: "15회 (2024년)", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "가갑밤베스", team: "대한민국", value: "12회 (2023년)", image: "/images/player/img_player-4.png" },
-            { id: 3, name: "다라에밤베스", team: "대한민국", value: "10회 (2024년)", image: "/images/player/img_player-8.png" },
-            { id: 4, name: "호남두호남두", team: "대한민국", value: "9회 (2022년)", image: "/images/player/img_player-3.png" },
-            { id: 5, name: "알베스", team: "대한민국", value: "7회 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 6, name: "김민수", team: "대한민국", value: "5회 (2023년)", image: "/images/player/img_player-9.png" },
-            { id: 7, name: "이준호", team: "대한민국", value: "4회 (2025년)", image: "/images/player/img_player-10.png" },
-            { id: 8, name: "렌디", team: "대한민국", value: "3회 (2022년)", image: "/images/player/img_player-6.png" },
-            { id: 9, name: "제스퍼", team: "대한민국", value: "2회 (2024년)", image: "/images/player/img_player-7.png" },
-            { id: 10, name: "수원알베스", team: "대한민국", value: "2회 (2023년)", image: "/images/player/img_player-5.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "15회 (2024년)" },
+            { id: 2, name: "가갑밤베스", team: "대한민국", value: "12회 (2023년)" },
+            { id: 3, name: "다라에밤베스", team: "대한민국", value: "10회 (2024년)" },
+            { id: 4, name: "호남두호남두", team: "대한민국", value: "9회 (2022년)" },
+            { id: 5, name: "알베스", team: "대한민국", value: "7회 (2024년)" },
+            { id: 6, name: "김민수", team: "대한민국", value: "5회 (2023년)" },
+            { id: 7, name: "이준호", team: "대한민국", value: "4회 (2025년)" },
+            { id: 8, name: "렌디", team: "대한민국", value: "3회 (2022년)" },
+            { id: 9, name: "제스퍼", team: "대한민국", value: "2회 (2024년)" },
+            { id: 10, name: "수원알베스", team: "대한민국", value: "2회 (2023년)" },
         ],
         OVR: [
-            { id: 1, name: "알베스", team: "대한민국", value: "94 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "91 (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "89 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "87 (2025년)", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "86 (2024년)", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "84 (2023년)", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "82 (2022년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "80 (2024년)", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "78 (2023년)", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "76 (2025년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "94 (2024년)" },
+            { id: 2, name: "박무드", team: "대한민국", value: "91 (2023년)" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "89 (2024년)" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "87 (2025년)" },
+            { id: 5, name: "렌디", team: "대한민국", value: "86 (2024년)" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "84 (2023년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "82 (2022년)" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "80 (2024년)" },
+            { id: 9, name: "김민수", team: "대한민국", value: "78 (2023년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "76 (2025년)" },
         ],
         TOP3: [
-            { id: 1, name: "알베스", team: "대한민국", value: "28회 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "25회 (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "22회 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "18회 (2025년)", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "제스퍼", team: "대한민국", value: "15회 (2024년)", image: "/images/player/img_player-7.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "12회 (2023년)", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "10회 (2022년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "7회 (2024년)", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "5회 (2023년)", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "4회 (2025년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "28회 (2024년)" },
+            { id: 2, name: "박무드", team: "대한민국", value: "25회 (2023년)" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "22회 (2024년)" },
+            { id: 4, name: "렌디", team: "대한민국", value: "18회 (2025년)" },
+            { id: 5, name: "제스퍼", team: "대한민국", value: "15회 (2024년)" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "12회 (2023년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "10회 (2022년)" },
+            { id: 8, name: "김민수", team: "대한민국", value: "7회 (2024년)" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "5회 (2023년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "4회 (2025년)" },
         ],
         개인승점: [
-            { id: 1, name: "알베스", team: "대한민국", value: "72점 (2024년)", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "68점 (2023년)", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "58점 (2024년)", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "52점 (2025년)", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "45점 (2024년)", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "38점 (2023년)", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "32점 (2022년)", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "25점 (2024년)", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "18점 (2023년)", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "15점 (2025년)", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "72점 (2024년)" },
+            { id: 2, name: "박무드", team: "대한민국", value: "68점 (2023년)" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "58점 (2024년)" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "52점 (2025년)" },
+            { id: 5, name: "렌디", team: "대한민국", value: "45점 (2024년)" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "38점 (2023년)" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "32점 (2022년)" },
+            { id: 8, name: "김민수", team: "대한민국", value: "25점 (2024년)" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "18점 (2023년)" },
+            { id: 10, name: "이준호", team: "대한민국", value: "15점 (2025년)" },
         ],
     };
 
     // 시즌 기록 데이터 (이번 시즌 2025-26 데이터 - 카테고리별) - 10명
     const seasonRecordData = {
         출장수: [
-            { id: 1, name: "박무드", team: "대한민국", value: "28경기", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "26경기", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "호남두호남두", team: "대한민국", value: "25경기", image: "/images/player/img_player-3.png" },
-            { id: 4, name: "가갑밤베스", team: "대한민국", value: "23경기", image: "/images/player/img_player-4.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "22경기", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "렌디", team: "대한민국", value: "21경기", image: "/images/player/img_player-6.png" },
-            { id: 7, name: "제스퍼", team: "대한민국", value: "20경기", image: "/images/player/img_player-7.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "18경기", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "17경기", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "15경기", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "28경기" },
+            { id: 2, name: "알베스", team: "대한민국", value: "26경기" },
+            { id: 3, name: "호남두호남두", team: "대한민국", value: "25경기" },
+            { id: 4, name: "가갑밤베스", team: "대한민국", value: "23경기" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "22경기" },
+            { id: 6, name: "렌디", team: "대한민국", value: "21경기" },
+            { id: 7, name: "제스퍼", team: "대한민국", value: "20경기" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "18경기" },
+            { id: 9, name: "김민수", team: "대한민국", value: "17경기" },
+            { id: 10, name: "이준호", team: "대한민국", value: "15경기" },
         ],
         득점: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "24골", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "18골", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "알베스", team: "대한민국", value: "15골", image: "/images/player/img_player-2.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "12골", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "10골", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "8골", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "6골", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "5골", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "이준호", team: "대한민국", value: "4골", image: "/images/player/img_player-10.png" },
-            { id: 10, name: "다라에밤베스", team: "대한민국", value: "3골", image: "/images/player/img_player-8.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "24골" },
+            { id: 2, name: "박무드", team: "대한민국", value: "18골" },
+            { id: 3, name: "알베스", team: "대한민국", value: "15골" },
+            { id: 4, name: "렌디", team: "대한민국", value: "12골" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "10골" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "8골" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "6골" },
+            { id: 8, name: "김민수", team: "대한민국", value: "5골" },
+            { id: 9, name: "이준호", team: "대한민국", value: "4골" },
+            { id: 10, name: "다라에밤베스", team: "대한민국", value: "3골" },
         ],
         도움: [
-            { id: 1, name: "알베스", team: "대한민국", value: "14개", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "11개", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "제스퍼", team: "대한민국", value: "9개", image: "/images/player/img_player-7.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "7개", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "수원알베스", team: "대한민국", value: "6개", image: "/images/player/img_player-5.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "5개", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "4개", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "3개", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "2개", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "1개", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "14개" },
+            { id: 2, name: "박무드", team: "대한민국", value: "11개" },
+            { id: 3, name: "제스퍼", team: "대한민국", value: "9개" },
+            { id: 4, name: "렌디", team: "대한민국", value: "7개" },
+            { id: 5, name: "수원알베스", team: "대한민국", value: "6개" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "5개" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "4개" },
+            { id: 8, name: "김민수", team: "대한민국", value: "3개" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "2개" },
+            { id: 10, name: "이준호", team: "대한민국", value: "1개" },
         ],
         공격포인트: [
-            { id: 1, name: "수원알베스", team: "대한민국", value: "38P", image: "/images/player/img_player-5.png" },
-            { id: 2, name: "알베스", team: "대한민국", value: "29P", image: "/images/player/img_player-2.png" },
-            { id: 3, name: "박무드", team: "대한민국", value: "29P", image: "/images/player/img_player-1.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "19P", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "호남두호남두", team: "대한민국", value: "15P", image: "/images/player/img_player-3.png" },
-            { id: 6, name: "제스퍼", team: "대한민국", value: "12P", image: "/images/player/img_player-7.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "10P", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "8P", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "5P", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "5P", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "수원알베스", team: "대한민국", value: "38P" },
+            { id: 2, name: "알베스", team: "대한민국", value: "29P" },
+            { id: 3, name: "박무드", team: "대한민국", value: "29P" },
+            { id: 4, name: "렌디", team: "대한민국", value: "19P" },
+            { id: 5, name: "호남두호남두", team: "대한민국", value: "15P" },
+            { id: 6, name: "제스퍼", team: "대한민국", value: "12P" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "10P" },
+            { id: 8, name: "김민수", team: "대한민국", value: "8P" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "5P" },
+            { id: 10, name: "이준호", team: "대한민국", value: "5P" },
         ],
         클린시트: [
-            { id: 1, name: "박무드", team: "대한민국", value: "12회", image: "/images/player/img_player-1.png" },
-            { id: 2, name: "가갑밤베스", team: "대한민국", value: "9회", image: "/images/player/img_player-4.png" },
-            { id: 3, name: "다라에밤베스", team: "대한민국", value: "7회", image: "/images/player/img_player-8.png" },
-            { id: 4, name: "호남두호남두", team: "대한민국", value: "5회", image: "/images/player/img_player-3.png" },
-            { id: 5, name: "알베스", team: "대한민국", value: "4회", image: "/images/player/img_player-2.png" },
-            { id: 6, name: "김민수", team: "대한민국", value: "3회", image: "/images/player/img_player-9.png" },
-            { id: 7, name: "이준호", team: "대한민국", value: "2회", image: "/images/player/img_player-10.png" },
-            { id: 8, name: "렌디", team: "대한민국", value: "2회", image: "/images/player/img_player-6.png" },
-            { id: 9, name: "제스퍼", team: "대한민국", value: "1회", image: "/images/player/img_player-7.png" },
-            { id: 10, name: "수원알베스", team: "대한민국", value: "1회", image: "/images/player/img_player-5.png" },
+            { id: 1, name: "박무드", team: "대한민국", value: "12회" },
+            { id: 2, name: "가갑밤베스", team: "대한민국", value: "9회" },
+            { id: 3, name: "다라에밤베스", team: "대한민국", value: "7회" },
+            { id: 4, name: "호남두호남두", team: "대한민국", value: "5회" },
+            { id: 5, name: "알베스", team: "대한민국", value: "4회" },
+            { id: 6, name: "김민수", team: "대한민국", value: "3회" },
+            { id: 7, name: "이준호", team: "대한민국", value: "2회" },
+            { id: 8, name: "렌디", team: "대한민국", value: "2회" },
+            { id: 9, name: "제스퍼", team: "대한민국", value: "1회" },
+            { id: 10, name: "수원알베스", team: "대한민국", value: "1회" },
         ],
         TOP3: [
-            { id: 1, name: "알베스", team: "대한민국", value: "22회", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "18회", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "15회", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "렌디", team: "대한민국", value: "12회", image: "/images/player/img_player-6.png" },
-            { id: 5, name: "제스퍼", team: "대한민국", value: "10회", image: "/images/player/img_player-7.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "8회", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "6회", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "4회", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "3회", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "2회", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "22회" },
+            { id: 2, name: "박무드", team: "대한민국", value: "18회" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "15회" },
+            { id: 4, name: "렌디", team: "대한민국", value: "12회" },
+            { id: 5, name: "제스퍼", team: "대한민국", value: "10회" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "8회" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "6회" },
+            { id: 8, name: "김민수", team: "대한민국", value: "4회" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "3회" },
+            { id: 10, name: "이준호", team: "대한민국", value: "2회" },
         ],
         OVR: [
-            { id: 1, name: "알베스", team: "대한민국", value: "92", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "89", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "87", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "85", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "84", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "82", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "80", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "다라에밤베스", team: "대한민국", value: "78", image: "/images/player/img_player-8.png" },
-            { id: 9, name: "김민수", team: "대한민국", value: "76", image: "/images/player/img_player-9.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "74", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "92" },
+            { id: 2, name: "박무드", team: "대한민국", value: "89" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "87" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "85" },
+            { id: 5, name: "렌디", team: "대한민국", value: "84" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "82" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "80" },
+            { id: 8, name: "다라에밤베스", team: "대한민국", value: "78" },
+            { id: 9, name: "김민수", team: "대한민국", value: "76" },
+            { id: 10, name: "이준호", team: "대한민국", value: "74" },
         ],
         개인승점: [
-            { id: 1, name: "알베스", team: "대한민국", value: "58점", image: "/images/player/img_player-2.png" },
-            { id: 2, name: "박무드", team: "대한민국", value: "52점", image: "/images/player/img_player-1.png" },
-            { id: 3, name: "수원알베스", team: "대한민국", value: "45점", image: "/images/player/img_player-5.png" },
-            { id: 4, name: "제스퍼", team: "대한민국", value: "38점", image: "/images/player/img_player-7.png" },
-            { id: 5, name: "렌디", team: "대한민국", value: "32점", image: "/images/player/img_player-6.png" },
-            { id: 6, name: "호남두호남두", team: "대한민국", value: "28점", image: "/images/player/img_player-3.png" },
-            { id: 7, name: "가갑밤베스", team: "대한민국", value: "24점", image: "/images/player/img_player-4.png" },
-            { id: 8, name: "김민수", team: "대한민국", value: "18점", image: "/images/player/img_player-9.png" },
-            { id: 9, name: "다라에밤베스", team: "대한민국", value: "15점", image: "/images/player/img_player-8.png" },
-            { id: 10, name: "이준호", team: "대한민국", value: "12점", image: "/images/player/img_player-10.png" },
+            { id: 1, name: "알베스", team: "대한민국", value: "58점" },
+            { id: 2, name: "박무드", team: "대한민국", value: "52점" },
+            { id: 3, name: "수원알베스", team: "대한민국", value: "45점" },
+            { id: 4, name: "제스퍼", team: "대한민국", value: "38점" },
+            { id: 5, name: "렌디", team: "대한민국", value: "32점" },
+            { id: 6, name: "호남두호남두", team: "대한민국", value: "28점" },
+            { id: 7, name: "가갑밤베스", team: "대한민국", value: "24점" },
+            { id: 8, name: "김민수", team: "대한민국", value: "18점" },
+            { id: 9, name: "다라에밤베스", team: "대한민국", value: "15점" },
+            { id: 10, name: "이준호", team: "대한민국", value: "12점" },
         ],
     };
 
@@ -860,8 +840,8 @@ export default function TeamDataPage() {
         setIsStatsModalOpen(true);
     };
 
-    // 선수 선택/검색 핸들러
-    const handlePlayerSelect = (playerName: string) => {
+    // 검색 핸들러
+    const handleSearch = (playerName: string) => {
         // 모든 데이터에서 선수 찾기
         let foundPlayer: Player | null = null;
         const seasonStats: Record<string, string> = {};
@@ -913,7 +893,7 @@ export default function TeamDataPage() {
                 <SeasonSelector />
 
                 {/* 검색 박스 */}
-                <SearchBoxWithHandler onSearch={handlePlayerSelect} />
+                <SearchBoxWithHandler onSearch={handleSearch} />
 
                 {/* 탭 메뉴 - 반응형 */}
                 <div
@@ -938,7 +918,6 @@ export default function TeamDataPage() {
                 <RankingCardsCarousel
                     statsData={currentData}
                     onCategoryClick={handleCategoryClick}
-                    onPlayerClick={handlePlayerSelect}
                 />
             </main>
 
@@ -948,7 +927,6 @@ export default function TeamDataPage() {
                 onClose={() => setIsStatsModalOpen(false)}
                 initialCategory={modalCategory}
                 allData={currentData}
-                onPlayerClick={handlePlayerSelect}
             />
 
             {/* 선수 카드 모달 (검색) */}
@@ -959,7 +937,6 @@ export default function TeamDataPage() {
                 seasonStats={searchedSeasonStats}
                 cumulativeStats={searchedCumulativeStats}
                 singleRecordStats={searchedSingleRecordStats}
-                initialTab={activeTab === "팀 순위" ? "시즌 기록" : activeTab}
             />
 
             {/* 애니메이션 스타일 */}
