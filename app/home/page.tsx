@@ -40,7 +40,7 @@ export default function HomePage() {
         <div className="min-h-screen bg-surface-primary">
             <Header showTeamSelector selectedTeam="바르셀로나 FC" />
 
-            <main className="max-w-[1400px] mx-auto p-8">
+            <main className="max-w-[87.5rem] mx-auto p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
                     {/* 왼쪽: 다가오는 경기 + Starting XI */}
                     <div>
