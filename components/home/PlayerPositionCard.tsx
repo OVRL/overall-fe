@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 
 interface Player {
@@ -22,15 +22,15 @@ interface PlayerPositionCardProps {
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 
 /**
- * 포메이션 내 선수 카드 컴포넌트 (HTML 스타일 기반)
+ * 포메이션 내 선수 카드 컴포넌트
  */
-export default function PlayerPositionCard({
+const PlayerPositionCard = ({
     player,
     onDragStart,
     onDrop,
     onDragOver
-}: PlayerPositionCardProps) {
-    const [imageError, setImageError] = React.useState(false);
+}: PlayerPositionCardProps) => {
+    const [imageError, setImageError] = useState(false);
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
@@ -72,4 +72,6 @@ export default function PlayerPositionCard({
             </div>
         </div>
     );
-}
+};
+
+export default PlayerPositionCard;
