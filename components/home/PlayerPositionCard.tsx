@@ -39,11 +39,11 @@ export default function PlayerPositionCard({
             onDragStart={onDragStart}
             onDrop={onDrop}
             onDragOver={onDragOver}
-            className="flex flex-col items-center gap-2 cursor-move hover:scale-105 transition-transform"
+            className="flex flex-col items-center gap-1 md:gap-2 cursor-move hover:scale-105 transition-transform"
         >
             {/* 선수 아바타 */}
             <div className="relative">
-                <div className="w-14 h-14 bg-surface-tertiary rounded-full border-[3px] border-gray-700 overflow-hidden relative">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-surface-tertiary rounded-full border-2 md:border-[3px] border-gray-700 overflow-hidden relative">
                     <Image
                         src={playerImage}
                         alt={player.name}
@@ -54,20 +54,20 @@ export default function PlayerPositionCard({
                 </div>
 
                 {/* 등번호 배지 */}
-                <div className="absolute -top-1 -right-1 bg-gray-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold">
+                <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 bg-gray-600 text-white w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[10px] md:text-[11px] font-bold">
                     {player.number}
                 </div>
 
                 {/* 주장 배지 (첫 번째 선수에만) */}
                 {player.id === 5 && (
-                    <div className="absolute top-0 left-0 bg-yellow-400 text-black w-5 h-5 rounded-full flex items-center justify-center text-xs font-black">
+                    <div className="absolute top-0 left-0 bg-yellow-400 text-black w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[10px] md:text-xs font-black">
                         C
                     </div>
                 )}
             </div>
 
             {/* 선수 이름 */}
-            <div className="bg-surface-tertiary px-3 py-1 rounded-md text-[13px] text-white font-semibold whitespace-nowrap">
+            <div className="bg-surface-tertiary px-2 md:px-3 py-0.5 md:py-1 rounded-md text-[11px] md:text-[13px] text-white font-semibold whitespace-nowrap">
                 {player.name}
             </div>
         </div>
