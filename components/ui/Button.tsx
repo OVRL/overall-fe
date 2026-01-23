@@ -1,38 +1,65 @@
-import React from "react";
+import {ButtonHTMLAttributes, ReactNode, Ref} from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "secondary" | "ghost";
-    size?: "default" | "full";
-    children: React.ReactNode;
-}
+const buttonVariants = cva(
+  "flex items-center justify-center font-medium disabled:opacity-50 cursor-pointer",
+  {
+    variants: {
+      variant: {
+        primary:
+          "bg-Fill_AccentPrimary text-Label-Fixed_black hover:bg-Fill_AccentPrimary-hover shadow-lg shadow-Fill_AccentPrimary/20",
+        ghost: "bg-fill-quaternary text-Label-Tertiary hover:bg-white/10",
+        line: "bg-transparent text-Label-Tertiary border border-Fill_Quatiary hover:bg-Fill_Quatiary/10",
+      },
+      size: {
+        xs: "h-7.5 w-full text-xs rounded-xl",
+        s: "h-9.5 w-full text-xs rounded-xl",
+        m: "h-10.5 w-full text-sm rounded-xl",
+        XL: "h-14 w-full text-lg rounded-sm",
+      },
+      logo: {
+        true: "gap-2.5",
+        false: "gap-0",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "m",
+      logo: false,
+    },
+  },
+);
 
-export default function Button({
-    variant = "primary",
-    size = "default",
-    className = "",
-    children,
-    ...props
-}: ButtonProps) {
-    const baseStyles =
-        "flex items-center justify-center font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed";
+export interface ButtonProps
+  extends
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+      leftIcon?: ReactNode;
+      ref?: Ref<HTMLButtonElement>;
+    }
 
-    const sizeStyles = {
-        default: "px-6 py-3 rounded-xl text-[15px]",
-        full: "w-full py-4 rounded-xl text-[16px]",
-    };
+const Button = ({
+  className,
+  variant,
+  size,
+  logo,
+  leftIcon,
+  children,
+  ...props
+}: ButtonProps) => {
+  const isLogo = logo ?? !!leftIcon;
 
-    const variantStyles = {
-        primary: "bg-primary hover:bg-primary-hover text-black shadow-lg shadow-primary/20",
-        secondary: "bg-white hover:bg-gray-100 text-black border border-gray-200",
-        ghost: "bg-transparent hover:bg-white/10 text-white",
-    };
+  return (
+    <button
+      className={cn(buttonVariants({ variant, size, logo: isLogo, className }))}
+      {...props}
+    >
+      {leftIcon}
+      {children}
+    </button>
+  );
+};
+Button.displayName = "Button";
 
-    return (
-        <button
-            className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
-            {...props}
-        >
-            {children}
-        </button>
-    );
-}
+export { Button, buttonVariants };
