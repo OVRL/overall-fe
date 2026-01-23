@@ -75,16 +75,16 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
     };
 
     return (
-        <div className="bg-surface-secondary rounded-[20px] p-6">
+        <div className="bg-surface-secondary rounded-[20px] p-4 md:p-6">
             {/* 헤더 */}
-            <div className="flex items-center justify-between mb-5">
-                <h2 className="text-[28px] font-black text-white">STARTING XI</h2>
-                <div className="flex gap-4">
+            <div className="flex items-center justify-between mb-4 md:mb-5">
+                <h2 className="text-lg xs:text-xl md:text-[28px] font-black text-white whitespace-nowrap">STARTING XI</h2>
+                <div className="flex gap-1 md:gap-4 flex-nowrap">
                     {["대표", "A", "B", "C"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === tab
+                            className={`px-2 xs:px-3 md:px-5 py-1.5 md:py-2 rounded-lg text-[10px] xs:text-xs md:text-sm font-bold transition-colors whitespace-nowrap ${activeTab === tab
                                 ? "bg-primary text-black"
                                 : "bg-transparent border border-gray-700 text-gray-500 hover:border-gray-500"
                                 }`}
@@ -95,8 +95,8 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
                 </div>
             </div>
 
-            {/* 필드 */}
-            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden">
+            {/* 필드 - 모바일/태블릿에서 세로 (이미지 참조), 데스크톱(lg)에서 가로 */}
+            <div className="relative w-full aspect-[3/4] md:aspect-[16/9] rounded-2xl overflow-hidden">
                 {/* 필드 이미지 배경 */}
                 <Image
                     src="/images/object_field.png"
@@ -127,10 +127,10 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
             </div>
 
             {/* 감독 정보 */}
-            <div className="flex items-center justify-center gap-6 mt-5">
+            <div className="flex items-center justify-center gap-2 md:gap-6 mt-4 md:mt-5 flex-nowrap overflow-x-visible">
                 {/* 감독 사진 */}
                 <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 bg-surface-tertiary rounded-full border-2 border-gray-700 overflow-hidden relative">
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-surface-tertiary rounded-full border-2 border-gray-700 overflow-hidden relative">
                         <Image
                             src="/images/ovr.png"
                             alt="Manager"
@@ -138,30 +138,30 @@ export default function StartingXI({ players, onPlayersChange }: StartingXIProps
                             className="object-cover"
                         />
                     </div>
-                    <div className="absolute -top-1 -right-1 bg-gray-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold">
+                    <div className="absolute -top-1 -right-1 bg-gray-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold">
                         30
                     </div>
                 </div>
 
                 {/* 감독 정보 */}
                 <div className="text-left">
-                    <p className="text-gray-500 text-xs">감독</p>
-                    <p className="text-white font-bold text-lg">정태우</p>
+                    <p className="text-gray-500 text-xs md:text-sm">감독</p>
+                    <p className="text-white font-bold text-base md:text-lg">정태우</p>
                 </div>
 
                 {/* 스탯 */}
-                <div className="flex gap-6 text-center">
+                <div className="flex gap-2 xs:gap-4 md:gap-8 text-center flex-nowrap">
                     <div>
-                        <p className="text-gray-500 text-xs">경기수</p>
-                        <p className="text-white font-bold">30</p>
+                        <p className="text-gray-500 text-xs md:text-sm">경기수</p>
+                        <p className="text-white font-bold text-sm md:text-base">30</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">승/무/패</p>
-                        <p className="text-white font-bold">20/5/5</p>
+                        <p className="text-gray-500 text-xs md:text-sm">승/무/패</p>
+                        <p className="text-white font-bold text-sm md:text-base">20/5/5</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs">팀 승률</p>
-                        <p className="text-white font-bold">60%</p>
+                        <p className="text-gray-500 text-xs md:text-sm">팀 승률</p>
+                        <p className="text-white font-bold text-sm md:text-base">60%</p>
                     </div>
                 </div>
             </div>
