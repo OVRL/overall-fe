@@ -1,21 +1,14 @@
 import React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { Position, MainPosition } from '@/types/postion';
 
-export type Position =
-  | 'FW' | 'MF' | 'DF' | 'GK'
-  | 'ST' | 'CF' | 'RF' | 'LF' | 'RW' | 'LW' | 'RS' | 'LS'
-  | 'CM' | 'LCM' | 'RCM' | 'CDM' | 'LDM' | 'RDM' | 'CAM' | 'LCAM' | 'RCAM' | 'RM' | 'LM' | 'RAM' | 'LAM'
-  | 'CB' | 'LCB' | 'RCB' | 'LB' | 'RB' | 'LWB' | 'RWB' | 'SW';
-
-export type MainPosition = 'FW' | 'MF' | 'DF' | 'GK';
-
-const POSITION_CATEGORY_MAP: Record<Position, MainPosition> = {
+export const POSITION_CATEGORY_MAP: Record<Position, MainPosition> = {
   ST: 'FW', CF: 'FW', RF: 'FW', LF: 'FW', RW: 'FW', LW: 'FW', RS: 'FW', LS: 'FW', FW: 'FW',
   CM: 'MF', LCM: 'MF', RCM: 'MF', CDM: 'MF', LDM: 'MF', RDM: 'MF', CAM: 'MF', LCAM: 'MF', RCAM: 'MF', RM: 'MF', LM: 'MF', RAM: 'MF', LAM: 'MF', MF: 'MF',
   CB: 'DF', LCB: 'DF', RCB: 'DF', LB: 'DF', RB: 'DF', LWB: 'DF', RWB: 'DF', SW: 'DF', DF: 'DF',
   GK: 'GK',
-};
+} as const;
 
 const positionChipVariants = cva(
   "py-1 px-1.5 inline-flex items-center justify-center rounded-sm text-xs font-semibold border shadow-[0_2px_10px_0_rgba(0,0,0,0.15)] transition-colors",
