@@ -135,15 +135,10 @@ const MatchAction = () => (
 const UpcomingMatch = () => {
     return (
         <div className="bg-surface-secondary rounded-[20px] p-4 lg:p-6 mb-4 lg:mb-5 border border-primary/30 lg:border-transparent">
-            {/* 전체 레이아웃 컨테이너 */}
+            {/* Unchanged logic, just confirming LG breakpoint usage matches request */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                {/* 1. 좌측: 타이틀 & 모바일 컨텐츠 */}
                 <MatchHeaderSection />
-
-                {/* 2. 중앙: PC 전용 매치 정보 */}
                 <MatchInfoDesktop />
-
-                {/* 3. 우측: 버튼 */}
                 <MatchAction />
             </div>
         </div>

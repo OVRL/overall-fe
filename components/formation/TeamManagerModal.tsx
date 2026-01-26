@@ -66,7 +66,8 @@ export default function TeamManagerModal({
         // Auto-Filter Logic
         const formationStr = quarters.find(q => q.id === quarterId)?.formation || "4-2-3-1";
         // Type safe access
-        const formationDef = (FORMATIONS as any)[formationStr];
+        // @ts-ignore
+        const formationDef = FORMATIONS[formationStr];
         if (formationDef && formationDef[posId]) {
             const role = formationDef[posId].role; // "ST", "CB" etc.
             setAutoFilterPos(role);
