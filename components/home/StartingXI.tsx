@@ -168,17 +168,15 @@ const ManagerInfo = () => (
     <div className="flex items-center justify-center gap-2 md:gap-6 mt-4 md:mt-5 flex-nowrap overflow-x-visible">
         {/* 감독 사진 */}
         <div className="relative flex-shrink-0">
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-surface-tertiary rounded-full border-2 border-gray-700 overflow-hidden relative">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden relative">
                 <Image
-                    src="/images/ovr.png"
+                    src="/images/player/img_player-1.png"
                     alt="Manager"
                     fill
                     className="object-cover"
                 />
             </div>
-            <div className="absolute -top-1 -right-1 bg-gray-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold">
-                30
-            </div>
+            {/* 배지 제거됨 */}
         </div>
 
         {/* 감독 정보 */}
