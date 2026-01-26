@@ -1,24 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import PositionChip from "@/components/PositionChip";
-import SeasonChip from "@/components/ui/SeasonChip";
-import type { Position } from "@/components/PositionChip";
-
-interface Player {
-    id: number;
-    name: string;
-    position: string;
-    number: number;
-    overall: number;
-    nationality?: string;
-    image?: string;
-    season?: string;
-    seasonType?: "general" | "worldBest";
-}
-
-const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
+import React, { useState, useMemo } from "react";
+import PlayerInfoList from "./PlayerInfoList";
+import { POSITION_CATEGORY_MAP, Position, MainPosition } from "@/components/PositionChip";
+import type { Player } from "./PlayerInfoList";
 
 /**
  * 탭 메뉴 컴포넌트
@@ -52,80 +37,76 @@ const PlayerListTabs = ({
 );
 
 /**
- * 테이블 헤더 컴포넌트
- */
-const PlayerListHeader = () => (
-    <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 px-2 md:px-3 py-2 text-gray-500 text-xs md:text-xs border-b border-gray-800 whitespace-nowrap">
-        <span>포지션</span>
-        <span className="text-center">등번호</span>
-        <span>선수명</span>
-        <span className="text-right">OVR</span>
-    </div>
-);
-
-/**
- * 개별 선수 아이템 컴포넌트
- */
-const PlayerListItem = ({ player }: { player: Player }) => {
-    const [imageError, setImageError] = useState(false);
-    const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
-
-    return (
-        <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
-            {/* 포지션 배지 */}
-            <div className="flex justify-center">
-                <PositionChip position={player.position as Position} variant="filled" />
-            </div>
-
-            {/* 등번호 */}
-            <span className="text-white font-bold text-center text-sm md:text-base">{player.number}</span>
-
-            {/* 선수 정보 */}
-            <div className="flex items-center gap-2 md:gap-3">
-                {/* 선수 이미지 */}
-                <div className="relative w-8 h-12 md:w-12 md:h-16 flex-shrink-0">
-                    <Image
-                        src={playerImage}
-                        alt={player.name}
-                        fill
-                        className="object-contain"
-                        onError={() => setImageError(true)}
-                    />
-                </div>
-
-                {/* 연도 배지 */}
-                <SeasonChip
-                    season={player.season || "26"}
-                    type={player.seasonType || "general"}
-                />
-
-                {/* 선수 이름 */}
-                <span className="text-white font-medium truncate text-xs md:text-base">{player.name}</span>
-            </div>
-
-            {/* OVR */}
-            <div className="flex justify-end min-w-[30px]">
-                <span className="text-primary font-bold text-base md:text-lg">{player.overall}</span>
-            </div>
-        </div>
-    );
-};
-
-/**
  * 선수 목록 리스트 컴포넌트
  */
 const PlayerList = ({ players }: { players: Player[] }) => {
     const [activeTab, setActiveTab] = useState("전체");
 
+    const filteredAndGroupedPlayers = useMemo(() => {
+        // 1. Filter
+        let filtered = [...players];
+        if (activeTab === "선발") {
+            // Assuming "Starting" implies index 0-10 or strictly "id" check etc. 
+            // Currently no 'isStarting' prop, usually derived from position in array (0-10).
+            // Let's assume first 11 are starters for simple logic, or rely on prop if exists.
+            // Using array index 0-10 as per StartingXI logic.
+            filtered = filtered.slice(0, 11);
+        } else if (activeTab === "교체") {
+            filtered = filtered.slice(11);
+        } else if (activeTab === "OVR") {
+            filtered = filtered.sort((a, b) => b.overall - a.overall);
+        }
+
+        // 2. Group by Position (Only if not OVR sorted? Or always group? User said "Separate based on position")
+        // If sorting by OVR, grouping might confuse the order. 
+        // User said "Main Page... separate based on position". 
+        // I will apply grouping for "전체", "선발", "교체".
+        // For "OVR", I might keep flat list OR group by position then sort by OVR inside.
+        // Let's group for all tabs for consistency with the request.
+
+        const groups: Record<MainPosition, Player[]> = {
+            FW: [],
+            MF: [],
+            DF: [],
+            GK: []
+        };
+
+        filtered.forEach(p => {
+            const mainPos = POSITION_CATEGORY_MAP[p.position as Position] || 'MF'; // Fallback
+            if (groups[mainPos]) {
+                groups[mainPos].push(p);
+            }
+        });
+
+        return groups;
+    }, [players, activeTab]);
+
+    const positionOrder: MainPosition[] = ['FW', 'MF', 'DF', 'GK'];
+
     return (
         <div className="bg-surface-secondary rounded-[20px] p-4 md:p-5 mt-4 md:mt-5">
             <PlayerListTabs activeTab={activeTab} onTabChange={setActiveTab} />
-            <PlayerListHeader />
 
-            <div className="divide-y divide-gray-800/50">
-                {players.map((player) => (
-                    <PlayerListItem key={player.id} player={player} />
-                ))}
+            {/* Header only once or per section? 
+                If we group, header per section is redundant if identical.
+                Or just Main Header then sections. 
+                Let's do sections.
+            */}
+
+            <div className="flex flex-col gap-6">
+                {positionOrder.map(pos => {
+                    const groupPlayers = filteredAndGroupedPlayers[pos];
+                    if (!groupPlayers || groupPlayers.length === 0) return null;
+
+                    return (
+                        <div key={pos}>
+                            <h3 className="text-white font-bold mb-2 pl-2 border-l-4 border-primary">
+                                {pos} <span className="text-gray-500 text-sm font-normal">({groupPlayers.length})</span>
+                            </h3>
+                            <PlayerInfoList players={groupPlayers} showHeader={false} />
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
