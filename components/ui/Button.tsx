@@ -1,4 +1,4 @@
-import {ButtonHTMLAttributes, ReactNode, Ref} from "react";
+import { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ const buttonVariants = cva(
         xs: "h-7.5 w-full text-xs rounded-xl",
         s: "h-9.5 w-full text-xs rounded-xl",
         m: "h-10.5 w-full text-sm rounded-xl",
-        XL: "h-14 w-full text-lg rounded-sm",
+        xl: "h-14 w-full text-lg rounded-sm",
       },
       logo: {
         true: "gap-2.5",
@@ -35,9 +35,9 @@ export interface ButtonProps
   extends
     ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-      leftIcon?: ReactNode;
-      ref?: Ref<HTMLButtonElement>;
-    }
+  leftIcon?: ReactNode;
+  ref?: Ref<HTMLButtonElement>;
+}
 
 const Button = ({
   className,

@@ -1,0 +1,36 @@
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+"""Exposes a URL that specifies the behavior of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behavior of this scalar."""
+  url: String!
+) on SCALAR
+
+type Mutation {
+  signUp(email: String!, name: String!, password: String!, phone: String!): User!
+}
+
+type Query {
+  user(email: String!): User!
+  users(limit: Int! = 10, offset: Int! = 0): Users!
+}
+
+type User {
+  accessToken: String!
+  email: String!
+  id: ID!
+  name: String!
+  phone: String!
+  refreshToken: String!
+  rememberToken: String
+}
+
+type Users {
+  hasNextPage: Boolean!
+  items: [User!]!
+  totalCount: Int!
+}
+
