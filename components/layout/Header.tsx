@@ -54,9 +54,6 @@ const TeamSelector = ({
     </button>
 );
 
-/**
- * 헤더 네비게이션 컴포넌트
- */
 const HeaderNavigation = ({
     menuItems,
     showHamburger,
