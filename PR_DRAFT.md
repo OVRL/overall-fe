@@ -27,6 +27,8 @@
     - `ManagerStats`: 반복되는 스탯 UI를 `ManagerStatItem`으로 분리하여 코드 중복 제거.
     - `UpcomingMatch`: 반복되는 팀 정보(로고/이름)를 `TeamInfo` 컴포넌트로 분리하고 `reverse` props로 좌우 반전 로직을 유연하게 처리.
     - `Header`: `TeamSelector`와 `HeaderNavigation` 컴포넌트로 분리하여 구조 개선.
+    - `Header`: 로고 클릭 시 `/home`으로 이동하도록 `Link` 적용.
+    - `SeasonChip`: 시즌 배지(26 Normal, World Best) 컴포넌트 추가 및 동적 데이터 연동 (`PlayerList`, `PlayerPositionCard`에 `season`/`seasonType` 적용).
     - `Layout`: 메인 컨텐츠 너비를 `max-w-[1400px]`(픽셀)에서 `max-w-[87.5rem]`(rem)으로 변경하여 반응형 단위 일관성 확보.
 
 ### 3. 디자인 토큰 및 스타일링
