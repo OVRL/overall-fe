@@ -24,7 +24,7 @@ const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
  * 테이블 헤더 컴포넌트
  */
 const PlayerListHeader = () => (
-    <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 px-2 md:px-3 py-2 text-gray-500 text-xs md:text-xs border-b border-gray-800 whitespace-nowrap">
+    <div className="grid grid-cols-[2.8125rem_1.875rem_1fr_2.8125rem] md:grid-cols-[3.75rem_3.125rem_1fr_3.125rem] items-center gap-1 md:gap-4 px-2 md:px-3 py-2 text-gray-500 text-xs md:text-xs border-b border-gray-800 whitespace-nowrap">
         <span>포지션</span>
         <span className="text-center">등번호</span>
         <span>선수명</span>
@@ -40,7 +40,7 @@ const PlayerListItem = ({ player }: { player: Player }) => {
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
+        <div className="grid grid-cols-[2.8125rem_1.875rem_1fr_2.8125rem] md:grid-cols-[3.75rem_3.125rem_1fr_3.125rem] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
             {/* 포지션 배지 */}
             <div className="flex justify-center">
                 <PositionChip position={player.position as Position} variant="filled" />
@@ -73,7 +73,7 @@ const PlayerListItem = ({ player }: { player: Player }) => {
             </div>
 
             {/* OVR */}
-            <div className="flex justify-end min-w-[30px]">
+            <div className="flex justify-end min-w-[1.875rem]">
                 <span className="text-primary font-bold text-base md:text-lg">{player.overall}</span>
             </div>
         </div>

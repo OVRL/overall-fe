@@ -10,7 +10,7 @@ export type Position =
 
 export type MainPosition = 'FW' | 'MF' | 'DF' | 'GK';
 
-const POSITION_CATEGORY_MAP: Record<Position, MainPosition> = {
+export const POSITION_CATEGORY_MAP: Record<Position, MainPosition> = {
   ST: 'FW', CF: 'FW', RF: 'FW', LF: 'FW', RW: 'FW', LW: 'FW', RS: 'FW', LS: 'FW', FW: 'FW',
   CM: 'MF', LCM: 'MF', RCM: 'MF', CDM: 'MF', LDM: 'MF', RDM: 'MF', CAM: 'MF', LCAM: 'MF', RCAM: 'MF', RM: 'MF', LM: 'MF', RAM: 'MF', LAM: 'MF', MF: 'MF',
   CB: 'DF', LCB: 'DF', RCB: 'DF', LB: 'DF', RB: 'DF', LWB: 'DF', RWB: 'DF', SW: 'DF', DF: 'DF',
@@ -38,7 +38,7 @@ const positionChipVariants = cva(
       { intent: 'MF', variant: 'outline', className: 'border-Position-MF-Green text-Position-MF-Green' },
       { intent: 'DF', variant: 'outline', className: 'border-Position-DF-Blue text-Position-DF-Blue' },
       { intent: 'GK', variant: 'outline', className: 'border-Position-GK-Yellow text-Position-GK-Yellow' },
-      
+
       // Filled variants
       { intent: 'FW', variant: 'filled', className: 'bg-Position-FW-Red text-white' },
       { intent: 'MF', variant: 'filled', className: 'bg-Position-MF-Green text-white' },
@@ -58,10 +58,10 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 
 const PositionChip = ({ position, variant = 'outline', className, ...props }: Props) => {
   const mainCategory = POSITION_CATEGORY_MAP[position];
-  
+
   return (
-    <span 
-      className={cn(positionChipVariants({ intent: mainCategory, variant }), className)} 
+    <span
+      className={cn(positionChipVariants({ intent: mainCategory, variant }), className)}
       {...props}
     >
       {position}
