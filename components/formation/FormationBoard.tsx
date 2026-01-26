@@ -74,7 +74,6 @@ interface FormationBoardProps {
     selectedListPlayer: Player | null; // New prop for Tap-to-Place
     onPlaceListPlayer: (pos: number) => void; // New handler
     onRemove?: () => void; // Team Remove Handler
-    onExpand?: () => void; // New Expand Handler
 }
 
 export default function FormationBoard({
@@ -88,8 +87,7 @@ export default function FormationBoard({
     onSwap,
     selectedListPlayer,
     onPlaceListPlayer,
-    onRemove,
-    onExpand
+    onRemove
 }: FormationBoardProps) {
     const [selectedPos, setSelectedPos] = useState<number | null>(null);
 
@@ -162,15 +160,6 @@ export default function FormationBoard({
             <div className="bg-surface-tertiary px-4 py-2 flex justify-between items-center group">
                 <div className="flex items-center gap-2">
                     <h3 className="font-bold text-white text-sm md:text-base">{label}</h3>
-                    {onExpand && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onExpand(); }}
-                            className="bg-gray-700 hover:bg-white hover:text-black text-gray-300 rounded px-2 py-0.5 text-xs font-bold transition-colors flex items-center gap-1"
-                            title="크게 보기 / 관리"
-                        >
-                            <span>⤢</span> 관리
-                        </button>
-                    )}
                     {onRemove && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -219,7 +208,10 @@ export default function FormationBoard({
                             {/* Player Card or Empty Slot */}
                             {player ? (
                                 <div className="relative group w-full h-full flex flex-col items-center">
-                                    {/* Selection Ring - REMOVED per user request */}
+                                    {/* Selection Ring */}
+                                    {isSelected && (
+                                        <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-pulse z-0 pointer-events-none scale-125 md:scale-150 rounded-b-none" />
+                                    )}
 
                                     {/* Placement Hint (Mobile) */}
                                     {isPlacementTarget && (
@@ -244,12 +236,12 @@ export default function FormationBoard({
                                     )}
 
                                     {/* Image */}
-                                    <div className={`w-14 h-14 md:w-16 md:h-16 relative z-10 transition-colors`}>
+                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 shadow-lg bg-surface-tertiary relative z-10 transition-colors ${isSelected ? "border-yellow-400" : "border-white"}`}>
                                         <Image
                                             src={player.image || "/images/ovr.png"}
                                             alt={player.name}
-                                            width={64}
-                                            height={64}
+                                            width={48}
+                                            height={48}
                                             className="w-full h-full object-cover"
                                             draggable={false}
                                         />
