@@ -9,7 +9,6 @@ const pretendard = localFont({
   variable: "--font-pretendard",
 });
 
-
 export const metadata: Metadata = {
   title: "Overall",
   description: "Overall",
@@ -22,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body
-        className={`${pretendard.variable} antialiased`}
-      >
+      <body className={`${pretendard.variable} w-screen h-screen antialiased`}>
         {children}
       </body>
     </html>
