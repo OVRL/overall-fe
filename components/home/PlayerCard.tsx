@@ -41,7 +41,7 @@ const PlayerAvatar = ({
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="relative w-20 h-28 md:w-24 md:h-32 bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-xl overflow-hidden flex-shrink-0">
+        <div className="relative w-20 h-28 md:w-24 md:h-32 bg-gradient-to-br">
             <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 bg-primary text-black px-1.5 md:px-2 py-0.5 md:py-1 rounded text-base md:text-lg font-black z-10">
                 {player.overall}
             </div>

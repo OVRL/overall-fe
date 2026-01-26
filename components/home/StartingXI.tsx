@@ -18,6 +18,7 @@ interface Player {
     pace: number;
     season?: string;
     seasonType?: "general" | "worldBest";
+    image?: string;
 }
 
 interface FormationPosition {
@@ -42,7 +43,7 @@ const FORMATION_POSITIONS: Record<number, FormationPosition> = {
     8: { top: "40%", left: "50%" },      // CAM
     9: { top: "20%", left: "15%" },      // LW
     10: { top: "20%", left: "85%" },     // RW
-    11: { top: "13%", left: "50%" },     // ST
+    11: { top: "18%", left: "50%" },     // ST
 };
 
 /**
