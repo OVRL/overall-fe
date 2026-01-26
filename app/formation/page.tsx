@@ -7,6 +7,7 @@ import FormationBoard, { FormationType } from "@/components/formation/FormationB
 import FormationPlayerList from "@/components/formation/FormationPlayerList";
 import PlayerSearchModal from "@/components/formation/PlayerSearchModal";
 import AutoSquadModal from "@/components/formation/AutoSquadModal";
+import TeamManagerModal from "@/components/formation/TeamManagerModal";
 
 // ============================================================
 // Types
@@ -556,91 +557,134 @@ export default function FormationPage() {
         }
     })();
 
+    // ------------------------------------------------------------------
+    // Team Manager Logic
+    // ------------------------------------------------------------------
+    const [managingTeam, setManagingTeam] = useState<string | null>(null); // "teamA", "teamB"...
+
+    const handleForceAssign = (quarterId: number, targetTeamKey: string, targetPos: number, player: Player) => {
+        setQuarters(prev => prev.map(q => {
+            if (q.id === quarterId) {
+                // 1. Remove player from ANY team in this quarter
+                const newQ = { ...q };
+
+                // Helper to remove specific player ID from a lineup
+                const removePlayerFromLineup = (lineup: Record<number, Player | null>) => {
+                    const newLineup = { ...lineup };
+                    let changed = false;
+                    Object.entries(newLineup).forEach(([pos, p]) => {
+                        if (p?.id === player.id) {
+                            delete newLineup[parseInt(pos)];
+                            changed = true;
+                        }
+                    });
+                    return { modified: newLineup, changed };
+                };
+
+                // Check and remove from A, B, C, D
+                ["teamA", "teamB", "teamC", "teamD"].forEach(tKey => {
+                    // @ts-ignore
+                    if (newQ[tKey]) {
+                        // @ts-ignore
+                        const { modified, changed } = removePlayerFromLineup(newQ[tKey]);
+                        // @ts-ignore
+                        if (changed) newQ[tKey] = modified;
+                    }
+                });
+
+                // 2. Add to Target Team at Target Pos
+                // @ts-ignore
+                const targetLineup = { ...(newQ[targetTeamKey] || {}) };
+
+                // Search for `player`'s old position first to handle Swap
+                let oldTeamKey: string | null = null;
+                let oldPosId: number | null = null;
+
+                ["teamA", "teamB", "teamC", "teamD"].forEach(tKey => {
+                    // @ts-ignore
+                    const l = q[tKey];
+                    if (l) {
+                        Object.entries(l).forEach(([pos, p]) => {
+                            // @ts-ignore
+                            if (p?.id === player.id) {
+                                oldTeamKey = tKey;
+                                oldPosId = parseInt(pos);
+                            }
+                        });
+                    }
+                });
+
+                // Now, if targetPos has an Occupant:
+                const occupant = targetLineup[targetPos];
+
+                // Execute Pull
+                targetLineup[targetPos] = player;
+                // @ts-ignore
+                newQ[targetTeamKey] = targetLineup;
+
+                // Move occupant to old position if it existed (Swap)
+                // Note: The player was already removed from old position by removePlayerFromLineup.
+                // We just need to put the occupant there.
+                if (oldTeamKey && oldPosId !== null && occupant) {
+                    // @ts-ignore
+                    // We must fetch the lineup AGAIN from newQ because it was modified (cleaned)
+                    // @ts-ignore
+                    const targetOldLineup = { ...(newQ[oldTeamKey] || {}) };
+                    targetOldLineup[oldPosId] = occupant;
+                    // @ts-ignore
+                    newQ[oldTeamKey] = targetOldLineup;
+                }
+
+                return newQ;
+            }
+            return q;
+        }));
+    };
+
     return (
         <div className="min-h-screen bg-surface-primary pb-32">
             <Header showTeamSelector selectedTeam="Formation Manager" />
 
             <div className="max-w-[75rem] mx-auto px-4">
-                {/* 1. Controls */}
+                {/* ... Controls ... */}
+                {/* ... (Keep existing Controls code) ... */}
                 <div className="flex flex-col gap-4 my-6">
+                    {/* ... Same Controls Row 1 ... */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex gap-2 items-center">
                             <div className="bg-surface-secondary p-1 rounded-lg flex">
                                 <button onClick={() => setMode("MATCHING")} className={`px-4 md:px-6 py-2 rounded-md font-bold transition-colors whitespace-nowrap text-sm md:text-base ${mode === "MATCHING" ? "bg-primary text-black" : "text-gray-400"}`}>매칭</button>
                                 <button onClick={() => setMode("IN_HOUSE")} className={`px-4 md:px-6 py-2 rounded-md font-bold transition-colors whitespace-nowrap text-sm md:text-base ${mode === "IN_HOUSE" ? "bg-primary text-black" : "text-gray-400"}`}>내전</button>
                             </div>
-
-                            {/* Auto Squad Button */}
-                            <button
-                                onClick={() => setAutoSquadModalOpen(true)}
-                                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:shadow-purple-500/30 flex items-center gap-2 whitespace-nowrap"
-                            >
-                                <span className="text-yellow-300">★</span> 스쿼드 추천
-                            </button>
-
-                            {/* Dynamic Team Add Button */}
+                            <button onClick={() => setAutoSquadModalOpen(true)} className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:shadow-purple-500/30 flex items-center gap-2 whitespace-nowrap"><span className="text-yellow-300">★</span> 스쿼드 추천</button>
                             {mode === "IN_HOUSE" && activeTeamsCount < 4 && (
-                                <button
-                                    onClick={handleAddTeam}
-                                    className="bg-surface-tertiary hover:bg-surface-secondary text-primary border border-primary/30 px-3 py-2 rounded-lg text-sm font-bold flex items-center gap-1"
-                                    title="팀 추가 (C팀, D팀)"
-                                >
-                                    <span>+ 팀</span>
-                                    <span className="bg-primary text-black text-[10px] px-1 rounded">{String.fromCharCode(65 + activeTeamsCount)}</span>
-                                </button>
+                                <button onClick={handleAddTeam} className="bg-surface-tertiary hover:bg-surface-secondary text-primary border border-primary/30 px-3 py-2 rounded-lg text-sm font-bold flex items-center gap-1"><span>+ 팀</span><span className="bg-primary text-black text-[10px] px-1 rounded">{String.fromCharCode(65 + activeTeamsCount)}</span></button>
                             )}
                         </div>
-
                         <div className="flex gap-2 items-center">
                             {mode === "IN_HOUSE" && (
                                 <div className="bg-surface-secondary px-3 py-2 rounded-lg border border-gray-700 flex items-center gap-2 text-sm text-gray-300 mr-2">
                                     <span className="font-bold text-white">매치업:</span>
-                                    <select
-                                        value={currentQuarter?.matchup.home}
-                                        onChange={(e) => handleMatchupChange("home", e.target.value as TeamType)}
-                                        className="bg-surface-tertiary text-white px-2 py-0.5 rounded border border-gray-600 outline-none"
-                                    >
-                                        {availableTeams.map(t => <option key={t} value={t}>{t}팀</option>)}
-                                    </select>
+                                    <select value={currentQuarter?.matchup.home} onChange={(e) => handleMatchupChange("home", e.target.value as TeamType)} className="bg-surface-tertiary text-white px-2 py-0.5 rounded border border-gray-600 outline-none">{availableTeams.map(t => <option key={t} value={t}>{t}팀</option>)}</select>
                                     <span>vs</span>
-                                    <select
-                                        value={currentQuarter?.matchup.away}
-                                        onChange={(e) => handleMatchupChange("away", e.target.value as TeamType)}
-                                        className="bg-surface-tertiary text-white px-2 py-0.5 rounded border border-gray-600 outline-none"
-                                    >
-                                        {availableTeams.map(t => <option key={t} value={t}>{t}팀</option>)}
-                                    </select>
+                                    <select value={currentQuarter?.matchup.away} onChange={(e) => handleMatchupChange("away", e.target.value as TeamType)} className="bg-surface-tertiary text-white px-2 py-0.5 rounded border border-gray-600 outline-none">{availableTeams.map(t => <option key={t} value={t}>{t}팀</option>)}</select>
                                 </div>
                             )}
-
-                            <select className="bg-surface-secondary text-white px-3 py-2 rounded-lg border border-gray-700"
-                                value={currentQuarter?.formation}
-                                onChange={e => {
-                                    setQuarters(prev => prev.map(q => q.id === currentQuarterId ? { ...q, formation: e.target.value as FormationType } : q));
-                                }}
-                            >
+                            <select className="bg-surface-secondary text-white px-3 py-2 rounded-lg border border-gray-700" value={currentQuarter?.formation} onChange={e => { setQuarters(prev => prev.map(q => q.id === currentQuarterId ? { ...q, formation: e.target.value as FormationType } : q)); }}>
                                 <option value="4-2-3-1">4-2-3-1</option>
                                 <option value="4-4-2">4-4-2</option>
                                 <option value="4-3-3">4-3-3</option>
                             </select>
                             <button onClick={handleReset} className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg border border-red-500/30 font-bold hover:bg-red-500/20 whitespace-nowrap">초기화</button>
-                            {mode === "IN_HOUSE" && (
-                                <button onClick={handleLoadMatch} className="px-4 py-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/30 font-bold hover:bg-blue-500/20 whitespace-nowrap">불러오기</button>
-                            )}
+                            {mode === "IN_HOUSE" && <button onClick={handleLoadMatch} className="px-4 py-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/30 font-bold hover:bg-blue-500/20 whitespace-nowrap">불러오기</button>}
                         </div>
                     </div>
-
+                    {/* ... Same Controls Row 2 ... */}
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
                         {quarters.map(q => (
-                            <button key={q.id} onClick={() => setCurrentQuarterId(q.id)}
-                                className={`flex-shrink-0 w-12 h-12 rounded-full border-2 font-bold transition-all ${currentQuarterId === q.id ? "bg-primary border-primary text-black scale-110" : "bg-surface-secondary border-gray-700 text-gray-400"}`}
-                            >
-                                {q.id}Q
-                            </button>
+                            <button key={q.id} onClick={() => setCurrentQuarterId(q.id)} className={`flex-shrink-0 w-12 h-12 rounded-full border-2 font-bold transition-all ${currentQuarterId === q.id ? "bg-primary border-primary text-black scale-110" : "bg-surface-secondary border-gray-700 text-gray-400"}`}>{q.id}Q</button>
                         ))}
-                        {quarters.length < 10 && (
-                            <button onClick={addQuarter} className="w-10 h-10 rounded-full bg-surface-tertiary border border-dashed border-gray-600 text-gray-400 hover:text-white">+</button>
-                        )}
+                        {quarters.length < 10 && <button onClick={addQuarter} className="w-10 h-10 rounded-full bg-surface-tertiary border border-dashed border-gray-600 text-gray-400 hover:text-white">+</button>}
                     </div>
                 </div>
 
@@ -652,8 +696,7 @@ export default function FormationPage() {
                             <FormationBoard
                                 quarterId={currentQuarterId}
                                 label="매칭 라인업"
-                                lineup={currentQuarter?.lineup || {}
-                                }
+                                lineup={currentQuarter?.lineup || {}}
                                 formation={currentQuarter?.formation}
                                 onUpdate={(pos, p) => updateQuarterLineup(currentQuarterId, "lineup", pos, p)}
                                 onSwap={(p1, p2) => handleSwap(currentQuarterId, "lineup", p1, p2)}
@@ -663,15 +706,11 @@ export default function FormationPage() {
                             />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Only Render Boards for ACTIVE teams (A, B, C...) */}
                                 {availableTeams.map((teamStr, index) => {
                                     const teamKey = `team${teamStr}`;
                                     // @ts-ignore
                                     const teamLineup = currentQuarter?.[teamKey] || {};
-                                    // Visual color coding
                                     const colors = { "A": "blue", "B": "red", "C": "green", "D": "purple" };
-
-                                    // Can remove ONLY if it's the last team AND it's not A/B
                                     const isRemovable = (index === availableTeams.length - 1) && (index >= 2);
 
                                     return (
@@ -689,6 +728,7 @@ export default function FormationPage() {
                                             onPlaceListPlayer={(pos) => handlePlaceListPlayer(teamKey, pos)}
                                             onPositionClick={(pos) => { setSearchTarget({ quarterId: currentQuarterId, team: teamKey, posId: pos }); setSearchModalOpen(true); }}
                                             onRemove={isRemovable ? handleRemoveTeam : undefined}
+                                            onExpand={() => setManagingTeam(teamKey)}
                                         />
                                     );
                                 })}
@@ -697,18 +737,10 @@ export default function FormationPage() {
                     </div>
 
                     {/* Player List */}
-                    <div className="lg:h-[calc(100vh-200px)] lg:sticky lg:top-24">
+                    <div className="lg:h-[calc(100vh-12.5rem)] lg:sticky lg:top-24">
                         <FormationPlayerList
                             players={playersWithCounts}
-                            // Pass ALL active lineups for check
-                            currentQuarterLineups={
-                                mode === "MATCHING"
-                                    ? [currentQuarter?.lineup || {}]
-                                    : availableTeamKeys.map(k =>
-                                        // @ts-ignore
-                                        currentQuarter?.[k] || {}
-                                    )
-                            }
+                            currentQuarterLineups={mode === "MATCHING" ? [currentQuarter?.lineup || {}] : availableTeamKeys.map(k => currentQuarter?.[k as keyof QuarterData] as Record<number, Player | null> || {})}
                             selectedPlayer={selectedListPlayer}
                             onSelectPlayer={setSelectedListPlayer}
                             isLineupFull={isLineupFull}
@@ -729,22 +761,6 @@ export default function FormationPage() {
                 availableTeams={availableTeams}
             />
 
-            {/* Bottom Save Bar */}
-            <div className="fixed bottom-0 left-0 w-full bg-surface-secondary border-t border-gray-700 p-4 z-40">
-                <div className="max-w-[75rem] mx-auto flex justify-between items-center">
-                    <span className="text-gray-400 text-sm hidden md:inline">모든 변경사항은 저장 버튼을 눌러야 반영됩니다.</span>
-                    <button
-                        onClick={handleSave}
-                        className="w-full md:w-auto bg-primary text-black font-bold text-lg px-8 py-3 rounded-xl hover:bg-primary-hover shadow-lg transition-transform active:scale-95"
-                    >
-                        포메이션 저장하기
-                    </button>
-                </div>
-            </div>
-
-            {/* ... */}
-
-            {/* Calculate playing IDs for Search Modal Sorting */}
             <PlayerSearchModal
                 isOpen={searchModalOpen}
                 onClose={() => setSearchModalOpen(false)}
@@ -755,7 +771,6 @@ export default function FormationPage() {
                     }
                 }}
                 players={playersWithCounts}
-                // Pass IDs of players currently in ANY lineup for this quarter
                 playingPlayerIds={
                     mode === "MATCHING"
                         ? Object.values(currentQuarter.lineup || {}).filter(p => p).map(p => p!.id)
@@ -765,6 +780,38 @@ export default function FormationPage() {
                         )
                 }
             />
+
+            {/* Team Manager Modal (New) */}
+            {managingTeam && (
+                <TeamManagerModal
+                    isOpen={!!managingTeam}
+                    onClose={() => setManagingTeam(null)}
+                    quarterId={currentQuarterId}
+                    teamKey={managingTeam}
+                    teamName={managingTeam.replace("team", "")}
+                    // @ts-ignore
+                    currentLineup={currentQuarter?.[managingTeam] || {}}
+                    quarters={quarters}
+                    allPlayers={playersWithCounts}
+                    currentQuarterLineups={availableTeamKeys.map(k => currentQuarter?.[k as keyof QuarterData] as Record<number, Player | null> || {})}
+                    onUpdateLineup={(qid, team, pos, p) => {
+                        // Use Force Assign for advanced logic (Steal/Swap)
+                        if (p) handleForceAssign(qid, team, pos, p);
+                        else updateQuarterLineup(qid, team, pos, null); // Just Remove
+                    }}
+                    onAddPlayer={handleAddPlayer}
+                    onRemovePlayer={handleRemovePlayer}
+                />
+            )}
+
+            {/* Bottom Save Bar */}
+            <div className="fixed bottom-0 left-0 w-full bg-surface-secondary border-t border-gray-700 p-4 z-40">
+                <div className="max-w-[75rem] mx-auto flex justify-between items-center">
+                    <span className="text-gray-400 text-sm hidden md:inline">모든 변경사항은 저장 버튼을 눌러야 반영됩니다.</span>
+                    <button onClick={handleSave} className="w-full md:w-auto bg-primary text-black font-bold text-lg px-8 py-3 rounded-xl hover:bg-primary-hover shadow-lg transition-transform active:scale-95">포메이션 저장하기</button>
+                </div>
+            </div>
         </div>
     );
 }
+
