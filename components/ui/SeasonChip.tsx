@@ -1,8 +1,10 @@
 import React from "react";
 
+export type SeasonType = "general" | "worldBest";
+
 interface SeasonChipProps {
     season?: number | string;
-    type?: "general" | "worldBest";
+    type?: SeasonType;
     className?: string;
 }
 
