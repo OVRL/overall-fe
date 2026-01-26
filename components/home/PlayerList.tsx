@@ -55,7 +55,7 @@ const PlayerListTabs = ({
  * 테이블 헤더 컴포넌트
  */
 const PlayerListHeader = () => (
-    <div className="grid grid-cols-[45px_30px_1fr_40px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 px-2 md:px-3 py-2 text-gray-500 text-xs md:text-xs border-b border-gray-800 whitespace-nowrap">
+    <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 px-2 md:px-3 py-2 text-gray-500 text-xs md:text-xs border-b border-gray-800 whitespace-nowrap">
         <span>포지션</span>
         <span className="text-center">등번호</span>
         <span>선수명</span>
@@ -71,7 +71,7 @@ const PlayerListItem = ({ player }: { player: Player }) => {
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="grid grid-cols-[45px_30px_1fr_40px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
+        <div className="grid grid-cols-[45px_30px_1fr_45px] md:grid-cols-[60px_50px_1fr_50px] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
             {/* 포지션 배지 */}
             <div className="flex justify-center">
                 <PositionChip position={player.position as Position} variant="filled" />
@@ -83,12 +83,12 @@ const PlayerListItem = ({ player }: { player: Player }) => {
             {/* 선수 정보 */}
             <div className="flex items-center gap-2 md:gap-3">
                 {/* 선수 이미지 */}
-                <div className="relative w-7 h-7 md:w-9 md:h-9 bg-surface-tertiary rounded-full overflow-hidden flex-shrink-0">
+                <div className="relative w-8 h-12 md:w-12 md:h-16 flex-shrink-0">
                     <Image
                         src={playerImage}
                         alt={player.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         onError={() => setImageError(true)}
                     />
                 </div>
