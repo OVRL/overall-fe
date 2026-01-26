@@ -16,6 +16,8 @@ interface Player {
     physical: number;
     pace: number;
     image?: string;
+    season?: string;
+    seasonType?: "general" | "worldBest";
 }
 
 interface PlayerCardProps {

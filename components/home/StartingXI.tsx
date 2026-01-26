@@ -16,6 +16,8 @@ interface Player {
     defending: number;
     physical: number;
     pace: number;
+    season?: string;
+    seasonType?: "general" | "worldBest";
 }
 
 interface FormationPosition {
@@ -80,7 +82,14 @@ const FormationHeader = ({
     setActiveTab: (tab: string) => void;
 }) => (
     <div className="flex items-center justify-between mb-4 md:mb-5">
-        <h2 className="text-lg xs:text-xl md:text-[28px] font-black text-white whitespace-nowrap">STARTING XI</h2>
+        <div className="relative w-[140px] h-[30px] md:w-[200px] md:h-[40px]">
+            <Image
+                src="/images/object_title_starting11.png"
+                alt="STARTING XI"
+                fill
+                className="object-contain object-left"
+            />
+        </div>
         <FormationTabs activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
 );

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import PositionChip from "@/components/PositionChip";
+import SeasonChip from "@/components/ui/SeasonChip";
 import type { Position } from "@/components/PositionChip";
 
 interface Player {
@@ -13,6 +14,8 @@ interface Player {
     overall: number;
     nationality?: string;
     image?: string;
+    season?: string;
+    seasonType?: "general" | "worldBest";
 }
 
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
@@ -91,9 +94,10 @@ const PlayerListItem = ({ player }: { player: Player }) => {
                 </div>
 
                 {/* 연도 배지 */}
-                <div className="w-5 h-3.5 md:w-6 md:h-4 bg-gray-700 rounded-sm flex items-center justify-center text-[10px] md:text-[10px] text-white font-bold flex-shrink-0 hidden xs:flex">
-                    26
-                </div>
+                <SeasonChip
+                    season={player.season || "26"}
+                    type={player.seasonType || "general"}
+                />
 
                 {/* 선수 이름 */}
                 <span className="text-white font-medium truncate text-xs md:text-base">{player.name}</span>

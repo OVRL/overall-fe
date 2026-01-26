@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import SeasonChip from "@/components/ui/SeasonChip";
 
 interface Player {
     id: number;
@@ -10,6 +11,8 @@ interface Player {
     number: number;
     overall: number;
     image?: string;
+    season?: string;
+    seasonType?: "general" | "worldBest";
 }
 
 interface PlayerPositionCardProps {
@@ -67,8 +70,15 @@ const PlayerPositionCard = ({
             </div>
 
             {/* 선수 이름 */}
-            <div className="bg-surface-tertiary px-2 md:px-3 py-0.5 md:py-1 rounded-md text-[11px] md:text-[13px] text-white font-semibold whitespace-nowrap">
-                {player.name}
+            <div className="bg-surface-tertiary px-2 md:px-3 py-0.5 md:py-1 rounded-md flex items-center gap-1.5 md:gap-2">
+                <SeasonChip
+                    season={player.season || "26"}
+                    type={player.seasonType || "general"}
+                    className="md:scale-110"
+                />
+                <span className="text-[11px] md:text-[13px] text-white font-semibold whitespace-nowrap">
+                    {player.name}
+                </span>
             </div>
         </div>
     );
