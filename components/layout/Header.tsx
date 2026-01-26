@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface MenuItem {
     label: string;
@@ -106,14 +107,14 @@ export default function Header({
         <nav className="flex justify-between items-center px-4 lg:px-8 py-3 lg:py-4 bg-surface-primary border-b border-gray-800">
             {/* 왼쪽: 로고 + 팀 선택기 */}
             <div className="flex items-center gap-3 lg:gap-4">
-                <div className="relative w-16 lg:w-20 h-8 lg:h-10">
+                <Link href="/home" className="relative w-16 lg:w-20 h-8 lg:h-10">
                     <Image
                         src="/images/logo_OVR_head.png"
                         alt="OVR Logo"
                         fill
                         className="object-contain"
                     />
-                </div>
+                </Link>
 
                 {/* 팀 선택 */}
                 {showTeamSelector && (
