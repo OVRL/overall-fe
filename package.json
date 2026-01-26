@@ -8,14 +8,19 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "relay": "relay-compiler",
+    "schema:update": "get-graphql-schema http://api.ovr-log.com/graphql > schema.graphql"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "graphql": "^16.12.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-relay": "^20.1.1",
+    "relay-runtime": "^20.1.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
@@ -27,10 +32,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-relay": "^18.2.1",
+    "@types/relay-runtime": "^20.1.1",
+    "babel-plugin-relay": "^20.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "get-graphql-schema": "^2.1.2",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "relay-compiler": "^20.1.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "turbopack-inline-svg-loader": "^1.0.2",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
+import RelayProvider from "@/components/RelayProvider";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -8,7 +9,6 @@ const pretendard = localFont({
   weight: "45 920",
   variable: "--font-pretendard",
 });
-
 
 export const metadata: Metadata = {
   title: "Overall",
@@ -22,10 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body
-        className={`${pretendard.variable} antialiased`}
-      >
-        {children}
+      <body className={`${pretendard.variable} w-screen h-screen antialiased`}>
+        <RelayProvider>{children}</RelayProvider>
       </body>
     </html>
   );
