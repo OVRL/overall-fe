@@ -65,7 +65,7 @@ export default function EmailLoginForm({ onSubmit }: EmailLoginFormProps) {
 
       <div className="mt-8 lg:mt-6">
         <Button
-          size="full"
+          size="xl"
           className={`
                         transition-all duration-300
                         ${

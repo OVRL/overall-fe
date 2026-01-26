@@ -39,8 +39,8 @@ export default function SocialButtons() {
     <ul className="flex justify-center gap-6.25">
       {SOCIAL_PROVIDERS.map((provider) => (
         <li key={provider.id}>
-          <button
-            type="button"
+          <a
+            href={`/api/auth/${provider.id}/callback`}
             aria-label={provider.label}
             className={`
               w-12 h-12 flex items-center justify-center rounded-full
@@ -50,7 +50,7 @@ export default function SocialButtons() {
             `}
           >
             {provider.icon}
-          </button>
+          </a>
         </li>
       ))}
     </ul>
