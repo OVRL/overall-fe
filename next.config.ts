@@ -1,9 +1,7 @@
+import { env } from "./lib/env";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export", // 이 설정이 있어야 빌드 시 'out' 폴더가 생성됩니다.
-  images: {
-    unoptimized: true, // 정적 내보내기 시 Next.js 이미지 최적화 기능을 꺼야 에러가 안 납니다.
-  },
   compiler: {
     relay: {
       src: "./",
@@ -18,6 +16,14 @@ const nextConfig = {
     });
 
     return config;
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${env.BACKEND_URL}/:path*`,
+      },
+    ];
   },
 };
 

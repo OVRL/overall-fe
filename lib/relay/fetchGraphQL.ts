@@ -1,12 +1,11 @@
+import { env } from "@/lib/env";
 import { RequestParameters, Variables } from "relay-runtime";
-
-const ENDPOINT = "http://api.ovr-log.com/graphql";
 
 export const fetchQuery = async (
   params: RequestParameters,
   variables: Variables,
 ) => {
-  const response = await fetch(ENDPOINT, {
+  const response = await fetch(env.NEXT_PUBLIC_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
