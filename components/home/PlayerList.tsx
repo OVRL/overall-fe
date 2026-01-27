@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import PlayerInfoList from "./PlayerInfoList";
-import { POSITION_CATEGORY_MAP, Position, MainPosition } from "@/components/PositionChip";
+import PlayerInfoList, { PlayerListHeader } from "./PlayerInfoList";
 import type { Player } from "./PlayerInfoList";
 
 /**
  * 탭 메뉴 컴포넌트
  */
-const PLAYER_LIST_TABS = ["전체", "선발", "교체", "OVR"] as const;
+const DISPLAY_GROUPS = [
+    { id: "attack", label: "공격", positions: ["ST", "FW", "LW", "RW"] },
+    { id: "mid", label: "미드", positions: ["CAM", "CDM", "LM", "RM", "MF"] },
+    { id: "defense", label: "수비", positions: ["CB", "LB", "RB", "DF", "WB", "GK"] },
+];
 
 /**
  * 탭 메뉴 컴포넌트
@@ -18,19 +21,19 @@ const PlayerListTabs = ({
     onTabChange
 }: {
     activeTab: string;
-    onTabChange: (tab: string) => void;
+    onTabChange: (id: string) => void;
 }) => (
-    <div className="flex gap-2 mb-4 bg-surface-primary p-1 rounded-xl">
-        {PLAYER_LIST_TABS.map((tab) => (
+    <div className="flex gap-2 mb-4 bg-surface-primary p-1 rounded-xl sticky top-0 z-10">
+        {DISPLAY_GROUPS.map((group) => (
             <button
-                key={tab}
-                onClick={() => onTabChange(tab)}
-                className={`flex-1 py-1.5 md:py-2 px-2 md:px-4 rounded-lg text-xs md:text-sm font-semibold transition-colors ${activeTab === tab
+                key={group.id}
+                onClick={() => onTabChange(group.id)}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-colors ${activeTab === group.id
                     ? "bg-surface-tertiary text-white"
                     : "text-gray-500 hover:text-gray-300"
                     }`}
             >
-                {tab}
+                {group.label}
             </button>
         ))}
     </div>
@@ -40,77 +43,77 @@ const PlayerListTabs = ({
  * 선수 목록 리스트 컴포넌트
  */
 const PlayerList = ({ players, onPlayerSelect }: { players: Player[]; onPlayerSelect?: (player: Player) => void }) => {
-    const [activeTab, setActiveTab] = useState("전체");
+    const [activeTab, setActiveTab] = useState("attack");
+    const listRef = React.useRef<HTMLDivElement>(null);
 
-    const filteredAndGroupedPlayers = useMemo(() => {
-        // 1. Filter
-        let filtered = [...players];
-        if (activeTab === "선발") {
-            // Assuming "Starting" implies index 0-10 or strictly "id" check etc. 
-            // Currently no 'isStarting' prop, usually derived from position in array (0-10).
-            // Let's assume first 11 are starters for simple logic, or rely on prop if exists.
-            // Using array index 0-10 as per StartingXI logic.
-            filtered = filtered.slice(0, 11);
-        } else if (activeTab === "교체") {
-            filtered = filtered.slice(11);
-        } else if (activeTab === "OVR") {
-            filtered = filtered.sort((a, b) => b.overall - a.overall);
-        }
-
-        // 2. Group by Position (Only if not OVR sorted? Or always group? User said "Separate based on position")
-        // If sorting by OVR, grouping might confuse the order. 
-        // User said "Main Page... separate based on position". 
-        // I will apply grouping for "전체", "선발", "교체".
-        // For "OVR", I might keep flat list OR group by position then sort by OVR inside.
-        // Let's group for all tabs for consistency with the request.
-
-        const groups: Record<MainPosition, Player[]> = {
-            FW: [],
-            MF: [],
-            DF: [],
-            GK: []
+    const groupedPlayers = useMemo(() => {
+        const groups: Record<string, Player[]> = {
+            attack: [],
+            mid: [],
+            defense: []
         };
 
-        filtered.forEach(p => {
-            const mainPos = POSITION_CATEGORY_MAP[p.position as Position] || 'MF'; // Fallback
-            if (groups[mainPos]) {
-                groups[mainPos].push(p);
-            }
+        players.forEach(p => {
+            const pos = p.position;
+            if (DISPLAY_GROUPS[0].positions.includes(pos)) groups.attack.push(p);
+            else if (DISPLAY_GROUPS[1].positions.includes(pos)) groups.mid.push(p);
+            else groups.defense.push(p);
+        });
+
+        // Sort Defense group: Generic defenders first, GK last
+        // If needed, you can add more specific sorting logic here
+        groups.defense.sort((a, b) => {
+            const isAGK = a.position === 'GK';
+            const isBGK = b.position === 'GK';
+            if (isAGK && !isBGK) return 1;
+            if (!isAGK && isBGK) return -1;
+            return 0;
         });
 
         return groups;
-    }, [players, activeTab]);
+    }, [players]);
 
-    const positionOrder: MainPosition[] = ['FW', 'MF', 'DF', 'GK'];
+    const scrollToSection = (id: string) => {
+        setActiveTab(id);
+        const element = document.getElementById(`section-${id}`);
+        if (element && listRef.current) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     return (
-        <div className="bg-surface-secondary rounded-[20px] p-4 md:p-5 mt-4 md:mt-5">
-            <PlayerListTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="bg-surface-secondary rounded-[20px] p-4 md:p-5 mt-4 md:mt-5 h-[600px] flex flex-col">
+            <PlayerListTabs activeTab={activeTab} onTabChange={scrollToSection} />
 
-            {/* Header only once or per section? 
-                If we group, header per section is redundant if identical.
-                Or just Main Header then sections. 
-                Let's do sections.
-            */}
+            {/* Main Header (Rendered Once) */}
+            <div className="mb-2">
+                <PlayerListHeader />
+            </div>
 
-            <div className="flex flex-col gap-6">
-                {positionOrder.map(pos => {
-                    const groupPlayers = filteredAndGroupedPlayers[pos];
+            <div
+                ref={listRef}
+                className="flex-1 overflow-y-auto scroll-smooth pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+                {DISPLAY_GROUPS.map(group => {
+                    const groupPlayers = groupedPlayers[group.id];
                     if (!groupPlayers || groupPlayers.length === 0) return null;
 
                     return (
-                        <div key={pos}>
-                            <h3 className="text-white font-bold mb-2 pl-2 border-l-4 border-primary">
-                                {pos} <span className="text-gray-500 text-sm font-normal">({groupPlayers.length})</span>
-                            </h3>
+                        <div key={group.id} id={`section-${group.id}`} className="scroll-mt-4">
+                            {/* No intermediate headers here */}
                             <PlayerInfoList
                                 players={groupPlayers}
-                                showHeader={false}
                                 onPlayerSelect={onPlayerSelect}
+                                showHeader={false}
                             />
                         </div>
                     );
                 })}
+
+                {/* Empty State */}
+                {players.length === 0 && (
+                    <div className="text-gray-500 text-center py-10">선수가 없습니다.</div>
+                )}
             </div>
         </div>
     );
