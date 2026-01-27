@@ -1,5 +1,8 @@
 import React from "react";
 import Icon from "@/components/Icon";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+
 import kakaoLogo from "@/public/icons/kakao_logo.svg";
 import naverLogo from "@/public/icons/naver_logo.svg";
 import googleLogo from "@/public/icons/google_logo.svg";
@@ -36,23 +39,22 @@ const SOCIAL_PROVIDERS: SocialOption[] = [
 
 export default function SocialButtons() {
   return (
-    <ul className="flex justify-center gap-6.25">
+    <div className="flex flex-col gap-2 w-full">
       {SOCIAL_PROVIDERS.map((provider) => (
-        <li key={provider.id}>
-          <a
-            href={`/api/auth/${provider.id}/callback`}
-            aria-label={provider.label}
-            className={`
-              w-12 h-12 flex items-center justify-center rounded-full
-              transition-all duration-200 active:scale-95
-              shadow-sm hover:shadow-md cursor-pointer
-              ${provider.styleClass}
-            `}
+        <Link
+          key={provider.id}
+          href={`/api/auth/${provider.id}/callback`}
+          className="w-full"
+        >
+          <Button
+            size="xl"
+            className={provider.styleClass}
+            leftIcon={provider.icon}
           >
-            {provider.icon}
-          </a>
-        </li>
+            {provider.label}
+          </Button>
+        </Link>
       ))}
-    </ul>
+    </div>
   );
 }
