@@ -29,6 +29,7 @@ interface FormationPosition {
 interface StartingXIProps {
     players: Player[];
     onPlayersChange: (players: Player[]) => void;
+    onPlayerSelect?: (player: Player) => void;
 }
 
 // 포메이션 위치 (4-2-3-1)
@@ -102,12 +103,14 @@ const FormationField = ({
     players,
     handleDragStart,
     handleDrop,
-    handleDragOver
+    handleDragOver,
+    onPlayerSelect
 }: {
     players: Player[];
     handleDragStart: (e: React.DragEvent, player: Player) => void;
     handleDrop: (e: React.DragEvent, player: Player) => void;
     handleDragOver: (e: React.DragEvent) => void;
+    onPlayerSelect?: (player: Player) => void;
 }) => (
     <div className="relative w-full aspect-[3/4] md:aspect-[16/9] rounded-2xl overflow-hidden">
         {/* 필드 이미지 배경 */}
@@ -133,6 +136,7 @@ const FormationField = ({
                         onDragStart={(e) => handleDragStart(e, player)}
                         onDrop={(e) => handleDrop(e, player)}
                         onDragOver={handleDragOver}
+                        onClick={() => onPlayerSelect && onPlayerSelect(player)}
                     />
                 </div>
             );
@@ -193,7 +197,7 @@ const ManagerInfo = () => (
 /**
  * 포메이션 컴포넌트
  */
-const StartingXI = ({ players, onPlayersChange }: StartingXIProps) => {
+const StartingXI = ({ players, onPlayersChange, onPlayerSelect }: StartingXIProps) => {
     const [draggedPlayer, setDraggedPlayer] = useState<Player | null>(null);
     const [activeTab, setActiveTab] = useState("대표");
 
@@ -230,6 +234,7 @@ const StartingXI = ({ players, onPlayersChange }: StartingXIProps) => {
                 handleDragStart={handleDragStart}
                 handleDrop={handleDrop}
                 handleDragOver={handleDragOver}
+                onPlayerSelect={onPlayerSelect}
             />
 
             <ManagerInfo />

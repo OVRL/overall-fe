@@ -39,6 +39,15 @@ export default function HomePage() {
         { id: 11, name: "박무트", position: "ST", number: 26, overall: 90, shooting: 94, passing: 85, dribbling: 90, defending: 38, physical: 82, pace: 92, season: "26", seasonType: "general", image: "/images/player/img_player-11.png" },
     ]);
 
+    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+
+    // 초기 로딩 시 첫 번째 선수 선택 (또는 편의상 7번 선수 - 기존 코드 유지)
+    React.useEffect(() => {
+        if (players.length > 0 && !selectedPlayer) {
+            setSelectedPlayer(players.find(p => p.id === 8) || players[0]); // id 8 is Alves (CAM) from original code or just default
+        }
+    }, [players]);
+
     return (
         <div className="min-h-screen bg-surface-primary">
             <Header showTeamSelector selectedTeam="바르셀로나 FC" />
@@ -48,13 +57,20 @@ export default function HomePage() {
                     {/* 왼쪽: 다가오는 경기 + Starting XI */}
                     <div>
                         <UpcomingMatch />
-                        <StartingXI players={players} onPlayersChange={setPlayers} />
+                        <StartingXI
+                            players={players}
+                            onPlayersChange={setPlayers}
+                            onPlayerSelect={setSelectedPlayer}
+                        />
                     </div>
 
                     {/* 오른쪽: 선수 카드 + 선수 목록 */}
                     <div>
-                        <PlayerCard player={players[7]} />
-                        <PlayerList players={players} />
+                        {selectedPlayer && <PlayerCard player={selectedPlayer} />}
+                        <PlayerList
+                            players={players}
+                            onPlayerSelect={setSelectedPlayer}
+                        />
                     </div>
                 </div>
             </main>

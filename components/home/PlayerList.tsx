@@ -39,7 +39,7 @@ const PlayerListTabs = ({
 /**
  * 선수 목록 리스트 컴포넌트
  */
-const PlayerList = ({ players }: { players: Player[] }) => {
+const PlayerList = ({ players, onPlayerSelect }: { players: Player[]; onPlayerSelect?: (player: Player) => void }) => {
     const [activeTab, setActiveTab] = useState("전체");
 
     const filteredAndGroupedPlayers = useMemo(() => {
@@ -103,7 +103,11 @@ const PlayerList = ({ players }: { players: Player[] }) => {
                             <h3 className="text-white font-bold mb-2 pl-2 border-l-4 border-primary">
                                 {pos} <span className="text-gray-500 text-sm font-normal">({groupPlayers.length})</span>
                             </h3>
-                            <PlayerInfoList players={groupPlayers} showHeader={false} />
+                            <PlayerInfoList
+                                players={groupPlayers}
+                                showHeader={false}
+                                onPlayerSelect={onPlayerSelect}
+                            />
                         </div>
                     );
                 })}
