@@ -16,6 +16,13 @@ export interface Player {
     image?: string;
     season?: string;
     seasonType?: "general" | "worldBest";
+    // Stats for PlayerCard
+    shooting: number;
+    passing: number;
+    dribbling: number;
+    defending: number;
+    physical: number;
+    pace: number;
 }
 
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
@@ -35,12 +42,15 @@ const PlayerListHeader = () => (
 /**
  * 개별 선수 아이템 컴포넌트
  */
-const PlayerListItem = ({ player }: { player: Player }) => {
+const PlayerListItem = ({ player, onClick }: { player: Player; onClick?: () => void }) => {
     const [imageError, setImageError] = useState(false);
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
     return (
-        <div className="grid grid-cols-[2.8125rem_1.875rem_1fr_2.8125rem] md:grid-cols-[3.75rem_3.125rem_1fr_3.125rem] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors">
+        <div
+            onClick={onClick}
+            className="grid grid-cols-[2.8125rem_1.875rem_1fr_2.8125rem] md:grid-cols-[3.75rem_3.125rem_1fr_3.125rem] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors cursor-pointer"
+        >
             {/* 포지션 배지 */}
             <div className="flex justify-center">
                 <PositionChip position={player.position as Position} variant="filled" />
@@ -83,18 +93,23 @@ const PlayerListItem = ({ player }: { player: Player }) => {
 interface PlayerInfoListProps {
     players: Player[];
     showHeader?: boolean;
+    onPlayerSelect?: (player: Player) => void;
 }
 
 /**
  * 선수 정보 리스트 컴포넌트
  */
-const PlayerInfoList = ({ players, showHeader = true }: PlayerInfoListProps) => {
+const PlayerInfoList = ({ players, showHeader = true, onPlayerSelect }: PlayerInfoListProps) => {
     return (
         <div className="w-full">
             {showHeader && <PlayerListHeader />}
             <div className="divide-y divide-gray-800/50">
                 {players.map((player) => (
-                    <PlayerListItem key={player.id} player={player} />
+                    <PlayerListItem
+                        key={player.id}
+                        player={player}
+                        onClick={() => onPlayerSelect && onPlayerSelect(player)}
+                    />
                 ))}
             </div>
         </div>
