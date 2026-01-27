@@ -1,84 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
+import AuthTextField from "@/components/login/AuthTextField";
+import { loginSchema, type LoginSchemaType } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
 
 interface EmailLoginFormProps {
   onSubmit?: (email: string, password: string) => void;
 }
 
-export default function EmailLoginForm({ onSubmit }: EmailLoginFormProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
+const EmailLoginForm = ({ onSubmit }: EmailLoginFormProps) => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors, isValid },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailRegex.test(email)) {
-      setEmailError("이메일 양식에 맞게 입력해주세요");
-    } else {
-      setEmailError("");
-    }
-  };
+  const [emailValue, passwordValue] = useWatch({
+    control,
+    name: ["email", "password"],
+  });
+  const isFormFilled =
+    (emailValue?.length ?? 0) > 0 && (passwordValue?.length ?? 0) > 0;
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    validateEmail(value);
-  };
-
-  const isFormFilled = email.length > 0 && password.length > 0;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isFormFilled && !emailError) {
-      onSubmit?.(email, password);
-    }
+  const onValid = (data: LoginSchemaType) => {
+    onSubmit?.(data.email, data.password);
   };
 
   return (
     <form
       className="flex-1 flex flex-col gap-10 lg:gap-8 lg:max-w-lg lg:mx-auto w-full"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onValid)}
     >
-      <Input
+      <AuthTextField
         label="이메일"
-        value={email}
-        onChange={handleEmailChange}
-        onClear={() => {
-          setEmail("");
-          setEmailError("");
-        }}
         placeholder="아이디(이메일)를 입력해주세요"
-        errorMessage={emailError}
+        errorMessage={errors.email?.message}
+        onClear={() => setValue("email", "", { shouldValidate: true })}
+        {...register("email")}
       />
 
-      <Input
+      <AuthTextField
         label="비밀번호"
         type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        onClear={() => setPassword("")}
         placeholder="비밀번호를 입력해주세요"
+        errorMessage={errors.password?.message}
+        onClear={() => setValue("password", "", { shouldValidate: true })}
+        {...register("password")}
       />
 
       <div className="mt-8 lg:mt-6">
         <Button
           size="xl"
-          className={`
-                        transition-all duration-300
-                        ${
-                          isFormFilled
-                            ? "bg-primary text-black hover:bg-primary-hover"
-                            : "bg-gray-700 text-gray-500 cursor-not-allowed"
-                        }
-                    `}
-          disabled={!isFormFilled || !!emailError}
+          className={cn(
+            "transition-all duration-300",
+            isValid && isFormFilled
+              ? "bg-primary text-black hover:bg-primary-hover"
+              : "bg-gray-700 text-gray-500 cursor-not-allowed",
+          )}
+          disabled={!isValid || !isFormFilled}
         >
           로그인
         </Button>
       </div>
     </form>
   );
-}
+};
+
+export default EmailLoginForm;
