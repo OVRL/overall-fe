@@ -1,3 +1,5 @@
+import { env } from "./lib/env";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compiler: {
@@ -22,7 +24,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.BACKEND_URL}/:path*`, 
+        destination: `${env.BACKEND_URL}/:path*`,
       },
     ];
   },

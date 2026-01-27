@@ -1043,6 +1043,18 @@
   dependencies:
     tslib "^2.8.0"
 
+"@t3-oss/env-core@0.13.10":
+  version "0.13.10"
+  resolved "https://registry.yarnpkg.com/@t3-oss/env-core/-/env-core-0.13.10.tgz#ba6b90498d7f3bb72662c842ec8015caced27210"
+  integrity sha512-NNFfdlJ+HmPHkLi2HKy7nwuat9SIYOxei9K10lO2YlcSObDILY7mHZNSHsieIM3A0/5OOzw/P/b+yLvPdaG52g==
+
+"@t3-oss/env-nextjs@^0.13.10":
+  version "0.13.10"
+  resolved "https://registry.yarnpkg.com/@t3-oss/env-nextjs/-/env-nextjs-0.13.10.tgz#85dfccf9126fc97b5eb55a913b71d0d9cb2e1357"
+  integrity sha512-JfSA2WXOnvcc/uMdp31paMsfbYhhdvLLRxlwvrnlPE9bwM/n0Z+Qb9xRv48nPpvfMhOrkrTYw1I5Yc06WIKBJQ==
+  dependencies:
+    "@t3-oss/env-core" "0.13.10"
+
 "@tailwindcss/node@4.1.18":
   version "4.1.18"
   resolved "https://registry.npmjs.org/@tailwindcss/node/-/node-4.1.18.tgz"
