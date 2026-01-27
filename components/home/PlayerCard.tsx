@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Button from "../ui/Button";
 
 interface Player {
     id: number;
@@ -61,7 +62,7 @@ const PlayerAvatar = ({
 /**
  * 선수 스탯 정보 그리드
  */
-import Button from "../ui/Button";
+
 
 /**
  * 선수 스탯 정보 그리드

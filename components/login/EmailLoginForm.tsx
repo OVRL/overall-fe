@@ -65,14 +65,13 @@ export default function EmailLoginForm({ onSubmit }: EmailLoginFormProps) {
 
       <div className="mt-8 lg:mt-6">
         <Button
-          size="full"
+          size="xl"
           className={`
                         transition-all duration-300
-                        ${
-                          isFormFilled
-                            ? "bg-primary text-black hover:bg-primary-hover"
-                            : "bg-gray-700 text-gray-500 cursor-not-allowed"
-                        }
+                        ${isFormFilled
+              ? "bg-primary text-black hover:bg-primary-hover"
+              : "bg-gray-700 text-gray-500 cursor-not-allowed"
+            }
                     `}
           disabled={!isFormFilled || !!emailError}
         >

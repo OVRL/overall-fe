@@ -26,7 +26,7 @@ const LoginLanding = () => {
 
       <div className="relative z-10 w-full p-6 pb-12 lg:pb-20 flex flex-col gap-2 max-w-sm mx-auto animate-in slide-in-from-bottom duration-500 fade-in">
         <Link href="/login">
-          <Button variant="primary" size="XL">
+          <Button variant="primary" size="xl">
             이메일로 로그인
           </Button>
         </Link>
