@@ -20,6 +20,7 @@ interface PlayerPositionCardProps {
     onDragStart: (e: React.DragEvent) => void;
     onDrop: (e: React.DragEvent) => void;
     onDragOver: (e: React.DragEvent) => void;
+    onClick?: () => void;
 }
 
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
@@ -31,7 +32,8 @@ const PlayerPositionCard = ({
     player,
     onDragStart,
     onDrop,
-    onDragOver
+    onDragOver,
+    onClick
 }: PlayerPositionCardProps) => {
     const [imageError, setImageError] = useState(false);
     const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
@@ -42,7 +44,8 @@ const PlayerPositionCard = ({
             onDragStart={onDragStart}
             onDrop={onDrop}
             onDragOver={onDragOver}
-            className="flex flex-col items-center gap-1 md:gap-2 cursor-move hover:scale-105 transition-transform"
+            onClick={onClick}
+            className="flex flex-col items-center gap-1 md:gap-2 cursor-pointer hover:scale-105 transition-transform"
         >
             {/* 선수 아바타 */}
             <div className="relative">
