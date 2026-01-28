@@ -1,11 +1,7 @@
 import React from "react";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-
-import kakaoLogo from "@/public/icons/kakao_logo.svg";
-import naverLogo from "@/public/icons/naver_logo.svg";
-import googleLogo from "@/public/icons/google_logo.svg";
 
 export type SocialProvider = "kakao" | "naver" | "google";
 
@@ -21,19 +17,19 @@ const SOCIAL_PROVIDERS: SocialOption[] = [
     id: "kakao",
     label: "카카오 로그인",
     styleClass: "bg-[#FEE500] text-[#3A1D1D] hover:bg-[#FDD835]",
-    icon: <Icon src={kakaoLogo} width={24} height={24} alt="Kakao" />,
+    icon: <Icon name="kakao" size={24} />,
   },
   {
     id: "naver",
     label: "네이버 로그인",
     styleClass: "bg-[#1EC800] text-white hover:bg-[#02B350]",
-    icon: <Icon src={naverLogo} alt="Naver" width={24} height={24} />,
+    icon: <Icon name="naver" size={24} />,
   },
   {
     id: "google",
     label: "구글 로그인",
     styleClass: "bg-white text-black hover:bg-gray-100",
-    icon: <Icon src={googleLogo} alt="Google" nofill width={24} height={24} />,
+    icon: <Icon name="google" size={24} />,
   },
 ] as const;
 
