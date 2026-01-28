@@ -14,7 +14,11 @@ export type IconName =
     | "favorite"
     | "radioOff"
     | "radioOn"
-    | "profile";
+    | "profile"
+    | "kakao"
+    | "naver"
+    | "google"
+    | "email";
 
 interface IconProps {
     name: IconName;
@@ -38,6 +42,10 @@ const ICON_MAP: Record<IconName, string> = {
     radioOff: "/images/radioOff.webp",
     radioOn: "/images/radioOn.webp",
     profile: "/images/profile.webp",
+    kakao: "/icons/kakao_logo.svg",
+    naver: "/icons/naver_logo.svg",
+    google: "/icons/google_logo.svg",
+    email: "/icons/email.svg",
 };
 
 export default function Icon({ name, size = 24, className = "", onClick }: IconProps) {
