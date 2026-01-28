@@ -10,6 +10,9 @@ directive @specifiedBy(
 ) on SCALAR
 
 type Mutation {
+  login(deviceInfo: String, email: String!, password: String!): User!
+  logout(refreshToken: String!): Boolean!
+  refresh(refreshToken: String!): User!
   signUp(email: String!, name: String!, password: String!, phone: String!): User!
 }
 
@@ -19,13 +22,12 @@ type Query {
 }
 
 type User {
-  accessToken: String!
+  accessToken: String
   email: String!
   id: ID!
   name: String!
   phone: String!
-  refreshToken: String!
-  rememberToken: String
+  refreshToken: String
 }
 
 type Users {
