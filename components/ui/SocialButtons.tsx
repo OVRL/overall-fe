@@ -1,6 +1,5 @@
 import React from "react";
 import Icon from "@/components/Icon";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 import kakaoLogo from "@/public/icons/kakao_logo.svg";
@@ -41,7 +40,7 @@ export default function SocialButtons() {
   return (
     <div className="flex flex-col gap-2 w-full">
       {SOCIAL_PROVIDERS.map((provider) => (
-        <Link
+        <a
           key={provider.id}
           href={`/api/auth/${provider.id}/callback`}
           className="w-full"
@@ -53,7 +52,7 @@ export default function SocialButtons() {
           >
             {provider.label}
           </Button>
-        </Link>
+        </a>
       ))}
     </div>
   );
