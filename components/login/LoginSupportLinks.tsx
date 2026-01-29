@@ -1,3 +1,6 @@
+import Link from "next/link";
+import React from "react";
+
 const LoginSupportLinks = () => {
   return (
     <nav aria-label="계정 지원 메뉴">
@@ -21,12 +24,12 @@ const LoginSupportLinks = () => {
         </li>
         <li aria-hidden="true" className="w-0.5 h-2 bg-Fill_Tertiary" />
         <li>
-          <button
-            type="button"
+          <Link
+            href="/signup"
             className="cursor-pointer hover:text-Label-AccentPrimary transition-colors"
           >
             회원가입
-          </button>
+          </Link>
         </li>
       </ul>
     </nav>
