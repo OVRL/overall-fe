@@ -100,7 +100,7 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--color-gray-1300);
   color: var(--foreground);
   font-family: var(--font-pretendard);
   line-height: normal;
