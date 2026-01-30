@@ -1,5 +1,6 @@
 "use client";
 
+import ObjectField from "@/components/formation/ObjectField";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,12 @@ const MainFormationCollect = () => {
           <span className="text-Label-AccentPrimary">메인 포지션</span>을
           선택해주세요!
         </OnboardingTitle>
-        <div className="mt-20"></div>
+        <div className="mt-20 rounded-3xl overflow-hidden">
+          <ObjectField 
+            crop={{x:0.24, y:0.1, width:0.52, height:0.87}} 
+            objectFit="cover"
+          />
+        </div>
       </div>
       <Button
         variant="primary"
