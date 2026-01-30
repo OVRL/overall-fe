@@ -1,5 +1,6 @@
 "use client";
 
+import OnboardingFormationSelector from "../OnboardingFormationSelector";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -7,7 +8,7 @@ import { Position } from "@/types/position";
 import { useState } from "react";
 
 const MainFormationCollect = () => {
-  const [mainFormation, setMainFormation] = useState<Position>("FW");
+  const [mainFormation, setMainFormation] = useState<Position[]>(["FW"]);
   const handleClick = () => {};
   return (
     <section className="flex flex-col gap-y-10 h-full">
@@ -16,7 +17,11 @@ const MainFormationCollect = () => {
           <span className="text-Label-AccentPrimary">메인 포지션</span>을
           선택해주세요!
         </OnboardingTitle>
-        <div className="mt-20"></div>
+        <OnboardingFormationSelector
+          value={mainFormation}
+          onChange={setMainFormation}
+          className="mt-20"
+        />
       </div>
       <Button
         variant="primary"

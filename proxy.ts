@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./lib/env";
+import { GUEST_ONLY_ROUTES, PUBLIC_ROUTES } from "./lib/routes";
 
 const BACKEND_URL = env.BACKEND_URL;
 
@@ -43,11 +44,6 @@ async function refreshAccessToken(
     return null;
   }
 }
-
-// 경로 세분화 정의
-const GUEST_ONLY_PATHS = ["/login"];
-const PUBLIC_PATHS = ["/", "/social/callback"]; // 둘 다 접근 가능
-// 그 외 나머지는 모두 로그인 필요
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -143,12 +139,17 @@ export async function proxy(request: NextRequest) {
   }
 
   // API 요청이 아닌 경우에 대한 페이지 접근 제어 로직
-  // 2. 경로 분류
-  const isGuestOnly = GUEST_ONLY_PATHS.some((path) => pathname === path);
-  const isPublic = PUBLIC_PATHS.some(
-    (path) => pathname === path || pathname.startsWith("/social/callback"),
+  // 2. 경로 분류 (Pattern Matching)
+  const isGuestOnly = GUEST_ONLY_ROUTES.some((pattern) =>
+    pattern.test(pathname),
   );
+  const isPublic = PUBLIC_ROUTES.some((pattern) => pattern.test(pathname));
   const isPrivate = !isGuestOnly && !isPublic;
+
+  console.log("pathname", pathname);
+  console.log("isGuestOnly", isGuestOnly);
+  console.log("isPublic", isPublic);
+  console.log("isPrivate", isPrivate);
 
   // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우)
   const checkAuth = async (): Promise<{
@@ -230,8 +231,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // 모든 경로 매치 (단, 정적 파일 제외)
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  // matcher: 정적 파일 및 API 등을 제외하여 성능 최적화
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

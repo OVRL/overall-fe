@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
 
   const accessToken = searchParams.get("accessToken");
   const refreshToken = searchParams.get("refreshToken");
+  const signupStatus = searchParams.get("signupStatus");
 
   if (!accessToken || !refreshToken) {
     // 토큰이 없는 경우 로그인 페이지로 리다이렉트 (에러 처리)
@@ -32,6 +33,10 @@ export async function GET(request: NextRequest) {
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   });
+
+  if (signupStatus === "pending") {
+    return redirect("/onboarding");
+  }
 
   return redirect("/home");
 }
