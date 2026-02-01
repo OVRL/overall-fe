@@ -26,6 +26,9 @@
   /* 1024px */
   --breakpoint-xl: 90rem;
   /* 1440px */
+  --max-width-layout: 45rem;
+  --width-layout: 45rem;
+  /* 720px */
 
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);

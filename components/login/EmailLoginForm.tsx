@@ -40,7 +40,7 @@ const EmailLoginForm = ({ onSubmit }: EmailLoginFormProps) => {
 
   return (
     <form
-      className="flex-1 flex flex-col gap-10 lg:gap-8 lg:max-w-lg lg:mx-auto w-full"
+      className="flex-1 flex flex-col gap-10 lg:gap-8 md:max-w-layout md:mx-auto w-full"
       onSubmit={handleSubmit(onValid)}
     >
       <AuthTextField

@@ -14,7 +14,7 @@ const OnboardingPage = () => {
           nofill: true,
         }}
       />
-      <main className="px-4 flex-1">
+      <main className="px-4 flex-1 md:max-w-layout md:mx-auto w-full">
         <OnboardingFunnelWrapper />
       </main>
     </div>
