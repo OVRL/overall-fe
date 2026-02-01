@@ -12,8 +12,9 @@ directive @specifiedBy(
 type Mutation {
   login(deviceInfo: String, email: String!, password: String!): User!
   logout(refreshToken: String!): Boolean!
+  modifyUser(input: UpdateUserInput!): User!
   refresh(refreshToken: String!): User!
-  signUp(email: String!, name: String!, password: String!, phone: String!): User!
+  signUp(input: SignUpInput!): User!
 }
 
 type Query {
@@ -21,12 +22,32 @@ type Query {
   users(limit: Int! = 10, offset: Int! = 0): Users!
 }
 
+input SignUpInput {
+  email: String!
+  gender: String
+  name: String
+  password: String
+  phone: String
+  provider: String
+}
+
+input UpdateUserInput {
+  email: String!
+  gender: String
+  name: String
+  password: String
+  phone: String
+  provider: String
+}
+
 type User {
   accessToken: String
   email: String!
+  gender: String!
   id: ID!
   name: String!
   phone: String!
+  provider: String!
   refreshToken: String
 }
 

@@ -4,10 +4,19 @@ import AuthTextField from "@/components/login/AuthTextField";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const PlayerNameCollect = () => {
-  const [authNumber, setAuthNumber] = useState("");
+import { OnboardingStepProps } from "../OnboardingStepProps";
 
-  const handleClick = () => {};
+const PlayerNameCollect = ({
+  onNext,
+  data,
+  onDataChange,
+}: OnboardingStepProps) => {
+  const [name, setName] = useState(data.name || "");
+
+  const handleClick = () => {
+    onDataChange((prev) => ({ ...prev, name }));
+    onNext();
+  };
 
   return (
     <section className="flex flex-col gap-y-10 h-full">
@@ -22,8 +31,8 @@ const PlayerNameCollect = () => {
             label="선수 이름"
             placeholder="선수 이름을 입력해주세요."
             type="text"
-            value={authNumber}
-            onChange={(e) => setAuthNumber(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
       </div>
@@ -31,8 +40,8 @@ const PlayerNameCollect = () => {
         variant="primary"
         size="xl"
         onClick={handleClick}
-        disabled={!authNumber}
-        className={cn(!authNumber && "bg-gray-900 text-Label-Tertiary")}
+        disabled={!name}
+        className={cn(!name && "bg-gray-900 text-Label-Tertiary")}
       >
         다음
       </Button>

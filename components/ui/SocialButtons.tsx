@@ -19,7 +19,7 @@ const SOCIAL_PROVIDERS: SocialOption[] = [
   {
     id: "kakao",
     label: "카카오 로그인",
-    styleClass: "bg-[#FEE500] text-[#3A1D1D] hover:bg-[#FDD835]",
+    styleClass: "bg-[#FEE500] text-Label-Fixed_black hover:bg-[#FDD835]",
     icon: <Icon src={kakaoLogo} width={24} height={24} alt="Kakao" />,
   },
   {
@@ -31,7 +31,7 @@ const SOCIAL_PROVIDERS: SocialOption[] = [
   {
     id: "google",
     label: "구글 로그인",
-    styleClass: "bg-white text-black hover:bg-gray-100",
+    styleClass: "bg-white text-Label-Fixed_black hover:bg-gray-100",
     icon: <Icon src={googleLogo} alt="Google" nofill width={24} height={24} />,
   },
 ] as const;

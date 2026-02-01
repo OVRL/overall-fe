@@ -18,7 +18,7 @@ export default function LoginHeader({ onBack }: LoginHeaderProps) {
           <Icon name="arrow_back" size={24} />
         </button>
       )}
-      <h1 className="text-xl text-gray-100 font-bold">오버롤 로그인</h1>
+      <h1 className="text-xl text-Label-Primary font-bold">오버롤 로그인</h1>
     </div>
   );
 }

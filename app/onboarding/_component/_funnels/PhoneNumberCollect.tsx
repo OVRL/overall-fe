@@ -6,13 +6,20 @@ import { useState } from "react";
 import PhoneNumberTextField from "@/components/onboarding/PhoneNumberTextField";
 import { cn } from "@/lib/utils";
 
-const PhoneNumberCollect = () => {
-  const [phoneNumber, setPhoneNumber] = useState("");
+import { OnboardingStepProps } from "../OnboardingStepProps";
+
+const PhoneNumberCollect = ({
+  onNext,
+  data,
+  onDataChange,
+}: OnboardingStepProps) => {
+  const [phoneNumber, setPhoneNumber] = useState(data.phone || "");
 
   const handleClick = () => {
     const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
     console.log("API로 보낼 값:", cleanPhoneNumber);
-    // TODO: API 요청 로직 추가
+    onDataChange((prev) => ({ ...prev, phone: cleanPhoneNumber }));
+    onNext();
   };
 
   return (

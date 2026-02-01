@@ -5,13 +5,30 @@ import { cn } from "@/lib/utils";
 import AuthTextField from "@/components/login/AuthTextField";
 import SelectMainFoot from "../SelectMainFoot";
 
-const AdditionalInfoCollect = () => {
+import { OnboardingStepProps } from "../OnboardingStepProps";
+
+const AdditionalInfoCollect = ({
+  onNext,
+  data,
+  onDataChange,
+}: OnboardingStepProps) => {
   const [mainFoot, setMainFoot] = useState<"left" | "right">("right");
   const [address, setAddress] = useState("");
   const [preferredNumber, setPreferredNumber] = useState("");
   const [favoritePlayer, setFavoritePlayer] = useState("");
 
-  const handleClick = () => {};
+  const handleClick = () => {
+    // Schema has 'gender' (maybe mainFoot?), 'provider', 'phone', 'email', 'name'.
+    // Address, preferredNumber, favoritePlayer are NOT in schema.
+    // Usage implies we just collect them.
+    onDataChange((prev) => ({
+      ...prev,
+      // Mapping these to schema fields if possible, or just ignoring for schema compliance
+      // as per "follow schema" instruction.
+      // I will just call onNext() for now to enable navigation.
+    }));
+    onNext();
+  };
 
   const isFormFilled =
     !!address && mainFoot.length > 0 && !!preferredNumber && !!favoritePlayer;

@@ -35,10 +35,10 @@ type WithCenter = BaseHeaderProps & {
 type WithoutCenter = BaseHeaderProps & {
   title?: never;
   logo?: never;
-} & (
-    | { leftAction: ActionButton; rightAction?: ActionButton }
-    | { leftAction?: ActionButton; rightAction: ActionButton }
-  );
+} & {
+  leftAction?: ActionButton;
+  rightAction?: ActionButton;
+};
 
 export type HeaderProps = WithCenter | WithoutCenter;
 
@@ -53,7 +53,7 @@ export const Header = (props: HeaderProps) => {
       className={`
         sticky top-0 z-50 flex w-full items-center justify-between p-4
         transition-colors duration-200
-        ${transparent ? "bg-transparent" : "bg-gray-1300/80 backdrop-blur-md"}
+        ${transparent ? "bg-transparent" : "bg-background/80 backdrop-blur-md"}
         ${className ?? ""}
       `}
     >

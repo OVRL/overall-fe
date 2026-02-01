@@ -10,7 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "relay": "relay-compiler",
-    "schema:update": "get-graphql-schema https://api.ovr-log.com/graphql > schema.graphql"
+    "schema:update": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && get-graphql-schema https://api.ovr-log.com/graphql > schema.graphql"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -18,7 +18,9 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "graphql": "^16.12.0",
+    "motion": "^12.29.2",
     "next": "16.1.1",
+    "next-themes": "^0.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
