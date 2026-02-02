@@ -232,5 +232,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // matcher: 정적 파일 및 API 등을 제외하여 성능 최적화
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images).*)"],
 };
