@@ -1,12 +1,12 @@
 import { buttonVariants } from "@/components/ui/Button";
 
 type Props = {
-  mainFoot: "left" | "right";
-  setMainFoot: (mainFoot: "left" | "right") => void;
+  mainFoot: "L" | "R";
+  setMainFoot: (mainFoot: "L" | "R") => void;
 };
 
 const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
-  const toggleFoot = (foot: "left" | "right") => {
+  const toggleFoot = (foot: "L" | "R") => {
     setMainFoot(foot);
   };
   return (
@@ -19,12 +19,12 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
           <input
             type="checkbox"
             className="hidden"
-            checked={mainFoot === "left"}
-            onChange={() => toggleFoot("left")}
+            checked={mainFoot === "L"}
+            onChange={() => toggleFoot("L")}
           />
           <div
             className={buttonVariants({
-              variant: mainFoot === "left" ? "primary" : "line",
+              variant: mainFoot === "L" ? "primary" : "line",
               size: "m",
             })}
           >
@@ -35,12 +35,12 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
           <input
             type="checkbox"
             className="hidden"
-            checked={mainFoot === "right"}
-            onChange={() => toggleFoot("right")}
+            checked={mainFoot === "R"}
+            onChange={() => toggleFoot("R")}
           />
           <div
             className={buttonVariants({
-              variant: mainFoot === "right" ? "primary" : "line",
+              variant: mainFoot === "R" ? "primary" : "line",
               size: "m",
             })}
           >

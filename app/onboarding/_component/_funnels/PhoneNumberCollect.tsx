@@ -6,7 +6,12 @@ import { useState } from "react";
 import PhoneNumberTextField from "@/components/onboarding/PhoneNumberTextField";
 import { cn } from "@/lib/utils";
 
-import { OnboardingStepProps } from "../OnboardingStepProps";
+import { OnboardingStepProps } from "@/types/onboarding";
+import { z } from "zod";
+
+const phoneNumberSchema = z
+  .string()
+  .regex(/^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/);
 
 const PhoneNumberCollect = ({
   onNext,
@@ -38,8 +43,11 @@ const PhoneNumberCollect = ({
         variant="primary"
         size="xl"
         onClick={handleClick}
-        disabled={!phoneNumber}
-        className={cn(!phoneNumber && "bg-gray-900 text-Label-Tertiary")}
+        disabled={!phoneNumberSchema.safeParse(phoneNumber).success}
+        className={cn(
+          !phoneNumberSchema.safeParse(phoneNumber).success &&
+            "bg-gray-900 text-Label-Tertiary"
+        )}
       >
         인증번호 받기
       </Button>

@@ -5,33 +5,40 @@ import { cn } from "@/lib/utils";
 import AuthTextField from "@/components/login/AuthTextField";
 import SelectMainFoot from "../SelectMainFoot";
 
-import { OnboardingStepProps } from "../OnboardingStepProps";
+import { OnboardingStepProps } from "@/types/onboarding";
 
 const AdditionalInfoCollect = ({
   onNext,
   data,
   onDataChange,
 }: OnboardingStepProps) => {
-  const [mainFoot, setMainFoot] = useState<"left" | "right">("right");
-  const [address, setAddress] = useState("");
-  const [preferredNumber, setPreferredNumber] = useState("");
-  const [favoritePlayer, setFavoritePlayer] = useState("");
+  const [info, setInfo] = useState({
+    activityArea: data.additionalInfo?.activityArea || "",
+    mainFoot: (data.additionalInfo?.mainFoot as "L" | "R") || "R",
+    preferredNumber: data.additionalInfo?.preferredNumber?.toString() || "",
+    favoritePlayer: data.additionalInfo?.favoritePlayer || "",
+  });
 
   const handleClick = () => {
-    // Schema has 'gender' (maybe mainFoot?), 'provider', 'phone', 'email', 'name'.
-    // Address, preferredNumber, favoritePlayer are NOT in schema.
-    // Usage implies we just collect them.
     onDataChange((prev) => ({
       ...prev,
-      // Mapping these to schema fields if possible, or just ignoring for schema compliance
-      // as per "follow schema" instruction.
-      // I will just call onNext() for now to enable navigation.
+      additionalInfo: {
+        activityArea: info.activityArea,
+        mainFoot: info.mainFoot,
+        preferredNumber: info.preferredNumber
+          ? parseInt(info.preferredNumber, 10)
+          : undefined,
+        favoritePlayer: info.favoritePlayer,
+      },
     }));
     onNext();
   };
 
   const isFormFilled =
-    !!address && mainFoot.length > 0 && !!preferredNumber && !!favoritePlayer;
+    !!info.activityArea &&
+    info.mainFoot.length > 0 &&
+    !!info.preferredNumber &&
+    !!info.favoritePlayer;
 
   return (
     <section className="flex flex-col gap-y-10 h-full">
@@ -46,25 +53,39 @@ const AdditionalInfoCollect = ({
             label="활동지역"
             placeholder="주소검색"
             type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={info.activityArea}
+            onChange={(e) =>
+              setInfo((prev) => ({ ...prev, activityArea: e.target.value }))
+            }
           />
 
-          <SelectMainFoot mainFoot={mainFoot} setMainFoot={setMainFoot} />
+          <SelectMainFoot
+            mainFoot={info.mainFoot}
+            setMainFoot={(foot) =>
+              setInfo((prev) => ({
+                ...prev,
+                mainFoot: foot,
+              }))
+            }
+          />
 
           <AuthTextField
             label="선호하는 등번호"
             placeholder="선호하는 등번호를 입력해주세요."
             type="number"
-            value={preferredNumber}
-            onChange={(e) => setPreferredNumber(e.target.value)}
+            value={info.preferredNumber}
+            onChange={(e) =>
+              setInfo((prev) => ({ ...prev, preferredNumber: e.target.value }))
+            }
           />
           <AuthTextField
             label="좋아하는 선수"
             placeholder="좋아하는 선수를 입력해주세요."
             type="text"
-            value={favoritePlayer}
-            onChange={(e) => setFavoritePlayer(e.target.value)}
+            value={info.favoritePlayer}
+            onChange={(e) =>
+              setInfo((prev) => ({ ...prev, favoritePlayer: e.target.value }))
+            }
           />
         </div>
       </div>

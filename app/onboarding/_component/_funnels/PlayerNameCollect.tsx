@@ -4,7 +4,7 @@ import AuthTextField from "@/components/login/AuthTextField";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-import { OnboardingStepProps } from "../OnboardingStepProps";
+import { OnboardingStepProps } from "@/types/onboarding";
 
 const PlayerNameCollect = ({
   onNext,

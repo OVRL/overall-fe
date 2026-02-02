@@ -1,6 +1,9 @@
 "use client";
 
-import ObjectField from "@/components/formation/ObjectField";
+import ObjectField, {
+  FIELD_HEIGHT,
+  FIELD_WIDTH,
+} from "@/components/formation/ObjectField";
 import OnboardingPositionChip from "@/components/OnboardingPositionChip";
 import { Position } from "@/types/position";
 
@@ -12,26 +15,32 @@ interface OnboardingFormationSelectorProps {
   multiSelect?: boolean;
 }
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 /**
- * 포지션별 경기장 위 좌표 (가시 영역 crop 기준 % 값)
+ * 절대적인 경기장 위 좌표 (0.0 ~ 1.0)
+ * 기존 모바일 크롭(cropX=0.24, width=0.52) 기준 좌표를 역산하여 정의함.
  */
-const FORMATION_COORDINATES: Partial<
-  Record<Position, { top: string; left: string }>
+const BASE_FIELD_COORDINATES: Partial<
+  Record<Position, { top: number; left: number }>
 > = {
-  ST: { top: "12%", left: "50.5%" },
-  LW: { top: "16%", left: "21%" },
-  RW: { top: "16%", left: "79%" },
-  CAM: { top: "29%", left: "50.5%" },
-  LM: { top: "44%", left: "30%" },
-  CM: { top: "44%", left: "50.5%" },
-  RM: { top: "44%", left: "70.5%" },
-  CDM: { top: "59%", left: "50.5%" },
-  LB: { top: "67%", left: "16%" },
-  LCB: { top: "75%", left: "38%" },
-  RCB: { top: "75%", left: "62%" },
-  RB: { top: "67%", left: "84%" },
-  GK: { top: "89%", left: "50.5%" },
+  ST: { top: 0.2044, left: 0.5026 },
+  LW: { top: 0.2392, left: 0.3492 },
+  RW: { top: 0.2392, left: 0.6508 },
+  CAM: { top: 0.3523, left: 0.5026 },
+  LM: { top: 0.4828, left: 0.396 },
+  CM: { top: 0.4828, left: 0.5026 },
+  RM: { top: 0.4828, left: 0.6066 },
+  CDM: { top: 0.6133, left: 0.5026 },
+  LB: { top: 0.6829, left: 0.3232 },
+  LCB: { top: 0.7525, left: 0.4376 },
+  RCB: { top: 0.7525, left: 0.5624 },
+  RB: { top: 0.6829, left: 0.6768 },
+  GK: { top: 0.8743, left: 0.5026 },
 } as const;
+
+const MOBILE_CROP = { x: 0.24, y: 0.1, width: 0.52, height: 0.87 };
+const DESKTOP_CROP = { x: 0, y: 0.1, width: 1.0, height: 0.87 };
 
 const OnboardingFormationSelector = ({
   value,
@@ -40,6 +49,9 @@ const OnboardingFormationSelector = ({
   disabledPositions = [],
   multiSelect = false,
 }: OnboardingFormationSelectorProps) => {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const currentCrop = isDesktop ? DESKTOP_CROP : MOBILE_CROP;
+
   const handlePositionClick = (pos: Position) => {
     if (multiSelect) {
       if (value.includes(pos)) {
@@ -51,24 +63,42 @@ const OnboardingFormationSelector = ({
       onChange([pos]);
     }
   };
+
+  const getRelativePosition = (
+    fieldPos: { top: number; left: number },
+    crop: typeof MOBILE_CROP
+  ) => {
+    const relativeLeft = (fieldPos.left - crop.x) / crop.width;
+    const relativeTop = (fieldPos.top - crop.y) / crop.height;
+    return {
+      left: `${relativeLeft * 100}%`,
+      top: `${relativeTop * 100}%`,
+    };
+  };
+
+  const aspectRatio =
+    (currentCrop.width * FIELD_WIDTH) / (currentCrop.height * FIELD_HEIGHT);
+
   return (
-    <div className={className}>
-      <div className="relative w-full rounded-3xl overflow-hidden border">
+    <div className={className} style={{ aspectRatio }}>
+      <div className="relative w-full h-full rounded-3xl overflow-hidden border border-transparent bg-card-bg">
         <ObjectField
-          crop={{ x: 0.24, y: 0.1, width: 0.52, height: 0.87 }}
-          objectFit="cover"
-          className="w-full"
+          crop={currentCrop}
+          autoAspect={false}
+          className="w-full h-full"
         />
 
         <div className="absolute inset-0 pointer-events-none">
-          {Object.entries(FORMATION_COORDINATES).map(([pos, coords]) => {
+          {Object.entries(BASE_FIELD_COORDINATES).map(([pos, fieldCoords]) => {
             const isDisabled = disabledPositions.includes(pos as Position);
+            const styleCoords = getRelativePosition(fieldCoords, currentCrop);
+            
             return (
               <div
                 key={pos}
                 className="absolute transition-all duration-300 ease-out"
                 style={{
-                  ...coords,
+                  ...styleCoords,
                   transform: "translate(-50%, -50%)",
                 }}
               >

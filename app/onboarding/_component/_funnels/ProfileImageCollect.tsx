@@ -4,10 +4,19 @@ import Button from "@/components/ui/Button";
 import ImageUploader from "@/components/ImageUploader";
 import { cn } from "@/lib/utils";
 
-const ProfileImageCollect = () => {
-  const [profileImage, setProfileImage] = useState("");
+import { OnboardingStepProps } from "@/types/onboarding";
 
-  const handleClick = () => {};
+const ProfileImageCollect = ({
+  onNext,
+  data,
+  onDataChange,
+}: OnboardingStepProps) => {
+  const [profileImage, setProfileImage] = useState(data.profileImage || "");
+
+  const handleClick = () => {
+    onDataChange((prev) => ({ ...prev, profileImage }));
+    onNext();
+  };
 
   return (
     <section className="flex flex-col gap-y-10 h-full">

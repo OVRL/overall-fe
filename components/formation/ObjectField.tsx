@@ -2,8 +2,8 @@ import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 // 원본 SVG를 기준으로 표준 필드 크기 정의
-const FIELD_WIDTH = 1280;
-const FIELD_HEIGHT = 785;
+export const FIELD_WIDTH = 1280;
+export const FIELD_HEIGHT = 785;
 
 export interface FieldCrop {
   /** 시작점 x 좌표 (0.0 = 왼쪽 끝 ~ 1.0 = 오른쪽 끝) */

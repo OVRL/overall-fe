@@ -11,8 +11,21 @@ export const onboardingSchema = z.object({
     .regex(/^[0-9]+$/, "휴대폰 번호는 숫자만 입력해주세요.")
     .optional(),
   provider: z.string().optional(),
-  mainFormation: z.array(z.string()).optional(),
-  subFormation: z.array(z.string()).optional(),
+  profileImage: z.string().optional(),
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 형식을 지켜주세요.")
+    .optional(),
+  mainPosition: z.string().optional(),
+  subPositions: z.array(z.string()).optional(),
+  additionalInfo: z
+    .object({
+      activityArea: z.string().optional(),
+      mainFoot: z.enum(["L", "R"]).optional(),
+      preferredNumber: z.number().optional(),
+      favoritePlayer: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type OnboardingState = z.infer<typeof onboardingSchema>;

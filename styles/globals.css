@@ -55,11 +55,11 @@
   --breakpoint-xl: 90rem;
   /* 1440px */
   --max-width-layout: 45rem;
-  --width-layout: 45rem;
-  /* 720px */
+  --width-layout: 100%;
 
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);
+  --color-card-bg: oklch(0.145 0 0);
 
   --color-gray-90: oklch(0.987 0.003 280);
   --color-gray-100: oklch(0.9794 0.0013 286.3756);
@@ -135,6 +135,12 @@
   --color-Label-Fixed_black: var(--color-black);
 
   --color-background: var(--background);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --width-layout: 45rem;
+  }
 }
 
 body {

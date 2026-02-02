@@ -12,7 +12,7 @@ import MainFormationCollect from "./_funnels/MainFormationCollect";
 import SubFormationCollect from "./_funnels/SubFormationCollect";
 import ProfileImageCollect from "./_funnels/ProfileImageCollect";
 import AdditionalInfoCollect from "./_funnels/AdditionalInfoCollect";
-import { OnboardingState } from "./OnboardingStepProps";
+import { OnboardingState } from "@/types/onboarding";
 
 type Step =
   | "phone"
@@ -86,7 +86,11 @@ const OnboardingFunnelWrapper = () => {
             />
           </Funnel.Step>
           <Funnel.Step name="profile">
-            <ProfileImageCollect />
+            <ProfileImageCollect
+              onNext={handleNext("additional")}
+              data={formData}
+              onDataChange={setFormData}
+            />
           </Funnel.Step>
           <Funnel.Step name="additional">
             <AdditionalInfoCollect
