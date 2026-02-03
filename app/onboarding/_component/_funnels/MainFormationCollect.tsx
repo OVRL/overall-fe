@@ -15,14 +15,14 @@ const MainFormationCollect = ({
   onDataChange,
 }: OnboardingStepProps) => {
   const [mainPosition, setMainPosition] = useState<Position | undefined>(
-    (data.mainPosition as Position) || "FW"
+    (data.mainPosition as Position) || "FW",
   );
   const handleClick = () => {
     onDataChange((prev) => ({ ...prev, mainPosition }));
     onNext();
   };
   return (
-    <section className="flex flex-col h-full overflow-hidden">
+    <section className="flex flex-col h-full overflow-hidden pb-12">
       <div className="flex-1 flex flex-col min-h-0">
         <OnboardingTitle>
           {data.name} 선수! <br />
@@ -33,7 +33,7 @@ const MainFormationCollect = ({
           <OnboardingFormationSelector
             value={mainPosition ? [mainPosition] : []}
             onChange={(positions) => setMainPosition(positions[0])}
-            className="h-full w-auto max-w-full"
+            className="w-full h-auto md:max-w-layout md:h-120"
           />
         </div>
       </div>
@@ -44,7 +44,7 @@ const MainFormationCollect = ({
         disabled={!mainPosition}
         className={cn(
           "mt-10",
-          !mainPosition && "bg-gray-900 text-Label-Tertiary"
+          !mainPosition && "bg-gray-900 text-Label-Tertiary",
         )}
       >
         다음

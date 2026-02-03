@@ -23,18 +23,14 @@ const OnboardingCompletion = () => {
         spread: 55,
         origin: { x: 0, y: 0.2 }, // Top left
         colors: ["#FFD700", "#FF4500", "#008080"], // Example festive colors
-        useWorker: true, // Optimize for mobile
-        disableForReducedMotion: true,
-      } as any);
+      });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
         origin: { x: 1, y: 0.2 }, // Top right
         colors: ["#FFD700", "#FF4500", "#008080"],
-        useWorker: true,
-        disableForReducedMotion: true,
-      } as any);
+      });
 
       if (Date.now() < end) {
         requestAnimationFrame(frame);
@@ -45,21 +41,21 @@ const OnboardingCompletion = () => {
   }, []);
 
   return (
-    <section className="flex flex-col ">
-        <div className="flex flex-col gap-y-10 h-full pb-12">
-            <OnboardingTitle>회원 가입을 축하합니다!</OnboardingTitle>
-            <div className="relative w-full aspect-square max-w-sm mb-8">
-                <Image
-                src="/images/soccer_chibi_squad.webp"
-                alt="Onboarding Complete Characters"
-                fill
-                className="object-contain"
-                priority
-                unoptimized
-                />
-            </div>
+    <section className="flex flex-col h-full">
+      <div className="flex flex-col flex-1 min-h-0 gap-y-4 pb-4">
+        <OnboardingTitle>회원 가입을 축하합니다!</OnboardingTitle>
+        <div className="relative w-full flex-1 min-h-0">
+          <Image
+            src="/images/soccer_chibi_squad.webp"
+            alt="Onboarding Complete Characters"
+            fill
+            className="object-contain"
+            priority
+            unoptimized
+          />
         </div>
-      
+      </div>
+
       <Button
         onClick={() => router.push("/")}
         variant="primary"

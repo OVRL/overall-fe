@@ -4,6 +4,7 @@ import ObjectField, {
   FIELD_HEIGHT,
   FIELD_WIDTH,
 } from "@/components/formation/ObjectField";
+import { cn } from "@/lib/utils";
 import OnboardingPositionChip from "@/components/OnboardingPositionChip";
 import { Position } from "@/types/position";
 
@@ -66,7 +67,7 @@ const OnboardingFormationSelector = ({
 
   const getRelativePosition = (
     fieldPos: { top: number; left: number },
-    crop: typeof MOBILE_CROP
+    crop: typeof MOBILE_CROP,
   ) => {
     const relativeLeft = (fieldPos.left - crop.x) / crop.width;
     const relativeTop = (fieldPos.top - crop.y) / crop.height;
@@ -80,41 +81,47 @@ const OnboardingFormationSelector = ({
     (currentCrop.width * FIELD_WIDTH) / (currentCrop.height * FIELD_HEIGHT);
 
   return (
-    <div className={className} style={{ aspectRatio }}>
+    <div className={cn("relative", className)} style={{ aspectRatio }}>
       <div className="relative w-full h-full rounded-3xl overflow-hidden border border-transparent bg-card-bg">
         <ObjectField
           crop={currentCrop}
           autoAspect={false}
-          className="w-full h-full"
-        />
+          className={cn("w-full", isDesktop ? "h-109" : "h-full")}
+        >
+          {" "}
+          <div className="absolute inset-0 pointer-events-none  h-9/10 top-0">
+            {Object.entries(BASE_FIELD_COORDINATES).map(
+              ([pos, fieldCoords]) => {
+                const isDisabled = disabledPositions.includes(pos as Position);
+                const styleCoords = getRelativePosition(
+                  fieldCoords,
+                  currentCrop,
+                );
 
-        <div className="absolute inset-0 pointer-events-none">
-          {Object.entries(BASE_FIELD_COORDINATES).map(([pos, fieldCoords]) => {
-            const isDisabled = disabledPositions.includes(pos as Position);
-            const styleCoords = getRelativePosition(fieldCoords, currentCrop);
-            
-            return (
-              <div
-                key={pos}
-                className="absolute transition-all duration-300 ease-out"
-                style={{
-                  ...styleCoords,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                <OnboardingPositionChip
-                  position={pos as Position}
-                  selected={value.includes(pos as Position)}
-                  disabled={isDisabled}
-                  onClick={() =>
-                    !isDisabled && handlePositionClick(pos as Position)
-                  }
-                  className="pointer-events-auto"
-                />
-              </div>
-            );
-          })}
-        </div>
+                return (
+                  <div
+                    key={pos}
+                    className="absolute transition-all duration-300 ease-out"
+                    style={{
+                      ...styleCoords,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  >
+                    <OnboardingPositionChip
+                      position={pos as Position}
+                      selected={value.includes(pos as Position)}
+                      disabled={isDisabled}
+                      onClick={() =>
+                        !isDisabled && handlePositionClick(pos as Position)
+                      }
+                      className="pointer-events-auto"
+                    />
+                  </div>
+                );
+              },
+            )}
+          </div>
+        </ObjectField>
       </div>
     </div>
   );

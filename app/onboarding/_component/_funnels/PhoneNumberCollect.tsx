@@ -28,7 +28,7 @@ const PhoneNumberCollect = ({
   };
 
   return (
-    <section className="flex flex-col gap-y-10 h-full">
+    <section className="flex flex-col gap-y-10 h-full pb-12">
       <div className="flex-1">
         <OnboardingTitle>전화번호를 알려주세요.</OnboardingTitle>
         <div className="mt-20">
@@ -46,7 +46,7 @@ const PhoneNumberCollect = ({
         disabled={!phoneNumberSchema.safeParse(phoneNumber).success}
         className={cn(
           !phoneNumberSchema.safeParse(phoneNumber).success &&
-            "bg-gray-900 text-Label-Tertiary"
+            "bg-gray-900 text-Label-Tertiary",
         )}
       >
         인증번호 받기

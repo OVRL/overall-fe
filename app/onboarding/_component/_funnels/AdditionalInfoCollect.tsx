@@ -6,6 +6,7 @@ import AuthTextField from "@/components/login/AuthTextField";
 import SelectMainFoot from "../SelectMainFoot";
 
 import { OnboardingStepProps } from "@/types/onboarding";
+import SelectGender from "../SelectGender";
 
 const AdditionalInfoCollect = ({
   onNext,
@@ -13,42 +14,51 @@ const AdditionalInfoCollect = ({
   onDataChange,
 }: OnboardingStepProps) => {
   const [info, setInfo] = useState({
-    activityArea: data.additionalInfo?.activityArea || "",
-    mainFoot: (data.additionalInfo?.mainFoot as "L" | "R") || "R",
-    preferredNumber: data.additionalInfo?.preferredNumber?.toString() || "",
-    favoritePlayer: data.additionalInfo?.favoritePlayer || "",
+    gender: (data.gender as "M" | "W") || "M",
+    activityArea: data.activityArea || "",
+    foot: (data.foot as "L" | "R" | "B") || "R",
+    preferredNumber: data.preferredNumber?.toString() || "",
+    favoritePlayer: data.favoritePlayer || "",
   });
 
   const handleClick = () => {
     onDataChange((prev) => ({
       ...prev,
-      additionalInfo: {
-        activityArea: info.activityArea,
-        mainFoot: info.mainFoot,
-        preferredNumber: info.preferredNumber
-          ? parseInt(info.preferredNumber, 10)
-          : undefined,
-        favoritePlayer: info.favoritePlayer,
-      },
+      gender: info.gender,
+      activityArea: info.activityArea,
+      foot: info.foot,
+      preferredNumber: info.preferredNumber
+        ? parseInt(info.preferredNumber, 10)
+        : undefined,
+      favoritePlayer: info.favoritePlayer,
     }));
     onNext();
   };
 
   const isFormFilled =
     !!info.activityArea &&
-    info.mainFoot.length > 0 &&
+    info.foot.length > 0 &&
     !!info.preferredNumber &&
     !!info.favoritePlayer;
 
   return (
-    <section className="flex flex-col gap-y-10 h-full">
-      <div className="flex-1">
+    <section className="flex flex-col h-full pb-12">
+      <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
         <OnboardingTitle>
           추가 정보를
           <br />
           입력해주세요.
         </OnboardingTitle>
-        <div className="mt-20 flex flex-col gap-y-6">
+        <div className="mt-8 flex flex-col gap-y-6 pb-6">
+          <SelectGender
+            gender={info.gender}
+            setGender={(gender) =>
+              setInfo((prev) => ({
+                ...prev,
+                gender: gender,
+              }))
+            }
+          />
           <AuthTextField
             label="활동지역"
             placeholder="주소검색"
@@ -60,11 +70,11 @@ const AdditionalInfoCollect = ({
           />
 
           <SelectMainFoot
-            mainFoot={info.mainFoot}
+            mainFoot={info.foot}
             setMainFoot={(foot) =>
               setInfo((prev) => ({
                 ...prev,
-                mainFoot: foot,
+                foot: foot,
               }))
             }
           />
@@ -94,7 +104,10 @@ const AdditionalInfoCollect = ({
         size="xl"
         onClick={handleClick}
         disabled={!isFormFilled}
-        className={cn(!isFormFilled && "bg-gray-900 text-Label-Tertiary")}
+        className={cn(
+          "w-full transition-colors",
+          !isFormFilled && "bg-gray-900 text-Label-Tertiary",
+        )}
       >
         다음
       </Button>

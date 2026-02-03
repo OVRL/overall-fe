@@ -23,7 +23,7 @@ const BirthDayCollect = ({
   };
 
   return (
-    <section className="flex flex-col gap-y-10 h-full">
+    <section className="flex flex-col gap-y-10 h-full pb-12">
       <div className="flex-1">
         <OnboardingTitle>
           {data.name} 선수! <br />
@@ -43,7 +43,7 @@ const BirthDayCollect = ({
         disabled={!birthDaySchema.safeParse(birthDay).success}
         className={cn(
           !birthDaySchema.safeParse(birthDay).success &&
-            "bg-gray-900 text-Label-Tertiary"
+            "bg-gray-900 text-Label-Tertiary",
         )}
       >
         다음

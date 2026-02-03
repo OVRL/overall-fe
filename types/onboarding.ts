@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const onboardingSchema = z.object({
   email: z.string().email("이메일 형식이 올바르지 않습니다."),
-  gender: z.string().optional(),
+  gender: z.enum(["M", "W"]).optional(),
   name: z.string().optional(),
   password: z.string().optional(),
   phone: z
@@ -18,14 +18,10 @@ export const onboardingSchema = z.object({
     .optional(),
   mainPosition: z.string().optional(),
   subPositions: z.array(z.string()).optional(),
-  additionalInfo: z
-    .object({
-      activityArea: z.string().optional(),
-      mainFoot: z.enum(["L", "R"]).optional(),
-      preferredNumber: z.number().optional(),
-      favoritePlayer: z.string().optional(),
-    })
-    .optional(),
+  activityArea: z.string().optional(),
+  foot: z.enum(["L", "R", "B"]).optional(),
+  preferredNumber: z.number().optional(),
+  favoritePlayer: z.string().optional(),
 });
 
 export type OnboardingState = z.infer<typeof onboardingSchema>;

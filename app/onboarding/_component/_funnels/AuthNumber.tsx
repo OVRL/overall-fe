@@ -10,7 +10,7 @@ const AuthNumber = () => {
   const handleClick = () => {};
 
   return (
-    <section className="flex flex-col gap-y-10 h-full">
+    <section className="flex flex-col gap-y-10 h-full pb-12">
       <div className="flex-1">
         <OnboardingTitle>
           문자로 받은

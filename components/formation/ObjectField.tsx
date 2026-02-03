@@ -54,6 +54,8 @@ interface ObjectFieldProps extends React.SVGProps<SVGSVGElement> {
    * @default "contain"
    */
   objectFit?: "contain" | "cover" | "fill";
+
+  children?: React.ReactNode;
 }
 
 /**
@@ -77,6 +79,7 @@ const ObjectField = ({
   autoAspect = true,
   "aria-label": ariaLabel = "Soccer Field",
   objectFit = "contain",
+  children,
   ...props
 }: ObjectFieldProps) => {
   // crop 또는 type을 기반으로 ViewBox 계산
@@ -231,6 +234,7 @@ const ObjectField = ({
           />
         </g>
       </svg>
+      {children}
     </div>
   );
 };

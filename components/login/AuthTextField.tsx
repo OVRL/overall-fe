@@ -48,6 +48,8 @@ const AuthTextField = ({
                 ? "border-white"
                 : "border-Fill_Tertiary",
             onClear && value ? "pr-8" : "",
+            type === "number" &&
+              "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           )}
           {...props}
         />

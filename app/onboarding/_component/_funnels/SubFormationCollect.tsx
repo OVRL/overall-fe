@@ -14,7 +14,7 @@ const SubFormationCollect = ({
   onDataChange,
 }: OnboardingStepProps) => {
   const [subPositions, setSubPositions] = useState<Position[]>(
-    (data.subPositions as Position[]) || []
+    (data.subPositions as Position[]) || [],
   );
 
   const mainPosition = (data.mainPosition as Position) || undefined;
@@ -27,11 +27,11 @@ const SubFormationCollect = ({
   const isComplete = subPositions.length === 2;
 
   return (
-    <section className="flex flex-col h-full overflow-hidden">
+    <section className="flex flex-col h-full overflow-hidden pb-12">
       <div className="flex-1 flex flex-col min-h-0">
         <OnboardingTitle>
           {data.name} 선수! <br />
-          <span className="text-Label-AccentPrimary">서브 포지션</span>을
+          <span className="text-Label-AccentPrimary">서브 포지션</span>을 2개
           선택해주세요!
         </OnboardingTitle>
         <div className="flex-1 min-h-0 flex items-center justify-center">
@@ -42,11 +42,11 @@ const SubFormationCollect = ({
                 setSubPositions(newPositions);
               }
             }}
-            className="h-full w-auto max-w-full"
+            className="w-full h-auto md:max-w-layout md:h-120"
             multiSelect={true}
             disabledPositions={mainPosition ? [mainPosition] : []}
           />
-        </div>₩
+        </div>
       </div>
       <Button
         variant="primary"
@@ -55,7 +55,7 @@ const SubFormationCollect = ({
         disabled={!isComplete}
         className={cn(
           "mt-10",
-          !isComplete && "bg-gray-900 text-Label-Tertiary"
+          !isComplete && "bg-gray-900 text-Label-Tertiary",
         )}
       >
         다음

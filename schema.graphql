@@ -9,6 +9,19 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
+"""주발"""
+enum Foot {
+  B
+  L
+  R
+}
+
+"""성별"""
+enum Gender {
+  M
+  W
+}
+
 type Mutation {
   login(deviceInfo: String, email: String!, password: String!): User!
   logout(refreshToken: String!): Boolean!
@@ -17,91 +30,99 @@ type Mutation {
   signUp(input: SignUpInput!): User!
 }
 
+"""축구 포지션 목록"""
+enum Position {
+  CAM
+  CB
+  CDM
+  CF
+  CM
+  DF
+  FW
+  GK
+  LAM
+  LB
+  LCAM
+  LCB
+  LCM
+  LDM
+  LF
+  LM
+  LS
+  LW
+  LWB
+  MF
+  RAM
+  RB
+  RCAM
+  RCB
+  RCM
+  RDM
+  RF
+  RM
+  RS
+  RW
+  RWB
+  ST
+  SW
+}
+
 type Query {
   user(email: String!): User!
   users(limit: Int! = 10, offset: Int! = 0): Users!
 }
 
 input SignUpInput {
+  activityArea: String
+  birthDate: String
   email: String!
-  gender: String
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
+  mainPosition: Position
   name: String
   password: String
   phone: String
+  preferredNumber: Float
+  profileImage: String
   provider: String
+  subPositions: [Position!]
 }
 
 input UpdateUserInput {
+  activityArea: String
+  birthDate: String
   email: String!
-  gender: String
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
+  mainPosition: Position
   name: String
   password: String
   phone: String
+  preferredNumber: Float
+  profileImage: String
   provider: String
+  subPositions: [Position!]
 }
 
 type User {
   accessToken: String
+  activityArea: String!
+  birthDate: String!
   email: String!
-  gender: String!
+  favoritePlayer: String!
+  foot: Foot!
+  gender: Gender!
   id: ID!
+  mainPosition: Position!
   name: String!
   phone: String!
+  preferredNumber: Float!
+  profileImage: String!
   provider: String!
   refreshToken: String
-  profileImage: String!
-  birthDate: String!
-  mainPosition: Position!
   subPositions: [Position!]!
-  additionalInfo: AdditionalUserInfo
-}
-
-type AdditionalUserInfo {
-  activityArea: String
-  mainFoot: Foot
-  preferredNumber: Int
-  favoritePlayer: String
-}
-
-enum Foot {
-  L
-  R
-}
-
-enum Position {
-  FW
-  MF
-  DF
-  GK
-  ST
-  CF
-  RF
-  LF
-  RW
-  LW
-  RS
-  LS
-  CM
-  LCM
-  RCM
-  CDM
-  LDM
-  RDM
-  CAM
-  LCAM
-  RCAM
-  RM
-  LM
-  RAM
-  LAM
-  CB
-  LCB
-  RCB
-  LB
-  RB
-  LWB
-  RWB
-  SW
 }
 
 type Users {

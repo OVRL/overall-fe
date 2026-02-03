@@ -1,12 +1,12 @@
 import { buttonVariants } from "@/components/ui/Button";
 
 type Props = {
-  mainFoot: "L" | "R";
-  setMainFoot: (mainFoot: "L" | "R") => void;
+  mainFoot: "L" | "R" | "B";
+  setMainFoot: (mainFoot: "L" | "R" | "B") => void;
 };
 
 const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
-  const toggleFoot = (foot: "L" | "R") => {
+  const toggleFoot = (foot: "L" | "R" | "B") => {
     setMainFoot(foot);
   };
   return (
@@ -29,6 +29,22 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
             })}
           >
             왼발
+          </div>
+        </label>
+        <label className="flex-1 cursor-pointer">
+          <input
+            type="checkbox"
+            className="hidden"
+            checked={mainFoot === "B"}
+            onChange={() => toggleFoot("B")}
+          />
+          <div
+            className={buttonVariants({
+              variant: mainFoot === "B" ? "primary" : "line",
+              size: "m",
+            })}
+          >
+            양발
           </div>
         </label>
         <label className="flex-1 cursor-pointer">
