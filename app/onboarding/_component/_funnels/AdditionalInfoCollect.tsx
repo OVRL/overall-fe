@@ -8,6 +8,9 @@ import SelectMainFoot from "../SelectMainFoot";
 import { OnboardingStepProps } from "@/types/onboarding";
 import SelectGender from "../SelectGender";
 
+import { useModifyUserMutation } from "../../_hooks/useModifyUserMutation";
+import { UpdateUserInput } from "@/__generated__/useModifyUserMutation.graphql";
+
 const AdditionalInfoCollect = ({
   onNext,
   data,
@@ -21,7 +24,9 @@ const AdditionalInfoCollect = ({
     favoritePlayer: data.favoritePlayer || "",
   });
 
-  const handleClick = () => {
+  const [commit, isMutationInFlight] = useModifyUserMutation();
+
+  const handleComplete = () => {
     onDataChange((prev) => ({
       ...prev,
       gender: info.gender,
@@ -32,14 +37,56 @@ const AdditionalInfoCollect = ({
         : undefined,
       favoritePlayer: info.favoritePlayer,
     }));
-    onNext();
+
+    commit({
+      variables: {
+        input: {
+          ...data,
+          email: data.email,
+          gender: info.gender,
+          activityArea: info.activityArea,
+          foot: info.foot,
+          preferredNumber: info.preferredNumber
+            ? parseFloat(info.preferredNumber)
+            : null,
+          favoritePlayer: info.favoritePlayer,
+        } as unknown as UpdateUserInput,
+      },
+      onCompleted: () => {
+        onNext();
+      },
+      onError: (error) => {
+        console.error("Mutation failed", error);
+      },
+    });
   };
 
-  const isFormFilled =
-    !!info.activityArea &&
-    info.foot.length > 0 &&
-    !!info.preferredNumber &&
-    !!info.favoritePlayer;
+  const handleLater = () => {
+    // Exclude current step's fields from previous data
+    const previousData = { ...data };
+    delete previousData.gender;
+    delete previousData.activityArea;
+    delete previousData.foot;
+    delete previousData.preferredNumber;
+    delete previousData.favoritePlayer;
+
+    commit({
+      variables: {
+        input: {
+          ...previousData,
+          email: data.email,
+        } as unknown as UpdateUserInput,
+      },
+      onCompleted: () => {
+        onNext(); // Next step or finish
+      },
+      onError: (error) => {
+        console.error("Mutation failed", error);
+      },
+    });
+  };
+
+  const isFormFilled = Object.values(info).every((value) => !!value);
 
   return (
     <section className="flex flex-col h-full pb-12">
@@ -103,16 +150,21 @@ const AdditionalInfoCollect = ({
         <Button
           variant="primary"
           size="xl"
-          onClick={handleClick}
-          disabled={!isFormFilled}
+          onClick={handleComplete}
+          disabled={!isFormFilled || isMutationInFlight}
           className={cn(
             "w-full transition-colors",
             !isFormFilled && "bg-gray-900 text-Label-Tertiary",
           )}
         >
-          다음
+          완료하기
         </Button>
-        <Button variant="line" size="xl" onClick={handleClick}>
+        <Button
+          variant="line"
+          size="xl"
+          onClick={handleLater}
+          disabled={isMutationInFlight}
+        >
           다음에 작성하기
         </Button>
       </div>

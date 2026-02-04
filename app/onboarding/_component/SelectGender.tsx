@@ -12,7 +12,7 @@ const SelectGender = ({ gender, setGender }: Props) => {
   return (
     <div className="flex flex-col gap-y-4 px-3">
       <span className="text-Label-Primary font-semibold text-sm leading-4">
-        주로 사용하는 발
+        성별
       </span>
       <div className="flex gap-x-2">
         <label className="flex-1 cursor-pointer">
