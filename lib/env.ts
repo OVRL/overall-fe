@@ -7,10 +7,12 @@ export const env = createEnv({
   },
   client: {
     NEXT_PUBLIC_API_URL: z.string(),
+    NEXT_PUBLIC_BACKEND_URL: z.string().url(),
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
-    BACKEND_URL: process.env.BACKEND_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    BACKEND_URL: process.env.BACKEND_URL,
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
   },
 });
