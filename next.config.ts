@@ -23,6 +23,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: "/graphql",
+        destination: `${env.BACKEND_URL}/graphql`,
+      },
+      {
         source: "/api/:path*",
         destination: `${env.BACKEND_URL}/api/:path*`,
       },

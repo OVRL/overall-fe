@@ -22,7 +22,6 @@ const PhoneNumberCollect = ({
 
   const handleClick = () => {
     const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
-    console.log("API로 보낼 값:", cleanPhoneNumber);
     onDataChange((prev) => ({ ...prev, phone: cleanPhoneNumber }));
     onNext();
   };
