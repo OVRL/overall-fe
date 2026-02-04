@@ -25,7 +25,7 @@ const AuthTextField = ({
 
   return (
     <div className={cn("flex flex-col w-full gap-y-1.5 px-3 ", className)}>
-      <label htmlFor={id} className="text-sm font-semibold text-gray-100 ">
+      <label htmlFor={id} className="text-sm font-semibold text-Label-Primary">
         {label}
       </label>
 
@@ -41,13 +41,15 @@ const AuthTextField = ({
           aria-invalid={!!errorMessage}
           aria-describedby={errorMessage ? errorId : undefined}
           className={cn(
-            "w-full bg-transparent pb-3.75 text-base  text-gray-100 placeholder:text-Label-Tertiary outline-none border-b transition-colors",
+            "w-full bg-transparent pb-3.75 text-base  text-Label-Primary placeholder:text-Label-Tertiary outline-none border-b transition-colors",
             errorMessage
               ? "border-Fill_Error"
               : isFocused
                 ? "border-white"
                 : "border-Fill_Tertiary",
             onClear && value ? "pr-8" : "",
+            type === "number" &&
+              "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           )}
           {...props}
         />

@@ -9,8 +9,62 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
+"""주발"""
+enum Foot {
+  B
+  L
+  R
+}
+
+"""성별"""
+enum Gender {
+  M
+  W
+}
+
 type Mutation {
-  signUp(email: String!, name: String!, password: String!, phone: String!): User!
+  login(deviceInfo: String, email: String!, password: String!): User!
+  logout(refreshToken: String!): Boolean!
+  modifyUser(input: UpdateUserInput!): User!
+  refresh(refreshToken: String!): User!
+  signUp(input: SignUpInput!): User!
+}
+
+"""축구 포지션 목록"""
+enum Position {
+  CAM
+  CB
+  CDM
+  CF
+  CM
+  DF
+  FW
+  GK
+  LAM
+  LB
+  LCAM
+  LCB
+  LCM
+  LDM
+  LF
+  LM
+  LS
+  LW
+  LWB
+  MF
+  RAM
+  RB
+  RCAM
+  RCB
+  RCM
+  RDM
+  RF
+  RM
+  RS
+  RW
+  RWB
+  ST
+  SW
 }
 
 type Query {
@@ -18,14 +72,57 @@ type Query {
   users(limit: Int! = 10, offset: Int! = 0): Users!
 }
 
-type User {
-  accessToken: String!
+input SignUpInput {
+  activityArea: String
+  birthDate: String
   email: String!
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
+  mainPosition: Position
+  name: String
+  password: String
+  phone: String
+  preferredNumber: Float
+  profileImage: String
+  provider: String
+  subPositions: [Position!]
+}
+
+input UpdateUserInput {
+  activityArea: String
+  birthDate: String
+  email: String!
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
+  mainPosition: Position
+  name: String
+  password: String
+  phone: String
+  preferredNumber: Float
+  profileImage: String
+  provider: String
+  subPositions: [Position!]
+}
+
+type User {
+  accessToken: String
+  activityArea: String!
+  birthDate: String!
+  email: String!
+  favoritePlayer: String!
+  foot: Foot!
+  gender: Gender!
   id: ID!
+  mainPosition: Position!
   name: String!
   phone: String!
-  refreshToken: String!
-  rememberToken: String
+  preferredNumber: Float!
+  profileImage: String!
+  provider: String!
+  refreshToken: String
+  subPositions: [Position!]!
 }
 
 type Users {

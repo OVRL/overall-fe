@@ -1,19 +1,47 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
+  --background: var(--color-gray-90);
   --foreground: #171717;
+
+  /* Semantic Tokens Implementation (Boilerplate) */
+  --label-primary: var(--color-gray-1100);
+}
+
+.dark {
+  --background: var(--color-gray-1300);
+  --color-Fill_AccentPrimary: var(--color-green-600);
+  --color-Fill_Primary: var(--color-gray-100);
+  --color-Fill_Secondary: var(--color-gray-300);
+  --color-Fill_Tertiary: var(--color-gray-400);
+  --color-Fill_Quatiary: var(--color-gray-900);
+  --color-Fill_Error: var(--color-red-400);
+  --color-Fill_Success: var(--color-blue-400);
+
+  --color-Label-AccentPrimary: var(--color-green-600);
+  --color-Label-Primary: var(--color-gray-100);
+  --color-Label-Secondary: var(--color-gray-300);
+  --color-Label-Tertiary: var(--color-gray-600);
+  --color-Label-Fixed_black: var(--color-black);
+
+  --color-bg-AccentPrimary: var(--color-green-600);
+  --color-bg-Primary: var(--color-gray-1200);
+  --color-bg-Secondary: var(--color-gray-1000);
+  --color-bg-Tertiary: var(--color-gray-900);
+  --color-bg-basic: var(--color-gray-1300);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-gray-1300);
+  --color-foreground: var(--color-gray-90);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-gray-1300);
+    --foreground: var(--color-gray-90);
   }
 }
 
@@ -26,20 +54,13 @@
   /* 1024px */
   --breakpoint-xl: 90rem;
   /* 1440px */
-  /* Background Color Hierarchy */
-  --color-gray-10: oklch(0.213 0 0);
-  /* #1A1A1A */
-  --color-surface-primary: oklch(0.13 0 0);
-  /* #0a0a0a - 가장 어두운 배경 (페이지 배경) */
-  --color-surface-secondary: oklch(0.16 0 0);
-  /* #141414 - 카드/섹션 배경 */
-  --color-surface-tertiary: var(--color-gray-10);
-  /* #1a1a1a - 내부 요소 배경 */
-  --color-surface-elevated: oklch(0.22 0 0);
-  /* #252525 - 호버/강조 배경 */
+  --max-width-layout: 45rem;
+  --width-layout: 100%;
 
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);
+  --color-card-bg: oklch(0.145 0 0);
+
   --color-gray-90: oklch(0.987 0.003 280);
   --color-gray-100: oklch(0.9794 0.0013 286.3756);
   --color-gray-200: oklch(0.9581 0 89.8756);
@@ -92,9 +113,15 @@
   --color-kakao-text: oklch(0.17 0.01 0);
   --color-kakao-icon: oklch(0.25 0.04 30);
   --color-naver: oklch(0.65 0.17 155);
-  --color-naver-hover: oklch(0.60 0.16 155);
-  --color-dark-olive: oklch(0.30 0.04 120);
+  --color-naver-hover: oklch(0.6 0.16 155);
+
+  --color-dark-olive: oklch(0.3 0.04 120);
   --color-bg-dark: oklch(0.15 0.02 120);
+  --color-bg-AccentPrimary: var(--color-green-600);
+  --color-bg-Primary: var(--color-white);
+  --color-bg-Secondary: var(--color-gray-200);
+  --color-bg-Tertiary: var(--color-gray-300);
+  --color-bg-basic: var(--color-gray-90);
 
   --color-Position-FW-Red: oklch(0.627 0.258 29.2);
   --color-Position-MF-Green: oklch(0.866 0.176 142.1);
@@ -106,10 +133,18 @@
   --color-Label-Tertiary: var(--color-gray-400);
   --color-Label-AccentPrimary: var(--color-green-600);
   --color-Label-Fixed_black: var(--color-black);
+
+  --color-background: var(--background);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --width-layout: 45rem;
+  }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-pretendard);
   line-height: normal;

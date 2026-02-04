@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import RelayProvider from "@/components/RelayProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -21,9 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body className={`${pretendard.variable} w-screen h-screen antialiased`}>
-        <RelayProvider>{children}</RelayProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <RelayProvider>{children}</RelayProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
