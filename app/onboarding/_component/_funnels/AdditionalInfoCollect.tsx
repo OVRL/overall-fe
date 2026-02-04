@@ -99,18 +99,23 @@ const AdditionalInfoCollect = ({
           />
         </div>
       </div>
-      <Button
-        variant="primary"
-        size="xl"
-        onClick={handleClick}
-        disabled={!isFormFilled}
-        className={cn(
-          "w-full transition-colors",
-          !isFormFilled && "bg-gray-900 text-Label-Tertiary",
-        )}
-      >
-        다음
-      </Button>
+      <div className="flex flex-col gap-y-4">
+        <Button
+          variant="primary"
+          size="xl"
+          onClick={handleClick}
+          disabled={!isFormFilled}
+          className={cn(
+            "w-full transition-colors",
+            !isFormFilled && "bg-gray-900 text-Label-Tertiary",
+          )}
+        >
+          다음
+        </Button>
+        <Button variant="line" size="xl" onClick={handleClick}>
+          다음에 작성하기
+        </Button>
+      </div>
     </section>
   );
 };

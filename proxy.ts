@@ -146,11 +146,6 @@ export async function proxy(request: NextRequest) {
   const isPublic = PUBLIC_ROUTES.some((pattern) => pattern.test(pathname));
   const isPrivate = !isGuestOnly && !isPublic;
 
-  console.log("pathname", pathname);
-  console.log("isGuestOnly", isGuestOnly);
-  console.log("isPublic", isPublic);
-  console.log("isPrivate", isPrivate);
-
   // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우)
   const checkAuth = async (): Promise<{
     isAuthenticated: boolean;

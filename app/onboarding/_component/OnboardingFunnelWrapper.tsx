@@ -81,7 +81,7 @@ const OnboardingFunnelWrapper = () => {
           </Funnel.Step>
           <Funnel.Step name="subFormation">
             <SubFormationCollect
-              onNext={handleNext("additional")}
+              onNext={handleNext("profile")}
               data={formData}
               onDataChange={setFormData}
             />
