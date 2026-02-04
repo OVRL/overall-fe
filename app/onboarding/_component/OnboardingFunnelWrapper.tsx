@@ -10,7 +10,6 @@ import PlayerNameCollect from "./_funnels/PlayerNameCollect";
 import BirthDayCollect from "./_funnels/BirthDayCollect";
 import MainFormationCollect from "./_funnels/MainFormationCollect";
 import SubFormationCollect from "./_funnels/SubFormationCollect";
-import ProfileImageCollect from "./_funnels/ProfileImageCollect";
 import AdditionalInfoCollect from "./_funnels/AdditionalInfoCollect";
 import OnboardingCompletion from "./_funnels/OnboardingCompletion";
 import { OnboardingState } from "@/types/onboarding";
@@ -81,19 +80,11 @@ const OnboardingFunnelWrapper = () => {
           </Funnel.Step>
           <Funnel.Step name="subFormation">
             <SubFormationCollect
-              onNext={handleNext("profile")}
-              data={formData}
-              onDataChange={setFormData}
-            />
-          </Funnel.Step>
-          <Funnel.Step name="profile">
-            <ProfileImageCollect
               onNext={handleNext("additional")}
               data={formData}
               onDataChange={setFormData}
             />
           </Funnel.Step>
-
           <Funnel.Step name="additional">
             <AdditionalInfoCollect
               onNext={handleNext("complete")}
