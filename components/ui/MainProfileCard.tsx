@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
 import PositionChip from "../PositionChip";
@@ -6,7 +7,7 @@ import PlayerProfileDim from "./PlayerProfileDim";
 
 interface MainProfileCardProps {
   imgUrl: string;
-  bgUrl: string;
+  bgUrl?: string;
   playerName: string;
   mainPosition: Position;
   backNumber: number;
@@ -27,17 +28,23 @@ const MainProfileCard = ({
         "relative w-32 h-42 bg-cover bg-center rounded-[10px] overflow-hidden shadow-md",
         className,
       )}
-      style={{ backgroundImage: `url(${bgUrl})` }}
     >
+      <Image
+        src={bgUrl || "/images/card-bg.webp"}
+        alt={`${playerName} background card`}
+        fill
+        priority
+        className="object-cover"
+      />
       <div className="absolute top-4 left-2 w-50 h-50 scale-90 origin-top-left pointer-events-none">
         <ImgPlayer
           src={imgUrl}
           alt={playerName}
-          className="w-full h-full bg-transparent"
+          className="w-full h-full bg-transparent z-10"
         />
       </div>
 
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-full text-center z-10">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-full text-center z-20">
         <span className="text-sm font-bold text-white drop-shadow-md">
           {playerName}
         </span>
