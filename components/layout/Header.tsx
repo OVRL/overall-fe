@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 const defaultMenuItems: MenuItem[] = [
-    { label: "팀 관리", href: "/home" },
+    { label: "팀 관리", href: "/team-management" },
     { label: "팀 데이터", href: "/team-data" },
     { label: "선수 목록", href: "#" },
     { label: "경기 기록", href: "/formation" },
