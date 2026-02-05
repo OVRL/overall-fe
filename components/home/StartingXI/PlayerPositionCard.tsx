@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import SeasonChip, { SeasonType } from "@/components/ui/SeasonChip";
+import ImgPlayer from "@/components/ui/ImgPlayer";
 
 export interface Player {
     id: number;
@@ -50,11 +50,10 @@ const PlayerPositionCard = ({
             {/* 선수 아바타 */}
             <div className="relative">
                 <div className="w-14 h-20 md:w-20 md:h-28 relative -mt-4 md:-mt-8">
-                    <Image
+                    <ImgPlayer
                         src={playerImage}
                         alt={player.name}
-                        fill
-                        className="object-contain"
+                        className="w-full h-full object-contain bg-transparent"
                         onError={() => setImageError(true)}
                     />
                 </div>
@@ -83,3 +82,4 @@ const PlayerPositionCard = ({
 };
 
 export default PlayerPositionCard;
+

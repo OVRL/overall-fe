@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import PositionChip from "@/components/PositionChip";
 import SeasonChip, { SeasonType } from "@/components/ui/SeasonChip";
-import type { Position } from "@/components/PositionChip";
+import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { Position } from "@/types/position";
 
 export interface Player {
     id: number;
@@ -52,15 +52,12 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
             {/* 선수 정보 */}
             <div className="flex items-center gap-2 md:gap-3">
                 {/* 선수 이미지 */}
-                <div className="relative w-8 h-12 md:w-12 md:h-16 shrink-0">
-                    <Image
-                        src={playerImage}
-                        alt={player.name}
-                        fill
-                        className="object-contain"
-                        onError={() => setImageError(true)}
-                    />
-                </div>
+                <ProfileAvatar
+                    src={playerImage}
+                    alt={player.name}
+                    size="xs"
+                    onError={() => setImageError(true)}
+                />
 
                 {/* 연도 배지 */}
                 <SeasonChip
@@ -81,3 +78,4 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
 };
 
 export default PlayerListItem;
+
