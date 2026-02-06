@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import SeasonChip, { SeasonType } from "@/components/ui/SeasonChip";
 
 export interface Player {
     id: number;
@@ -68,12 +67,7 @@ const PlayerPositionCard = ({
             </div>
 
             {/* 선수 이름 */}
-            <div className="flex items-center gap-0.5 md:gap-1.5 -mt-3 md:-mt-5 max-w-16 md:max-w-none justify-center z-10">
-                <SeasonChip
-                    season={player.season || "26"}
-                    type={player.seasonType as SeasonType || "general"}
-                    className="scale-[0.8] md:scale-100 shadow-sm shrink-0"
-                />
+            <div className="flex items-center -mt-3 md:-mt-5 max-w-16 md:max-w-none justify-center z-10">
                 <span className="text-[0.5625rem] md:text-[0.875rem] text-white font-bold whitespace-nowrap drop-shadow-md truncate">
                     {player.name}
                 </span>

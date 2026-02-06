@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import PositionChip from "@/components/PositionChip";
-import SeasonChip, { SeasonType } from "@/components/ui/SeasonChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { Position } from "@/types/position";
 
@@ -57,12 +56,6 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
                     alt={player.name}
                     size="xs"
                     onError={() => setImageError(true)}
-                />
-
-                {/* 연도 배지 */}
-                <SeasonChip
-                    season={player.season || "26"}
-                    type={player.seasonType as SeasonType || "general"}
                 />
 
                 {/* 선수 이름 */}
