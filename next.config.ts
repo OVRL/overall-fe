@@ -9,13 +9,16 @@ const nextConfig = {
       artifactDirectory: "./__generated__",
     },
   },
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-
-    return config;
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["turbopack-inline-svg-loader"],
+        as: "*.js",
+        condition: {
+          content: /^[\s\S]{0,4000}$/,
+        },
+      },
+    },
   },
   async rewrites() {
     return [
