@@ -68,8 +68,24 @@ enum Position {
 }
 
 type Query {
+  region_search(keyword: String!): RegionSearch!
   user(email: String!): User!
   users(limit: Int! = 10, offset: Int! = 0): Users!
+}
+
+type RegionSearch {
+  hasNextPage: Boolean!
+  items: [RegionSearchItem!]!
+  totalCount: Int!
+}
+
+type RegionSearchItem {
+  code: String!
+  dongName: String
+  name: String!
+  riName: String
+  sidoName: String!
+  siggName: String
 }
 
 input SignUpInput {
@@ -92,10 +108,10 @@ input SignUpInput {
 input UpdateUserInput {
   activityArea: String
   birthDate: String
-  email: String!
   favoritePlayer: String
   foot: Foot
   gender: Gender
+  id: Float!
   mainPosition: Position
   name: String
   password: String
@@ -108,21 +124,21 @@ input UpdateUserInput {
 
 type User {
   accessToken: String
-  activityArea: String!
-  birthDate: String!
+  activityArea: String
+  birthDate: String
   email: String!
-  favoritePlayer: String!
-  foot: Foot!
-  gender: Gender!
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
   id: ID!
-  mainPosition: Position!
-  name: String!
-  phone: String!
-  preferredNumber: Float!
-  profileImage: String!
-  provider: String!
+  mainPosition: Position
+  name: String
+  phone: String
+  preferredNumber: Float
+  profileImage: String
+  provider: String
   refreshToken: String
-  subPositions: [Position!]!
+  subPositions: [Position!]
 }
 
 type Users {

@@ -26,9 +26,15 @@ type Step =
   | "profile"
   | "additional";
 
-const OnboardingFunnelWrapper = () => {
+interface OnboardingFunnelWrapperProps {
+  userId?: number;
+}
+
+const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
   const { Funnel, setStep, goBack, step } = useFunnel<Step>("phone");
-  const [formData, setFormData] = useState<Partial<OnboardingState>>({});
+  const [formData, setFormData] = useState<Partial<OnboardingState>>({
+    id: userId,
+  });
   const handleNext = (nextStep: Step) => () => setStep(nextStep);
 
   return (
