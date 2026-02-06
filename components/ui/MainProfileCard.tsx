@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import ImgPlayer from "./ImgPlayer";
 import PositionChip from "../PositionChip";
 import { Position } from "@/types/position";
 import PlayerProfileDim from "./PlayerProfileDim";
@@ -36,12 +35,15 @@ const MainProfileCard = ({
         priority
         className="object-cover"
       />
-      <div className="absolute top-4 left-2 w-50 h-50 scale-90 origin-top-left pointer-events-none">
-        <ImgPlayer
-          src={imgUrl}
-          alt={playerName}
-          className="w-full h-full bg-transparent z-10"
-        />
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
+        <div className="relative w-full h-full">
+          <Image
+            src={imgUrl}
+            alt={playerName}
+            fill
+            className="object-contain object-bottom z-10"
+          />
+        </div>
       </div>
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-full text-center z-20">
@@ -50,7 +52,7 @@ const MainProfileCard = ({
         </span>
       </div>
 
-      <div className="absolute flex flex-col justify-center items-center top-2 left-1.75">
+      <div className="absolute flex flex-col justify-center items-center top-2 left-1.75 z-20">
         <span className="text-2xl font-bold text-white leading-8">
           {backNumber}
         </span>
