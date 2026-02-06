@@ -14,7 +14,9 @@ const ProfileImageCollect = ({
   data,
   onDataChange,
 }: OnboardingStepProps) => {
-  const [profileImage, setProfileImage] = useState(data.profileImage || "");
+  const [profileImage, setProfileImage] = useState(
+    data.profileImage || "/images/player/img_player-3.png",
+  );
 
   const specificPosition = (data.mainPosition as Position) || "FW";
 
@@ -43,6 +45,9 @@ const ProfileImageCollect = ({
 
         <ImageUploader
           onFileSelect={(file) => setProfileImage(URL.createObjectURL(file))}
+          previewHeight="calc(100dvh - 26.5625rem)"
+          currentImage={profileImage}
+          onDefaultImageSelect={(image) => setProfileImage(image)}
         />
       </div>
       <Button

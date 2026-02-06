@@ -135,6 +135,7 @@
   --color-bg-Secondary: var(--color-gray-200);
   --color-bg-Tertiary: var(--color-gray-300);
   --color-bg-basic: var(--color-gray-90);
+  --color-bg-modal: oklch(0.213 0 0);
 
   --color-Position-FW-Red: oklch(0.627 0.258 29.2);
   --color-Position-MF-Green: oklch(0.866 0.176 142.1);
@@ -161,4 +162,12 @@ body {
   color: var(--foreground);
   font-family: var(--font-pretendard);
   line-height: normal;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
