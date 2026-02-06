@@ -204,7 +204,7 @@ function PlayerDetailModal({ isOpen, onClose, player }: PlayerDetailModalProps) 
 
     return (
         <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn"
             onClick={onClose}
         >
             <div
@@ -339,7 +339,7 @@ function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCard
     const top4Players = players.slice(0, 4);
 
     return (
-        <div className="bg-[#121212] rounded-[24px] p-6 flex flex-col border border-gray-800 min-w-[320px] flex-shrink-0 relative select-none">
+        <div className="bg-[#121212] rounded-[24px] p-6 flex flex-col border border-gray-800 min-w-[320px] shrink-0 relative select-none">
             {/* 헤더 */}
             <h3 className="text-xl font-bold text-white text-center mb-8 tracking-wide">{title}</h3>
 
@@ -352,12 +352,12 @@ function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCard
                         onClick={() => onPlayerClick?.(player)}
                     >
                         {/* 순위 */}
-                        <span className={`font-black text-3xl italic w-8 text-center flex-shrink-0 ${index === 0 ? "text-[#D9E021]" : "text-white"}`} style={{ fontFamily: 'var(--font-oswald, sans-serif)' }}>
+                        <span className={`font-black text-3xl italic w-8 text-center shrink-0 ${index === 0 ? "text-[#D9E021]" : "text-white"}`} style={{ fontFamily: 'var(--font-oswald, sans-serif)' }}>
                             {index + 1}
                         </span>
 
                         {/* 선수 이미지 */}
-                        <div className="relative w-12 h-12 flex-shrink-0 rounded-full overflow-hidden">
+                        <div className="relative w-12 h-12 shrink-0 rounded-full overflow-hidden">
                             <Image
                                 src={player.image || "/images/ovr.png"}
                                 alt={player.name}
@@ -368,14 +368,14 @@ function RankingCard({ title, players, onMoreClick, onPlayerClick }: RankingCard
 
                         {/* 포지션 & 이름 */}
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <PositionChip position={player.position} variant="outline" className="text-[11px] px-1.5 py-0.5 font-bold border-red-500 text-red-500 bg-transparent flex-shrink-0" />
+                            <PositionChip position={player.position} variant="outline" className="text-[11px] px-1.5 py-0.5 font-bold border-red-500 text-red-500 bg-transparent shrink-0" />
                             <span className={`font-bold text-base truncate ${index === 0 ? "text-[#D9E021]" : "text-white"}`}>
                                 {player.name}
                             </span>
                         </div>
 
                         {/* 값 */}
-                        <span className={`font-bold text-xl text-right flex-shrink-0 ${index === 0 ? "text-[#D9E021]" : "text-white"}`}>
+                        <span className={`font-bold text-xl text-right shrink-0 ${index === 0 ? "text-[#D9E021]" : "text-white"}`}>
                             {player.value.replace(/[^0-9%]/g, '')}
                         </span>
                     </div>
@@ -420,11 +420,11 @@ function PlayerTable({ players, onPlayerClick, sortConfig, onSort }: PlayerTable
         <div className="mt-12 overflow-x-auto select-none">
             <table className="w-full text-sm">
                 <thead>
-                    <tr className="border-b border-gray-800">
+                    <tr className="bg-[#1a1a1a] border-b border-gray-800">
                         {fullColumns.map((col) => (
                             <th
                                 key={col}
-                                className={`${col === "이름" ? "text-left pl-6" : "text-center"} text-gray-500 font-medium py-4 px-2 whitespace-nowrap text-xs ${sortableColumns.includes(col) ? "cursor-pointer hover:text-white transition-colors" : ""}`}
+                                className={`${col === "이름" ? "text-left pl-6" : "text-center"} text-gray-500 font-medium py-3 px-2 whitespace-nowrap text-xs ${sortableColumns.includes(col) ? "cursor-pointer hover:text-white transition-colors" : ""}`}
                                 onClick={() => sortableColumns.includes(col) && onSort?.(col)}
                             >
                                 {col}
@@ -453,7 +453,7 @@ function PlayerTable({ players, onPlayerClick, sortConfig, onSort }: PlayerTable
                             {/* 이름 (팀명 제거, 가로 정렬) */}
                             <td className="py-4 px-2 pl-6">
                                 <div className="flex items-center gap-3 justify-start">
-                                    <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                                    <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
                                         <Image
                                             src={player.image || "/images/ovr.png"}
                                             alt={player.name}
@@ -727,17 +727,35 @@ export default function TeamDataPage() {
                     )}
                 </div>
 
-                {/* 검색 박스 - 왼쪽 정렬 */}
-                <div className="flex justify-start gap-2 mb-4 mt-8">
+                {/* 검색 박스 - 모바일 (버튼 분리) */}
+                <div className="md:hidden flex w-full items-center gap-3 mb-6 mt-8">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="선수 검색"
+                        className="flex-1 bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-primary transition-colors placeholder:text-gray-500"
+                    />
+                    <button
+                        onClick={handleSearch}
+                        className="bg-[#1a1a1a] border border-gray-800 rounded-lg px-5 py-3 text-gray-400 text-sm hover:bg-gray-800 hover:text-white transition-colors whitespace-nowrap font-medium"
+                    >
+                        검색
+                    </button>
+                </div>
+
+                {/* 검색 박스 - PC (기존 디자인: 아이콘 포함, 왼쪽 정렬) */}
+                <div className="hidden md:flex justify-start gap-2 mb-4 mt-8">
                     <div className="relative">
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="선수 검색"
-                            className="w-full md:w-64 bg-[#1a1a1a] border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition-colors"
+                            className="w-64 bg-[#1a1a1a] border border-gray-800 rounded-lg pl-4 pr-10 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition-colors"
                         />
                         <button
+                            onClick={handleSearch}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
