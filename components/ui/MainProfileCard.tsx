@@ -11,6 +11,9 @@ interface MainProfileCardProps {
   mainPosition: Position;
   backNumber: number;
   className?: string;
+  nameClassName?: string;
+  numberClassName?: string;
+  positionClassName?: string;
 }
 
 const MainProfileCard = ({
@@ -20,6 +23,9 @@ const MainProfileCard = ({
   mainPosition,
   backNumber,
   className,
+  nameClassName,
+  numberClassName,
+  positionClassName,
 }: MainProfileCardProps) => {
   return (
     <div
@@ -47,20 +53,20 @@ const MainProfileCard = ({
       </div>
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-full text-center z-20">
-        <span className="text-sm font-bold text-white drop-shadow-md">
+        <span className={cn("text-sm font-bold text-white drop-shadow-md", nameClassName)}>
           {playerName}
         </span>
       </div>
 
       <div className="absolute flex flex-col justify-center items-center top-2 left-1.75 z-20">
-        <span className="text-2xl font-bold text-white leading-8">
+        <span className={cn("text-2xl font-bold text-white leading-8", numberClassName)}>
           {backNumber}
         </span>
 
         <PositionChip
           position={mainPosition}
           variant="filled"
-          className="text-[10px] px-1 py-0.5 h-auto"
+          className={cn("text-[10px] px-1 py-0.5 h-auto", positionClassName)}
         />
       </div>
       <PlayerProfileDim />
