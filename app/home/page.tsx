@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import Header from "@/components/layout/Header";
 import UpcomingMatch from "@/components/home/UpcomingMatch";
 import StartingXI from "@/components/home/StartingXI";
-import PlayerCard from "@/components/home/PlayerCard/PlayerCard";
+import PlayerCard from "@/components/home/PlayerCard";
 import PlayerList from "@/components/home/PlayerList";
 
 interface Player {
@@ -230,7 +230,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-surface-primary">
       <Header showTeamSelector selectedTeam="바르셀로나 FC" />
 
-      <main className="max-w-350 mx-auto p-8">
+      <main className="max-w-[1400px] mx-auto p-8">
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
           {/* Left: Next Match + Starting XI */}
           <div>

@@ -229,9 +229,6 @@ function PlayerDetailModal({ isOpen, onClose, player }: PlayerDetailModalProps) 
                         mainPosition={player.position}
                         backNumber={player.backNumber}
                         className="w-48 h-64"
-                        nameClassName="text-3xl"
-                        numberClassName="text-5xl"
-                        positionClassName="text-sm px-2.5 py-1"
                     />
                 </div>
 
