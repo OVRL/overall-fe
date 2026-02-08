@@ -1,15 +1,13 @@
 import { create } from "zustand";
-import { ModalKey, ModalPropsMap } from "@/components/modals/types";
-
-export interface ModalInstance<T extends ModalKey = ModalKey> {
-  id: string; // 각 모달 인스턴스의 고유 ID
-  key: T;
-  props: ModalPropsMap[T];
-}
+import {
+  ModalKey,
+  ModalPropsMap,
+  ModalInstance,
+} from "@/components/modals/types";
 
 interface ModalState {
   modals: ModalInstance[];
-  showModal: <T extends ModalKey>(key: T, props?: ModalPropsMap[T]) => string;
+  showModal: <T extends ModalKey>(key: T, props: ModalPropsMap[T]) => string;
   closeModal: (id: string) => void;
   closeAll: () => void;
 }
@@ -24,8 +22,8 @@ export const useModalStore = create<ModalState>((set) => ({
         {
           id,
           key,
-          props: props as any,
-        },
+          props, // any casting removed, assuming correct props passed
+        } as ModalInstance, // Explicit cast to union if inference fails or to satisfy union
       ],
     }));
     return id;

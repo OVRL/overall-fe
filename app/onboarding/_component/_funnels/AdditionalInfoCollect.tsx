@@ -10,6 +10,7 @@ import SelectGender from "../SelectGender";
 
 import { useModifyUserMutation } from "../../_hooks/useModifyUserMutation";
 import { UpdateUserInput } from "@/__generated__/useModifyUserMutation.graphql";
+import useModal from "@/hooks/useModal";
 
 const AdditionalInfoCollect = ({
   onNext,
@@ -25,6 +26,7 @@ const AdditionalInfoCollect = ({
   });
 
   const [commit, isMutationInFlight] = useModifyUserMutation();
+  const { openModal } = useModal("ADDRESS_SEARCH");
 
   const handleComplete = () => {
     onDataChange((prev) => ({
@@ -106,15 +108,23 @@ const AdditionalInfoCollect = ({
               }))
             }
           />
-          <AuthTextField
-            label="활동지역"
-            placeholder="주소검색"
-            type="text"
-            value={info.activityArea}
-            onChange={(e) =>
-              setInfo((prev) => ({ ...prev, activityArea: e.target.value }))
+          <div
+            onClick={() =>
+              openModal({
+                onComplete: (address) =>
+                  setInfo((prev) => ({ ...prev, activityArea: address })),
+              })
             }
-          />
+          >
+            <AuthTextField
+              label="활동지역"
+              placeholder="주소검색"
+              type="text"
+              value={info.activityArea}
+              readOnly
+              className="pointer-events-none"
+            />
+          </div>
 
           <SelectMainFoot
             mainFoot={info.foot}

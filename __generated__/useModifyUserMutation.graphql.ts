@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9c3376947f0ae28f4740813c5440033e>>
+ * @generated SignedSource<<4dbf2f35f7197b2ebc09ea647dff7c05>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,10 +15,10 @@ export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" |
 export type UpdateUserInput = {
   activityArea?: string | null | undefined;
   birthDate?: string | null | undefined;
-  email: string;
   favoritePlayer?: string | null | undefined;
   foot?: Foot | null | undefined;
   gender?: Gender | null | undefined;
+  id: number;
   mainPosition?: Position | null | undefined;
   name?: string | null | undefined;
   password?: string | null | undefined;
@@ -33,14 +33,14 @@ export type useModifyUserMutation$variables = {
 };
 export type useModifyUserMutation$data = {
   readonly modifyUser: {
-    readonly activityArea: string;
+    readonly activityArea: string | null | undefined;
     readonly email: string;
-    readonly favoritePlayer: string;
-    readonly foot: Foot;
-    readonly gender: Gender;
+    readonly favoritePlayer: string | null | undefined;
+    readonly foot: Foot | null | undefined;
+    readonly gender: Gender | null | undefined;
     readonly id: string;
-    readonly name: string;
-    readonly preferredNumber: number;
+    readonly name: string | null | undefined;
+    readonly preferredNumber: number | null | undefined;
   };
 };
 export type useModifyUserMutation = {

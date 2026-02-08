@@ -8,6 +8,9 @@ export interface ModalPropsMap {
     initialImage: string;
     onSave: (image: string) => void;
   };
+  ADDRESS_SEARCH: {
+    onComplete: (address: string) => void;
+  };
 }
 
 export type ModalKey = keyof ModalPropsMap;
@@ -15,3 +18,11 @@ export type ModalKey = keyof ModalPropsMap;
 export type ModalComponentMap = {
   [K in ModalKey]: ComponentType<ModalPropsMap[K]>;
 };
+
+export type ModalInstance = {
+  [K in ModalKey]: {
+    id: string;
+    key: K;
+    props: ModalPropsMap[K];
+  };
+}[ModalKey];

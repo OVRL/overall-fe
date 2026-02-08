@@ -31,7 +31,7 @@ interface OnboardingFunnelWrapperProps {
 }
 
 const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
-  const { Funnel, setStep, goBack, step } = useFunnel<Step>("profile");
+  const { Funnel, setStep, goBack, step } = useFunnel<Step>("additional");
   const [formData, setFormData] = useState<Partial<OnboardingState>>({
     id: userId,
   });
