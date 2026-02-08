@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "@/styles/globals.css";
 import RelayProvider from "@/components/RelayProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { GlobalPortalProvider } from "@/components/GlobalPortal";
+import Modals from "@/components/modals/Modals";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -32,6 +34,9 @@ export default function RootLayout({
         >
           <RelayProvider>{children}</RelayProvider>
         </ThemeProvider>
+        <GlobalPortalProvider>
+          <Modals />
+        </GlobalPortalProvider>
       </body>
     </html>
   );

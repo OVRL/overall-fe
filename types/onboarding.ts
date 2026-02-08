@@ -22,6 +22,7 @@ export const onboardingSchema = z.object({
   foot: z.enum(["L", "R", "B"]).optional(),
   preferredNumber: z.number().optional(),
   favoritePlayer: z.string().optional(),
+  id: z.number(),
 });
 
 export type OnboardingState = z.infer<typeof onboardingSchema>;

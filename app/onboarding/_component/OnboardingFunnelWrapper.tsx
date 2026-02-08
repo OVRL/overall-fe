@@ -13,7 +13,7 @@ import SubFormationCollect from "./_funnels/SubFormationCollect";
 import AdditionalInfoCollect from "./_funnels/AdditionalInfoCollect";
 import OnboardingCompletion from "./_funnels/OnboardingCompletion";
 import { OnboardingState } from "@/types/onboarding";
-
+import ProfileImageCollect from "./_funnels/ProfileImageCollect";
 type Step =
   | "phone"
   | "name"
@@ -26,9 +26,15 @@ type Step =
   | "profile"
   | "additional";
 
-const OnboardingFunnelWrapper = () => {
-  const { Funnel, setStep, goBack, step } = useFunnel<Step>("phone");
-  const [formData, setFormData] = useState<Partial<OnboardingState>>({});
+interface OnboardingFunnelWrapperProps {
+  userId?: number;
+}
+
+const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
+  const { Funnel, setStep, goBack, step } = useFunnel<Step>("profile");
+  const [formData, setFormData] = useState<Partial<OnboardingState>>({
+    id: userId,
+  });
   const handleNext = (nextStep: Step) => () => setStep(nextStep);
 
   return (
@@ -94,6 +100,13 @@ const OnboardingFunnelWrapper = () => {
           </Funnel.Step>
           <Funnel.Step name="complete">
             <OnboardingCompletion />
+          </Funnel.Step>
+          <Funnel.Step name="profile">
+            <ProfileImageCollect
+              onNext={handleNext("complete")}
+              data={formData}
+              onDataChange={setFormData}
+            />
           </Funnel.Step>
         </Funnel>
       </div>

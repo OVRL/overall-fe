@@ -43,6 +43,7 @@ const ProfileImageCollect = ({
 
         <ImageUploader
           onFileSelect={(file) => setProfileImage(URL.createObjectURL(file))}
+          previewHeight="calc(100dvh - 26.5625rem)"
         />
       </div>
       <Button
