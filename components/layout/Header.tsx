@@ -49,7 +49,7 @@ const TeamSelector = ({
                 className="object-cover"
             />
         </div>
-        <span className="text-black text-xs lg:text-sm font-medium truncate max-w-[80px] lg:max-w-none">{selectedTeam}</span>
+
         <span className="text-black text-xs">▼</span>
     </button>
 );
@@ -127,9 +127,7 @@ export default function Header({
                         />
                     </Link>
 
-                    {showTeamSelector && (
-                        <TeamSelector selectedTeam={selectedTeam} onClick={onTeamSelect} />
-                    )}
+
                 </div>
 
                 {/* 네비게이션 */}
