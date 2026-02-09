@@ -3,13 +3,17 @@ import { useDebounce } from "@toss/react";
 import useModal from "@/hooks/useModal";
 
 interface UseAddressSearchProps {
-  onComplete: (address: string) => void;
+  onComplete: (result: { address: string; code: string }) => void;
 }
 
 export const useAddressSearch = ({ onComplete }: UseAddressSearchProps) => {
   const { hideModal } = useModal();
   const [inputValue, setInputValue] = useState("");
   const [debouncedValue, setDebouncedValue] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState<{
+    address: string;
+    code: string;
+  } | null>(null);
 
   const debouncedUpdate = useDebounce((value: string) => {
     setDebouncedValue(value);
@@ -19,9 +23,15 @@ export const useAddressSearch = ({ onComplete }: UseAddressSearchProps) => {
     debouncedUpdate(inputValue);
   }, [inputValue, debouncedUpdate]);
 
-  const handleSelect = (address: string) => {
-    onComplete(address);
-    hideModal();
+  const handleSelect = (address: string, code: string) => {
+    setSelectedAddress({ address, code });
+  };
+
+  const handleComplete = () => {
+    if (selectedAddress) {
+      onComplete(selectedAddress);
+      hideModal();
+    }
   };
 
   const keyword = String(debouncedValue ?? "").trim();
@@ -31,6 +41,8 @@ export const useAddressSearch = ({ onComplete }: UseAddressSearchProps) => {
     setInputValue,
     keyword,
     handleSelect,
+    handleComplete,
     hideModal,
+    selectedAddress,
   };
 };

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import AdditionalInfoCollect from "../AdditionalInfoCollect";
 import "@testing-library/jest-dom";
 
@@ -52,11 +52,10 @@ describe("AdditionalInfoCollect", () => {
     const modalProps = mockOpenModal.mock.calls[0][0];
     // Assuming ADDRESS_SEARCH props: { onComplete: (address) => void }
     if (modalProps && modalProps.onComplete) {
-      modalProps.onComplete("서울");
+      act(() => {
+        modalProps.onComplete({ address: "서울", code: "1111111111" });
+      });
     }
-
-    // 2. 주발 (Default R is set in state, assuming component handles default)
-    // If not, we might need to select it. But let's assume default "R" is valid.
 
     // 3. 선호하는 등번호
     const numInput = screen.getByLabelText("선호하는 등번호");
@@ -74,8 +73,5 @@ describe("AdditionalInfoCollect", () => {
 
     // Verify mutation called
     expect(mockCommit).toHaveBeenCalled();
-    // Verify onNext called (simulating success usually requires mock implementation to call onCompleted,
-    // but here we just check if commit is called. The original test checked mockOnDataChange and mockOnNext,
-    // which happens in onCompleted. We might need to simulate onCompleted if we want to check those.)
   });
 });

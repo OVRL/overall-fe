@@ -5,9 +5,11 @@ import DefaultAddressList from "./DefaultAddressList";
 const AddressListSection = ({
   keyword,
   onSelect,
+  selectedCode,
 }: {
   keyword: string;
-  onSelect: (address: string) => void;
+  onSelect: (address: string, code: string) => void;
+  selectedCode?: string | null;
 }) => (
   <div className="flex flex-col pl-3">
     <span className="font-semibold text-sm leading-4 text-Label-Primary mb-2">
@@ -21,10 +23,14 @@ const AddressListSection = ({
           </div>
         }
       >
-        <SearchResultList keyword={keyword} onSelect={onSelect} />
+        <SearchResultList
+          keyword={keyword}
+          onSelect={onSelect}
+          selectedCode={selectedCode}
+        />
       </Suspense>
     ) : (
-      <DefaultAddressList onSelect={onSelect} />
+      <DefaultAddressList onSelect={onSelect} selectedCode={selectedCode} />
     )}
   </div>
 );

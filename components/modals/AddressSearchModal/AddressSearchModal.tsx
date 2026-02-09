@@ -8,13 +8,19 @@ import SearchInputSection from "./SearchInputSection";
 import AddressListSection from "./AddressListSection";
 
 interface AddressSearchModalProps {
-  onComplete: (address: string) => void;
+  onComplete: (result: { address: string; code: string }) => void;
 }
 
 const AddressSearchModal = ({ onComplete }: AddressSearchModalProps) => {
   const id = useId();
-  const { inputValue, setInputValue, keyword, handleSelect, hideModal } =
-    useAddressSearch({ onComplete });
+  const {
+    inputValue,
+    setInputValue,
+    keyword,
+    handleSelect,
+    handleComplete,
+    selectedAddress,
+  } = useAddressSearch({ onComplete });
 
   const environment = getClientEnvironment();
 
@@ -27,8 +33,17 @@ const AddressSearchModal = ({ onComplete }: AddressSearchModalProps) => {
             value={inputValue}
             onChange={setInputValue}
           />
-          <AddressListSection keyword={keyword} onSelect={handleSelect} />
-          <Button variant="primary" size="xl" onClick={hideModal}>
+          <AddressListSection
+            keyword={keyword}
+            onSelect={handleSelect}
+            selectedCode={selectedAddress?.code}
+          />
+          <Button
+            variant="primary"
+            size="xl"
+            onClick={handleComplete}
+            disabled={!selectedAddress}
+          >
             완료
           </Button>
         </div>

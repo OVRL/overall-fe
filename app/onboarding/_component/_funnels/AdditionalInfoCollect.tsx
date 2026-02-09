@@ -20,6 +20,7 @@ const AdditionalInfoCollect = ({
   const [info, setInfo] = useState({
     gender: (data.gender as "M" | "W") || "M",
     activityArea: data.activityArea || "",
+    activityAreaCode: "",
     foot: (data.foot as "L" | "R" | "B") || "R",
     preferredNumber: data.preferredNumber?.toString() || "",
     favoritePlayer: data.favoritePlayer || "",
@@ -46,7 +47,7 @@ const AdditionalInfoCollect = ({
           ...data,
           email: data.email,
           gender: info.gender,
-          activityArea: info.activityArea,
+          activityArea: info.activityAreaCode || info.activityArea,
           foot: info.foot,
           preferredNumber: info.preferredNumber
             ? parseFloat(info.preferredNumber)
@@ -64,7 +65,6 @@ const AdditionalInfoCollect = ({
   };
 
   const handleLater = () => {
-    // Exclude current step's fields from previous data
     const previousData = { ...data };
     delete previousData.gender;
     delete previousData.activityArea;
@@ -109,12 +109,32 @@ const AdditionalInfoCollect = ({
             }
           />
           <div
+            role="button"
+            tabIndex={0}
+            className="cursor-pointer outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
             onClick={() =>
               openModal({
-                onComplete: (address) =>
-                  setInfo((prev) => ({ ...prev, activityArea: address })),
+                onComplete: ({ address, code }) =>
+                  setInfo((prev) => ({
+                    ...prev,
+                    activityArea: address,
+                    activityAreaCode: code,
+                  })),
               })
             }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openModal({
+                  onComplete: ({ address, code }) =>
+                    setInfo((prev) => ({
+                      ...prev,
+                      activityArea: address,
+                      activityAreaCode: code,
+                    })),
+                });
+              }
+            }}
           >
             <AuthTextField
               label="활동지역"

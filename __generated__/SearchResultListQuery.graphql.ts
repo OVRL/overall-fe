@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<db616a948179d7f1beeebb0779a924a6>>
+ * @generated SignedSource<<1c9d8dbab24bd32bbe426c87ae3bb414>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,11 +9,12 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type AddressSearchModalQuery$variables = {
+export type SearchResultListQuery$variables = {
   keyword: string;
 };
-export type AddressSearchModalQuery$data = {
+export type SearchResultListQuery$data = {
   readonly region_search: {
+    readonly hasNextPage: boolean;
     readonly items: ReadonlyArray<{
       readonly code: string;
       readonly dongName: string | null | undefined;
@@ -24,9 +25,9 @@ export type AddressSearchModalQuery$data = {
     }>;
   };
 };
-export type AddressSearchModalQuery = {
-  response: AddressSearchModalQuery$data;
-  variables: AddressSearchModalQuery$variables;
+export type SearchResultListQuery = {
+  response: SearchResultListQuery$data;
+  variables: SearchResultListQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -52,6 +53,13 @@ v1 = [
     "name": "region_search",
     "plural": false,
     "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "hasNextPage",
+        "storageKey": null
+      },
       {
         "alias": null,
         "args": null,
@@ -114,7 +122,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "AddressSearchModalQuery",
+    "name": "SearchResultListQuery",
     "selections": (v1/*: any*/),
     "type": "Query",
     "abstractKey": null
@@ -123,20 +131,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "AddressSearchModalQuery",
+    "name": "SearchResultListQuery",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "61a99730bf89091cf4b26bb7b8c66780",
+    "cacheID": "8322e0836413bb2270596a49c7a561f7",
     "id": null,
     "metadata": {},
-    "name": "AddressSearchModalQuery",
+    "name": "SearchResultListQuery",
     "operationKind": "query",
-    "text": "query AddressSearchModalQuery(\n  $keyword: String!\n) {\n  region_search(keyword: $keyword) {\n    items {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n}\n"
+    "text": "query SearchResultListQuery(\n  $keyword: String!\n) {\n  region_search(keyword: $keyword) {\n    hasNextPage\n    items {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "9e66108a056b78d303fe56e756b77e70";
+(node as any).hash = "78b0b8ecfa11c4e8908629ee83148a01";
 
 export default node;

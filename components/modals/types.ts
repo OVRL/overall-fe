@@ -9,7 +9,7 @@ export interface ModalPropsMap {
     onSave: (image: string) => void;
   };
   ADDRESS_SEARCH: {
-    onComplete: (address: string) => void;
+    onComplete: (result: { address: string; code: string }) => void;
   };
 }
 

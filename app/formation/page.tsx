@@ -462,7 +462,7 @@ export default function FormationPage() {
 
                 remainingSlots.forEach(pos => {
                     const role = targetRoles[pos];
-                    let candidates = sortedPool.filter(p => !assignedIds.has(p.id));
+                    const candidates = sortedPool.filter(p => !assignedIds.has(p.id));
 
                     // Score
                     const scored = candidates.map(p => ({ p, score: calculateScore(p, role) }))

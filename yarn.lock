@@ -1368,7 +1368,7 @@
   resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-19.2.3.tgz"
   integrity sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==
 
-"@types/react-relay@^18.2.1":
+"@types/react-relay@*", "@types/react-relay@^18.2.1":
   version "18.2.1"
   resolved "https://registry.npmjs.org/@types/react-relay/-/react-relay-18.2.1.tgz"
   integrity sha512-KgmFapsxAylhxcFfaAv5GZZJhTHnDvV8IDZVsUm5afpJUvgZC1Y68ssfOGsFfiFY/2EhxHM/YPfpdKbfmF3Ecg==
@@ -1387,6 +1387,15 @@
   version "20.1.1"
   resolved "https://registry.npmjs.org/@types/relay-runtime/-/relay-runtime-20.1.1.tgz"
   integrity sha512-loM2iJteknnJcsxrynmBVb7pIDkSkJUuCMnAa/oDFcrvaxkDvq8iy0J2UshMdDy14iJJocDblXeAu7c6Q1+Ucw==
+
+"@types/relay-test-utils@^19.0.0":
+  version "19.0.0"
+  resolved "https://registry.yarnpkg.com/@types/relay-test-utils/-/relay-test-utils-19.0.0.tgz#3ee2a4c8f577d812fdfb8e61dbd85e3558f9dbfa"
+  integrity sha512-yC/wVgDetV+88HrHLKlesIfju3RGsp32vLs0IiwBPKD0npQSTrFddcP3FNPe5Kkk4/Y/kgY3oR/DA8g8Bmmppw==
+  dependencies:
+    "@types/react" "*"
+    "@types/react-relay" "*"
+    "@types/relay-runtime" "*"
 
 "@types/stack-utils@^2.0.3":
   version "2.0.3"
@@ -4922,6 +4931,16 @@ relay-runtime@20.1.1, relay-runtime@^20.1.1:
     "@babel/runtime" "^7.25.0"
     fbjs "^3.0.2"
     invariant "^2.2.4"
+
+relay-test-utils@^20.1.1:
+  version "20.1.1"
+  resolved "https://registry.yarnpkg.com/relay-test-utils/-/relay-test-utils-20.1.1.tgz#7dbb7cdd3439ad1278ee1ce217ebdfbe75e9568a"
+  integrity sha512-9E6+smojY43XmBi7un5l+8xWpqq1AgJtNEJZHDOLbdF8NIOzxI1n/HF2zZeGbqVQWjpvl/EyqegL6LLrIIJpcA==
+  dependencies:
+    "@babel/runtime" "^7.25.0"
+    fbjs "^3.0.2"
+    invariant "^2.2.4"
+    relay-runtime "20.1.1"
 
 require-directory@^2.1.1:
   version "2.1.1"
