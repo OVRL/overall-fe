@@ -30,7 +30,7 @@ const TeamInfo = ({
             </div>
             {/* 이름 */}
             <span
-                className={`text-white font-medium ${mobileLayout ? "text-[0.6875rem] xs:text-sm" : "text-base"} whitespace-nowrap`}
+                className={`text-white font-medium ${mobileLayout ? "text-[0.6875rem] xs:text-sm" : "text-lg md:text-xl font-bold"} whitespace-nowrap`}
             >
                 {name}
             </span>

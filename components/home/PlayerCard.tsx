@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Button from "../ui/Button";
+import MainProfileCard from "../ui/MainProfileCard";
+import { Position } from "@/types/position";
 
 interface Player {
     id: number;
@@ -30,34 +32,7 @@ const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 /**
  * 선수 아바타 컴포넌트 (사진 및 OVR 배지)
  */
-const PlayerAvatar = ({
-    player,
-    imageError,
-    setImageError
-}: {
-    player: Player;
-    imageError: boolean;
-    setImageError: (error: boolean) => void;
-}) => {
-    const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
-    return (
-        <div className="relative w-20 h-28 md:w-24 md:h-32 bg-gradient-to-br">
-            <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 bg-primary text-black px-1.5 md:px-2 py-0.5 md:py-1 rounded text-base md:text-lg font-black z-10">
-                {player.overall}
-            </div>
-            <div className="absolute bottom-0 right-0 w-full h-full">
-                <Image
-                    src={playerImage}
-                    alt={player.name}
-                    fill
-                    className="object-contain object-bottom"
-                    onError={() => setImageError(true)}
-                />
-            </div>
-        </div>
-    );
-};
 
 /**
  * 선수 스탯 정보 그리드
@@ -110,17 +85,23 @@ const PlayerStats = ({ player }: { player: Player }) => {
  * 선수 상세 카드 컴포넌트
  */
 const PlayerCard = ({ player }: PlayerCardProps) => {
-    const [imageError, setImageError] = useState(false);
+
 
     return (
-        <div className="bg-surface-tertiary rounded-2xl p-4 md:p-5 mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0">
             {/* 선수 헤더 */}
             <div className="flex gap-3 md:gap-4 mb-4 md:mb-5">
-                <PlayerAvatar
-                    player={player}
-                    imageError={imageError}
-                    setImageError={setImageError}
-                />
+                <div className="relative w-24 h-31.5 md:w-28 md:h-38 shrink-0 flex justify-center">
+                    <div className="origin-top scale-75 md:scale-[0.85]">
+                        <MainProfileCard
+                            imgUrl={player.image || "/images/ovr.png"}
+                            playerName={player.name}
+                            mainPosition={player.position as Position}
+                            backNumber={player.number}
+                            className="shadow-lg"
+                        />
+                    </div>
+                </div>
                 <PlayerStats player={player} />
             </div>
 

@@ -9,7 +9,7 @@ import { MatchInfoDesktop, MatchInfoMobile } from "./MatchInfo";
  */
 const UpcomingMatch = () => {
     return (
-        <div className="bg-surface-secondary rounded-[1.25rem] p-4 lg:p-6 mb-4 lg:mb-5 border border-primary/30 lg:border-transparent">
+        <div className="bg-[#1A1A1A] rounded-[1.25rem] p-4 lg:p-6 mb-4 lg:mb-5">
             {/* Header + Mobile Info */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                 <div className="text-center lg:text-left lg:flex-1">
@@ -21,7 +21,7 @@ const UpcomingMatch = () => {
 
                 {/* Action Button */}
                 <div className="w-full lg:w-auto lg:flex-1 lg:flex lg:justify-end">
-                    <button className="bg-primary hover:bg-primary-hover text-black font-bold py-2.5 lg:py-3 px-6 lg:px-8 rounded-lg transition-colors w-full lg:w-auto text-sm lg:text-base whitespace-nowrap">
+                    <button className="flex justify-center items-center gap-[10px] p-[12px] bg-[#CCFF00] hover:bg-[#B3E600] text-black font-bold rounded-[10px] transition-colors w-full lg:w-auto text-sm lg:text-base whitespace-nowrap box-border">
                         포메이션 확인
                     </button>
                 </div>

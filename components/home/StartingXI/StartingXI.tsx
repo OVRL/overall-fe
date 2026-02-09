@@ -44,7 +44,7 @@ const StartingXI = ({ players, onPlayersChange, onPlayerSelect }: StartingXIProp
     };
 
     return (
-        <div className="bg-surface-secondary rounded-[1.25rem] p-4 md:p-6">
+        <div className="bg-[#1A1A1A] rounded-[1.25rem] p-4 md:p-6">
             <FormationHeader activeTab={activeTab} setActiveTab={setActiveTab} />
 
             <FormationField
