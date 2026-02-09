@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import PlayerListItem, { Player } from "./PlayerListItem";
+import PlayerListItem from "./PlayerListItem";
+import { Player } from "@/types/player";
 import PlayerListHeader from "./PlayerListHeader";
-
-// Re-export Player type for convenience
-export type { Player } from "./PlayerListItem";
+export type { Player };
 
 export { PlayerListHeader };
 

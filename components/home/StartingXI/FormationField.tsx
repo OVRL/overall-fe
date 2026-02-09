@@ -2,7 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import PlayerPositionCard, { Player } from "./PlayerPositionCard";
+import PlayerPositionCard from "./PlayerPositionCard";
+import { Player } from "@/types/player";
 
 interface FormationPosition {
     top: string;
