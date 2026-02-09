@@ -18,7 +18,7 @@ import { ModalHideContext } from "@/components/modals/Modal";
 
 type CalledByModalInner = { hideModal: () => void };
 type CalledByModalOuter<T extends ModalKey> = {
-  openModal: (props?: ModalPropsMap[T]) => void;
+  openModal: (props: ModalPropsMap[T]) => void;
   hideModal: () => void;
 };
 
@@ -35,7 +35,7 @@ function useModal<T extends ModalKey>(
   const modalIdRef = useRef<string | null>(null);
 
   const openModal = useCallback(
-    (props?: ModalPropsMap[T]) => {
+    (props: ModalPropsMap[T]) => {
       if (key) {
         modalIdRef.current = showModal(key, props);
       }
