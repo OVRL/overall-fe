@@ -49,27 +49,24 @@ export const MatchInfoMobile = () => (
  * PC용 매치 정보 (날짜 위, 팀 아래 세로 배치)
  */
 export const MatchInfoDesktop = () => (
-    <div className="hidden lg:flex flex-col items-center justify-center flex-2">
-        {/* 날짜 위로 분리 */}
-        <div className="text-gray-500 text-sm mb-2">01.25 (토) 15:00</div>
-
-        {/* 팀 정보 아래로 */}
-        <div className="flex items-center gap-4">
-            <TeamInfo
-                name={TEAMS.HOME.name}
-                logo={TEAMS.HOME.logo}
-                logoColor={TEAMS.HOME.logoColor}
-                reverse={true}
-                mobileLayout={false}
-            />
-            <span className="text-gray-500 text-lg font-bold">VS</span>
-            <TeamInfo
-                name={TEAMS.AWAY.name}
-                logo={TEAMS.AWAY.logo}
-                logoColor={TEAMS.AWAY.logoColor}
-                reverse={false}
-                mobileLayout={false}
-            />
+    <div className="hidden lg:flex items-center justify-center flex-2 gap-8">
+        <TeamInfo
+            name={TEAMS.HOME.name}
+            logo={TEAMS.HOME.logo}
+            logoColor={TEAMS.HOME.logoColor}
+            reverse={true}
+            mobileLayout={false}
+        />
+        <div className="flex flex-col items-center gap-1">
+            <span className="text-gray-500 text-sm whitespace-nowrap">01.25 (토) 15:00</span>
+            <span className="text-gray-500 text-sm font-bold">VS</span>
         </div>
+        <TeamInfo
+            name={TEAMS.AWAY.name}
+            logo={TEAMS.AWAY.logo}
+            logoColor={TEAMS.AWAY.logoColor}
+            reverse={false}
+            mobileLayout={false}
+        />
     </div>
 );
