@@ -1,23 +1,22 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { RelayEnvironmentProvider } from "react-relay";
 import { createMockEnvironment, MockPayloadGenerator } from "relay-test-utils";
+import { OperationDescriptor } from "relay-runtime";
 import SearchResultList from "../SearchResultList";
 import { Suspense } from "react";
 import "@testing-library/jest-dom";
 
 // Mock IntersectionObserver
 beforeAll(() => {
-  global.IntersectionObserver = class IntersectionObserver {
-    observe() {
-      return null;
-    }
-    disconnect() {
-      return null;
-    }
-    unobserve() {
-      return null;
-    }
-  } as any;
+  global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+    root: null,
+    rootMargin: "",
+    thresholds: [],
+    takeRecords: jest.fn(),
+  }));
 });
 
 // Mock AddressItem
@@ -40,7 +39,7 @@ jest.mock("../AddressItem", () => {
 });
 
 describe("SearchResultList 컴포넌트", () => {
-  let environment: any; // Type inference issue with mock env
+  let environment: ReturnType<typeof createMockEnvironment>;
   const mockOnSelect = jest.fn();
 
   beforeEach(() => {
@@ -48,7 +47,13 @@ describe("SearchResultList 컴포넌트", () => {
     jest.clearAllMocks();
   });
 
-  const TestWrapper = ({ keyword = "test", selectedCode = null }: any) => (
+  const TestWrapper = ({
+    keyword = "test",
+    selectedCode = null,
+  }: {
+    keyword?: string;
+    selectedCode?: string | null;
+  }) => (
     <RelayEnvironmentProvider environment={environment}>
       <Suspense fallback={<div>Loading...</div>}>
         <SearchResultList
@@ -69,22 +74,23 @@ describe("SearchResultList 컴포넌트", () => {
     render(<TestWrapper />);
 
     act(() => {
-      environment.mock.resolveMostRecentOperation((operation: any) =>
-        MockPayloadGenerator.generate(operation, {
-          RegionSearch: () => ({
-            items: [
-              {
-                code: "111",
-                sidoName: "Seoul",
-                siggName: "Gangnam",
-                dongName: "Yeoksam",
-                riName: null,
-                name: "Yeoksam-dong",
-              },
-            ],
-            hasNextPage: false,
+      environment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            RegionSearch: () => ({
+              items: [
+                {
+                  code: "111",
+                  sidoName: "Seoul",
+                  siggName: "Gangnam",
+                  dongName: "Yeoksam",
+                  riName: null,
+                  name: "Yeoksam-dong",
+                },
+              ],
+              hasNextPage: false,
+            }),
           }),
-        }),
       );
     });
 
@@ -98,13 +104,14 @@ describe("SearchResultList 컴포넌트", () => {
     render(<TestWrapper />);
 
     act(() => {
-      environment.mock.resolveMostRecentOperation((operation: any) =>
-        MockPayloadGenerator.generate(operation, {
-          RegionSearch: () => ({
-            items: [],
-            hasNextPage: false,
+      environment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            RegionSearch: () => ({
+              items: [],
+              hasNextPage: false,
+            }),
           }),
-        }),
       );
     });
 
@@ -117,22 +124,23 @@ describe("SearchResultList 컴포넌트", () => {
     render(<TestWrapper />);
 
     act(() => {
-      environment.mock.resolveMostRecentOperation((operation: any) =>
-        MockPayloadGenerator.generate(operation, {
-          RegionSearch: () => ({
-            items: [
-              {
-                code: "111",
-                sidoName: "Seoul",
-                siggName: "Gangnam",
-                dongName: "Yeoksam",
-                riName: null,
-                name: "Yeoksam-dong",
-              },
-            ],
-            hasNextPage: false,
+      environment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            RegionSearch: () => ({
+              items: [
+                {
+                  code: "111",
+                  sidoName: "Seoul",
+                  siggName: "Gangnam",
+                  dongName: "Yeoksam",
+                  riName: null,
+                  name: "Yeoksam-dong",
+                },
+              ],
+              hasNextPage: false,
+            }),
           }),
-        }),
       );
     });
 
@@ -146,30 +154,31 @@ describe("SearchResultList 컴포넌트", () => {
     render(<TestWrapper selectedCode="111" />);
 
     act(() => {
-      environment.mock.resolveMostRecentOperation((operation: any) =>
-        MockPayloadGenerator.generate(operation, {
-          RegionSearch: () => ({
-            items: [
-              {
-                code: "111",
-                sidoName: "Seoul",
-                siggName: "Gangnam",
-                dongName: "Yeoksam",
-                riName: null,
-                name: "Yeoksam-dong",
-              },
-              {
-                code: "222",
-                sidoName: "Seoul",
-                siggName: "Seocho",
-                dongName: "Seocho",
-                riName: null,
-                name: "Seocho-dong",
-              },
-            ],
-            hasNextPage: false,
+      environment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            RegionSearch: () => ({
+              items: [
+                {
+                  code: "111",
+                  sidoName: "Seoul",
+                  siggName: "Gangnam",
+                  dongName: "Yeoksam",
+                  riName: null,
+                  name: "Yeoksam-dong",
+                },
+                {
+                  code: "222",
+                  sidoName: "Seoul",
+                  siggName: "Seocho",
+                  dongName: "Seocho",
+                  riName: null,
+                  name: "Seocho-dong",
+                },
+              ],
+              hasNextPage: false,
+            }),
           }),
-        }),
       );
     });
 

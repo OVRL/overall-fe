@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import AddressSearchModal from "../AddressSearchModal";
 import { createMockEnvironment, MockPayloadGenerator } from "relay-test-utils";
+import { OperationDescriptor } from "relay-runtime";
 import "@testing-library/jest-dom";
 
 // Mock environment
@@ -11,21 +12,23 @@ jest.mock("@/lib/relay/environment", () => ({
 
 // Mock IntersectionObserver
 beforeAll(() => {
-  global.IntersectionObserver = class IntersectionObserver {
-    observe() {
-      return null;
-    }
-    disconnect() {
-      return null;
-    }
-    unobserve() {
-      return null;
-    }
-  } as any;
+  global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+    root: null,
+    rootMargin: "",
+    thresholds: [],
+    takeRecords: jest.fn(),
+  }));
 });
 
 // Mock Icon to avoid SVG issues
-jest.mock("@/components/Icon", () => () => <div data-testid="mock-icon" />);
+jest.mock("@/components/Icon", () => {
+  const MockIcon = () => <div data-testid="mock-icon" />;
+  MockIcon.displayName = "MockIcon";
+  return MockIcon;
+});
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 jest.mock("@/public/icons/check.svg", () => "check.svg");
 
@@ -93,22 +96,23 @@ describe("AddressSearchModal 컴포넌트", () => {
 
     // Resolve Relay query
     act(() => {
-      mockEnvironment.mock.resolveMostRecentOperation((operation: any) =>
-        MockPayloadGenerator.generate(operation, {
-          RegionSearch: () => ({
-            items: [
-              {
-                code: "999",
-                sidoName: "Seoul",
-                siggName: "Gangnam",
-                dongName: "Test",
-                riName: null,
-                name: "Test-dong",
-              },
-            ],
-            hasNextPage: false,
+      mockEnvironment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            RegionSearch: () => ({
+              items: [
+                {
+                  code: "999",
+                  sidoName: "Seoul",
+                  siggName: "Gangnam",
+                  dongName: "Test",
+                  riName: null,
+                  name: "Test-dong",
+                },
+              ],
+              hasNextPage: false,
+            }),
           }),
-        }),
       );
     });
 

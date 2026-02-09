@@ -1,12 +1,7 @@
 "use client";
 
-import PositionChip from "@/components/PositionChip";
-import { Position } from "@/types/position";
 import PlayerListItem from "@/components/home/PlayerList/PlayerListItem";
-import type { Player } from "@/components/home/PlayerList/PlayerListItem";
-
-// Re-export Player type for external usage
-export type { Player };
+import { Player } from "@/types/player";
 
 /**
  * 테이블 헤더 컴포넌트
@@ -51,4 +46,3 @@ const PlayerInfoList = ({
 };
 
 export default PlayerInfoList;
-
