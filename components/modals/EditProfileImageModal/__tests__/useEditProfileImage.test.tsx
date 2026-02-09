@@ -1,13 +1,13 @@
 import { renderHook, act } from "@testing-library/react";
 import useEditProfileImage from "../useEditProfileImage";
 
-// Mock canvas utils
+// 캔버스 유틸 모킹
 jest.mock("@/utils/canvasUtils", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-// Mock ProfileImageCanvas
+// ProfileImageCanvas 모킹
 jest.mock("../ProfileImageCanvas", () => {
   return {
     __esModule: true,
@@ -21,17 +21,16 @@ describe("useEditProfileImage", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.URL.createObjectURL = jest.fn(() => "blob:test-url");
   });
 
-  it("should initialize with initialImage", () => {
+  it("initialImage로 초기화되어야 한다", () => {
     const { result } = renderHook(() =>
       useEditProfileImage({ initialImage, onSave: mockOnSave }),
     );
     expect(result.current.currentImage).toBe(initialImage);
   });
 
-  it("should handle file change", () => {
+  it("파일 변경을 처리해야 한다", () => {
     const { result } = renderHook(() =>
       useEditProfileImage({ initialImage, onSave: mockOnSave }),
     );
@@ -49,11 +48,11 @@ describe("useEditProfileImage", () => {
     });
 
     expect(global.URL.createObjectURL).toHaveBeenCalledWith(file);
-    expect(result.current.currentImage).toBe("blob:test-url");
+    expect(result.current.currentImage).toBe("blob:mock-url");
     expect(event.target.value).toBe("");
   });
 
-  it("should trigger file input click", () => {
+  it("파일 입력 클릭을 트리거해야 한다", () => {
     const { result } = renderHook(() =>
       useEditProfileImage({ initialImage, onSave: mockOnSave }),
     );

@@ -6,19 +6,6 @@ import SearchResultList from "../SearchResultList";
 import { Suspense } from "react";
 import "@testing-library/jest-dom";
 
-// Mock IntersectionObserver
-beforeAll(() => {
-  global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-    observe: jest.fn(),
-    unobserve: jest.fn(),
-    disconnect: jest.fn(),
-    root: null,
-    rootMargin: "",
-    thresholds: [],
-    takeRecords: jest.fn(),
-  }));
-});
-
 // Mock AddressItem
 jest.mock("../AddressItem", () => {
   return function MockAddressItem({

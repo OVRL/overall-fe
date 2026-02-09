@@ -27,15 +27,6 @@ jest.mock("@/components/ImageUploader", () => {
   return MockImageUploader;
 });
 
-// Mock URL.createObjectURL since it's not available in JSDOM
-// Note: We need to restore it or mock it globally.
-beforeAll(() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).URL.createObjectURL = jest.fn(
-    () => "blob:http://localhost/mock-url",
-  );
-});
-
 describe("ProfileImageCollect", () => {
   const mockOnNext = jest.fn();
   const mockOnDataChange = jest.fn();
@@ -74,7 +65,7 @@ describe("ProfileImageCollect", () => {
     expect(mockOnDataChange).toHaveBeenCalled();
     const updateFn = mockOnDataChange.mock.calls[0][0];
     expect(updateFn({})).toEqual({
-      profileImage: "blob:http://localhost/mock-url",
+      profileImage: "blob:mock-url",
     });
     expect(mockOnNext).toHaveBeenCalled();
   });

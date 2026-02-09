@@ -2,10 +2,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import EditProfileImageModal from "../EditProfileImageModal";
 import useEditProfileImage from "../useEditProfileImage";
 
-// Mock the custom hook
+// 커스텀 훅 모킹
 jest.mock("../useEditProfileImage");
 
-// Mock child components
+// 자식 컴포넌트 모킹
 jest.mock("../ProfileImageCanvas", () => {
   return function DummyProfileImageCanvas({ imageSrc }: { imageSrc: string }) {
     return <div data-testid="profile-image-canvas">{imageSrc}</div>;
@@ -14,12 +14,20 @@ jest.mock("../ProfileImageCanvas", () => {
 jest.mock(
   "../../ModalLayout",
   () =>
-    ({ children, title }: { children: React.ReactNode; title: string }) => (
-      <div>
-        <h1>{title}</h1>
-        {children}
-      </div>
-    ),
+    function MockModalLayout({
+      children,
+      title,
+    }: {
+      children: React.ReactNode;
+      title: string;
+    }) {
+      return (
+        <div>
+          <h1>{title}</h1>
+          {children}
+        </div>
+      );
+    },
 );
 jest.mock("@/components/ui/Button", () => ({
   Button: ({
@@ -54,7 +62,7 @@ describe("EditProfileImageModal", () => {
     jest.clearAllMocks();
   });
 
-  it("renders correctly", () => {
+  it("정상적으로 렌더링된다", () => {
     render(
       <EditProfileImageModal
         initialImage="test-image.jpg"
@@ -68,7 +76,7 @@ describe("EditProfileImageModal", () => {
     expect(screen.getByText("저장")).toBeInTheDocument();
   });
 
-  it("calls handleSave when save button is clicked", () => {
+  it("저장 버튼 클릭 시 handleSave를 호출한다", () => {
     render(
       <EditProfileImageModal
         initialImage="test-image.jpg"
@@ -80,7 +88,7 @@ describe("EditProfileImageModal", () => {
     expect(mockHandleSave).toHaveBeenCalled();
   });
 
-  it("calls handleRemoveBackground when background remove button is clicked", () => {
+  it("배경 제거 버튼 클릭 시 handleRemoveBackground를 호출한다", () => {
     render(
       <EditProfileImageModal
         initialImage="test-image.jpg"
@@ -92,7 +100,7 @@ describe("EditProfileImageModal", () => {
     expect(mockHandleRemoveBackground).toHaveBeenCalled();
   });
 
-  it("calls handleFileClick when change photo button is clicked", () => {
+  it("사진 변경 버튼 클릭 시 handleFileClick을 호출한다", () => {
     render(
       <EditProfileImageModal
         initialImage="test-image.jpg"

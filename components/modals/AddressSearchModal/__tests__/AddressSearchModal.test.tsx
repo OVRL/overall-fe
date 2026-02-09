@@ -10,25 +10,8 @@ jest.mock("@/lib/relay/environment", () => ({
   getClientEnvironment: () => mockEnvironment,
 }));
 
-// Mock IntersectionObserver
-beforeAll(() => {
-  global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-    observe: jest.fn(),
-    unobserve: jest.fn(),
-    disconnect: jest.fn(),
-    root: null,
-    rootMargin: "",
-    thresholds: [],
-    takeRecords: jest.fn(),
-  }));
-});
-
 // Mock Icon to avoid SVG issues
-jest.mock("@/components/Icon", () => {
-  const MockIcon = () => <div data-testid="mock-icon" />;
-  MockIcon.displayName = "MockIcon";
-  return MockIcon;
-});
+jest.mock("@/components/Icon");
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 jest.mock("@/public/icons/check.svg", () => "check.svg");
 
