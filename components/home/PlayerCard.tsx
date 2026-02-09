@@ -6,22 +6,7 @@ import Button from "../ui/Button";
 import MainProfileCard from "../ui/MainProfileCard";
 import { Position } from "@/types/position";
 
-interface Player {
-    id: number;
-    name: string;
-    position: string;
-    number: number;
-    overall: number;
-    shooting: number;
-    passing: number;
-    dribbling: number;
-    defending: number;
-    physical: number;
-    pace: number;
-    image?: string;
-    season?: string;
-    seasonType?: "general" | "worldBest";
-}
+import { Player } from "@/types/player";
 
 interface PlayerCardProps {
     player: Player;

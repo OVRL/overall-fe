@@ -5,24 +5,7 @@ import PositionChip from "@/components/PositionChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { Position } from "@/types/position";
 
-export interface Player {
-    id: number;
-    name: string;
-    position: string;
-    number: number;
-    overall: number;
-    nationality?: string;
-    image?: string;
-    season?: string;
-    seasonType?: "general" | "worldBest";
-    // Stats for PlayerCard
-    shooting: number;
-    passing: number;
-    dribbling: number;
-    defending: number;
-    physical: number;
-    pace: number;
-}
+import { Player } from "@/types/player";
 
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 

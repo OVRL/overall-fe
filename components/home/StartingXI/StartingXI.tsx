@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import type { Player } from "./PlayerPositionCard";
+import { Player } from "@/types/player";
 import FormationHeader from "./FormationHeader";
 import FormationField from "./FormationField";
 import ManagerInfo from "./ManagerInfo";

@@ -3,16 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-export interface Player {
-    id: number;
-    name: string;
-    position: string;
-    number: number;
-    overall: number;
-    image?: string;
-    season?: string;
-    seasonType?: "general" | "worldBest";
-}
+import { Player } from "@/types/player";
 
 interface PlayerPositionCardProps {
     player: Player;
