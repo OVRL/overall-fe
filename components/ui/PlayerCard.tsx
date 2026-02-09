@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
-import Icon from "../Icon";
+import Icon from "@/components/Icon";
 import close from "@/public/icons/close.svg";
 
 const cardVariants = cva("relative flex shrink-0", {
