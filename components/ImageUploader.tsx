@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import useModal from "@/hooks/useModal";
@@ -22,22 +22,35 @@ const ImageUploader = ({
 }: ImageUploaderProps) => {
   const [preview, setPreview] = useState<string | null>(null);
 
+  const { openModal } = useModal("DEFAULT_IMAGE_SELECT");
+  const { openModal: openEditModal } = useModal("EDIT_PROFILE_IMAGE");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
-      onFileSelect?.(file);
+      // Open edit modal directly instead of setting preview immediately
+      openEditModal({
+        initialImage: objectUrl,
+        onSave: (savedImage) => {
+          setPreview(savedImage);
+          onFileSelect?.(file); // Or convert savedImage back to file if handled in modal
+        },
+      });
+      // Reset input to allow selecting same file again
+      e.target.value = "";
     }
   };
 
-  const { openModal } = useModal("DEFAULT_IMAGE_SELECT");
-
   return (
-    <label
-      className={`flex flex-col gap-y-12 px-4 cursor-pointer ${className || ""}`}
-    >
+    <div className={`flex flex-col gap-y-12 px-4 ${className || ""}`}>
       <input
+        ref={fileInputRef}
         type="file"
         className="hidden"
         accept="image/*"
@@ -60,7 +73,13 @@ const ImageUploader = ({
         )}
       </div>
       <div className="flex flex-col gap-2 h-23.5">
-        <Button variant="line" size="m" className="flex-1" type="button">
+        <Button
+          variant="line"
+          size="m"
+          className="flex-1"
+          type="button"
+          onClick={handleFileClick}
+        >
           사진 불러오기
         </Button>
         <Button
@@ -73,7 +92,10 @@ const ImageUploader = ({
             if (currentImage && onDefaultImageSelect) {
               openModal({
                 initialImage: currentImage,
-                onSave: onDefaultImageSelect,
+                onSave: (image) => {
+                  setPreview(null); // Clear manual preview when default image is selected
+                  onDefaultImageSelect(image);
+                },
               });
             }
           }}
@@ -81,7 +103,7 @@ const ImageUploader = ({
           기본 이미지 변경
         </Button>
       </div>
-    </label>
+    </div>
   );
 };
 

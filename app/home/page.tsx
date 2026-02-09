@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Header from "@/components/layout/Header";
 import UpcomingMatch from "@/components/home/UpcomingMatch";
 import StartingXI from "@/components/home/StartingXI";

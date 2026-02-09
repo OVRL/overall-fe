@@ -11,6 +11,10 @@ export interface ModalPropsMap {
   ADDRESS_SEARCH: {
     onComplete: (result: { address: string; code: string }) => void;
   };
+  EDIT_PROFILE_IMAGE: {
+    initialImage: string;
+    onSave: (image: string) => void;
+  };
 }
 
 export type ModalKey = keyof ModalPropsMap;
