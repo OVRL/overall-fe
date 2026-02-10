@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import check from "@/public/icons/check.svg";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 const AddressItem = ({
   address,
   onClick,

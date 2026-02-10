@@ -1,4 +1,4 @@
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import logo from "@/public/icons/logo_OVR.svg";
 import { PropsWithChildren } from "react";
 

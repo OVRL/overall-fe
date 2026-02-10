@@ -1,7 +1,7 @@
 import { useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import profile_guide from "@/public/icons/profile_guide.svg";
 import coachmarkAll from "@/public/icons/coachmark_2.svg";
 import getCroppedImg from "@/utils/canvasUtils";

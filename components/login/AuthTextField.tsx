@@ -1,6 +1,6 @@
 import { ComponentProps, useState, useId } from "react";
 import { cn } from "@/lib/utils";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import coseCircle from "@/public/icons/close-circle.svg";
 interface AuthTextFieldProps extends ComponentProps<"input"> {
   label: string;
@@ -49,7 +49,7 @@ const AuthTextField = ({
                 : "border-Fill_Tertiary",
             onClear && value ? "pr-8" : "",
             type === "number" &&
-              "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+            "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           )}
           {...props}
         />

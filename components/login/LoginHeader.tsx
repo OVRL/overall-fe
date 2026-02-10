@@ -1,5 +1,5 @@
 "use client";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import arrowBack from "@/public/icons/arrow_back.svg";
 
 interface LoginHeaderProps {
