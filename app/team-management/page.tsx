@@ -11,6 +11,7 @@ import PlayerManagementPanel from "@/components/team-management/PlayerManagement
 import BestElevenPanel from "@/components/team-management/BestElevenPanel";
 import InvitationPanel from "@/components/team-management/InvitationPanel";
 import MOMVotePanel from "@/components/team-management/MOMVotePanel";
+import TeamManagementFooter from "@/components/team-management/TeamManagementFooter";
 
 export default function TeamManagementPage() {
     const [activeMenu, setActiveMenu] = useState<TeamManagementMenu>("settings");
@@ -40,17 +41,25 @@ export default function TeamManagementPage() {
             <Header showTeamSelector selectedTeam="바르셀로나 FC" />
 
             <div className="flex">
-                {/* 좌측 사이드바 */}
-                <TeamManagementSidebar
-                    activeMenu={activeMenu}
-                    onMenuChange={setActiveMenu}
-                    userRole={userRole}
-                />
+                {/* 좌측 사이드바 (데스크탑) */}
+                <div className="hidden md:block">
+                    <TeamManagementSidebar
+                        activeMenu={activeMenu}
+                        onMenuChange={setActiveMenu}
+                        userRole={userRole}
+                    />
+                </div>
 
                 {/* 메인 콘텐츠 영역 */}
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-auto pb-20 md:pb-0">
                     {renderPanel()}
                 </main>
+
+                {/* 하단 내비게이션 (모바일) */}
+                <TeamManagementFooter
+                    activeMenu={activeMenu}
+                    onMenuChange={setActiveMenu}
+                />
             </div>
         </div>
     );
