@@ -1,0 +1,1 @@
+﻿components/team-management/PlayerManagementPanel.tsx(1418,38): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
