@@ -10,6 +10,7 @@ import SelectGender from "../SelectGender";
 
 import { useModifyUserMutation } from "../../_hooks/useModifyUserMutation";
 import { UpdateUserInput } from "@/__generated__/useModifyUserMutation.graphql";
+import useModal from "@/hooks/useModal";
 
 const AdditionalInfoCollect = ({
   onNext,
@@ -19,12 +20,14 @@ const AdditionalInfoCollect = ({
   const [info, setInfo] = useState({
     gender: (data.gender as "M" | "W") || "M",
     activityArea: data.activityArea || "",
+    activityAreaCode: "",
     foot: (data.foot as "L" | "R" | "B") || "R",
     preferredNumber: data.preferredNumber?.toString() || "",
     favoritePlayer: data.favoritePlayer || "",
   });
 
   const [commit, isMutationInFlight] = useModifyUserMutation();
+  const { openModal } = useModal("ADDRESS_SEARCH");
 
   const handleComplete = () => {
     onDataChange((prev) => ({
@@ -44,7 +47,7 @@ const AdditionalInfoCollect = ({
           ...data,
           email: data.email,
           gender: info.gender,
-          activityArea: info.activityArea,
+          activityArea: info.activityAreaCode || info.activityArea,
           foot: info.foot,
           preferredNumber: info.preferredNumber
             ? parseFloat(info.preferredNumber)
@@ -62,7 +65,6 @@ const AdditionalInfoCollect = ({
   };
 
   const handleLater = () => {
-    // Exclude current step's fields from previous data
     const previousData = { ...data };
     delete previousData.gender;
     delete previousData.activityArea;
@@ -106,15 +108,43 @@ const AdditionalInfoCollect = ({
               }))
             }
           />
-          <AuthTextField
-            label="활동지역"
-            placeholder="주소검색"
-            type="text"
-            value={info.activityArea}
-            onChange={(e) =>
-              setInfo((prev) => ({ ...prev, activityArea: e.target.value }))
+          <div
+            role="button"
+            tabIndex={0}
+            className="cursor-pointer outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+            onClick={() =>
+              openModal({
+                onComplete: ({ address, code }) =>
+                  setInfo((prev) => ({
+                    ...prev,
+                    activityArea: address,
+                    activityAreaCode: code,
+                  })),
+              })
             }
-          />
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openModal({
+                  onComplete: ({ address, code }) =>
+                    setInfo((prev) => ({
+                      ...prev,
+                      activityArea: address,
+                      activityAreaCode: code,
+                    })),
+                });
+              }
+            }}
+          >
+            <AuthTextField
+              label="활동지역"
+              placeholder="주소검색"
+              type="text"
+              value={info.activityArea}
+              readOnly
+              className="pointer-events-none"
+            />
+          </div>
 
           <SelectMainFoot
             mainFoot={info.foot}

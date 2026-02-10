@@ -1,6 +1,6 @@
 import { ComponentProps, useState, useId } from "react";
 import { cn } from "@/lib/utils";
-import Icon from "../Icon";
+import Icon from "@/components/Icon";
 import coseCircle from "@/public/icons/close-circle.svg";
 interface AuthTextFieldProps extends ComponentProps<"input"> {
   label: string;

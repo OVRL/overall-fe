@@ -11,17 +11,15 @@ const OnboardingCompletion = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Mobile-optimized confetti settings
     const duration = 3000;
     const end = Date.now() + duration;
 
     const frame = () => {
-      // Launch confetti from the top corners
       confetti({
         particleCount: 2,
         angle: 60,
         spread: 55,
-        origin: { x: 0, y: 0.2 }, // Top left
+        origin: { x: 0, y: 0.2 },
         colors: ["#FFD700", "#FF4500", "#008080"], // Example festive colors
       });
       confetti({

@@ -21,7 +21,7 @@ const Modals = () => {
             <Modal
               hide={() => closeModal(modal.id)}
               key={modal.id}
-              Component={Component}
+              Component={Component as React.ComponentType<unknown>}
               modalProps={modal.props}
             />
           );

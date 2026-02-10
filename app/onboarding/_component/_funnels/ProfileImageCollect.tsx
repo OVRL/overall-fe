@@ -1,29 +1,15 @@
-import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import Button from "@/components/ui/Button";
 import ImageUploader from "@/components/ImageUploader";
 import { cn } from "@/lib/utils";
 import { positionTextVariants } from "@/constants/positionVariants";
-import { Position } from "@/types/position";
 import { POSITION_CATEGORY_MAP } from "@/constants/position";
-
+import useProfileImageCollect from "../../_hooks/useProfileImageCollect";
 import { OnboardingStepProps } from "@/types/onboarding";
 
-const ProfileImageCollect = ({
-  onNext,
-  data,
-  onDataChange,
-}: OnboardingStepProps) => {
-  const [profileImage, setProfileImage] = useState(
-    data.profileImage || "/images/player/img_player-3.png",
-  );
-
-  const specificPosition = (data.mainPosition as Position) || "FW";
-
-  const handleClick = () => {
-    onDataChange((prev) => ({ ...prev, profileImage }));
-    onNext();
-  };
+const ProfileImageCollect = (props: OnboardingStepProps) => {
+  const { profileImage, setProfileImage, specificPosition, handleNext } =
+    useProfileImageCollect(props);
 
   return (
     <section className="flex flex-col gap-y-10 h-full pb-12">
@@ -36,9 +22,9 @@ const ProfileImageCollect = ({
               }),
             )}
           >
-            {data.mainPosition}
+            {props.data.mainPosition}
           </span>
-          {data.name} 선수!
+          {props.data.name} 선수!
           <br />
           프로필 이미지를 등록해주세요.
         </OnboardingTitle>
@@ -53,7 +39,7 @@ const ProfileImageCollect = ({
       <Button
         variant="primary"
         size="xl"
-        onClick={handleClick}
+        onClick={handleNext}
         disabled={!profileImage}
         className={cn(!profileImage && "bg-gray-900 text-Label-Tertiary")}
       >

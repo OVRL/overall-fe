@@ -20,7 +20,7 @@ const ModalLayout = ({ title, children, onClose }: Props) => {
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        className="absolute top-4 right-4 text-white p-3"
+        className="absolute top-4 right-4 text-white p-3 z-10 cursor-pointer"
         onClick={onCloseModal}
       >
         <Icon src={close} alt="close" />

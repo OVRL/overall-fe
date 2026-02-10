@@ -5,7 +5,6 @@ export const GUEST_ONLY_ROUTES = [
 ];
 
 export const PUBLIC_ROUTES = [
-  /^\/social\/callback(\/.*)?$/, // 소셜 로그인 콜백 (및 하위 경로)
   /^\/onboarding(\/.*)?$/,
   /^\/home(\/.*)?$/,
   /^\/team-data(\/.*)?$/,

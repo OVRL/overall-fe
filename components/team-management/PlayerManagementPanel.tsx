@@ -224,7 +224,7 @@ export default function PlayerManagementPanel() {
         }
 
         let updatedEntries = [...batchEntries];
-        let events: GoalEvent[] = [...goalEvents];
+        const events: GoalEvent[] = [...goalEvents];
         let logCount = 0;
 
         const lines = smartInputText.replace(/\r\n/g, "\n").split("\n");
