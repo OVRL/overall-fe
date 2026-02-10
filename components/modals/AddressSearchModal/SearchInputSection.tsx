@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import search from "@/public/icons/search.svg";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 
 const SearchInputSection = ({
   id,

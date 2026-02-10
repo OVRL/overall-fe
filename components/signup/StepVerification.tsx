@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Icon from "@/components/ui/Icon";
+import kakaoLogo from "@/public/icons/kakao_logo.svg";
 import AuthTextField from "@/components/login/AuthTextField";
 import { Button } from "@/components/ui/Button";
 
@@ -54,7 +55,7 @@ const StepVerification = ({ initialName, initialPhone, onNext }: StepVerificatio
                             </span>
                         ) : (
                             <>
-                                <Icon name="kakao" className="w-6 h-6" />
+                                <Icon src={kakaoLogo} alt="kakao" width={24} height={24} className="w-6 h-6" />
                                 <span>카카오톡으로 본인인증</span>
                             </>
                         )}

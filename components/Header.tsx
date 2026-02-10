@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import { StaticImageData } from "next/image";
 
 interface ActionButton {

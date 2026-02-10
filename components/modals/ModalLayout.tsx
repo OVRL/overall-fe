@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import close from "@/public/icons/close.svg";
 import useModal from "@/hooks/useModal";
 
