@@ -1636,672 +1636,669 @@ export default function PlayerManagementPanel() {
                                                     </Button>
                                                 </div>
                                             </div>
-
-
-                                            {/* 우측: 필드 뷰 & 통합 로그 뷰 */}
-                                            <div className="hidden lg:flex flex-1 flex-col h-full overflow-hidden bg-[#121212] relative">
-                                                {/* PC View: Field (Top 40%) + Summary (Bottom 60%) */}
-                                                <div className="hidden lg:block h-[40%] bg-[#1A1A1A] p-4 border-b border-gray-800 relative">
-                                                    <div className="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full text-xs font-bold text-white backdrop-blur-md border border-white/10">
-                                                        🏟️ {currentQuarter}Q 포메이션
-                                                    </div>
-                                                    <div className="w-full h-full flex justify-center">
-                                                        <div className="w-full h-full relative">
-                                                            <FormationField
-                                                                players={players
-                                                                    .filter(p => {
-                                                                        const entry = batchEntries.find(e => e.playerId === p.id);
-                                                                        return entry?.quarters[currentQuarter]?.attended;
-                                                                    })
-                                                                    .map(p => ({
-                                                                        ...p,
-                                                                        id: parseInt(p.id) || 0,
-                                                                        position: p.mainPosition,
-                                                                        image: p.profileImage,
-                                                                        season: "26", // Mock Data
-                                                                        seasonType: "general", // Mock Data
-                                                                        number: 0, // Mock Data
-                                                                        overall: p.ovr,
-                                                                        shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, pace: 0 // Mock stats
-                                                                    }))}
-                                                                handleDragStart={() => { }}
-                                                                handleDrop={() => { }}
-                                                                handleDragOver={() => { }}
-                                                                onPlayerSelect={(player) => {
-                                                                    // 플레이어 선택 시 득점자로 설정
-                                                                    setWizardStep("scorer");
-                                                                    setCurrentGoal(prev => ({ scorerId: player.id.toString(), assisterId: null, isOpponentOwnGoal: false }));
-                                                                    setWizardStep("assister"); // 바로 어시스터 선택으로 이동? 아니면 스코어러 선택?
-                                                                    // 여기서는 스코어러로 세팅하고 'assister' 단계로 넘기는게 자연스러울 듯
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Summary View (Bottom 55% -> Expanded) */}
-                                                <div className="flex-1 overflow-hidden flex flex-col relative">
-                                                    <div className="absolute inset-0 flex flex-col"> {/* Removed overflow-y-auto and pb-20 */}
-                                                        <SummaryView
-                                                            batchEntries={batchEntries}
-                                                            goalEvents={getDisplayEvents()}
-                                                            players={players}
-                                                            activeEventId={activeEventId}
-                                                            setActiveEventId={setActiveEventId}
-                                                            quarterCompleted={quarterCompleted}
-                                                            setQuarterCompleted={setQuarterCompleted}
-                                                            currentQuarter={currentQuarter}
-                                                            setCurrentQuarter={setCurrentQuarter}
-                                                            setShowFinishModal={setShowFinishModal}
-                                                            handleBatchSubmit={handleBatchSubmit}
-                                                            showFinishModal={showFinishModal}
-                                                            setShowPreviewModal={setShowPreviewModal}
-                                                            showPreviewModal={showPreviewModal}
-                                                            showNilNilAlert={showNilNilAlert}
-                                                            setShowNilNilAlert={setShowNilNilAlert}
-                                                            handleNilNilConfirm={handleNilNilConfirm}
-                                                            gameType={gameType}
-                                                            matchGoalEvents={matchGoalEvents}
-                                                            setMatchGoalEvents={setMatchGoalEvents}
-                                                            wizardStep={wizardStep}
-                                                            setWizardStep={setWizardStep}
-                                                            currentGoal={currentGoal}
-                                                            setCurrentGoal={setCurrentGoal}
-                                                            teamAScore={teamAScore}
-                                                            teamBScore={teamBScore}
-                                                            theirScore={theirScore}
-                                                            showQuarterFinishModal={showQuarterFinishModal}
-                                                            setShowQuarterFinishModal={setShowQuarterFinishModal}
-                                                            setOurScore={setOurScore}
-                                                            setTeamAScore={setTeamAScore}
-                                                            setTeamBScore={setTeamBScore}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                )
+
+                                {/* 우측: 필드 뷰 & 통합 로그 뷰 */}
+                                <div className="hidden lg:flex flex-1 flex-col h-full overflow-hidden bg-[#121212] relative">
+                                    {/* PC View: Field (Top 40%) + Summary (Bottom 60%) */}
+                                    <div className="hidden lg:block h-[40%] bg-[#1A1A1A] p-4 border-b border-gray-800 relative">
+                                        <div className="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full text-xs font-bold text-white backdrop-blur-md border border-white/10">
+                                            🏟️ {currentQuarter}Q 포메이션
+                                        </div>
+                                        <div className="w-full h-full flex justify-center">
+                                            <div className="w-full h-full relative">
+                                                <FormationField
+                                                    players={players
+                                                        .filter(p => {
+                                                            const entry = batchEntries.find(e => e.playerId === p.id);
+                                                            return entry?.quarters[currentQuarter]?.attended;
+                                                        })
+                                                        .map(p => ({
+                                                            ...p,
+                                                            id: parseInt(p.id) || 0,
+                                                            position: p.mainPosition,
+                                                            image: p.profileImage,
+                                                            season: "26", // Mock Data
+                                                            seasonType: "general", // Mock Data
+                                                            number: 0, // Mock Data
+                                                            overall: p.ovr,
+                                                            shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, pace: 0 // Mock stats
+                                                        }))}
+                                                    handleDragStart={() => { }}
+                                                    handleDrop={() => { }}
+                                                    handleDragOver={() => { }}
+                                                    onPlayerSelect={(player) => {
+                                                        // 플레이어 선택 시 득점자로 설정
+                                                        setWizardStep("scorer");
+                                                        setCurrentGoal(prev => ({ scorerId: player.id.toString(), assisterId: null, isOpponentOwnGoal: false }));
+                                                        setWizardStep("assister"); // 바로 어시스터 선택으로 이동? 아니면 스코어러 선택?
+                                                        // 여기서는 스코어러로 세팅하고 'assister' 단계로 넘기는게 자연스러울 듯
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Summary View (Bottom 55% -> Expanded) */}
+                                    <div className="flex-1 overflow-hidden flex flex-col relative">
+                                        <div className="absolute inset-0 flex flex-col"> {/* Removed overflow-y-auto and pb-20 */}
+                                            <SummaryView
+                                                batchEntries={batchEntries}
+                                                goalEvents={getDisplayEvents()}
+                                                players={players}
+                                                activeEventId={activeEventId}
+                                                setActiveEventId={setActiveEventId}
+                                                quarterCompleted={quarterCompleted}
+                                                setQuarterCompleted={setQuarterCompleted}
+                                                currentQuarter={currentQuarter}
+                                                setCurrentQuarter={setCurrentQuarter}
+                                                setShowFinishModal={setShowFinishModal}
+                                                handleBatchSubmit={handleBatchSubmit}
+                                                showFinishModal={showFinishModal}
+                                                setShowPreviewModal={setShowPreviewModal}
+                                                showPreviewModal={showPreviewModal}
+                                                showNilNilAlert={showNilNilAlert}
+                                                setShowNilNilAlert={setShowNilNilAlert}
+                                                handleNilNilConfirm={handleNilNilConfirm}
+                                                gameType={gameType}
+                                                matchGoalEvents={matchGoalEvents}
+                                                setMatchGoalEvents={setMatchGoalEvents}
+                                                wizardStep={wizardStep}
+                                                setWizardStep={setWizardStep}
+                                                currentGoal={currentGoal}
+                                                setCurrentGoal={setCurrentGoal}
+                                                teamAScore={teamAScore}
+                                                teamBScore={teamBScore}
+                                                theirScore={theirScore}
+                                                showQuarterFinishModal={showQuarterFinishModal}
+                                                setShowQuarterFinishModal={setShowQuarterFinishModal}
+                                                setOurScore={setOurScore}
+                                                setTeamAScore={setTeamAScore}
+                                                setTeamBScore={setTeamBScore}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
             }
 
-                                {/* Feature: Sticky Bottom Save Button */}
-                                {
-                                    hasUnsavedChanges && (
-                                        <div className="fixed bottom-0 left-0 w-full p-4 bg-[#1a1a1a]/90 backdrop-blur-md border-t border-gray-800 z-50 flex items-center justify-between shadow-2xl animate-slide-up">
-                                            <div className="text-white hidden md:block">
-                                                <span className="font-bold text-yellow-500 text-lg mr-2">⚠️ 변경사항이 있습니다</span>
-                                                <span className="text-gray-400 text-sm">저장하지 않으면 사라집니다.</span>
-                                            </div>
-                                            <Button
-                                                variant="primary"
-                                                onClick={() => setShowSaveConfirmModal(true)}
-                                                className="w-full md:w-auto md:px-12 py-4 text-lg font-bold shadow-lg shadow-primary/20 rounded-xl"
-                                            >
-                                                💾 스탯 수정사항 저장하기
-                                            </Button>
-                                        </div>
-                                    )
-                                }
+            {/* Feature: Sticky Bottom Save Button */}
+            {
+                hasUnsavedChanges && (
+                    <div className="fixed bottom-0 left-0 w-full p-4 bg-[#1a1a1a]/90 backdrop-blur-md border-t border-gray-800 z-50 flex items-center justify-between shadow-2xl animate-slide-up">
+                        <div className="text-white hidden md:block">
+                            <span className="font-bold text-yellow-500 text-lg mr-2">⚠️ 변경사항이 있습니다</span>
+                            <span className="text-gray-400 text-sm">저장하지 않으면 사라집니다.</span>
+                        </div>
+                        <Button
+                            variant="primary"
+                            onClick={() => setShowSaveConfirmModal(true)}
+                            className="w-full md:w-auto md:px-12 py-4 text-lg font-bold shadow-lg shadow-primary/20 rounded-xl"
+                        >
+                            💾 스탯 수정사항 저장하기
+                        </Button>
+                    </div>
+                )
+            }
 
-                                {/* Feature: Save Confirmation Modal */}
-                                {
-                                    showSaveConfirmModal && (
-                                        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60] animate-fade-in p-4">
-                                            <div className="bg-[#1a1a1a] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-gray-700 animate-scale-up">
-                                                <div className="p-5 border-b border-gray-800 bg-[#252526]">
-                                                    <h3 className="text-xl font-bold text-white">💾 스탯 변경 내역 확인</h3>
-                                                    <p className="text-sm text-gray-400 mt-1">다음 변경사항을 저장하시겠습니까?</p>
+            {/* Feature: Save Confirmation Modal */}
+            {
+                showSaveConfirmModal && (
+                    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60] animate-fade-in p-4">
+                        <div className="bg-[#1a1a1a] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-gray-700 animate-scale-up">
+                            <div className="p-5 border-b border-gray-800 bg-[#252526]">
+                                <h3 className="text-xl font-bold text-white">💾 스탯 변경 내역 확인</h3>
+                                <p className="text-sm text-gray-400 mt-1">다음 변경사항을 저장하시겠습니까?</p>
+                            </div>
+                            <div className="p-5 max-h-[60vh] overflow-y-auto space-y-3 custom-scrollbar">
+                                {players.filter(p => {
+                                    const original = originalPlayers.find(op => op.id === p.id);
+                                    if (!original) return false;
+                                    return manualFields.some(key => p[key] !== original[key]);
+                                }).length === 0 ? (
+                                    <div className="text-center text-gray-500 py-10">변경사항이 없습니다.</div>
+                                ) : (
+                                    players.filter(p => {
+                                        const original = originalPlayers.find(op => op.id === p.id);
+                                        if (!original) return false;
+                                        return manualFields.some(key => p[key] !== original[key]);
+                                    }).map(p => {
+                                        const original = originalPlayers.find(op => op.id === p.id)!;
+                                        const diffs = manualFields.filter(key => p[key] !== original[key]);
+
+                                        return (
+                                            <div key={p.id} className="bg-[#121212] rounded-xl p-3 border border-gray-800">
+                                                <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-800">
+                                                    <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-700">
+                                                        <Image src={p.profileImage} alt={p.name} fill className="object-cover" />
+                                                    </div>
+                                                    <span className="text-white font-bold">{p.name}</span>
                                                 </div>
-                                                <div className="p-5 max-h-[60vh] overflow-y-auto space-y-3 custom-scrollbar">
-                                                    {players.filter(p => {
-                                                        const original = originalPlayers.find(op => op.id === p.id);
-                                                        if (!original) return false;
-                                                        return manualFields.some(key => p[key] !== original[key]);
-                                                    }).length === 0 ? (
-                                                        <div className="text-center text-gray-500 py-10">변경사항이 없습니다.</div>
-                                                    ) : (
-                                                        players.filter(p => {
-                                                            const original = originalPlayers.find(op => op.id === p.id);
-                                                            if (!original) return false;
-                                                            return manualFields.some(key => p[key] !== original[key]);
-                                                        }).map(p => {
-                                                            const original = originalPlayers.find(op => op.id === p.id)!;
-                                                            const diffs = manualFields.filter(key => p[key] !== original[key]);
+                                                <div className="space-y-1">
+                                                    {diffs.map(field => (
+                                                        <div key={field} className="flex justify-between items-center text-sm">
+                                                            <span className="text-gray-400">{fieldLabels[field] || field}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500 line-through">{original[field] as number}</span>
+                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-primary font-bold">{p[field] as number}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                            <div className="p-4 border-t border-gray-800 bg-[#252526] flex gap-3">
+                                <Button variant="line" onClick={() => setShowSaveConfirmModal(false)} className="flex-1 py-3 text-gray-400">취소</Button>
+                                <Button variant="primary" onClick={() => { saveStatChanges(); setShowSaveConfirmModal(false); }} className="flex-1 py-3 font-bold">확인 및 저장</Button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
-                                                            return (
-                                                                <div key={p.id} className="bg-[#121212] rounded-xl p-3 border border-gray-800">
-                                                                    <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-800">
-                                                                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-700">
-                                                                            <Image src={p.profileImage} alt={p.name} fill className="object-cover" />
-                                                                        </div>
-                                                                        <span className="text-white font-bold">{p.name}</span>
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        {diffs.map(field => (
-                                                                            <div key={field} className="flex justify-between items-center text-sm">
-                                                                                <span className="text-gray-400">{fieldLabels[field] || field}</span>
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <span className="text-gray-500 line-through">{original[field] as number}</span>
-                                                                                    <span className="text-gray-600">→</span>
-                                                                                    <span className="text-primary font-bold">{p[field] as number}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })
+            {/* 쿼터 종료 컨펌 모달 */}
+            {showQuarterFinishModal && (
+                <div className="absolute inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-60 animate-fade-in p-6">
+                    <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
+                        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-primary/40">⏱️</div>
+                        <h3 className="text-xl font-bold text-white mb-2">{currentQuarter}쿼터를 마감하시겠습니까?</h3>
+
+                        <div className="bg-black/30 rounded-xl p-4 my-6 flex items-center justify-around border border-white/5">
+                            <div className="flex flex-col items-center">
+                                <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">Our Team</span>
+                                <span className="text-3xl font-extrabold text-white tabular-nums">
+                                    {gameType === "match" ? (matchGoalEvents[currentQuarter] || []).length : teamAScore[currentQuarter]}
+                                </span>
+                            </div>
+                            <div className="text-gray-700 text-xl font-black">VS</div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">Opponent</span>
+                                <span className="text-3xl font-extrabold text-white tabular-nums">
+                                    {gameType === "match" ? (theirScore[currentQuarter] || 0) : teamBScore[currentQuarter]}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p className="text-gray-400 text-xs mb-6">
+                            입력하신 정보가 맞는지 확인해주세요.<br />
+                            확인 시 {currentQuarter + 1}쿼터 입력으로 넘어갑니다.
+                        </p>
+
+                        <div className="flex gap-3">
+                            <Button variant="line" onClick={() => setShowQuarterFinishModal(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400">
+                                취소
+                            </Button>
+                            <Button variant="primary" onClick={() => {
+                                setQuarterCompleted(prev => ({ ...prev, [currentQuarter]: true }));
+                                setCurrentQuarter(prev => (prev + 1) as 1 | 2 | 3 | 4);
+                                setShowQuarterFinishModal(false);
+                            }} className="flex-1 py-3 rounded-xl font-bold">
+                                네, 맞습니다
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 무득점 경기 알럿 모달 */}
+            {showNilNilAlert && (
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-6">
+                    <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
+                        <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-yellow-500/40">⚠️</div>
+                        <h3 className="text-xl font-bold text-white mb-2">무득점 경기로 등록하시겠습니까?</h3>
+                        <p className="text-gray-400 text-sm mb-6">
+                            골 기록 없이 {currentQuarter}쿼터를 마감합니다.<br />
+                            {gameType === "scrimmage"
+                                ? "양팀 모두 0:0으로 기록되며, 모든 수비진에 CS가 부여됩니다."
+                                : "상대팀 실점이 0으로 기록되며, 수비진에 CS가 부여됩니다."
+                            }
+                        </p>
+                        <div className="flex gap-3">
+                            <Button variant="line" onClick={() => setShowNilNilAlert(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400 hover:text-white hover:bg-white/5">
+                                취소
+                            </Button>
+                            <Button variant="primary" onClick={handleNilNilConfirm} className="flex-1 py-3 rounded-xl font-bold bg-yellow-600 text-white hover:bg-yellow-500 shadow-lg shadow-yellow-900/20">
+                                네, 무득점으로 등록
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 경기 종합 결과 보고서 (Match Report Modal) */}
+            {showPreviewModal && (
+                <div className="fixed inset-0 bg-black/95 z-100 flex flex-col animate-fade-in overflow-hidden">
+                    {/* Header - Simple & Clean like DatePicker */}
+                    <div className="h-16 border-b border-gray-800 flex items-center justify-between px-5 bg-[#1a1a1a] shrink-0">
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl">📊</span>
+                            <span className="text-xl font-bold text-white tracking-tight">경기 기록 확인</span>
+                        </div>
+                        <button
+                            onClick={() => setShowPreviewModal(false)}
+                            className="px-4 py-2 rounded-xl bg-[#252526] text-gray-300 font-bold text-sm border border-gray-700 hover:bg-[#333] hover:text-white transition-all shadow-lg"
+                        >
+                            뒤로 가기
+                        </button>
+                    </div>
+
+                    {/* Main Content (Match Log + Stat Changes) */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+                        {/* 1. Quarter-by-Quarter Match Log */}
+                        <div className="max-w-7xl mx-auto">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <span>📅</span> 쿼터별 기록 요약
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {[1, 2, 3, 4].map((q) => {
+                                    const events = matchGoalEvents[q as 1 | 2 | 3 | 4] || [];
+                                    return (
+                                        <div key={q} className="bg-[#1e1e1e] rounded-xl p-4 border border-gray-800 flex flex-col h-full">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="text-gray-400 font-bold text-sm">{q}쿼터</span>
+                                                <div className="flex gap-1 items-center">
+                                                    {events.length > 0 && <span className="text-[10px] bg-gray-800 px-2 py-0.5 rounded text-gray-300 font-bold">{events.length}골</span>}
+                                                    {/* Clean Sheet Indicator */}
+                                                    {batchEntries.some(e => e.quarters[q]?.cleanSheet) && (
+                                                        <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-black border border-green-500/20 flex items-center gap-0.5">
+                                                            🛡️ CS
+                                                        </span>
                                                     )}
                                                 </div>
-                                                <div className="p-4 border-t border-gray-800 bg-[#252526] flex gap-3">
-                                                    <Button variant="line" onClick={() => setShowSaveConfirmModal(false)} className="flex-1 py-3 text-gray-400">취소</Button>
-                                                    <Button variant="primary" onClick={() => { saveStatChanges(); setShowSaveConfirmModal(false); }} className="flex-1 py-3 font-bold">확인 및 저장</Button>
+                                            </div>
+                                            {events.length === 0 ? (
+                                                <div className="flex-1 flex items-center justify-center text-gray-600 text-xs py-4">
+                                                    기록 없음
                                                 </div>
-                                            </div>
-                                        </div>
-                                    )
-                                }
-
-                                {/* 쿼터 종료 컨펌 모달 */}
-                                {showQuarterFinishModal && (
-                                    <div className="absolute inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-60 animate-fade-in p-6">
-                                        <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
-                                            <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-primary/40">⏱️</div>
-                                            <h3 className="text-xl font-bold text-white mb-2">{currentQuarter}쿼터를 마감하시겠습니까?</h3>
-
-                                            <div className="bg-black/30 rounded-xl p-4 my-6 flex items-center justify-around border border-white/5">
-                                                <div className="flex flex-col items-center">
-                                                    <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">Our Team</span>
-                                                    <span className="text-3xl font-extrabold text-white tabular-nums">
-                                                        {gameType === "match" ? (matchGoalEvents[currentQuarter] || []).length : teamAScore[currentQuarter]}
-                                                    </span>
-                                                </div>
-                                                <div className="text-gray-700 text-xl font-black">VS</div>
-                                                <div className="flex flex-col items-center">
-                                                    <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">Opponent</span>
-                                                    <span className="text-3xl font-extrabold text-white tabular-nums">
-                                                        {gameType === "match" ? (theirScore[currentQuarter] || 0) : teamBScore[currentQuarter]}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-gray-400 text-xs mb-6">
-                                                입력하신 정보가 맞는지 확인해주세요.<br />
-                                                확인 시 {currentQuarter + 1}쿼터 입력으로 넘어갑니다.
-                                            </p>
-
-                                            <div className="flex gap-3">
-                                                <Button variant="line" onClick={() => setShowQuarterFinishModal(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400">
-                                                    취소
-                                                </Button>
-                                                <Button variant="primary" onClick={() => {
-                                                    setQuarterCompleted(prev => ({ ...prev, [currentQuarter]: true }));
-                                                    setCurrentQuarter(prev => (prev + 1) as 1 | 2 | 3 | 4);
-                                                    setShowQuarterFinishModal(false);
-                                                }} className="flex-1 py-3 rounded-xl font-bold">
-                                                    네, 맞습니다
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 무득점 경기 알럿 모달 */}
-                                {showNilNilAlert && (
-                                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-6">
-                                        <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
-                                            <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-yellow-500/40">⚠️</div>
-                                            <h3 className="text-xl font-bold text-white mb-2">무득점 경기로 등록하시겠습니까?</h3>
-                                            <p className="text-gray-400 text-sm mb-6">
-                                                골 기록 없이 {currentQuarter}쿼터를 마감합니다.<br />
-                                                {gameType === "scrimmage"
-                                                    ? "양팀 모두 0:0으로 기록되며, 모든 수비진에 CS가 부여됩니다."
-                                                    : "상대팀 실점이 0으로 기록되며, 수비진에 CS가 부여됩니다."
-                                                }
-                                            </p>
-                                            <div className="flex gap-3">
-                                                <Button variant="line" onClick={() => setShowNilNilAlert(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400 hover:text-white hover:bg-white/5">
-                                                    취소
-                                                </Button>
-                                                <Button variant="primary" onClick={handleNilNilConfirm} className="flex-1 py-3 rounded-xl font-bold bg-yellow-600 text-white hover:bg-yellow-500 shadow-lg shadow-yellow-900/20">
-                                                    네, 무득점으로 등록
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 경기 종합 결과 보고서 (Match Report Modal) */}
-                                {showPreviewModal && (
-                                    <div className="fixed inset-0 bg-black/95 z-100 flex flex-col animate-fade-in overflow-hidden">
-                                        {/* Header - Simple & Clean like DatePicker */}
-                                        <div className="h-16 border-b border-gray-800 flex items-center justify-between px-5 bg-[#1a1a1a] shrink-0">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-2xl">📊</span>
-                                                <span className="text-xl font-bold text-white tracking-tight">경기 기록 확인</span>
-                                            </div>
-                                            <button
-                                                onClick={() => setShowPreviewModal(false)}
-                                                className="px-4 py-2 rounded-xl bg-[#252526] text-gray-300 font-bold text-sm border border-gray-700 hover:bg-[#333] hover:text-white transition-all shadow-lg"
-                                            >
-                                                뒤로 가기
-                                            </button>
-                                        </div>
-
-                                        {/* Main Content (Match Log + Stat Changes) */}
-                                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
-                                            {/* 1. Quarter-by-Quarter Match Log */}
-                                            <div className="max-w-7xl mx-auto">
-                                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                                    <span>📅</span> 쿼터별 기록 요약
-                                                </h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                    {[1, 2, 3, 4].map((q) => {
-                                                        const events = matchGoalEvents[q as 1 | 2 | 3 | 4] || [];
+                                            ) : (
+                                                <div className="space-y-2 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar pr-1">
+                                                    {events.map((evt, idx) => {
+                                                        const scorer = players.find(p => p.id === evt.scorerId);
+                                                        const assister = players.find(p => p.id === evt.assisterId);
                                                         return (
-                                                            <div key={q} className="bg-[#1e1e1e] rounded-xl p-4 border border-gray-800 flex flex-col h-full">
-                                                                <div className="flex justify-between items-center mb-3">
-                                                                    <span className="text-gray-400 font-bold text-sm">{q}쿼터</span>
-                                                                    <div className="flex gap-1 items-center">
-                                                                        {events.length > 0 && <span className="text-[10px] bg-gray-800 px-2 py-0.5 rounded text-gray-300 font-bold">{events.length}골</span>}
-                                                                        {/* Clean Sheet Indicator */}
-                                                                        {batchEntries.some(e => e.quarters[q]?.cleanSheet) && (
-                                                                            <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-black border border-green-500/20 flex items-center gap-0.5">
-                                                                                🛡️ CS
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
+                                                            <div key={evt.id} className="text-xs bg-black/20 p-2 rounded border border-gray-700/50">
+                                                                <div className="flex items-center gap-1 mb-1">
+                                                                    <span className="text-yellow-500 font-bold">#{idx + 1}</span>
+                                                                    <span className="text-white font-bold">{evt.isOpponentOwnGoal ? "상대 자책골" : scorer?.name}</span>
                                                                 </div>
-                                                                {events.length === 0 ? (
-                                                                    <div className="flex-1 flex items-center justify-center text-gray-600 text-xs py-4">
-                                                                        기록 없음
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="space-y-2 flex-1 overflow-y-auto max-h-[200px] custom-scrollbar pr-1">
-                                                                        {events.map((evt, idx) => {
-                                                                            const scorer = players.find(p => p.id === evt.scorerId);
-                                                                            const assister = players.find(p => p.id === evt.assisterId);
-                                                                            return (
-                                                                                <div key={evt.id} className="text-xs bg-black/20 p-2 rounded border border-gray-700/50">
-                                                                                    <div className="flex items-center gap-1 mb-1">
-                                                                                        <span className="text-yellow-500 font-bold">#{idx + 1}</span>
-                                                                                        <span className="text-white font-bold">{evt.isOpponentOwnGoal ? "상대 자책골" : scorer?.name}</span>
-                                                                                    </div>
-                                                                                    {!evt.isOpponentOwnGoal && assister && (
-                                                                                        <div className="text-gray-500 pl-4">└ 도움: {assister.name}</div>
-                                                                                    )}
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
+                                                                {!evt.isOpponentOwnGoal && assister && (
+                                                                    <div className="text-gray-500 pl-4">└ 도움: {assister.name}</div>
                                                                 )}
                                                             </div>
                                                         );
                                                     })}
                                                 </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* 2. Player Stat Changes */}
+                        <div className="max-w-7xl mx-auto">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <span>📈</span> 최종 스탯 변화
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {players.map(player => {
+                                    // summaryData is inside SummaryView, so we need to recalculate here or pass it.
+                                    // Actually, it's easier to just pass necessary data or recalculate.
+                                    // Inside PlayerManagementPanel, we can calculate session results.
+
+                                    const sessionStats = batchEntries.find(d => d.playerId === player.id);
+                                    if (!sessionStats) return null;
+
+                                    let sGoals = 0, sAssists = 0, sCS = 0;
+                                    Object.values(sessionStats.quarters).forEach(q => {
+                                        if (q.attended) {
+                                            sGoals += q.goals;
+                                            sAssists += q.assists;
+                                            if (q.cleanSheet) sCS++;
+                                        }
+                                    });
+
+                                    if (sGoals === 0 && sAssists === 0 && sCS === 0) return null;
+
+                                    return (
+                                        <div key={player.id} className="bg-[#1e1e1e] rounded-xl p-4 border border-gray-800 flex gap-4 items-center relative overflow-hidden group hover:border-gray-600 transition-colors">
+                                            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-800 shrink-0 border border-gray-700">
+                                                <Image src={player.profileImage} alt={player.name} fill className="object-cover" />
                                             </div>
-
-                                            {/* 2. Player Stat Changes */}
-                                            <div className="max-w-7xl mx-auto">
-                                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                                    <span>📈</span> 최종 스탯 변화
-                                                </h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                                    {players.map(player => {
-                                                        // summaryData is inside SummaryView, so we need to recalculate here or pass it.
-                                                        // Actually, it's easier to just pass necessary data or recalculate.
-                                                        // Inside PlayerManagementPanel, we can calculate session results.
-
-                                                        const sessionStats = batchEntries.find(d => d.playerId === player.id);
-                                                        if (!sessionStats) return null;
-
-                                                        let sGoals = 0, sAssists = 0, sCS = 0;
-                                                        Object.values(sessionStats.quarters).forEach(q => {
-                                                            if (q.attended) {
-                                                                sGoals += q.goals;
-                                                                sAssists += q.assists;
-                                                                if (q.cleanSheet) sCS++;
-                                                            }
-                                                        });
-
-                                                        if (sGoals === 0 && sAssists === 0 && sCS === 0) return null;
-
-                                                        return (
-                                                            <div key={player.id} className="bg-[#1e1e1e] rounded-xl p-4 border border-gray-800 flex gap-4 items-center relative overflow-hidden group hover:border-gray-600 transition-colors">
-                                                                <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                                                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-800 shrink-0 border border-gray-700">
-                                                                    <Image src={player.profileImage} alt={player.name} fill className="object-cover" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-center gap-2 mb-2">
-                                                                        <span className="text-lg font-bold text-white truncate">{player.name}</span>
-                                                                    </div>
-                                                                    <div className="space-y-1 text-sm bg-black/20 p-2 rounded-lg">
-                                                                        {sGoals > 0 && (
-                                                                            <div className="flex justify-between items-center">
-                                                                                <span className="text-gray-400">골</span>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <span className="text-gray-500">{player.goals}</span>
-                                                                                    <span className="text-gray-600">→</span>
-                                                                                    <span className="text-white font-bold">{player.goals + sGoals}</span>
-                                                                                    <span className="text-green-400 font-bold ml-1 text-xs">(+{sGoals})</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {sAssists > 0 && (
-                                                                            <div className="flex justify-between items-center">
-                                                                                <span className="text-gray-400">어시</span>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <span className="text-gray-500">{player.assists}</span>
-                                                                                    <span className="text-gray-600">→</span>
-                                                                                    <span className="text-white font-bold">{player.assists + sAssists}</span>
-                                                                                    <span className="text-blue-400 font-bold ml-1 text-xs">(+{sAssists})</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                        {sCS > 0 && (
-                                                                            <div className="flex justify-between items-center">
-                                                                                <span className="text-gray-400 font-medium">CLEAN SHEET</span>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <span className="text-gray-500">{player.cleanSheets}</span>
-                                                                                    <span className="text-gray-600">→</span>
-                                                                                    <span className="text-green-400 font-extrabold">{player.cleanSheets + sCS}</span>
-                                                                                    <span className="bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded text-[10px] font-black border border-green-500/10 ml-1">🛡️ +{sCS}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-lg font-bold text-white truncate">{player.name}</span>
+                                                </div>
+                                                <div className="space-y-1 text-sm bg-black/20 p-2 rounded-lg">
+                                                    {sGoals > 0 && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400">골</span>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-gray-500">{player.goals}</span>
+                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-white font-bold">{player.goals + sGoals}</span>
+                                                                <span className="text-green-400 font-bold ml-1 text-xs">(+{sGoals})</span>
                                                             </div>
-                                                        );
-                                                    })}
+                                                        </div>
+                                                    )}
+                                                    {sAssists > 0 && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400">어시</span>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-gray-500">{player.assists}</span>
+                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-white font-bold">{player.assists + sAssists}</span>
+                                                                <span className="text-blue-400 font-bold ml-1 text-xs">(+{sAssists})</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {sCS > 0 && (
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400 font-medium">CLEAN SHEET</span>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-gray-500">{player.cleanSheets}</span>
+                                                                <span className="text-gray-600">→</span>
+                                                                <span className="text-green-400 font-extrabold">{player.cleanSheets + sCS}</span>
+                                                                <span className="bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded text-[10px] font-black border border-green-500/10 ml-1">🛡️ +{sCS}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Footer Buttons */}
-                                        <div className="h-24 border-t border-gray-800 bg-[#121212] p-6 flex gap-4 shrink-0 z-20">
-                                            <button
-                                                onClick={() => setShowPreviewModal(false)}
-                                                className="flex-1 h-full rounded-xl bg-[#252526] text-white font-bold text-lg hover:bg-[#333] transition-colors border border-gray-700"
-                                            >
-                                                취소
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setShowPreviewModal(false);
-                                                    handleBatchSubmit();
-                                                }}
-                                                className="flex-3 h-full rounded-xl bg-primary text-black font-extrabold text-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                                            >
-                                                <span>✅ 저장하기</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 종료 컨펌 모달 */}
-                                {showFinishModal && (
-                                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-6">
-                                        <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
-                                            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-green-500/40">💾</div>
-                                            <h3 className="text-xl font-bold text-white mb-2">쿼터 입력을 마치겠습니까?</h3>
-                                            <p className="text-gray-400 text-sm mb-6">
-                                                1~4쿼터의 모든 기록이 합산되어<br />
-                                                선수 스탯에 영구적으로 반영됩니다.
-                                            </p>
-                                            <div className="flex gap-3">
-                                                <Button variant="line" onClick={() => setShowFinishModal(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400 hover:text-white hover:bg-white/5">
-                                                    계속 입력
-                                                </Button>
-                                                <Button variant="primary" onClick={handleBatchSubmit} className="flex-1 py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-900/20">
-                                                    네, 저장합니다
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                    );
+                                })}
                             </div>
-                            );
+                        </div>
+                    </div>
+
+                    {/* Footer Buttons */}
+                    <div className="p-6 border-t border-gray-800 bg-[#1a1a1a] flex gap-4 shrink-0">
+                        <Button
+                            variant="line"
+                            onClick={() => setShowPreviewModal(false)}
+                            className="flex-1 py-4 rounded-xl border-gray-600 text-gray-400 hover:text-white"
+                        >
+                            기록 수정하기
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={handleBatchSubmit}
+                            className="flex-1 py-4 rounded-xl font-bold bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-900/40"
+                        >
+                            네, 최종 저장합니다
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* 종료 컨펌 모달 */}
+            {showFinishModal && (
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-6">
+                    <div className="bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm text-center border border-gray-700 shadow-2xl animate-scale-up">
+                        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-green-500/40">💾</div>
+                        <h3 className="text-xl font-bold text-white mb-2">쿼터 입력을 마치겠습니까?</h3>
+                        <p className="text-gray-400 text-sm mb-6">
+                            1~4쿼터의 모든 기록이 합산되어<br />
+                            선수 스탯에 영구적으로 반영됩니다.
+                        </p>
+                        <div className="flex gap-3">
+                            <Button variant="line" onClick={() => setShowFinishModal(false)} className="flex-1 py-3 rounded-xl border-gray-600 text-gray-400 hover:text-white hover:bg-white/5">
+                                계속 입력
+                            </Button>
+                            <Button variant="primary" onClick={handleBatchSubmit} className="flex-1 py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-900/20">
+                                네, 저장합니다
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
-                            // 하단 뷰 분리 컴포넌트
-                            function SummaryView({
-                                batchEntries,
-                                goalEvents,
-                                players,
-                                activeEventId,
-                                setActiveEventId,
-                                setShowFinishModal,
-                                handleBatchSubmit,
-                                showFinishModal,
-                                quarterCompleted,
-                                setQuarterCompleted,
-                                setShowPreviewModal,
-                                showPreviewModal,
-                                showNilNilAlert,
-                                setShowNilNilAlert,
-                                handleNilNilConfirm,
-                                currentQuarter,
-                                setCurrentQuarter,
-                                gameType,
-                                matchGoalEvents,
-                                setMatchGoalEvents,
-                                wizardStep,
-                                setWizardStep,
-                                currentGoal,
-                                setCurrentGoal,
-                                teamAScore,
-                                teamBScore,
-                                theirScore,
-                                showQuarterFinishModal,
-                                setShowQuarterFinishModal,
-                                setOurScore,
-                                setTeamAScore,
-                                setTeamBScore
-                            }: {
-                                batchEntries: BatchEntry[];
-                            goalEvents: GoalEvent[];
-                            players: PlayerRecord[];
-                            activeEventId: number | null;
+// 하단 뷰 분리 컴포넌트
+interface SummaryViewProps {
+    batchEntries: BatchEntry[];
+    goalEvents: GoalEvent[];
+    players: PlayerRecord[];
+    activeEventId: number | null;
     setActiveEventId: (id: number | null) => void;
     setShowFinishModal: (show: boolean) => void;
     handleBatchSubmit: () => void;
-                            showFinishModal: boolean;
-                            quarterCompleted: Record<number, boolean>;
-                            setQuarterCompleted: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+    showFinishModal: boolean;
+    quarterCompleted: Record<number, boolean>;
+    setQuarterCompleted: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
     setShowPreviewModal: (show: boolean) => void;
-                                showPreviewModal: boolean;
-                                showNilNilAlert: boolean;
+    showPreviewModal: boolean;
+    showNilNilAlert: boolean;
     setShowNilNilAlert: (show: boolean) => void;
     handleNilNilConfirm: () => void;
-                                currentQuarter: 1 | 2 | 3 | 4;
-                                setCurrentQuarter: React.Dispatch<React.SetStateAction<1 | 2 | 3 | 4>>;
-                                    gameType: "match" | "scrimmage";
-                                    matchGoalEvents: Record<number, GoalEvent[]>;
-                                    setMatchGoalEvents: React.Dispatch<React.SetStateAction<Record<number, GoalEvent[]>>>;
-                                        wizardStep: "idle" | "scorer" | "assister";
+    currentQuarter: 1 | 2 | 3 | 4;
+    setCurrentQuarter: React.Dispatch<React.SetStateAction<1 | 2 | 3 | 4>>;
+    gameType: "match" | "scrimmage";
+    matchGoalEvents: Record<number, GoalEvent[]>;
+    setMatchGoalEvents: React.Dispatch<React.SetStateAction<Record<number, GoalEvent[]>>>;
+    wizardStep: "idle" | "scorer" | "assister";
     setWizardStep: (step: "idle" | "scorer" | "assister") => void;
-                                        currentGoal: {scorerId: string | null; assisterId: string | null; isOpponentOwnGoal: boolean } | null;
-                                        setCurrentGoal: React.Dispatch<React.SetStateAction<{ scorerId: string | null; assisterId: string | null; isOpponentOwnGoal: boolean } | null>>;
-                                            teamAScore: {[key: number]: number };
-                                            teamBScore: {[key: number]: number };
-                                            theirScore: {[key: number]: number };
-                                            showQuarterFinishModal: boolean;
+    currentGoal: { scorerId: string | null; assisterId: string | null; isOpponentOwnGoal: boolean } | null;
+    setCurrentGoal: React.Dispatch<React.SetStateAction<{ scorerId: string | null; assisterId: string | null; isOpponentOwnGoal: boolean } | null>>;
+    teamAScore: { [key: number]: number };
+    teamBScore: { [key: number]: number };
+    theirScore: { [key: number]: number };
+    showQuarterFinishModal: boolean;
     setShowQuarterFinishModal: (show: boolean) => void;
-                                            setOurScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
-                                                setTeamAScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
-                                                    setTeamBScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
-}) {
+    setOurScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
+    setTeamAScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
+    setTeamBScore: React.Dispatch<React.SetStateAction<{ [key: number]: number; }>>;
+}
+
+function SummaryView({
+    batchEntries,
+    goalEvents,
+    players,
+    activeEventId,
+    setActiveEventId,
+    setShowFinishModal,
+    handleBatchSubmit,
+    showFinishModal,
+    quarterCompleted,
+    setQuarterCompleted,
+    setShowPreviewModal,
+    showPreviewModal,
+    showNilNilAlert,
+    setShowNilNilAlert,
+    handleNilNilConfirm,
+    currentQuarter,
+    setCurrentQuarter,
+    gameType,
+    matchGoalEvents,
+    setMatchGoalEvents,
+    wizardStep,
+    setWizardStep,
+    currentGoal,
+    setCurrentGoal,
+    teamAScore,
+    teamBScore,
+    theirScore,
+    showQuarterFinishModal,
+    setShowQuarterFinishModal,
+    setOurScore,
+    setTeamAScore,
+    setTeamBScore
+}: SummaryViewProps) {
     const [activeTab, setActiveTab] = useState<"log" | "summary">("log");
 
     // 합산 데이터 계산
-    // 합산 데이터 계산
     const summaryData = batchEntries.map(entry => {
-                                                            let totalGoals = 0;
-                                                        let totalAssists = 0;
-                                                        let totalOG = 0;
-                                                        let totalCS = 0;
+        let totalGoals = 0;
+        let totalAssists = 0;
+        let totalOG = 0;
+        let totalCS = 0;
 
         Object.values(entry.quarters).forEach(q => {
             if (q.attended) {
-                                                            totalGoals += q.goals;
-                                                        totalAssists += q.assists;
-                                                        totalOG += q.ownGoals;
-                                                        if (q.cleanSheet) totalCS++;
+                totalGoals += q.goals;
+                totalAssists += q.assists;
+                totalOG += q.ownGoals;
+                if (q.cleanSheet) totalCS++;
             }
         });
 
-                                                        return {
-                                                            ...entry,
-                                                            totalGoals,
-                                                            totalAssists,
-                                                            totalOG,
-                                                            totalCS,
-                                                            name: players.find(p => p.id === entry.playerId)?.name || ""
+        const player = players.find(p => p.id === entry.playerId);
+        return {
+            ...entry,
+            totalGoals,
+            totalAssists,
+            totalOG,
+            totalCS,
+            name: player?.name || ""
         };
     }).filter(d => d.totalGoals > 0 || d.totalAssists > 0 || d.totalOG > 0 || d.totalCS > 0)
         .sort((a, b) => (b.totalGoals * 2 + b.totalAssists) - (a.totalGoals * 2 + a.totalAssists));
 
-                                                        return (
-                                                        <div className="h-full bg-[#1a1a1a] flex flex-col">
-                                                            <div className="flex border-b border-gray-800">
-                                                                <button
-                                                                    onClick={() => setActiveTab("log")}
-                                                                    className={`flex-1 px-4 py-3 text-sm font-bold transition-colors ${activeTab === "log" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-gray-500 hover:text-white"}`}
-                                                                >
-                                                                    📋 실시간 매치 로그
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setActiveTab("summary")}
-                                                                    className={`flex-1 px-4 py-3 text-sm font-bold transition-colors ${activeTab === "summary" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-gray-500 hover:text-white"}`}
-                                                                >
-                                                                    📊 기록 집계 (합산)
-                                                                </button>
-                                                            </div>
+    return (
+        <div className="h-full bg-[#1a1a1a] flex flex-col">
+            <div className="flex border-b border-gray-800">
+                <button
+                    onClick={() => setActiveTab("log")}
+                    className={`flex-1 px-4 py-3 text-sm font-bold transition-colors ${activeTab === "log" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-gray-500 hover:text-white"}`}
+                >
+                    📋 실시간 매치 로그
+                </button>
+                <button
+                    onClick={() => setActiveTab("summary")}
+                    className={`flex-1 px-4 py-3 text-sm font-bold transition-colors ${activeTab === "summary" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-gray-500 hover:text-white"}`}
+                >
+                    📊 기록 집계 (합산)
+                </button>
+            </div>
 
-                                                            <div className="flex-1 overflow-y-auto p-4 space-y-2 relative scrollbar-hide">
-                                                                {activeTab === "log" ? (
-                                                                    goalEvents.length === 0 ? (
-                                                                        <div className="flex flex-col items-center justify-center h-full text-gray-600 gap-2">
-                                                                            <span className="text-2xl">📝</span>
-                                                                            <p className="text-xs">기록된 이벤트가 없습니다.<br />좌측 패널에 기록을 입력해주세요.</p>
-                                                                        </div>
-                                                                    ) : (
-                                                                        goalEvents.slice().reverse().map(event => {
-                                                                            const scorer = players.find(p => p.id === event.scorerId);
-                                                                            const isOG = event.scorerId === "OG";
-                                                                            const assister = event.assisterId ? players.find(p => p.id === event.assisterId) : null;
-                                                                            const isActive = activeEventId === event.id;
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 relative scrollbar-hide">
+                {activeTab === "log" ? (
+                    goalEvents.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-600 gap-2">
+                            <span className="text-2xl">📝</span>
+                            <p className="text-xs text-center">기록된 이벤트가 없습니다.<br />좌측 패널에 기록을 입력해주세요.</p>
+                        </div>
+                    ) : (
+                        goalEvents.slice().reverse().map(event => {
+                            const scorer = players.find(p => p.id === event.scorerId);
+                            const isOG = event.scorerId === "OG";
+                            const assister = event.assisterId ? players.find(p => p.id === event.assisterId) : null;
+                            const isActive = activeEventId === event.id;
 
-                                                                            return (
-                                                                                <div
-                                                                                    key={event.id}
-                                                                                    onClick={() => setActiveEventId(isActive ? null : event.id)}
-                                                                                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isActive
-                                                                                        ? "bg-primary/10 border-primary/40 shadow-[0_0_15px_rgba(234,179,8,0.1)]"
-                                                                                        : "bg-[#252526] border-gray-700 hover:border-gray-500"
-                                                                                        }`}
-                                                                                >
-                                                                                    <div className="w-8 h-8 rounded-full bg-[#121212] flex items-center justify-center border border-gray-700 text-xs font-bold text-gray-400 shrink-0">
-                                                                                        {event.quarter}Q
-                                                                                    </div>
-                                                                                    <div className="flex-1 flex items-center gap-2">
-                                                                                        <span className="text-yellow-500 text-lg">⚽</span>
-                                                                                        <span className="text-white font-bold text-sm">{isOG ? "상대 자책골" : scorer?.name}</span>
-                                                                                        {assister ? (
-                                                                                            <>
-                                                                                                <span className="text-gray-500 text-xs mx-1">from</span>
-                                                                                                <span className="text-blue-400 text-lg">🅰️</span>
-                                                                                                <span className="text-white font-medium text-sm">{assister.name}</span>
-                                                                                            </>
-                                                                                        ) : (
-                                                                                            <span className="text-gray-500 text-xs ml-2">(단독 득점)</span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    {event.team && <span className={`text-[10px] px-1.5 py-0.5 rounded ${event.team === "A" ? "bg-red-500/20 text-red-400" : "bg-blue-500/20 text-blue-400"}`}>Team {event.team}</span>}
-                                                                                    <button
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            // 삭제 로직
-                                                                                            setMatchGoalEvents(prev => ({
-                                                                                                ...prev,
-                                                                                                [event.quarter]: prev[event.quarter].filter(ev => ev.id !== event.id)
-                                                                                            }));
+                            return (
+                                <div
+                                    key={event.id}
+                                    onClick={() => setActiveEventId(isActive ? null : event.id)}
+                                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isActive
+                                        ? "bg-primary/10 border-primary/40 shadow-[0_0_15px_rgba(234,179,8,0.1)]"
+                                        : "bg-[#252526] border-gray-700 hover:border-gray-500"
+                                        }`}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-[#121212] flex items-center justify-center border border-gray-700 text-xs font-bold text-gray-400 shrink-0">
+                                        {event.quarter}Q
+                                    </div>
+                                    <div className="flex-1 flex items-center gap-2">
+                                        <span className="text-yellow-500 text-lg">⚽</span>
+                                        <span className="text-white font-bold text-sm">{isOG ? "상대 자책골" : scorer?.name}</span>
+                                        {assister ? (
+                                            <>
+                                                <span className="text-gray-500 text-xs mx-1">from</span>
+                                                <span className="text-blue-400 text-lg">🅰️</span>
+                                                <span className="text-white font-medium text-sm">{assister.name}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-gray-500 text-xs ml-2">(단독 득점)</span>
+                                        )}
+                                    </div>
+                                    {event.team && <span className={`text-[10px] px-1.5 py-0.5 rounded ${event.team === "A" ? "bg-red-500/20 text-red-400" : "bg-blue-500/20 text-blue-400"}`}>Team {event.team}</span>}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setMatchGoalEvents(prev => ({
+                                                ...prev,
+                                                [event.quarter]: prev[event.quarter].filter(ev => ev.id !== event.id)
+                                            }));
 
-                                                                                            // 점수 차감
-                                                                                            if (gameType === "match") {
-                                                                                                // match 모드는 우리팀 점수만 관리 (상대 자책골 포함? 로직 확인 필요)
-                                                                                                // 기존 로직: setOurScore... +1
-                                                                                                setOurScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
-                                                                                            } else {
-                                                                                                const team = event.team;
-                                                                                                if (team === "A") setTeamAScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
-                                                                                                else setTeamBScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
-                                                                                            }
-                                                                                        }}
-                                                                                        className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-                                                                                    >
-                                                                                        ✕
-                                                                                    </button>
-                                                                                </div>
-                                                                            );
-                                                                        })
-                                                                    )
-                                                                ) : (
-                                                                    <div className="space-y-1">
-                                                                        {summaryData.length === 0 ? (
-                                                                            <div className="text-center text-gray-500 py-10 text-xs">집계된 기록이 없습니다.</div>
-                                                                        ) : (
-                                                                            summaryData.map(data => (
-                                                                                <div key={data.playerId} className="flex items-center justify-between p-3 bg-[#252526] rounded-xl border border-gray-700/50">
-                                                                                    <div className="flex items-center gap-3">
-                                                                                        <span className="text-sm font-bold text-white w-16 truncate">{data.name}</span>
-                                                                                        <div className="flex gap-1">
-                                                                                            {data.totalGoals > 0 && <span className="text-[10px] bg-yellow-500 text-black px-1.5 py-0.5 rounded font-bold">⚽ {data.totalGoals}</span>}
-                                                                                            {data.totalAssists > 0 && <span className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">🅰️ {data.totalAssists}</span>}
-                                                                                            {data.totalOG > 0 && <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold">😱 {data.totalOG}</span>}
-                                                                                            {data.totalCS > 0 && <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded font-bold">🛡️ {data.totalCS}</span>}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <span className="text-[10px] text-gray-500">Total</span>
-                                                                                </div>
-                                                                            ))
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                            if (gameType === "match") {
+                                                setOurScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
+                                            } else {
+                                                const team = event.team;
+                                                if (team === "A") setTeamAScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
+                                                else setTeamBScore(prev => ({ ...prev, [event.quarter]: Math.max(0, (prev[event.quarter] || 0) - 1) }));
+                                            }
+                                        }}
+                                        className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            );
+                        })
+                    )
+                ) : (
+                    <div className="space-y-1">
+                        {summaryData.length === 0 ? (
+                            <div className="text-center text-gray-500 py-10 text-xs">집계된 기록이 없습니다.</div>
+                        ) : (
+                            summaryData.map(data => (
+                                <div key={data.playerId} className="flex items-center justify-between p-3 bg-[#252526] rounded-xl border border-gray-700/50">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm font-bold text-white w-16 truncate">{data.name}</span>
+                                        <div className="flex gap-1">
+                                            {data.totalGoals > 0 && <span className="text-[10px] bg-yellow-500 text-black px-1.5 py-0.5 rounded font-bold">⚽ {data.totalGoals}</span>}
+                                            {data.totalAssists > 0 && <span className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">🅰️ {data.totalAssists}</span>}
+                                            {data.totalOG > 0 && <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-bold">😱 {data.totalOG}</span>}
+                                            {data.totalCS > 0 && <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded font-bold">🛡️ {data.totalCS}</span>}
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-500">Total</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
 
-                                                            {/* 하단 버튼 영역 - 더 컴팩트한 디자인 */}
-                                                            <div className="p-3 border-t border-gray-800 bg-[#121212] flex gap-2">
-                                                                {/* 이전 쿼터 버튼 (2쿼터 이상일 때 표시) */}
-                                                                {currentQuarter > 1 && (
-                                                                    <button
-                                                                        onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
-                                                                        className="px-4 py-2.5 font-bold text-sm rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center"
-                                                                    >
-                                                                        ⬅️ {currentQuarter - 1}Q
-                                                                    </button>
-                                                                )}
+            <div className="p-3 border-t border-gray-800 bg-[#121212] flex gap-2">
+                {currentQuarter > 1 && (
+                    <button
+                        onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
+                        className="px-4 py-2.5 font-bold text-sm rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center"
+                    >
+                        ⬅️ {currentQuarter - 1}Q
+                    </button>
+                )}
 
-                                                                {currentQuarter < 4 ? (
-                                                                    <button
-                                                                        onClick={() => setShowQuarterFinishModal(true)}
-                                                                        className="flex-1 py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
-                                                                    >
-                                                                        <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
-                                                                    </button>
-                                                                ) : (
-                                                                    <button
-                                                                        onClick={() => setShowPreviewModal(true)}
-                                                                        className="w-full py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
-                                                                    >
-                                                                        💾 경기 기록 전체 종료 및 저장
-                                                                    </button>
-                                                                )}
-                                                            </div>
-
-                                                        </div>
-                                                        );
+                {currentQuarter < 4 ? (
+                    <button
+                        onClick={() => setShowQuarterFinishModal(true)}
+                        className="flex-1 py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => setShowPreviewModal(true)}
+                        className="w-full py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
+                    >
+                        💾 경기 기록 전체 종료 및 저장
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 }
+
