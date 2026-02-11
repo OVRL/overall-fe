@@ -25,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={`${pretendard.variable} w-screen h-screen antialiased`}>
+      <body
+        className={`${pretendard.variable} w-full min-h-screen antialiased overflow-x-hidden`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

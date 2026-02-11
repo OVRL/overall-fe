@@ -61,6 +61,9 @@
   --color-white: oklch(1 0 89.8756);
   --color-card-bg: oklch(0.145 0 0);
 
+  --font-paperlogy: var(--font-paperlogy);
+  --font-pretendard: var(--font-pretendard);
+
   /* Background Color Hierarchy */
   --color-gray-10: oklch(0.213 0 0);
   /* #1A1A1A */
