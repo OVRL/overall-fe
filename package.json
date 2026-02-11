@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "relay": "relay-compiler",
-    "schema:update": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && get-graphql-schema https://api.ovr-log.com/graphql > schema.graphql"
+    "schema:update": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && get-graphql-schema https://api.ovr-log.com/graphql > schema.graphql",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

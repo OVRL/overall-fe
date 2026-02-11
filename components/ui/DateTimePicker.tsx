@@ -8,9 +8,10 @@ interface DateTimePickerProps {
     initialValue: string;
     onClose: () => void;
     onConfirm: (value: string) => void;
+    markedDates?: string[]; // YYYY-MM-DD
 }
 
-export default function DateTimePicker({ type, initialValue, onClose, onConfirm }: DateTimePickerProps) {
+export default function DateTimePicker({ type, initialValue, onClose, onConfirm, markedDates = [] }: DateTimePickerProps) {
     // Date Picker States
     const [currentDate, setCurrentDate] = useState(() => initialValue && type === 'date' ? new Date(initialValue) : new Date());
 
@@ -119,6 +120,13 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm 
             selectedDate.getMonth() === month &&
             selectedDate.getDate() === day;
 
+        const isMarked = (day: number) => {
+            if (!markedDates) return false;
+            // 월은 0부터 시작하므로 month + 1
+            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            return markedDates.includes(dateStr);
+        };
+
         return (
             <div className="w-full">
                 <div className="flex justify-between items-center mb-4 px-2">
@@ -137,12 +145,16 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm 
                         <button
                             key={day}
                             onClick={() => handleDateClick(day)}
-                            className={`h-10 w-10 mx-auto rounded-full flex items-center justify-center text-sm font-medium transition-colors
-                ${isSelected(day)
+                            className={`relative h-10 w-10 mx-auto rounded-full flex items-center justify-center text-sm font-medium transition-colors
+                                ${isSelected(day)
                                     ? "bg-primary text-black font-bold shadow-lg shadow-primary/20"
-                                    : "text-white hover:bg-white/10"}`}
+                                    : "text-white hover:bg-white/10"
+                                }`}
                         >
                             {day}
+                            {isMarked(day) && (
+                                <span className="absolute -bottom-1 -right-1 text-[10px]">⚽</span>
+                            )}
                         </button>
                     ))}
                 </div>
@@ -155,9 +167,6 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm 
         const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
         const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
         const ampms = ["AM", "PM"];
-
-        // 렌더링 최적화를 위해 map 내부에서 함수 생성 최소화
-        // (여기선 단순화를 위해 인라인)
 
         return (
             <div className="w-full flex flex-col items-center">
