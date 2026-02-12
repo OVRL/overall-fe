@@ -62,6 +62,9 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
     const [teamName, setTeamName] = useState("바르셀로나 FC");
     const [foundedYear, setFoundedYear] = useState("2020");
     const [description, setDescription] = useState("최고의 팀을 향해!");
+    const [frequentArea, setFrequentArea] = useState("용인 수지구");
+    const [ownerId, setOwnerId] = useState<string>("1"); // Default to manager (id: "1")
+
     const [members, setMembers] = useState<TeamMember[]>(mockMembers);
 
     // 권한 변경 모달
@@ -146,9 +149,117 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
         player: "선수",
     };
 
+    const ownerMember = members.find(m => m.id === ownerId);
+
     return (
         <div className="p-4 sm:p-6 space-y-8 max-w-5xl mx-auto">
-            {/* ... (상단 팀 정보 카드 생략) ... */}
+            {/* 팀 정보 섹션 (New) */}
+            <section className="bg-[#242424] rounded-3xl overflow-hidden shadow-lg border border-white/5 relative">
+                {/* 배경 장식 */}
+                <div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-primary/10 to-transparent pointer-events-none" />
+
+                <div className="p-6 sm:p-8 flex flex-col md:flex-row gap-8 relative z-10">
+                    {/* 로고 영역 */}
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-[#333] shadow-xl bg-[#1a1a1a] group">
+                            <Image src="/images/ovr.png" alt="Team Logo" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                            {isManager && (
+                                <button className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                    <span className="text-white text-xs font-bold border border-white/30 px-3 py-1 rounded-full backdrop-blur-md">로고 변경</span>
+                                </button>
+                            )}
+                        </div>
+                        {isManager ? (
+                            <input
+                                type="text"
+                                value={teamName}
+                                onChange={(e) => setTeamName(e.target.value)}
+                                className="text-2xl font-bold text-center bg-transparent border-b border-transparent hover:border-white/20 focus:border-primary outline-hidden text-white transition-colors w-full max-w-[200px]"
+                            />
+                        ) : (
+                            <h2 className="text-2xl font-bold text-white text-center">{teamName}</h2>
+                        )}
+                    </div>
+
+                    {/* 정보 입력 영역 */}
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">소개글</label>
+                            {isManager ? (
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="w-full bg-[#1a1a1a] rounded-xl px-4 py-3 text-sm text-gray-300 resize-none h-24 border border-white/5 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-hidden transition-all"
+                                    placeholder="팀 소개를 입력하세요..."
+                                />
+                            ) : (
+                                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap bg-[#1a1a1a] p-4 rounded-xl border border-white/5 h-24 overflow-y-auto">
+                                    {description}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">주 활동 지역</label>
+                                    {isManager ? (
+                                        <input
+                                            type="text"
+                                            value={frequentArea}
+                                            onChange={(e) => setFrequentArea(e.target.value)}
+                                            className="w-full bg-[#1a1a1a] rounded-xl px-3 py-2.5 text-sm text-gray-300 border border-white/5 focus:border-primary/50 outline-hidden transition-all"
+                                        />
+                                    ) : (
+                                        <div className="text-sm text-white font-medium bg-[#1a1a1a] px-3 py-2.5 rounded-xl border border-white/5">{frequentArea}</div>
+                                    )}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">창단일</label>
+                                    <div className="text-sm text-white font-medium bg-[#1a1a1a] px-3 py-2.5 rounded-xl border border-white/5 flex items-center justify-between">
+                                        {foundedYear}
+                                        <span className="text-xs text-gray-600">불변</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">구단주 (소유자)</label>
+                                {isManager ? (
+                                    <div className="relative">
+                                        <select
+                                            value={ownerId}
+                                            onChange={(e) => setOwnerId(e.target.value)}
+                                            className="w-full bg-[#1a1a1a] rounded-xl pl-3 pr-10 py-2.5 text-sm text-white appearance-none border border-white/5 focus:border-primary/50 outline-hidden cursor-pointer"
+                                        >
+                                            {members.map(m => (
+                                                <option key={m.id} value={m.id}>{m.name} ({roleLabels[m.role]})</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                            ▼
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 bg-[#1a1a1a] px-3 py-2.5 rounded-xl border border-white/5">
+                                        {ownerMember ? (
+                                            <>
+                                                <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-700">
+                                                    <Image src={ownerMember.profileImage} alt={ownerMember.name} fill className="object-cover" />
+                                                </div>
+                                                <span className="text-sm text-white font-medium">{ownerMember.name}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-sm text-gray-500">미지정</span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
 
             {/* 구성원 섹션 */}
             <section>

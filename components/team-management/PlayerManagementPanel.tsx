@@ -138,7 +138,7 @@ interface GoalEvent {
 }
 
 export default function PlayerManagementPanel() {
-    const [players, setPlayers] = useState<PlayerRecord[]>(mockPlayers);
+    const [players, setPlayers] = useState<PlayerRecord[]>(mockPlayers.map(p => calculateAutoFields(p)));
     const [editingId, setEditingId] = useState<string | null>(null);
 
     // 모달 상태
@@ -222,9 +222,12 @@ export default function PlayerManagementPanel() {
         setSortConfig({ key, direction });
     };
 
-    const deletePlayer = (id: string) => {
-        if (confirm("정말 이 선수를 삭제하시겠습니까?")) {
-            setPlayers(prev => prev.filter(p => p.id !== id));
+    const [deletingPlayerId, setDeletingPlayerId] = useState<string | null>(null);
+
+    const confirmDeletePlayer = () => {
+        if (deletingPlayerId) {
+            setPlayers(prev => prev.filter(p => p.id !== deletingPlayerId));
+            setDeletingPlayerId(null);
         }
     };
 
@@ -801,11 +804,11 @@ export default function PlayerManagementPanel() {
     let cbIndex = 0;
 
     const manualFields = ["attendance", "goals", "assists", "ownGoals", "keyPasses", "cleanSheets", "wins", "draws", "losses"] as const;
-    const autoFields = ["matchCount", "attendanceRate", "goalsPerGame", "assistsPerGame", "totalAttackPoints", "winRate", "points", "rating", "ovr", "momTop3Count"] as const;
+    const autoFields = ["goalsPerGame", "assistsPerGame", "totalAttackPoints", "winRate", "points", "ovr", "momTop3Count"] as const;
     const fieldLabels: Record<string, string> = {
         attendance: "출석", goals: "득점", assists: "도움", ownGoals: "자책", keyPasses: "기점", cleanSheets: "CS",
         wins: "승", draws: "무", losses: "패",
-        matchCount: "경기", attendanceRate: "참여율", goalsPerGame: "G/M", assistsPerGame: "A/M", totalAttackPoints: "공P",
+        goalsPerGame: "G/M", assistsPerGame: "A/M", totalAttackPoints: "공P (G+A)",
         winRate: "승률%", points: "승점", rating: "평점", ovr: "OVR", momTop3Count: "MOM",
     };
 
@@ -954,12 +957,12 @@ export default function PlayerManagementPanel() {
                                 <td className="px-1 py-2 text-center border-l border-gray-700 text-gray-600" >│</td>
                                 {autoFields.map(field => (
                                     <td key={field} className="px-2 py-2 text-center text-gray-400 font-medium">
-                                        {field === "winRate" || field === "attendanceRate" ? `${player[field]}%` : player[field]}
+                                        {field === "winRate" ? `${player[field]}%` : player[field]}
                                     </td>
                                 ))}
                                 <td className="px-3 py-2 text-center">
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); deletePlayer(player.id); }}
+                                        onClick={(e) => { e.stopPropagation(); setDeletingPlayerId(player.id); }}
                                         className="text-gray-600 hover:text-red-500 transition-colors"
                                     >
                                         ✕
@@ -978,66 +981,70 @@ export default function PlayerManagementPanel() {
                         <div
                             key={player.id}
                             onClick={() => setEditingId(editingId === player.id ? null : player.id)}
-                            className={`bg-surface-tertiary rounded-xl p-4 border transition-all ${editingId === player.id ? "border-primary bg-surface-secondary" : "border-transparent"
+                            className={`bg-surface-tertiary/50 backdrop-blur-md rounded-2xl p-5 border transition-all shadow-lg ${editingId === player.id ? "border-primary/50 bg-surface-secondary shadow-primary/10" : "border-white/5 hover:bg-white/5"
                                 }`}
                         >
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-700 ring-2 ring-white/10 shadow-lg">
                                         <Image src={player.profileImage} alt={player.name} fill className="object-cover" />
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-white font-bold">{player.name}</span>
-                                            <span className="text-xs text-gray-500">#{player.backNumber}</span>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-white font-black text-lg">{player.name}</span>
+                                            <span className="text-xs text-gray-500 font-mono bg-black/20 px-1.5 py-0.5 rounded">#{player.backNumber}</span>
                                         </div>
-                                        <PositionChip position={player.mainPosition} variant="filled" className="text-[10px] px-1.5 py-0.5 mt-0.5" />
+                                        <PositionChip position={player.mainPosition} variant="filled" className="text-[10px] px-2 py-0.5" />
                                     </div>
                                 </div>
                                 <button
-                                    onClick={(e) => { e.stopPropagation(); deletePlayer(player.id); }}
-                                    className="text-gray-600 hover:text-red-500 p-2"
+                                    onClick={(e) => { e.stopPropagation(); setDeletingPlayerId(player.id); }}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-95"
                                 >
                                     ✕
                                 </button>
                             </div>
 
                             {/* 주요 스탯 그리드 */}
-                            <div className="grid grid-cols-5 gap-2 bg-[#1a1a1a] rounded-lg p-3 mb-2">
-                                {manualFields.map(field => (
-                                    <div key={field} className="flex flex-col items-center">
-                                        <span className="text-[10px] text-gray-500 mb-1">
-                                            {fieldLabels[field]}
-                                        </span>
-                                        {editingId === player.id ? (
-                                            <div className="flex flex-col items-center">
-                                                <input
-                                                    type="number"
-                                                    value={player[field]}
-                                                    onChange={(e) => handleFieldChange(player.id, field, parseInt(e.target.value) || 0)}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="w-full bg-surface-tertiary border border-gray-600 rounded text-center text-white text-sm py-1"
-                                                />
-                                                {getStatDiff(player.id, field, player[field] as number)}
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center">
-                                                <span className={`text-sm font-bold ${field === "goals" ? "text-primary" : "text-white"}`}>
-                                                    {player[field]}
-                                                </span>
-                                                {getStatDiff(player.id, field, player[field] as number)}
-                                            </div>
-                                        )}
+                            <div className="grid grid-cols-4 gap-2 mb-4">
+                                {/* 공격 포인트 (강조) */}
+                                <div className="col-span-2 bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center">
+                                    <span className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">공격포인트</span>
+                                    <span className="text-2xl font-black text-white">{player.goals + player.assists}</span>
+                                    <div className="flex gap-2 mt-1 text-[10px] text-gray-400">
+                                        <span>⚽ {player.goals}</span>
+                                        <span>🅰️ {player.assists}</span>
                                     </div>
-                                ))}
+                                </div>
+                                {/* OVR */}
+                                <div className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col items-center justify-center">
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">OVR</span>
+                                    <span className="text-2xl font-black text-white">{player.ovr}</span>
+                                </div>
                             </div>
 
-                            {/* 자동 계산 스탯 (간략히) */}
-                            <div className="flex justify-between items-center text-xs text-gray-400 px-1">
-                                <span>경기 {player.matchCount}</span>
-                                <span>승률 {player.winRate}%</span>
-                                <span>공P {player.totalAttackPoints}</span>
-                                <span>평점 {player.rating}</span>
+                            {/* 상세 스탯 (Expandable or Grid) */}
+                            {editingId === player.id && (
+                                <div className="grid grid-cols-3 gap-2 animate-fade-in-up">
+                                    {manualFields.map(field => (
+                                        <div key={field} className="bg-black/20 rounded-lg p-2 flex flex-col items-center">
+                                            <span className="text-[10px] text-gray-500 mb-1">{fieldLabels[field]}</span>
+                                            <input
+                                                type="number"
+                                                value={player[field]}
+                                                onChange={(e) => handleFieldChange(player.id, field, parseInt(e.target.value) || 0)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="w-full bg-transparent text-center text-white text-sm font-bold focus:outline-none border-b border-gray-700 focus:border-primary pb-1"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Footer Stats */}
+                            <div className="flex justify-between items-center text-[10px] text-gray-500 mt-2 px-1 pt-2 border-t border-white/5">
+                                <span>🏆 승률 <span className="text-white font-bold">{player.winRate}%</span></span>
+                                <span>🌟 MOM <span className="text-white font-bold">{player.momTop3Count}회</span></span>
                             </div>
                         </div>
                     ))
@@ -1582,58 +1589,70 @@ export default function PlayerManagementPanel() {
                                                     )}
                                                 </div>
 
-                                                {/* PC 전용 스마트 파서 (하단 고정) */}
-                                                <div className="hidden lg:block p-4 border-t border-gray-800 bg-[#1e1e1e]/80 backdrop-blur-md">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h4 className="text-white font-black text-xs flex items-center gap-2">
-                                                            <span className="text-primary">⚡</span> SMART PARSER
-                                                        </h4>
-                                                        <span className="text-[10px] text-gray-500 font-medium">Auto-Parsing</span>
+                                                {/* Messenger Style UI - Mobile: Hidden, PC: Visible */}
+                                                <div className="hidden md:flex flex-col h-[320px] shrink-0 border-t border-gray-800 bg-[#b2c7d9] relative z-10 w-full">
+                                                    {/* Chat Area */}
+                                                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 font-sans relative">
+                                                        <div className="text-center text-[10px] text-white/80 mb-2 bg-black/20 inline-block px-3 py-1 rounded-full mx-auto backdrop-blur-sm shadow-sm">
+                                                            {new Date().toLocaleDateString()}
+                                                        </div>
+
+                                                        {/* System Welcome Message */}
+                                                        <div className="flex gap-2">
+                                                            <div className="w-8 h-8 rounded-[12px] bg-white flex items-center justify-center text-lg shrink-0 shadow-sm border border-black/5 overflow-hidden">
+                                                                🤖
+                                                            </div>
+                                                            <div className="flex flex-col gap-1 max-w-[80%]">
+                                                                <span className="text-[10px] text-gray-600 ml-1">스마트 파서</span>
+                                                                <div className="bg-white px-3 py-2 rounded-[12px] rounded-tl-none shadow-sm text-xs text-black leading-relaxed whitespace-pre-wrap relative border border-black/5">
+                                                                    경기 기록을 입력해주세요.<br />
+                                                                    예: "박무트 골 호남두 어시"<br />
+                                                                    (엔터를 눌러 줄바꿈 가능)
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* User Input Log (Mirroring current input or logic results) */}
+                                                        {parseResultMsg && (
+                                                            <div className="flex gap-2">
+                                                                <div className="w-8 h-8 rounded-[12px] bg-white flex items-center justify-center text-lg shrink-0 shadow-sm border border-black/5 overflow-hidden">
+                                                                    🤖
+                                                                </div>
+                                                                <div className="flex flex-col gap-1 max-w-[80%]">
+                                                                    <span className="text-[10px] text-gray-600 ml-1">스마트 파서</span>
+                                                                    <div className="bg-white px-3 py-2 rounded-[12px] rounded-tl-none shadow-sm text-xs text-black leading-relaxed relative border border-black/5">
+                                                                        {parseResultMsg}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
 
-                                                    <textarea
-                                                        value={smartInputText}
-                                                        onChange={(e) => setSmartInputText(e.target.value)}
-                                                        onKeyDown={(e) => e.stopPropagation()}
-                                                        placeholder="예: 박무트 호남두 (엔터)"
-                                                        className="w-full h-20 bg-[#0f0f0f] border border-gray-700 rounded-xl p-3 text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none custom-scrollbar mb-2"
-                                                    />
-                                                    <Button
-                                                        variant="primary"
-                                                        onClick={() => {
-                                                            const lines = smartInputText.split('\n').filter(line => line.trim() !== '');
-                                                            let addedCount = 0;
-                                                            const newEvents: GoalEvent[] = [];
-                                                            lines.forEach(line => {
-                                                                const normalizedLine = line.replace(/골|어시|도움|득점|\(|\)/g, ' ').trim();
-                                                                const tokens = normalizedLine.split(/\s+/).filter(t => t.length > 0);
-                                                                if (tokens.length === 0) return;
-                                                                const matchedPlayers = tokens.map(token => players.find(p => p.name === token || p.name.includes(token))).filter(p => p !== undefined) as PlayerRecord[];
-                                                                if (matchedPlayers.length > 0) {
-                                                                    const scorer = matchedPlayers[0];
-                                                                    const assister = matchedPlayers.length > 1 ? matchedPlayers[1] : undefined;
-                                                                    newEvents.push({ id: Date.now() + Math.random(), quarter: currentQuarter, scorerId: scorer.id, assisterId: assister?.id || null, isOpponentOwnGoal: false, team: "A" });
-                                                                    addedCount++;
+                                                    {/* Input Area */}
+                                                    <div className="bg-white p-3 border-t border-[#dcdcdc] flex gap-2 items-end">
+                                                        <textarea
+                                                            value={smartInputText}
+                                                            onChange={(e) => setSmartInputText(e.target.value)}
+                                                            placeholder="메시지를 입력하세요..."
+                                                            className="flex-1 bg-[#f5f5f5] rounded-[4px] px-3 py-2 text-sm text-black focus:outline-none resize-none h-[60px] custom-scrollbar border border-transparent focus:border-yellow-400 focus:bg-white transition-colors"
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                                    e.preventDefault();
+                                                                    parseSmartInput();
                                                                 }
-                                                            });
-                                                            if (addedCount > 0) {
-                                                                setMatchGoalEvents(prev => ({ ...prev, [currentQuarter]: [...(prev[currentQuarter] || []), ...newEvents] }));
-                                                                if (gameType === "match") setOurScore(prev => ({ ...prev, [currentQuarter]: (prev[currentQuarter] || 0) + addedCount }));
-                                                                else newEvents.forEach(evt => {
-                                                                    const scorerEntry = batchEntries.find(e => e.playerId === evt.scorerId);
-                                                                    const team = (scorerEntry?.quarters[currentQuarter]?.team || "A") as "A" | "B";
-                                                                    if (team === "A") setTeamAScore(prev => ({ ...prev, [currentQuarter]: (prev[currentQuarter] || 0) + 1 }));
-                                                                    else setTeamBScore(prev => ({ ...prev, [currentQuarter]: (prev[currentQuarter] || 0) + 1 }));
-                                                                });
-                                                                setSmartInputText("");
-                                                                setParseResultMsg(`✅ ${addedCount}건 추가!`);
-                                                                setTimeout(() => setParseResultMsg(""), 3000);
-                                                            }
-                                                        }}
-                                                        className="w-full py-2 font-bold text-xs"
-                                                    >
-                                                        ⚡ 적용하기
-                                                    </Button>
+                                                            }}
+                                                        />
+                                                        <button
+                                                            onClick={parseSmartInput}
+                                                            className={`
+                                                                px-4 h-[60px] rounded-[4px] font-bold text-sm transition-all
+                                                                ${smartInputText.trim() ? "bg-[#ffeb33] text-black hover:bg-[#ebd700]" : "bg-[#f5f5f5] text-[#b4b4b4] cursor-not-allowed"}
+                                                            `}
+                                                            disabled={!smartInputText.trim()}
+                                                        >
+                                                            전송
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1647,8 +1666,9 @@ export default function PlayerManagementPanel() {
                                         <div className="absolute top-4 left-4 z-10 bg-black/50 px-3 py-1 rounded-full text-xs font-bold text-white backdrop-blur-md border border-white/10">
                                             🏟️ {currentQuarter}Q 포메이션
                                         </div>
-                                        <div className="w-full h-full flex justify-center">
-                                            <div className="w-full h-full relative">
+                                        {/* Formation View (Larger & Centered) */}
+                                        <div className="w-full h-full flex flex-col justify-center items-center bg-[#1a1a1a] rounded-xl overflow-hidden shadow-inner border border-white/5 relative">
+                                            <div className="absolute inset-0 p-4">
                                                 <FormationField
                                                     players={players
                                                         .filter(p => {
@@ -1661,21 +1681,20 @@ export default function PlayerManagementPanel() {
                                                             position: p.mainPosition,
                                                             image: p.profileImage,
                                                             season: "26", // Mock Data
-                                                            seasonType: "general", // Mock Data
-                                                            number: 0, // Mock Data
+                                                            seasonType: "general",
+                                                            number: 0,
                                                             overall: p.ovr,
-                                                            shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, pace: 0 // Mock stats
+                                                            shooting: 0, passing: 0, dribbling: 0, defending: 0, physical: 0, pace: 0
                                                         }))}
                                                     handleDragStart={() => { }}
                                                     handleDrop={() => { }}
                                                     handleDragOver={() => { }}
                                                     onPlayerSelect={(player) => {
-                                                        // 플레이어 선택 시 득점자로 설정
                                                         setWizardStep("scorer");
                                                         setCurrentGoal(prev => ({ scorerId: player.id.toString(), assisterId: null, isOpponentOwnGoal: false }));
-                                                        setWizardStep("assister"); // 바로 어시스터 선택으로 이동? 아니면 스코어러 선택?
-                                                        // 여기서는 스코어러로 세팅하고 'assister' 단계로 넘기는게 자연스러울 듯
+                                                        setWizardStep("assister");
                                                     }}
+                                                    className="w-full h-full object-contain"
                                                 />
                                             </div>
                                         </div>
@@ -2059,6 +2078,39 @@ export default function PlayerManagementPanel() {
                             <Button variant="primary" onClick={handleBatchSubmit} className="flex-1 py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-900/20">
                                 네, 저장합니다
                             </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Player Release Confirmation Modal */}
+            {deletingPlayerId && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-70 animate-fade-in p-4">
+                    <div className="bg-[#1a1a1a] rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-gray-700 animate-scale-up">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl ring-1 ring-red-500/30">
+                                🗑️
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">선수 방출 확인</h3>
+                            <p className="text-gray-400 text-sm mb-6">
+                                <span className="text-white font-bold">{players.find(p => p.id === deletingPlayerId)?.name}</span> 선수를<br />
+                                정말로 팀에서 방출하시겠습니까?
+                            </p>
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="line"
+                                    onClick={() => setDeletingPlayerId(null)}
+                                    className="flex-1 py-3 border-gray-600 text-gray-400 hover:text-white"
+                                >
+                                    취소
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={confirmDeletePlayer}
+                                    className="flex-1 py-3 font-bold bg-red-600 text-white hover:bg-red-500 shadow-lg shadow-red-900/20"
+                                >
+                                    방출하기
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
