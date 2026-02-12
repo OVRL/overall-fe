@@ -210,6 +210,7 @@ export default function PlayerManagementPanel() {
 
     // Feature: Save Confirmation Modal
     const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
+    const [showToast, setShowToast] = useState(false); // Success Toast State
 
     // Sorting State
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
@@ -772,9 +773,13 @@ export default function PlayerManagementPanel() {
                     }
                 });
 
+                // Attendance: +1 if participated in ANY quarter
+                const hasAttendedAnyQuarter = Object.values(updatedQuarters).some(q => q.attended);
+                const matchAttendance = hasAttendedAnyQuarter ? 1 : 0;
+
                 const updated = {
                     ...p,
-                    attendance: p.attendance + totalAttended,
+                    attendance: p.attendance + matchAttendance, // Integrated Attendance Count
                     goals: p.goals + totalGoals,
                     assists: p.assists + totalAssists,
                     ownGoals: p.ownGoals + totalOwnGoals,
@@ -790,6 +795,11 @@ export default function PlayerManagementPanel() {
 
         setShowFinishModal(false);
         setShowBatchModal(false);
+        setShowPreviewModal(false); // Also close the preview modal
+
+        // Trigger Success Toast
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
     };
 
     const updateBatchEntry = (playerId: string, field: keyof QuarterRecord, value: unknown) => {
@@ -1150,7 +1160,7 @@ export default function PlayerManagementPanel() {
 
                             <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
                                 {/* 좌측: 컨트롤 패널 (스코어 & 기록 입력) - PC에서 스크롤 개선 */}
-                                <div className="w-full lg:w-[320px] lg:flex-none bg-[#1a1a1a] border-r border-gray-800 flex flex-col z-20 shrink-0 shadow-xl overflow-hidden">
+                                <div className="w-full lg:w-[320px] lg:flex-none md:flex-1 bg-[#1a1a1a] border-r border-gray-800 flex flex-col z-20 shrink-0 shadow-xl overflow-hidden flex-1">
                                     <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
                                         {/* 쿼터 결과 입력 */}
                                         <div>
@@ -1310,71 +1320,91 @@ export default function PlayerManagementPanel() {
                                                             </div>
                                                         </div>
 
+                                                        {/* Mobile Bottom Action Bar (Next Quarter / Finish) - Static Inline after Inputs */}
+                                                        <div className="lg:hidden w-full mt-4 p-4 bg-[#1a1a1a] border-t border-gray-800 rounded-xl flex gap-2 shadow-lg">
+                                                            {currentQuarter > 1 && (
+                                                                <button
+                                                                    onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
+                                                                    className="px-4 py-3 font-bold text-sm rounded-xl bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center"
+                                                                >
+                                                                    ⬅️
+                                                                </button>
+                                                            )}
+                                                            {currentQuarter < 4 ? (
+                                                                <button
+                                                                    onClick={() => setShowQuarterFinishModal(true)}
+                                                                    className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+                                                                >
+                                                                    <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => setShowQuarterFinishModal(true)}
+                                                                    className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
+                                                                >
+                                                                    💾 경기 종료 및 리포트 확인
+                                                                </button>
+                                                            )}
+                                                        </div>
+
 
 
                                                         {/* 출석 체크 대신 스마트 파서 위치 (PC) */}
-                                                        <div className="hidden md:flex flex-col h-[320px] shrink-0 border-t border-gray-800 bg-[#b2c7d9] relative z-10 w-full mt-4 rounded-xl overflow-hidden">
+                                                        {/* 출석 체크 대신 스마트 파서 위치 (PC) - Terminal Style */}
+                                                        <div className="hidden md:flex flex-col h-[320px] shrink-0 border-t border-gray-800 bg-[#0c0c0c] relative z-10 w-full mt-4 rounded-xl overflow-hidden font-mono shadow-inner border border-gray-800/50">
+                                                            {/* Terminal Header */}
+                                                            <div className="bg-[#1a1a1a] px-3 py-1.5 flex items-center justify-between border-b border-gray-800">
+                                                                <div className="flex gap-1.5">
+                                                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                                                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                                                                </div>
+                                                                <span className="text-[10px] text-gray-500 font-bold tracking-widest">SMART PARSER v1.0</span>
+                                                            </div>
+
                                                             {/* Chat Area */}
-                                                            <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 font-sans relative">
-                                                                <div className="text-center text-[10px] text-white/80 mb-2 bg-black/20 inline-block px-3 py-1 rounded-full mx-auto backdrop-blur-sm shadow-sm">
-                                                                    {new Date().toLocaleDateString()}
+                                                            <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 relative font-mono text-xs">
+                                                                <div className="text-gray-500 text-[10px] mb-2 border-b border-gray-800 pb-2">
+                                                                    Last Login: {new Date().toLocaleString()} on ttys001
                                                                 </div>
 
                                                                 {/* System Welcome Message */}
-                                                                <div className="flex gap-2">
-                                                                    <div className="w-8 h-8 rounded-[12px] bg-white flex items-center justify-center text-lg shrink-0 shadow-sm border border-black/5 overflow-hidden">
-                                                                        🤖
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-1 max-w-[80%]">
-                                                                        <span className="text-[10px] text-gray-600 ml-1">스마트 파서</span>
-                                                                        <div className="bg-white px-3 py-2 rounded-[12px] rounded-tl-none shadow-sm text-xs text-black leading-relaxed whitespace-pre-wrap relative border border-black/5">
-                                                                            경기 기록을 입력해주세요.<br />
-                                                                            예: "박무트 골 호남두 어시"<br />
-                                                                            (엔터를 눌러 줄바꿈 가능)
-                                                                        </div>
+                                                                <div className="flex flex-col gap-1 fade-in">
+                                                                    <span className="text-green-500 font-bold">$ system_init</span>
+                                                                    <div className="text-gray-300 leading-relaxed pl-2 border-l-2 border-green-500/30">
+                                                                        Smart Parser initialized.<br />
+                                                                        Enter match details below.<br />
+                                                                        Example: <span className="text-yellow-400">"박무트 골 호남두 어시"</span> (Press Enter)
                                                                     </div>
                                                                 </div>
 
-                                                                {/* User Input Log */}
+                                                                {/* User Input Log & Result */}
                                                                 {parseResultMsg && (
-                                                                    <div className="flex gap-2">
-                                                                        <div className="w-8 h-8 rounded-[12px] bg-white flex items-center justify-center text-lg shrink-0 shadow-sm border border-black/5 overflow-hidden">
-                                                                            🤖
-                                                                        </div>
-                                                                        <div className="flex flex-col gap-1 max-w-[80%]">
-                                                                            <span className="text-[10px] text-gray-600 ml-1">스마트 파서</span>
-                                                                            <div className="bg-white px-3 py-2 rounded-[12px] rounded-tl-none shadow-sm text-xs text-black leading-relaxed relative border border-black/5">
-                                                                                {parseResultMsg}
-                                                                            </div>
+                                                                    <div className="flex flex-col gap-1 animate-fade-in">
+                                                                        <span className="text-blue-400 font-bold">$ parser_result</span>
+                                                                        <div className="text-gray-300 leading-relaxed pl-2 border-l-2 border-blue-500/30">
+                                                                            {parseResultMsg}
                                                                         </div>
                                                                     </div>
                                                                 )}
                                                             </div>
 
                                                             {/* Input Area */}
-                                                            <div className="bg-white p-3 border-t border-[#dcdcdc] flex gap-2 items-end">
-                                                                <textarea
+                                                            <div className="bg-[#0c0c0c] p-3 border-t border-gray-800 flex gap-2 items-center">
+                                                                <span className="text-green-500 font-bold animate-pulse">{">"}</span>
+                                                                <input
+                                                                    type="text"
                                                                     value={smartInputText}
                                                                     onChange={(e) => setSmartInputText(e.target.value)}
-                                                                    placeholder="메시지를 입력하세요..."
-                                                                    className="flex-1 bg-[#f5f5f5] rounded-[4px] px-3 py-2 text-sm text-black focus:outline-none resize-none h-[60px] custom-scrollbar border border-transparent focus:border-yellow-400 focus:bg-white transition-colors"
+                                                                    placeholder="Type command..."
+                                                                    className="flex-1 bg-transparent text-sm text-white focus:outline-none font-mono placeholder-gray-700"
                                                                     onKeyDown={(e) => {
-                                                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        if (e.key === 'Enter') {
                                                                             e.preventDefault();
                                                                             parseSmartInput();
                                                                         }
                                                                     }}
                                                                 />
-                                                                <button
-                                                                    onClick={parseSmartInput}
-                                                                    className={`
-                                                                        px-4 h-[60px] rounded-[4px] font-bold text-sm transition-all
-                                                                        ${smartInputText.trim() ? "bg-[#ffeb33] text-black hover:bg-[#ebd700]" : "bg-[#f5f5f5] text-[#b4b4b4] cursor-not-allowed"}
-                                                                    `}
-                                                                    disabled={!smartInputText.trim()}
-                                                                >
-                                                                    전송
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1442,7 +1472,9 @@ export default function PlayerManagementPanel() {
                                                 {wizardStep === "assister" && currentGoal?.scorerId && (
                                                     <div className="space-y-4 animate-fade-in flex flex-col flex-1 min-h-0">
                                                         <div className="flex items-center justify-between shrink-0">
-                                                            <h3 className="text-white font-bold">🅰️ 어시스트를 선택해주세요</h3>
+                                                            <h3 className="text-white font-bold">
+                                                                🅰️ {players.find(p => p.id === currentGoal.scorerId)?.name} 골의 도움 선택
+                                                            </h3>
                                                             <Button variant="line" onClick={() => setWizardStep("scorer")} className="text-xs px-2 py-1">뒤로</Button>
                                                         </div>
                                                         <div className="p-3 bg-surface-tertiary rounded-xl flex items-center gap-3 mb-2 border border-gray-700 shrink-0">
@@ -1544,13 +1576,16 @@ export default function PlayerManagementPanel() {
                                             </div>
                                             {/* Mobile Wizard (Full Screen Overlay) */}
                                             <div className={`
-                                            md:hidden fixed inset-0 z-50 bg-[#121212] flex flex-col
+                                            md:hidden fixed inset-0 z-60 bg-[#121212] flex flex-col
                                             transition-all duration-300 transform
                                             ${wizardStep !== "idle" ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}
                                         `}>
                                                 <div className="h-14 border-b border-gray-800 flex items-center justify-between px-4 bg-[#1a1a1a] shrink-0">
                                                     <span className="text-lg font-bold text-white">
-                                                        {wizardStep === "scorer" ? "⚽ 득점자 선택" : "👟 도움 선수 선택"}
+                                                        {wizardStep === "scorer"
+                                                            ? "⚽ 득점자 선택"
+                                                            : `👟 ${players.find(p => p.id === currentGoal?.scorerId)?.name} 골의 도움 선택`
+                                                        }
                                                     </span>
                                                     <button onClick={() => setWizardStep("idle")} className="p-2 text-gray-400">✕</button>
                                                 </div>
@@ -1682,17 +1717,13 @@ export default function PlayerManagementPanel() {
                                                     )}
                                                 </div>
 
-                                                {/* Mobile Messenger UI Only - PC moved to Left Panel */}
-                                                <div className="md:hidden flex flex-col h-[300px] shrink-0 border-t border-gray-800 bg-[#b2c7d9] relative z-10 w-full">
-                                                    {/* Chat Area */}
-                                                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 font-sans relative">
-                                                        {/* ... (Mobile Chat Content) ... */}
-                                                    </div>
-                                                    {/* ... (Mobile Input Area) ... */}
-                                                </div>
+                                                {/* Mobile Messenger UI - REMOVED per user request */}
+                                                <div className="hidden"></div>
                                             </div>
                                         </div>
                                     </div>
+
+
                                 </div>
 
                                 {/* 우측: 필드 뷰 & 통합 로그 뷰 */}
@@ -1775,9 +1806,38 @@ export default function PlayerManagementPanel() {
                                             />
                                         </div>
                                     </div>
+
+                                    {/* PC Bottom Action Bar (Right Panel Footer) - Added per user request */}
+                                    <div className="hidden lg:flex w-full p-4 bg-[#1a1a1a] border-t border-gray-800 z-40 gap-2 shrink-0 justify-end">
+                                        {currentQuarter > 1 && (
+                                            <button
+                                                onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
+                                                className="px-6 py-3 font-bold text-sm rounded-xl bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center shadow-lg"
+                                            >
+                                                ⬅️
+                                            </button>
+                                        )}
+                                        {currentQuarter < 4 ? (
+                                            <button
+                                                onClick={() => setShowQuarterFinishModal(true)}
+                                                className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setShowQuarterFinishModal(true)}
+                                                className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
+                                            >
+                                                💾 경기 종료 및 리포트 확인
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
                 )
             }
@@ -1785,8 +1845,8 @@ export default function PlayerManagementPanel() {
             {/* Feature: Sticky Bottom Save Button */}
             {
                 hasUnsavedChanges && (
-                    <div className="fixed bottom-0 left-0 w-full p-4 bg-[#1a1a1a]/90 backdrop-blur-md border-t border-gray-800 z-50 flex items-center justify-between shadow-2xl animate-slide-up">
-                        <div className="text-white hidden md:block">
+                    <div className="hidden md:flex fixed bottom-0 left-0 w-full p-4 bg-[#1a1a1a]/90 backdrop-blur-md border-t border-gray-800 z-50 items-center justify-between shadow-2xl animate-slide-up">
+                        <div className="text-white">
                             <span className="font-bold text-yellow-500 text-lg mr-2">⚠️ 변경사항이 있습니다</span>
                             <span className="text-gray-400 text-sm">저장하지 않으면 사라집니다.</span>
                         </div>
@@ -1886,7 +1946,10 @@ export default function PlayerManagementPanel() {
 
                             <p className="text-gray-400 text-xs mb-6">
                                 입력하신 정보가 맞는지 확인해주세요.<br />
-                                확인 시 {currentQuarter + 1}쿼터 입력으로 넘어갑니다.
+                                {currentQuarter === 4
+                                    ? "확인 시 경기 기록을 종료하고 리포트를 확인합니다."
+                                    : `확인 시 ${currentQuarter + 1}쿼터 입력으로 넘어갑니다.`
+                                }
                             </p>
 
                             <div className="flex gap-3">
@@ -1901,7 +1964,7 @@ export default function PlayerManagementPanel() {
                                     if (opponentScore === 0) {
                                         updatedEntries = updatedEntries.map(entry => {
                                             const player = players.find(p => p.id === entry.playerId);
-                                            // Check if player attended this quarter and is a Defender/GK
+                                            // Check if player attended this quarter AND is a Defender/GK
                                             if (entry.quarters[currentQuarter]?.attended && player && ["GK", "CB", "LB", "RB", "DF"].some(pos => player.mainPosition.includes(pos))) {
                                                 return {
                                                     ...entry,
@@ -1936,31 +1999,7 @@ export default function PlayerManagementPanel() {
             }
 
             {/* Mobile Bottom Action Bar (Next Quarter / Finish) */}
-            <div className="md:hidden fixed bottom-0 left-0 w-full p-4 bg-[#1a1a1a] border-t border-gray-800 z-40 flex gap-2">
-                {currentQuarter > 1 && (
-                    <button
-                        onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
-                        className="px-4 py-3 font-bold text-sm rounded-xl bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center"
-                    >
-                        ⬅️
-                    </button>
-                )}
-                {currentQuarter < 4 ? (
-                    <button
-                        onClick={() => setShowQuarterFinishModal(true)}
-                        className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
-                    >
-                        <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
-                    </button>
-                ) : (
-                    <button
-                        onClick={() => setShowPreviewModal(true)}
-                        className="flex-1 py-3 font-bold text-sm rounded-xl bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
-                    >
-                        💾 경기 기록 전체 종료 및 저장
-                    </button>
-                )}
-            </div>
+
 
             {/* 무득점 경기 알럿 모달 */}
             {
@@ -2042,7 +2081,7 @@ export default function PlayerManagementPanel() {
                                                             득점 기록 없음
                                                         </div>
                                                     ) : (
-                                                        <div className="space-y-2">
+                                                        <div className="space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar pr-1">
                                                             {events.map((evt, idx) => {
                                                                 const scorer = players.find(p => p.id === evt.scorerId);
                                                                 const assister = players.find(p => p.id === evt.assisterId);
@@ -2065,7 +2104,7 @@ export default function PlayerManagementPanel() {
                                                     {batchEntries.some(e => e.quarters[q]?.cleanSheet) && (
                                                         <div className="pt-2 border-t border-gray-800/50">
                                                             <h4 className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
-                                                                🛡️ Clean Sheet
+                                                                🛡️ CS
                                                             </h4>
                                                             <div className="flex flex-wrap gap-1">
                                                                 {batchEntries.filter(e => e.quarters[q]?.cleanSheet).map(e => {
@@ -2148,7 +2187,7 @@ export default function PlayerManagementPanel() {
                                                         )}
                                                         {sCS > 0 && (
                                                             <div className="flex justify-between items-center">
-                                                                <span className="text-gray-400 font-medium">CLEAN SHEET</span>
+                                                                <span className="text-gray-400 font-medium">CS</span>
                                                                 <div className="flex items-center gap-1">
                                                                     <span className="text-gray-500">{player.cleanSheets}</span>
                                                                     <span className="text-gray-600">→</span>
@@ -2242,6 +2281,14 @@ export default function PlayerManagementPanel() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )
+            }
+            {
+                showToast && (
+                    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] bg-green-500/90 text-white px-8 py-4 rounded-full font-bold shadow-2xl animate-bounce-in backdrop-blur-md flex items-center gap-3 border border-white/20">
+                        <span className="text-2xl">✅</span>
+                        <span className="text-lg">경기 기록이 성공적으로 저장되었습니다!</span>
                     </div>
                 )
             }
@@ -2453,34 +2500,6 @@ function SummaryView({
                     </div>
                 )}
             </div>
-
-            <div className="p-3 border-t border-gray-800 bg-[#121212] flex gap-2">
-                {currentQuarter > 1 && (
-                    <button
-                        onClick={() => setCurrentQuarter(prev => (prev - 1) as 1 | 2 | 3 | 4)}
-                        className="px-4 py-2.5 font-bold text-sm rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-all flex items-center justify-center"
-                    >
-                        ⬅️ {currentQuarter - 1}Q
-                    </button>
-                )}
-
-                {currentQuarter < 4 ? (
-                    <button
-                        onClick={() => setShowQuarterFinishModal(true)}
-                        className="flex-1 py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
-                    >
-                        <span>{currentQuarter}Q 종료 및 다음 쿼터 시작</span>
-                    </button>
-                ) : (
-                    <button
-                        onClick={() => setShowPreviewModal(true)}
-                        className="w-full py-2.5 font-bold text-sm rounded-lg bg-primary text-black hover:bg-primary/90 shadow-md shadow-primary/10 transition-all"
-                    >
-                        💾 경기 기록 전체 종료 및 저장
-                    </button>
-                )}
-            </div>
         </div>
     );
 }
-
