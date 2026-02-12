@@ -53,6 +53,7 @@ const StartingXI = ({ players, onPlayersChange, onPlayerSelect }: StartingXIProp
                 handleDrop={handleDrop}
                 handleDragOver={handleDragOver}
                 onPlayerSelect={onPlayerSelect}
+                className="aspect-3/4 md:aspect-video"
             />
 
             <ManagerInfo />

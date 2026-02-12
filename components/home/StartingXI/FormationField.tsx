@@ -38,9 +38,10 @@ const FormationField = ({
     handleDragStart,
     handleDrop,
     handleDragOver,
-    onPlayerSelect
-}: FormationFieldProps) => (
-    <div className="relative w-full aspect-3/4 md:aspect-video rounded-2xl overflow-hidden">
+    onPlayerSelect,
+    className
+}: FormationFieldProps & { className?: string }) => (
+    <div className={`relative w-full rounded-2xl overflow-hidden ${className}`}>
         {/* 필드 이미지 배경 */}
         <Image
             src="/images/object_field.png"
