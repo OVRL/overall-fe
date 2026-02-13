@@ -10,48 +10,56 @@ import { Player } from "@/types/player";
 const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 
 interface PlayerListItemProps {
-    player: Player;
-    onClick?: () => void;
+  player: Player;
+  onClick?: () => void;
 }
 
 const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
-    const [imageError, setImageError] = useState(false);
-    const playerImage = imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
+  const [imageError, setImageError] = useState(false);
+  const playerImage =
+    imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
-    return (
-        <div
-            onClick={onClick}
-            className="grid grid-cols-[2.8125rem_1.875rem_1fr_2.8125rem] md:grid-cols-[3.75rem_3.125rem_1fr_3.125rem] items-center gap-1 md:gap-4 py-1.5 md:py-2 px-2 md:px-3 hover:bg-gray-800/30 transition-colors cursor-pointer"
-        >
-            {/* 포지션 배지 */}
-            <div className="flex justify-center">
-                <PositionChip position={player.position as Position} variant="filled" />
-            </div>
-
-            {/* 등번호 */}
-            <span className="text-white font-bold text-center text-sm md:text-base">{player.number}</span>
-
-            {/* 선수 정보 */}
-            <div className="flex items-center gap-2 md:gap-3">
-                {/* 선수 이미지 */}
-                <ProfileAvatar
-                    src={playerImage}
-                    alt={player.name}
-                    size="xs"
-                    onError={() => setImageError(true)}
-                />
-
-                {/* 선수 이름 */}
-                <span className="text-white font-medium truncate text-xs md:text-base">{player.name}</span>
-            </div>
-
-            {/* OVR */}
-            <div className="flex justify-end min-w-7.5">
-                <span className="text-primary font-bold text-base md:text-lg">{player.overall}</span>
-            </div>
+  return (
+    <tr
+      onClick={onClick}
+      className="flex items-center w-full hover:bg-gray-800/30 transition-colors cursor-pointer pl-2 pr-1.5"
+    >
+      <td className="flex items-center">
+        <div className="flex items-center">
+          <div className="w-12.25 flex justify-center">
+            <PositionChip
+              position={player.position as Position}
+              variant="filled"
+            />
+          </div>
+          <span className="w-9.75 text-white font-bold text-center text-sm md:text-base">
+            {player.number}
+          </span>
         </div>
-    );
+      </td>
+
+      <td className="flex-1 flex items-center overflow-hidden">
+        <div className="flex-none mr-2 md:mr-3">
+          <ProfileAvatar
+            src={playerImage}
+            alt={player.name}
+            size={36}
+            onError={() => setImageError(true)}
+          />
+        </div>
+
+        <span className="text-white font-medium truncate text-center text-xs md:text-base">
+          {player.name}
+        </span>
+      </td>
+
+      <td className="w-12.25 flex justify-end">
+        <span className="text-Label-AccentPrimary text-sm w-full text-center">
+          {player.overall}
+        </span>
+      </td>
+    </tr>
+  );
 };
 
 export default PlayerListItem;
-

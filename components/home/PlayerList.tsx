@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import PlayerInfoList, { PlayerListHeader } from "./PlayerInfoList";
+import PlayerInfoList from "./PlayerList/PlayerInfoList";
 import { Player } from "@/types/player";
+import PlayerListCategory from "../PlayerListCategory";
 
 /**
  * 탭 메뉴 컴포넌트
@@ -96,34 +97,27 @@ const PlayerList = ({
     <div className="bg-surface-secondary rounded-[20px] p-4 md:p-5 mt-4 md:mt-5 h-[600px] flex flex-col">
       <PlayerListTabs activeTab={activeTab} onTabChange={scrollToSection} />
 
-      {/* Main Header (Rendered Once) */}
-      <div className="mb-2">
-        <PlayerListHeader />
-      </div>
-
       <div
         ref={listRef}
         className="flex-1 overflow-y-auto scroll-smooth pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
-        {DISPLAY_GROUPS.map((group) => {
-          const groupPlayers = groupedPlayers[group.id];
-          if (!groupPlayers || groupPlayers.length === 0) return null;
+        <table className="w-full border-separate border-spacing-0">
+          <PlayerListCategory />
+          {DISPLAY_GROUPS.map((group) => {
+            const groupPlayers = groupedPlayers[group.id];
+            if (!groupPlayers || groupPlayers.length === 0) return null;
 
-          return (
-            <div
-              key={group.id}
-              id={`section-${group.id}`}
-              className="scroll-mt-4"
-            >
-              {/* No intermediate headers here */}
+            return (
               <PlayerInfoList
+                key={group.id}
+                id={`section-${group.id}`}
                 players={groupPlayers}
                 onPlayerSelect={onPlayerSelect}
                 showHeader={false}
               />
-            </div>
-          );
-        })}
+            );
+          })}
+        </table>
 
         {/* Empty State */}
         {players.length === 0 && (

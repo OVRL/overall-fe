@@ -9,29 +9,33 @@ export type { Player };
 export { PlayerListHeader };
 
 interface PlayerInfoListProps {
-    players: Player[];
-    showHeader?: boolean;
-    onPlayerSelect?: (player: Player) => void;
+  id?: string;
+  players: Player[];
+  showHeader?: boolean;
+  onPlayerSelect?: (player: Player) => void;
 }
 
 /**
  * 선수 정보 리스트 컴포넌트
  */
-const PlayerInfoList = ({ players, showHeader = true, onPlayerSelect }: PlayerInfoListProps) => {
-    return (
-        <div className="w-full">
-            {showHeader && <PlayerListHeader />}
-            <div className="divide-y divide-gray-800/50">
-                {players.map((player) => (
-                    <PlayerListItem
-                        key={player.id}
-                        player={player}
-                        onClick={() => onPlayerSelect && onPlayerSelect(player)}
-                    />
-                ))}
-            </div>
-        </div>
-    );
+const PlayerInfoList = ({
+  id,
+  players,
+  showHeader = true,
+  onPlayerSelect,
+}: PlayerInfoListProps) => {
+  return (
+    <tbody id={id} className="w-full divide-y divide-gray-800/50">
+      {showHeader && <PlayerListHeader />}
+      {players.map((player) => (
+        <PlayerListItem
+          key={player.id}
+          player={player}
+          onClick={() => onPlayerSelect && onPlayerSelect(player)}
+        />
+      ))}
+    </tbody>
+  );
 };
 
 export default PlayerInfoList;
