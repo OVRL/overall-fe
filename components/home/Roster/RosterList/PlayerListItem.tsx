@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import PositionChip from "@/components/PositionChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { Position } from "@/types/position";
+import PlayerListItemGradation from "./PlayerListItemGradation";
 
 import { Player } from "@/types/player";
 
@@ -20,25 +21,29 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
     imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
 
   return (
-    <tr
+    <div
       onClick={onClick}
-      className="flex items-center w-full hover:bg-gray-800/30 transition-colors cursor-pointer pl-2 pr-1.5"
+      className="flex items-center w-full hover:bg-gray-800/30 transition-colors cursor-pointer pl-2 pr-1.5 relative"
+      role="row"
     >
-      <td className="flex items-center">
+      <div className="flex items-center" role="cell">
         <div className="flex items-center">
           <div className="w-12.25 flex justify-center">
             <PositionChip
               position={player.position as Position}
-              variant="filled"
+              variant="outline"
             />
           </div>
-          <span className="w-9.75 text-white font-bold text-center text-sm md:text-base">
+          <span className="w-9.75 text-Label-Primary text-center text-sm md:text-base">
             {player.number}
           </span>
         </div>
-      </td>
+      </div>
 
-      <td className="flex-1 flex items-center overflow-hidden">
+      <div
+        className="flex-1 flex items-center overflow-hidden justify-center"
+        role="cell"
+      >
         <div className="flex-none mr-2 md:mr-3">
           <ProfileAvatar
             src={playerImage}
@@ -48,17 +53,21 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
           />
         </div>
 
-        <span className="text-white font-medium truncate text-center text-xs md:text-base">
+        <span className="text-white font-medium truncate text-xs md:text-base w-18.75 text-ellipsis">
           {player.name}
         </span>
-      </td>
+      </div>
 
-      <td className="w-12.25 flex justify-end">
+      <div className="w-12.25 flex justify-end" role="cell">
         <span className="text-Label-AccentPrimary text-sm w-full text-center">
           {player.overall}
         </span>
-      </td>
-    </tr>
+      </div>
+
+      {/* 구분선 */}
+      <div className="absolute inset-x-0 bottom-0 h-px z-10 bg-[#252525]" />
+      <PlayerListItemGradation position={player.position as Position} />
+    </div>
   );
 };
 

@@ -1,6 +1,3 @@
-"use client";
-
-import React from "react";
 import PlayerListItem from "./PlayerListItem";
 import { Player } from "@/types/player";
 import PlayerListHeader from "./PlayerListHeader";
@@ -15,9 +12,6 @@ interface PlayerInfoListProps {
   onPlayerSelect?: (player: Player) => void;
 }
 
-/**
- * 선수 정보 리스트 컴포넌트
- */
 const PlayerInfoList = ({
   id,
   players,
@@ -25,7 +19,7 @@ const PlayerInfoList = ({
   onPlayerSelect,
 }: PlayerInfoListProps) => {
   return (
-    <tbody id={id} className="w-full divide-y divide-gray-800/50">
+    <div id={id} className="w-full flex flex-col rounded-tl-xl overflow-hidden">
       {showHeader && <PlayerListHeader />}
       {players.map((player) => (
         <PlayerListItem
@@ -34,7 +28,7 @@ const PlayerInfoList = ({
           onClick={() => onPlayerSelect && onPlayerSelect(player)}
         />
       ))}
-    </tbody>
+    </div>
   );
 };
 

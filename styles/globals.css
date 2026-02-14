@@ -54,6 +54,8 @@
   /* 1024px */
   --breakpoint-xl: 90rem;
   /* 1440px */
+  --breakpoint-2xl: 120rem;
+  /* 1920px */
   --max-width-layout: 45rem;
   --width-layout: 100%;
 
@@ -72,6 +74,9 @@
   /* #1a1a1a - 내부 요소 배경 */
   --color-surface-elevated: oklch(0.22 0 0);
   /* #252525 - 호버/강조 배경 */
+
+  --color-surface-card: oklch(0.213 0 0); /* #1A1A1A - 카드 패널 배경 */
+  --color-border-card: oklch(0.27 0 0); /* #333333 - 카드 패널 테두리 */
 
   --color-black: oklch(0 0 0);
   --color-white: oklch(1 0 89.8756);

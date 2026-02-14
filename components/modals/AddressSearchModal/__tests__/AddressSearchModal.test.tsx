@@ -11,7 +11,7 @@ jest.mock("@/lib/relay/environment", () => ({
 }));
 
 // Mock Icon to avoid SVG issues
-jest.mock("@/components/Icon");
+jest.mock("@/components/ui/Icon");
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 jest.mock("@/public/icons/check.svg", () => "check.svg");
 
