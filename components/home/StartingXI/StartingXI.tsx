@@ -5,6 +5,7 @@ import { Player } from "@/types/player";
 import FormationHeader from "./FormationHeader";
 import FormationField from "./FormationField";
 import ManagerInfo from "./ManagerInfo";
+import AdBoard from "./AdBoard";
 
 interface StartingXIProps {
   players: Player[];
@@ -53,15 +54,29 @@ const StartingXI = ({
     <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 flex-1 border border-border-card">
       <FormationHeader activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <FormationField
-        players={players}
-        handleDragStart={handleDragStart}
-        handleDrop={handleDrop}
-        handleDragOver={handleDragOver}
-        onPlayerSelect={onPlayerSelect}
-        className="aspect-3/4 md:aspect-video"
-      />
-
+      <div>
+        <div className="relative h-9.5">
+          <AdBoard
+            imageUrl="/images/logo_OVR_head.png"
+            linkUrl="#"
+            altText="OVR Ad Banner"
+            className="w-31 absolute left-1/5"
+          />
+          <AdBoard
+            linkUrl="#"
+            altText="OVR Ad Banner"
+            className="w-31 absolute left-3/5"
+          />
+        </div>
+        <FormationField
+          players={players}
+          handleDragStart={handleDragStart}
+          handleDrop={handleDrop}
+          handleDragOver={handleDragOver}
+          onPlayerSelect={onPlayerSelect}
+          className="aspect-3/4 md:aspect-video"
+        />
+      </div>
       <ManagerInfo />
     </div>
   );
