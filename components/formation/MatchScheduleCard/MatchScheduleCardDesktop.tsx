@@ -31,7 +31,7 @@ const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
       <Button
         variant="primary"
         size="s"
-        className="absolute top-3 right-3 w-fit px-3.5 py-3"
+        className="absolute -top-1 -right-3 w-fit px-3.5 py-3"
       >
         경기 설정 변경
       </Button>

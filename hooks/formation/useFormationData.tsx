@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from "react";
 import { Player, QuarterData, TeamType } from "@/types/formation";
-import { FormationType } from "@/components/formation/FormationBoard";
+// import { FormationType } from "@/components/formation/FormationBoard";
 import { INITIAL_PLAYERS } from "@/constants/formation"; // Used for mock data load if needed
 
 export const useFormationData = () => {

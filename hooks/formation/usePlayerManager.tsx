@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from "react";
 import { Player, QuarterData } from "@/types/formation";
 import { INITIAL_PLAYERS } from "@/constants/formation";

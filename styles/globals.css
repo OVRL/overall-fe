@@ -46,7 +46,6 @@
 }
 
 @theme {
-  --font-sans: var(--font-pretendard);
   --font-pretendard: var(--font-pretendard);
 
   --breakpoint-sm: 24.5625rem;
@@ -159,6 +158,8 @@
   --color-background: var(--background);
   --animate-shimmer: shimmer 1.5s infinite;
 
+  --shadow-card: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+
   @keyframes shimmer {
     0% {
       transform: translate(-100%, -100%);
@@ -175,4 +176,14 @@
   &::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
   }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html {
+  font-family: var(--font-pretendard);
+  line-height: normal;
 }

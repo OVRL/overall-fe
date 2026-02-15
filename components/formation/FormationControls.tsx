@@ -1,6 +1,8 @@
 import React from "react";
 import { QuarterData, TeamType } from "@/types/formation";
 import { FormationType } from "@/types/formation";
+import Image from "next/image";
+import QuarterSelector from "./QuarterSelector";
 
 interface FormationControlsProps {
   mode: "MATCHING" | "IN_HOUSE";
@@ -39,7 +41,7 @@ const FormationControls: React.FC<FormationControlsProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-4 my-6">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex gap-2 items-center">
           <div className="bg-surface-secondary p-1 rounded-lg flex">
             <button
@@ -61,7 +63,7 @@ const FormationControls: React.FC<FormationControlsProps> = ({
           </div>
           <button
             onClick={handleOpenAutoSquad}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:shadow-purple-500/30 flex items-center gap-2 whitespace-nowrap"
+            className="bg-linear-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg hover:shadow-purple-500/30 flex items-center gap-2 whitespace-nowrap"
           >
             <span className="text-yellow-300">★</span> 스쿼드 추천
           </button>
@@ -110,60 +112,20 @@ const FormationControls: React.FC<FormationControlsProps> = ({
               </select>
             </div>
           )}
-          <select
-            className="bg-surface-secondary text-white px-3 py-2 rounded-lg border border-gray-700"
-            value={currentQuarter?.formation}
-            onChange={(e) =>
-              handleFormationChange(e.target.value as FormationType)
-            }
-          >
-            <option value="4-2-3-1">4-2-3-1</option>
-            <option value="4-4-2">4-4-2</option>
-            <option value="4-3-3">4-3-3</option>
-          </select>
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg border border-red-500/30 font-bold hover:bg-red-500/20 whitespace-nowrap"
-          >
-            초기화
-          </button>
-          {mode === "IN_HOUSE" && (
-            <button
-              onClick={handleLoadMatch}
-              className="px-4 py-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/30 font-bold hover:bg-blue-500/20 whitespace-nowrap"
-            >
-              불러오기
-            </button>
-          )}
         </div>
-      </div>
-
-      <div
-        className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {quarters.map((q) => (
-          <button
-            key={q.id}
-            onClick={() => setCurrentQuarterId(q.id)}
-            className={`flex-shrink-0 w-12 h-12 rounded-full border-2 font-bold transition-all ${
-              currentQuarterId === q.id
-                ? "bg-primary border-primary text-black scale-110"
-                : "bg-surface-secondary border-gray-700 text-gray-400"
-            }`}
-          >
-            {q.id}Q
-          </button>
-        ))}
-        {quarters.length < 10 && (
-          <button
-            onClick={addQuarter}
-            className="w-10 h-10 rounded-full bg-surface-tertiary border border-dashed border-gray-600 text-gray-400 hover:text-white"
-          >
-            +
-          </button>
-        )}
-      </div>
+      </div> */}
+      <Image
+        src="/images/title_matchlineup.webp"
+        alt="matchlineup"
+        width={192}
+        height={34}
+      />
+      <QuarterSelector
+        quarters={quarters}
+        currentQuarterId={currentQuarterId}
+        setCurrentQuarterId={setCurrentQuarterId}
+        addQuarter={addQuarter}
+      />
     </div>
   );
 };

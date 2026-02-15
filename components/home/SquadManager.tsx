@@ -48,7 +48,7 @@ export default function SquadManager({
       </section>
 
       {/* Right: Player Card + Player List */}
-      <div className="max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-[0_4px_8px_0_rgba(0,0,0,0.5)]">
+      <div className="max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-card">
         <PlayerRosterPanel
           players={players}
           selectedPlayer={selectedPlayer}

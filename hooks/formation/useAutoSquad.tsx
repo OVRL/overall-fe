@@ -1,6 +1,12 @@
+"use client";
+
 import { useState } from "react";
-import { Player, QuarterData, TeamType } from "@/types/formation";
-import { FormationType } from "@/components/formation/FormationBoard";
+import {
+  Player,
+  QuarterData,
+  TeamType,
+  FormationType,
+} from "@/types/formation";
 
 export const useAutoSquad = (
   players: Player[],
