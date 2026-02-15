@@ -46,6 +46,9 @@
 }
 
 @theme {
+  --font-sans: var(--font-pretendard);
+  --font-pretendard: var(--font-pretendard);
+
   --breakpoint-sm: 24.5625rem;
   /* 393px */
   --breakpoint-md: 48rem;

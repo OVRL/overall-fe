@@ -9,7 +9,7 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-Fill_AccentPrimary text-Label-Fixed_black hover:bg-Fill_AccentPrimary-hover disabled:text-Label-Tertiary disabled:bg-Fill_Quatiary ",
-        ghost: "bg-fill-quaternary text-Label-Tertiary hover:bg-white/10",
+        ghost: "bg-Fill_Quatiary text-Label-Tertiary hover:bg-white/10",
         line: "bg-transparent text-Label-Tertiary border border-Fill_Quatiary hover:bg-Fill_Quatiary/10",
       },
       size: {
