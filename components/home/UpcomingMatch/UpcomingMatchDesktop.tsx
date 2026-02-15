@@ -12,7 +12,11 @@ const UpcomingMatchDesktop = () => {
         <MatchHeader />
         <MatchInfoDesktop />
       </div>
-      <Button variant="primary" size="m" className="absolute right-4 w-25">
+      <Button
+        variant="primary"
+        size="m"
+        className="absolute right-4 w-25 font-medium text-black text-sm"
+      >
         포메이션 확인
       </Button>
     </div>

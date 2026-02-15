@@ -13,7 +13,11 @@ const UpcomingMatchMobile = () => {
         <MatchInfoMobile />
       </div>
       <div className="w-full">
-        <Button variant="primary" size="m" className="w-full">
+        <Button
+          variant="primary"
+          size="m"
+          className="w-full font-medium text-black text-sm"
+        >
           포메이션 확인
         </Button>
       </div>
