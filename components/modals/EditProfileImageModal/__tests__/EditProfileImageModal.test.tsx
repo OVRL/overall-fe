@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import EditProfileImageModal from "../EditProfileImageModal";
-import useEditProfileImage from "../useEditProfileImage";
+import useEditProfileImage from "../hooks/useEditProfileImage";
 
 // 커스텀 훅 모킹
-jest.mock("../useEditProfileImage");
+jest.mock("../hooks/useEditProfileImage");
 
 // 자식 컴포넌트 모킹
 jest.mock("../ProfileImageCanvas", () => {

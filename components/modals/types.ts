@@ -13,7 +13,7 @@ export interface ModalPropsMap {
   };
   EDIT_PROFILE_IMAGE: {
     initialImage: string;
-    onSave: (image: string) => void;
+    onSave: (image: string, file: File) => void;
   };
 }
 

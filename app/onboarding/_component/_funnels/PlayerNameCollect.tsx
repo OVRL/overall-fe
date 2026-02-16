@@ -33,6 +33,7 @@ const PlayerNameCollect = ({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onClear={() => setName("")}
           />
         </div>
       </div>

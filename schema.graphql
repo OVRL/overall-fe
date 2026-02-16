@@ -9,6 +9,10 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
+type BackgroundRemovalResult {
+  image: String!
+}
+
 """주발"""
 enum Foot {
   B
@@ -25,8 +29,9 @@ enum Gender {
 type Mutation {
   login(deviceInfo: String, email: String!, password: String!): User!
   logout(refreshToken: String!): Boolean!
-  modifyUser(input: UpdateUserInput!): User!
+  modifyUser(input: UpdateUserInput!, profileImage: Upload!): User!
   refresh(refreshToken: String!): User!
+  removeBackground(image: Upload!): BackgroundRemovalResult!
   signUp(input: SignUpInput!): User!
 }
 
@@ -113,14 +118,16 @@ input UpdateUserInput {
   gender: Gender
   id: Float!
   mainPosition: Position
-  name: String
+  name: String!
   password: String
-  phone: String
+  phone: String!
   preferredNumber: Float
-  profileImage: String
   provider: String
   subPositions: [Position!]
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   accessToken: String

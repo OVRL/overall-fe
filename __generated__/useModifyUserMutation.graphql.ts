@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4dbf2f35f7197b2ebc09ea647dff7c05>>
+ * @generated SignedSource<<9841c7ce45f8d699c16c8526b14fd506>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,16 +20,16 @@ export type UpdateUserInput = {
   gender?: Gender | null | undefined;
   id: number;
   mainPosition?: Position | null | undefined;
-  name?: string | null | undefined;
+  name: string;
   password?: string | null | undefined;
-  phone?: string | null | undefined;
+  phone: string;
   preferredNumber?: number | null | undefined;
-  profileImage?: string | null | undefined;
   provider?: string | null | undefined;
   subPositions?: ReadonlyArray<Position> | null | undefined;
 };
 export type useModifyUserMutation$variables = {
   input: UpdateUserInput;
+  profileImage: any;
 };
 export type useModifyUserMutation$data = {
   readonly modifyUser: {
@@ -54,6 +54,11 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "input"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "profileImage"
   }
 ],
 v1 = [
@@ -64,6 +69,11 @@ v1 = [
         "kind": "Variable",
         "name": "input",
         "variableName": "input"
+      },
+      {
+        "kind": "Variable",
+        "name": "profileImage",
+        "variableName": "profileImage"
       }
     ],
     "concreteType": "User",
@@ -149,16 +159,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1ff0e52a7963d2e6fad8fb016f22d552",
+    "cacheID": "b5ffce3b59a9de6ec1f6041d96176c8a",
     "id": null,
     "metadata": {},
     "name": "useModifyUserMutation",
     "operationKind": "mutation",
-    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n) {\n  modifyUser(input: $input) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
+    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n  $profileImage: Upload!\n) {\n  modifyUser(input: $input, profileImage: $profileImage) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d40767ddcceefb0eb7d8430a37a30ea1";
+(node as any).hash = "402a03b9c1aa5bcb558901b8453a4253";
 
 export default node;

@@ -33,6 +33,7 @@ export default async function getCroppedImg(
   pixelCrop: { x: number; y: number; width: number; height: number },
   rotation = 0,
   flip = { horizontal: false, vertical: false },
+  outputFormat: "image/jpeg" | "image/png" | "image/webp" = "image/webp",
 ): Promise<Blob | null> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -87,6 +88,6 @@ export default async function getCroppedImg(
   return new Promise((resolve) => {
     canvas.toBlob((file) => {
       resolve(file);
-    }, "image/png"); // Changed to PNG for transparency support
+    }, outputFormat);
   });
 }

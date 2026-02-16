@@ -31,7 +31,7 @@ interface OnboardingFunnelWrapperProps {
 }
 
 const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
-  const { Funnel, setStep, goBack, step } = useFunnel<Step>("profile");
+  const { Funnel, setStep, goBack, step } = useFunnel<Step>("phone");
   const [formData, setFormData] = useState<Partial<OnboardingState>>({
     id: userId,
   });
@@ -86,6 +86,13 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
           </Funnel.Step>
           <Funnel.Step name="subFormation">
             <SubFormationCollect
+              onNext={handleNext("profile")}
+              data={formData}
+              onDataChange={setFormData}
+            />
+          </Funnel.Step>
+          <Funnel.Step name="profile">
+            <ProfileImageCollect
               onNext={handleNext("additional")}
               data={formData}
               onDataChange={setFormData}
@@ -100,13 +107,6 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
           </Funnel.Step>
           <Funnel.Step name="complete">
             <OnboardingCompletion />
-          </Funnel.Step>
-          <Funnel.Step name="profile">
-            <ProfileImageCollect
-              onNext={handleNext("complete")}
-              data={formData}
-              onDataChange={setFormData}
-            />
           </Funnel.Step>
         </Funnel>
       </div>

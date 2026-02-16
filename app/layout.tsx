@@ -34,11 +34,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <RelayProvider>{children}</RelayProvider>
+          <RelayProvider>
+            {children}
+            <GlobalPortalProvider>
+              <Modals />
+            </GlobalPortalProvider>
+          </RelayProvider>
         </ThemeProvider>
-        <GlobalPortalProvider>
-          <Modals />
-        </GlobalPortalProvider>
       </body>
     </html>
   );

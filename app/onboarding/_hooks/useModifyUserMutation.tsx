@@ -3,8 +3,11 @@ import { useModifyUserMutation as MutationType } from "@/__generated__/useModify
 
 export const useModifyUserMutation = () => {
   return useMutation<MutationType>(graphql`
-    mutation useModifyUserMutation($input: UpdateUserInput!) {
-      modifyUser(input: $input) {
+    mutation useModifyUserMutation(
+      $input: UpdateUserInput!
+      $profileImage: Upload!
+    ) {
+      modifyUser(input: $input, profileImage: $profileImage) {
         id
         email
         name
