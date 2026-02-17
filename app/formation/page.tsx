@@ -16,6 +16,7 @@ import FormationControls from "@/components/formation/FormationControls";
 import FormationWorkspace from "@/components/formation/FormationWorkspace";
 // import { QuarterData, Player } from "@/types/formation";
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
+import { Player } from "@/types/formation";
 
 export default function FormationPage() {
   // 1. Data Hooks
@@ -44,14 +45,46 @@ export default function FormationPage() {
     handleAddTeam,
   } = usePlayerManager(quarters, mode);
 
-  // 2. Auto Squad Logic
+  // 2. 자동 선발 로직 (Auto Squad Logic)
   const { setIsOpen: setAutoSquadModalOpen, availableTeams } = useAutoSquad(
-    [], // players (removed from destructured above if unused)
+    [], // players (위에서 구조 분해 할당되지 않았다면 제거)
     mode,
     activeTeamsCount,
     setQuarters,
     setCurrentQuarterId,
   );
+
+  // 3. 포메이션 인터랙션 로직 (Formation Interaction Logic)
+  const [activePosition, setActivePosition] = React.useState<{
+    quarterId: number;
+    index: number;
+    role: string; // Position 타입이어야 하지만 당장은 엄격한 타입 체크 회피
+  } | null>(null);
+
+  const handleAssignPlayer = (player: Player) => {
+    if (!activePosition) return;
+
+    const { quarterId, index, role } = activePosition;
+
+    setQuarters((prev) =>
+      prev.map((q) => {
+        if (q.id !== quarterId) return q;
+
+        // 매칭 모드인 경우 (Matching Mode)
+        if (mode === "MATCHING") {
+          const newLineup = { ...q.lineup };
+          newLineup[index] = { ...player, position: role }; // 해당 인덱스에 선수 할당
+          return { ...q, lineup: newLineup };
+        }
+
+        return q;
+      })
+    );
+    
+    // 할당 후 활성 포지션 초기화? 아니면 유지?
+    // 일단 초기화합니다.
+    setActivePosition(null);
+  };
 
   const isLineupFull = (() => {
     if (mode === "MATCHING") {
@@ -76,9 +109,19 @@ export default function FormationPage() {
           handleAddPlayer={handleAddPlayer}
           onRemovePlayer={(pid) => handleRemovePlayer(pid, setQuarters)}
           isLineupFull={isLineupFull}
+          activePosition={activePosition}
+          setActivePosition={setActivePosition}
+          onAssignPlayer={handleAssignPlayer}
+          onQuarterFormationChange={(qid, fmt) => {
+            setQuarters((prev) =>
+              prev.map((q) =>
+                q.id === qid ? { ...q, formation: fmt } : q
+              )
+            );
+          }}
         >
           <MatchScheduleCard
-            // Mock Data - In real app, pass via props
+            // 목 데이터 - 실제 앱에서는 props로 전달
             matchDate="2026-02-03(목)"
             matchTime="18:00~20:00"
             stadium="수원 월드컵 보조 구장 A"

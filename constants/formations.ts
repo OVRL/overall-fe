@@ -1,0 +1,31 @@
+export const FORMATION_POSITIONS: Record<string, string[]> = {
+  "4-3-3": ["GK", "LB", "LCB", "RCB", "RB", "CDM", "LCM", "RCM", "LW", "ST", "RW"],
+  "4-2-3-1": ["GK", "LB", "LCB", "RCB", "RB", "LDM", "RDM", "CAM", "LW", "ST", "RW"],
+  "4-4-2": ["GK", "LB", "LCB", "RCB", "RB", "LM", "LCM", "RCM", "RM", "LST", "RST"],
+  "4-1-4-1": ["GK", "LB", "LCB", "RCB", "RB", "CDM", "LM", "LCM", "RCM", "RM", "ST"],
+  "4-5-1": ["GK", "LB", "LCB", "RCB", "RB", "CDM", "LM", "LCM", "RCM", "RM", "ST"], // Adjusted for 5 mids
+  "4-3-2-1": ["GK", "LB", "LCB", "RCB", "RB", "CDM", "LCM", "RCM", "LAM", "RAM", "ST"],
+  "4-2-2-2": ["GK", "LB", "LCB", "RCB", "RB", "LDM", "RDM", "LAM", "RAM", "LST", "RST"],
+  "3-5-2": ["GK", "LCB", "CB", "RCB", "LWB", "RWB", "LDM", "RDM", "CAM", "LST", "RST"],
+  "3-4-3": ["GK", "LCB", "CB", "RCB", "LM", "LCM", "RCM", "RM", "LW", "ST", "RW"],
+  "3-4-1-2": ["GK", "LCB", "CB", "RCB", "LM", "CM", "RM", "CAM", "LST", "RST"], // Adjusted
+  "5-3-2": ["GK", "LWB", "LCB", "CB", "RCB", "RWB", "LCM", "CM", "RCM", "LST", "RST"],
+  "5-4-1": ["GK", "LWB", "LCB", "CB", "RCB", "RWB", "LM", "LCM", "RCM", "RM", "ST"],
+  "5-2-3": ["GK", "LWB", "LCB", "CB", "RCB", "RWB", "LCM", "RCM", "LW", "ST", "RW"],
+};
+
+export const FORMATION_OPTIONS = [
+  { label: "4-3-3", value: "4-3-3" },
+  { label: "4-2-3-1", value: "4-2-3-1" },
+  { label: "4-4-2", value: "4-4-2" },
+  { label: "4-1-4-1", value: "4-1-4-1" },
+  { label: "4-5-1", value: "4-5-1" },
+  { label: "4-3-2-1", value: "4-3-2-1" },
+  { label: "4-2-2-2", value: "4-2-2-2" },
+  { label: "3-5-2", value: "3-5-2" },
+  { label: "3-4-3", value: "3-4-3" },
+  { label: "3-4-1-2", value: "3-4-1-2" },
+  { label: "5-3-2", value: "5-3-2" },
+  { label: "5-4-1", value: "5-4-1" },
+  { label: "5-2-3", value: "5-2-3" },
+];

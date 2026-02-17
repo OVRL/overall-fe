@@ -39,7 +39,12 @@ const MatchScheduleCardMobile = () => {
           </span>
         </div>
 
-        <Dropdown />
+        <Dropdown
+          options={[{ label: "2026-02-03(목)", value: "2026-02-03" }]}
+          onChange={() => {}}
+          value="2026-02-03"
+          placeholder="날짜 선택"
+        />
       </div>
     </div>
   );
