@@ -5,7 +5,13 @@ import Icon from "@/components/ui/Icon";
 import calendar from "@/public/icons/calendar.svg";
 import Dropdown from "@/components/ui/Dropdown";
 
-const MatchScheduleCardMobile = () => {
+interface MatchScheduleCardMobileProps {
+  matchDate: string;
+}
+
+const MatchScheduleCardMobile: React.FC<MatchScheduleCardMobileProps> = ({
+  matchDate,
+}) => {
   return (
     <div className="flex flex-col gap-6 md:hidden">
       <div className="flex flex-col gap-6 items-center w-full">

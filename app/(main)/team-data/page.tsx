@@ -1199,7 +1199,7 @@ export default function TeamDataPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="flex-1 bg-black">
       <main className="max-w-[1400px] mx-auto px-4 py-6 md:px-8 md:py-8">
         {/* 페이지 헤더 */}
         <div className="flex items-center gap-4 mb-8">

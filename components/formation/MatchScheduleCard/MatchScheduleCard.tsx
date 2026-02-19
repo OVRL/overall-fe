@@ -23,22 +23,24 @@ const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
   className,
 }) => {
   return (
-    <div
-      className={cn(
-        "bg-surface-card border border-border-card rounded-xl shadow-[0_4px_8px_rgba(0, 0, 0, 0.50)] w-full shrink-0 py-4 px-6",
-        className,
-      )}
-    >
-      <MatchScheduleCardMobile matchDate={matchDate} />
-      <MatchScheduleCardDesktop
-        matchDate={matchDate}
-        matchTime={matchTime}
-        stadium={stadium}
-        opponent={opponent}
-        opponentRecord={opponentRecord}
-        homeUniform={homeUniform}
-      />
-    </div>
+    <section aria-label="경기 정보">
+      <div
+        className={cn(
+          "bg-surface-card border border-border-card rounded-xl shadow-[0_4px_8px_rgba(0, 0, 0, 0.50)] w-full shrink-0 py-4 px-6",
+          className,
+        )}
+      >
+        <MatchScheduleCardMobile matchDate={matchDate} />
+        <MatchScheduleCardDesktop
+          matchDate={matchDate}
+          matchTime={matchTime}
+          stadium={stadium}
+          opponent={opponent}
+          opponentRecord={opponentRecord}
+          homeUniform={homeUniform}
+        />
+      </div>
+    </section>
   );
 };
 

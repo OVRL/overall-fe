@@ -37,7 +37,7 @@ export default function TeamManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="flex-1 bg-surface-primary">
       <div className="flex">
         {/* 좌측 사이드바 (데스크탑) */}
         <div className="hidden md:block">

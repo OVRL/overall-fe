@@ -51,7 +51,7 @@ const StartingXI = ({
   };
 
   return (
-    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 flex-1 border border-border-card">
+    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
       <FormationHeader activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div>

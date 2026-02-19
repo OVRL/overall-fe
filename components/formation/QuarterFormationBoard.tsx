@@ -2,10 +2,7 @@ import QuarterButton from "../ui/QuarterButton";
 import Dropdown from "../ui/Dropdown";
 import ObjectField from "./ObjectField";
 import { QuarterData } from "@/types/formation";
-import {
-  FORMATION_OPTIONS,
-  FORMATION_POSITIONS,
-} from "@/constants/formations";
+import { FORMATION_OPTIONS, FORMATION_POSITIONS } from "@/constants/formations";
 import { Position } from "@/types/position";
 import {
   BASE_FIELD_COORDINATES,
@@ -21,7 +18,7 @@ interface QuarterFormationBoardProps {
   quarter: QuarterData;
   activePosition: { quarterId: number; index: number; role: string } | null;
   onPositionSelect: (
-    pos: { quarterId: number; index: number; role: string } | null
+    pos: { quarterId: number; index: number; role: string } | null,
   ) => void;
   onFormationChange?: (formation: string) => void; // Optional for now
 }
@@ -36,7 +33,10 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <div className="flex flex-col gap-3 p-3 rounded-xl border border-border-card shadow-card bg-surface-card h-full">
+    <article
+      aria-label={`${quarter.id}쿼터 포메이션 보드`}
+      className="flex flex-col gap-3 p-3 rounded-xl border border-border-card shadow-card bg-surface-card h-full"
+    >
       <div className="flex justify-between items-center">
         <QuarterButton variant="default" size="sm">
           {quarter.id}Q
@@ -62,10 +62,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
 
               if (!fieldCoords) return null;
 
-              const styleCoords = getRelativePosition(
-                fieldCoords,
-                isDesktop,
-              );
+              const styleCoords = getRelativePosition(fieldCoords, isDesktop);
 
               const player = quarter.lineup?.[index];
               const isActive =
@@ -127,7 +124,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
           </div>
         </ObjectField>
       </div>
-    </div>
+    </article>
   );
 };
 
