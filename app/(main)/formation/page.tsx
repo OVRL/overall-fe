@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Header from "@/components/layout/Header";
+
 // import PlayerSearchModal from "@/components/formation/PlayerSearchModal";
 // import AutoSquadModal from "@/components/formation/AutoSquadModal";
 // import TeamManagerModal from "@/components/formation/TeamManagerModal";
@@ -78,9 +78,9 @@ export default function FormationPage() {
         }
 
         return q;
-      })
+      }),
     );
-    
+
     // 할당 후 활성 포지션 초기화? 아니면 유지?
     // 일단 초기화합니다.
     setActivePosition(null);
@@ -96,11 +96,9 @@ export default function FormationPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-surface-primary pb-32">
-      <Header showTeamSelector selectedTeam="Formation Manager" />
-
+    <main className="min-h-screen bg-surface-primary">
       {/* Main Content Area */}
-      <div className="mt-6 px-4">
+      <section className="flex flex-col lg:flex-row gap-8 w-full max-w-screen-xl justify-center items-center lg:items-start 2xl:max-w-none">
         <FormationWorkspace
           quarters={quarters}
           playersWithCounts={playersWithCounts}
@@ -114,47 +112,49 @@ export default function FormationPage() {
           onAssignPlayer={handleAssignPlayer}
           onQuarterFormationChange={(qid, fmt) => {
             setQuarters((prev) =>
-              prev.map((q) =>
-                q.id === qid ? { ...q, formation: fmt } : q
-              )
+              prev.map((q) => (q.id === qid ? { ...q, formation: fmt } : q)),
             );
           }}
         >
-          <MatchScheduleCard
-            // 목 데이터 - 실제 앱에서는 props로 전달
-            matchDate="2026-02-03(목)"
-            matchTime="18:00~20:00"
-            stadium="수원 월드컵 보조 구장 A"
-            opponent="FC 빠름셀로나"
-            opponentRecord="전적 2승 1무 1패"
-            homeUniform="빨강"
-          />
+          <section aria-label="매치 정보">
+            <MatchScheduleCard
+              // 목 데이터 - 실제 앱에서는 props로 전달
+              matchDate="2026-02-03(목)"
+              matchTime="18:00~20:00"
+              stadium="수원 월드컵 보조 구장 A"
+              opponent="FC 빠름셀로나"
+              opponentRecord="전적 2승 1무 1패"
+              homeUniform="빨강"
+            />
+          </section>
 
-          <FormationControls
-            mode={mode}
-            setMode={setMode}
-            activeTeamsCount={activeTeamsCount}
-            handleAddTeam={handleAddTeam}
-            handleOpenAutoSquad={() => setAutoSquadModalOpen(true)}
-            currentQuarter={currentQuarter}
-            availableTeams={availableTeams}
-            handleMatchupChange={handleMatchupChange}
-            currentQuarterId={currentQuarterId}
-            setCurrentQuarterId={setCurrentQuarterId}
-            handleFormationChange={(fmt) =>
-              setQuarters((prev) =>
-                prev.map((q) =>
-                  q.id === currentQuarterId ? { ...q, formation: fmt } : q,
-                ),
-              )
-            }
-            handleReset={handleReset}
-            handleLoadMatch={() => handleLoadMatch(setActiveTeamsCount)}
-            quarters={quarters}
-            addQuarter={addQuarter}
-          />
+          <section aria-label="포메이션 컨트롤">
+            <FormationControls
+              mode={mode}
+              setMode={setMode}
+              activeTeamsCount={activeTeamsCount}
+              handleAddTeam={handleAddTeam}
+              handleOpenAutoSquad={() => setAutoSquadModalOpen(true)}
+              currentQuarter={currentQuarter}
+              availableTeams={availableTeams}
+              handleMatchupChange={handleMatchupChange}
+              currentQuarterId={currentQuarterId}
+              setCurrentQuarterId={setCurrentQuarterId}
+              handleFormationChange={(fmt) =>
+                setQuarters((prev) =>
+                  prev.map((q) =>
+                    q.id === currentQuarterId ? { ...q, formation: fmt } : q,
+                  ),
+                )
+              }
+              handleReset={handleReset}
+              handleLoadMatch={() => handleLoadMatch(setActiveTeamsCount)}
+              quarters={quarters}
+              addQuarter={addQuarter}
+            />
+          </section>
         </FormationWorkspace>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
