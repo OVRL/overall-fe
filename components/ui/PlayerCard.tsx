@@ -39,7 +39,7 @@ const PlayerCard = ({
     <div className={cn(cardVariants({ type }), "relative", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-[5px] bg-gray-200 shrink-0",
+          "relative overflow-hidden rounded-[5px] bg-gray-200 shrink-0 bg-transparent",
           type === "L" && "w-16 h-21",
           type === "S" && "w-12 h-16",
           type === "XS" && "w-8 h-10",
@@ -54,7 +54,7 @@ const PlayerCard = ({
       {isXS && onDelete && (
         <button
           onClick={onDelete}
-          className="absolute top-1 right-1 z-10 text-Fill_Primary"
+          className="absolute top-1 right-1 z-10 text-Fill_Primary cursor-pointer hover:scale-110 transition-transform"
         >
           <Icon src={close} alt="close-icon" width={16} height={16} />
         </button>

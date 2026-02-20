@@ -86,7 +86,10 @@ const Dropdown = ({
       const list = listRef.current;
       const element = list.children[focusedIndex] as HTMLElement;
       if (element) {
-        element.scrollIntoView({ block: "nearest" });
+        // DOM 마운트 직후 스크롤이 안정적으로 동작하도록 setTimeout 사용
+        setTimeout(() => {
+          element.scrollIntoView({ block: "center" });
+        }, 0);
       }
     }
   }, [focusedIndex, isOpen]);
@@ -100,7 +103,13 @@ const Dropdown = ({
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) {
+            const idx = options.findIndex((opt) => opt.value === value);
+            setFocusedIndex(idx >= 0 ? idx : 0);
+          }
+        }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label={placeholder}
@@ -108,13 +117,13 @@ const Dropdown = ({
           "flex items-center justify-between w-39.5 h-12 pl-4 pr-1.75 py-3 border rounded-[0.625rem] transition-colors duration-200",
           "bg-Fill_Quatiary border-transparent",
           isOpen ? "border-Fill_AccentPrimary" : "",
-          className
+          className,
         )}
       >
         <span
           className={cn(
             "text-sm font-normal truncate w-25.25 ",
-            selectedLabel ? "text-Label-Secondary" : "text-Label-Primary"
+            selectedLabel ? "text-Label-Secondary" : "text-Label-Primary",
           )}
         >
           {selectedLabel || placeholder}
@@ -157,7 +166,7 @@ const Dropdown = ({
                       : "text-Label-Secondary", // Default
                     focusedIndex === index
                       ? "bg-Fill_Tertiary text-Label-Primary" // Focused style
-                      : ""
+                      : "",
                   )}
                   onMouseEnter={() => setFocusedIndex(index)}
                 >

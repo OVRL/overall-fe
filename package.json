@@ -14,6 +14,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@t3-oss/env-nextjs": "^0.13.10",
     "@toss/react": "^1.8.1",

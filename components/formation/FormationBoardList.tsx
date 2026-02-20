@@ -2,16 +2,20 @@
 
 import React from "react";
 import QuarterFormationBoard from "./QuarterFormationBoard";
-import { QuarterData } from "@/types/formation";
+import { QuarterData, Player } from "@/types/formation";
 
 interface FormationBoardListProps {
   quarters: QuarterData[];
+  selectedPlayer: Player | null; // Added prop
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
+  onPositionRemove: (quarterId: number, index: number) => void;
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
   quarters,
+  selectedPlayer, // Extracted
   setQuarters,
+  onPositionRemove,
 }) => {
   return (
     <div className="flex-1 w-full overflow-x-auto">
@@ -26,7 +30,9 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
             key={quarter.id}
             quarter={quarter}
             activePosition={null}
+            selectedPlayer={selectedPlayer} // Passed
             onPositionSelect={() => {}}
+            onPositionRemove={onPositionRemove}
             onFormationChange={(fmt) => {
               setQuarters((prev) =>
                 prev.map((q) =>

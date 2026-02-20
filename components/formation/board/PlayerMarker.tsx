@@ -71,7 +71,7 @@ const PlayerMarker: React.FC<PlayerMarkerProps> = ({
 
           {/* Player Image */}
           <div className="w-14 h-14 md:w-16 md:h-16 relative z-10 transition-transform">
-            <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/10 shadow-lg bg-surface-tertiary">
+            <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/10 shadow-lg bg-surface-card">
               <Image
                 src={player.image || "/images/ovr.png"}
                 alt={player.name}

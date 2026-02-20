@@ -1,32 +1,36 @@
+import DroppableSlot from "./DroppableSlot";
 import QuarterButton from "../ui/QuarterButton";
 import Dropdown from "../ui/Dropdown";
 import ObjectField from "./ObjectField";
-import { QuarterData } from "@/types/formation";
+import { QuarterData, Player } from "@/types/formation";
 import { FORMATION_OPTIONS, FORMATION_POSITIONS } from "@/constants/formations";
 import { Position } from "@/types/position";
 import {
-  BASE_FIELD_COORDINATES,
   DESKTOP_CROP,
   MOBILE_CROP,
   getRelativePosition,
+  getFieldCoordinates,
 } from "@/constants/formationCoordinates";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
 
 interface QuarterFormationBoardProps {
   quarter: QuarterData;
   activePosition: { quarterId: number; index: number; role: string } | null;
+  selectedPlayer: Player | null;
   onPositionSelect: (
     pos: { quarterId: number; index: number; role: string } | null,
   ) => void;
-  onFormationChange?: (formation: string) => void; // Optional for now
+  onPositionRemove: (quarterId: number, index: number) => void;
+  onFormationChange?: (formation: string) => void;
 }
 
 const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
   quarter,
   activePosition,
+  selectedPlayer,
   onPositionSelect,
+  onPositionRemove,
   onFormationChange,
 }) => {
   const formationPositions = FORMATION_POSITIONS[quarter.formation] || [];
@@ -48,7 +52,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
           placeholder="포메이션"
         />
       </div>
-      <div className="relative w-full rounded-lg overflow-hidden border border-border-card bg-card-bg">
+      <div className="relative w-full rounded-lg overflow-hidden">
         <ObjectField
           type="full"
           className="w-full"
@@ -58,24 +62,24 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
           <div className="absolute inset-0 pointer-events-none">
             {formationPositions.map((posKey, index) => {
               const position = posKey as Position;
-              const fieldCoords = BASE_FIELD_COORDINATES[position];
+              const fieldCoords = getFieldCoordinates(
+                quarter.formation,
+                position,
+              );
 
               if (!fieldCoords) return null;
 
               const styleCoords = getRelativePosition(fieldCoords, isDesktop);
 
-              const player = quarter.lineup?.[index];
+              const player = quarter.lineup?.[index] || null;
               const isActive =
                 activePosition?.quarterId === quarter.id &&
                 activePosition?.index === index;
 
               return (
                 <motion.div
-                  key={`${quarter.id}-${index}-${position}`} // 애니메이션을 위한 고유 키
-                  layoutId={`${quarter.id}-${index}`} // 포지션 변경 시 부드러운 전환을 위해 layoutId 시도?
-                  // 사실, 포지션 이름이 바뀌면 일관된 키로 layout을 잡기가 까다로울 수 있음.
-                  // 새로운 위치로 "이동"하는 것을 원한다면 index를 안정적인 키 부분으로 사용해야 할까?
-                  // 포메이션은 항상 11명이므로, 인덱스 0(GK)은 새로운 GK 위치로 이동함.
+                  key={`${quarter.id}-${index}-${position}`}
+                  layoutId={`${quarter.id}-${index}`}
                   className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
                   style={{
                     left: styleCoords.left,
@@ -92,32 +96,22 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
                     damping: 30,
                   }}
                 >
-                  <QuarterButton
-                    variant={isActive ? "selected" : "assistive"}
-                    size="sm"
-                    className={cn(
-                      "shadow-lg transition-transform hover:scale-110",
-                      player ? "bg-surface-primary" : "bg-surface-tertiary/80",
-                    )}
-                    onClick={() =>
+                  <DroppableSlot
+                    quarterId={quarter.id}
+                    index={index}
+                    positionName={position}
+                    player={player}
+                    selectedPlayer={selectedPlayer}
+                    isActive={isActive}
+                    onPositionSelect={() =>
                       onPositionSelect(
                         isActive
                           ? null
                           : { quarterId: quarter.id, index, role: position },
                       )
                     }
-                  >
-                    {player ? (
-                      <div className="flex flex-col items-center justify-center text-xs leading-tight">
-                        <span className="font-bold truncate max-w-16">
-                          {player.name}
-                        </span>
-                        {/* <span className="text-[10px] opacity-80">{position}</span> */}
-                      </div>
-                    ) : (
-                      <span className="text-sm font-bold">{position}</span>
-                    )}
-                  </QuarterButton>
+                    onPlayerRemove={() => onPositionRemove(quarter.id, index)}
+                  />
                 </motion.div>
               );
             })}
