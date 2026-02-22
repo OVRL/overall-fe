@@ -10,9 +10,16 @@ const AddressSearchModal = dynamic(() => import("./AddressSearchModal"), {
 const EditProfileImageModal = dynamic(() => import("./EditProfileImageModal"), {
   ssr: false,
 });
+const PlayerSearchModal = dynamic(
+  () => import("./PlayerSearchModal/PlayerSearchModal"),
+  {
+    ssr: false,
+  },
+);
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
   ADDRESS_SEARCH: AddressSearchModal,
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
+  PLAYER_SEARCH: PlayerSearchModal,
 } as ModalComponentMap;

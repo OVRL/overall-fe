@@ -7,6 +7,7 @@ import Button from "../ui/Button";
 import Icon from "../ui/Icon";
 import plus from "@/public/icons/plus.svg";
 import FormationPlayerGroupList from "./FormationPlayerGroupList";
+import useModal from "@/hooks/useModal";
 
 interface FormationPlayerListProps {
   players: Player[];
@@ -35,6 +36,7 @@ export default function FormationPlayerList({
 }: FormationPlayerListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activePosTab, setActivePosTab] = useState<string>("전체");
+  const { openModal } = useModal("PLAYER_SEARCH");
 
   // 타겟 포지션이나 활성 포지션이 변경될 때 자동으로 포지션 탭 전환
   React.useEffect(() => {
@@ -116,8 +118,13 @@ export default function FormationPlayerList({
             variant="line"
             size="m"
             onClick={() => {
-              const name = prompt("새로운 선수의 이름을 입력하세요:");
-              if (name && name.trim()) onAddPlayer?.(name.trim());
+              openModal({
+                onComplete: (player) => {
+                  if (player && onAddPlayer) {
+                    onAddPlayer(player.name);
+                  }
+                },
+              });
             }}
             className="flex gap-1 text-Label-Primary font-semibold"
           >

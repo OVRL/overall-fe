@@ -1,4 +1,5 @@
 import { ComponentType } from "react";
+import { Player } from "@/types/formation";
 
 export interface ModalPropsMap {
   // 예시:
@@ -14,6 +15,9 @@ export interface ModalPropsMap {
   EDIT_PROFILE_IMAGE: {
     initialImage: string;
     onSave: (image: string, file: File) => void;
+  };
+  PLAYER_SEARCH: {
+    onComplete: (player: Player) => void;
   };
 }
 

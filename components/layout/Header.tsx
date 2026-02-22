@@ -63,12 +63,12 @@ export default function Header({
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className={`text-sm transition-colors px-3 py-1.5 rounded-lg ${
+                      className={`transition-colors px-4 py-2.5 rounded-xl ${
                         isActive
-                          ? "bg-primary text-black font-bold"
-                          : "text-gray-500 hover:text-white"
+                          ? "bg-surface-card text-Label-AccentPrimary border border-border-card"
+                          : "text-white hover:text-gray-500"
                       }`}
-                      aria-current={isActive ? "page" : undefined}
+                      aria-current={isActive && "page"}
                     >
                       {item.label}
                     </Link>
