@@ -4,8 +4,8 @@ import Image from "next/image";
 import QuarterSelector from "./QuarterSelector";
 
 interface FormationControlsProps {
-  currentQuarterId: number;
-  setCurrentQuarterId: (id: number) => void;
+  currentQuarterId: number | null;
+  setCurrentQuarterId: (id: number | null) => void;
   quarters: QuarterData[];
   addQuarter: () => void;
 }

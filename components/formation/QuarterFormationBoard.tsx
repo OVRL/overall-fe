@@ -1,7 +1,7 @@
 import DroppableSlot from "./DroppableSlot";
 import QuarterButton from "../ui/QuarterButton";
 import Dropdown from "../ui/Dropdown";
-import ObjectField from "./ObjectField";
+import ObjectField from "../ui/ObjectField";
 import { QuarterData, Player } from "@/types/formation";
 import { FORMATION_OPTIONS, FORMATION_POSITIONS } from "@/constants/formations";
 import { Position } from "@/types/position";
@@ -18,6 +18,8 @@ interface QuarterFormationBoardProps {
   quarter: QuarterData;
   activePosition: { quarterId: number; index: number; role: string } | null;
   selectedPlayer: Player | null;
+  isSelected: boolean;
+  hasSelection: boolean;
   onPositionSelect: (
     pos: { quarterId: number; index: number; role: string } | null,
   ) => void;
@@ -29,6 +31,8 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
   quarter,
   activePosition,
   selectedPlayer,
+  isSelected,
+  hasSelection,
   onPositionSelect,
   onPositionRemove,
   onFormationChange,
@@ -38,8 +42,16 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
 
   return (
     <article
+      id={`quarter-board-${quarter.id}`}
+      data-quarter-id={quarter.id}
       aria-label={`${quarter.id}쿼터 포메이션 보드`}
-      className="flex flex-col gap-3 p-3 rounded-xl border border-border-card shadow-card bg-surface-card h-full"
+      className={`flex flex-col gap-3 p-3 rounded-xl bg-surface-card h-full transition-all duration-300 ease-in-out border-2 ${
+        !hasSelection
+          ? "border-border-card opacity-100"
+          : isSelected
+            ? "border-Fill_AccentPrimary opacity-100 shadow-md"
+            : "border-border-card opacity-60"
+      }`}
     >
       <div className="flex justify-between items-center">
         <QuarterButton variant="default" size="sm">

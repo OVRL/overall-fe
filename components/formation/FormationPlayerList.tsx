@@ -13,7 +13,6 @@ interface FormationPlayerListProps {
   currentQuarterLineups: Record<number, Player | null>[];
   selectedPlayer: Player | null; // For Mobile Tap-to-Place
   onSelectPlayer: (player: Player) => void;
-  isLineupFull: boolean;
   onAddPlayer?: (name: string) => void;
   onRemovePlayer?: (id: number) => void;
   targetPosition?: string | null; // e.g., "ST", "CDM"
@@ -29,7 +28,6 @@ export default function FormationPlayerList({
   currentQuarterLineups,
   selectedPlayer,
   onSelectPlayer,
-  isLineupFull,
   onAddPlayer,
   onRemovePlayer,
   targetPosition,

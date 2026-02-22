@@ -7,12 +7,9 @@ const DefaultImageModal = dynamic(() => import("./DefaultImageModal"), {
 const AddressSearchModal = dynamic(() => import("./AddressSearchModal"), {
   ssr: false,
 });
-const EditProfileImageModal = dynamic(
-  () => import("./EditProfileImageModal/EditProfileImageModal"),
-  {
-    ssr: false,
-  },
-);
+const EditProfileImageModal = dynamic(() => import("./EditProfileImageModal"), {
+  ssr: false,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,

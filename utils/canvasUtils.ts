@@ -34,6 +34,7 @@ export default async function getCroppedImg(
   rotation = 0,
   flip = { horizontal: false, vertical: false },
   outputFormat: "image/jpeg" | "image/png" | "image/webp" = "image/webp",
+  targetSize?: { width: number; height: number },
 ): Promise<Blob | null> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -75,14 +76,26 @@ export default async function getCroppedImg(
   );
 
   // set canvas width to final desired crop size - this will clear existing context
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  // If targetSize is provided, use it. Otherwise use the pixelCrop's dimensions.
+  canvas.width = targetSize ? targetSize.width : pixelCrop.width;
+  canvas.height = targetSize ? targetSize.height : pixelCrop.height;
 
-  // paste generated rotate image at the top left corner
-  ctx.putImageData(data, 0, 0);
-
-  // As Base64 string
-  // return canvas.toDataURL('image/jpeg');
+  // If we have a target size, we need to draw the image data onto the canvas with scaling
+  if (targetSize) {
+    // Create a temporary canvas to put the image data first
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = pixelCrop.width;
+    tempCanvas.height = pixelCrop.height;
+    const tempCtx = tempCanvas.getContext("2d");
+    if (tempCtx) {
+      tempCtx.putImageData(data, 0, 0);
+      // Draw the temp canvas onto the main canvas with the target size (resizing)
+      ctx.drawImage(tempCanvas, 0, 0, targetSize.width, targetSize.height);
+    }
+  } else {
+    // paste generated rotate image at the top left corner (no scaling)
+    ctx.putImageData(data, 0, 0);
+  }
 
   // As a blob
   return new Promise((resolve) => {

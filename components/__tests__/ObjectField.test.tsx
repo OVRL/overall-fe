@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import ObjectField from "../formation/ObjectField";
+import ObjectField from "../ui/ObjectField";
 import "@testing-library/jest-dom";
 
 describe("ObjectField 컴포넌트", () => {
@@ -31,7 +31,7 @@ describe("ObjectField 컴포넌트", () => {
     render(<ObjectField crop={{ x: 0, y: 0, width: 0.5, height: 0.5 }} />);
     const field = screen.getByRole("img");
     expect(field).toBeInTheDocument();
-    
+
     // We can verify specific viewBox on the SVG inside.
     const svg = field.querySelector("svg");
     expect(svg).toBeInTheDocument();

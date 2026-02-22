@@ -28,7 +28,17 @@ const useProfileImageCanvas = ({
   const getCroppedImage = async () => {
     if (!croppedAreaPixels) return null;
     try {
-      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const croppedImage = await getCroppedImg(
+        imageSrc,
+        croppedAreaPixels,
+        0,
+        {
+          horizontal: false,
+          vertical: false,
+        },
+        "image/webp",
+        { width: 200, height: 200 },
+      );
       return croppedImage;
     } catch (e) {
       console.error(e);

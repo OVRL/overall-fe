@@ -1,5 +1,5 @@
 import { Position } from "@/types/position";
-import { FIELD_HEIGHT, FIELD_WIDTH } from "@/components/formation/ObjectField";
+import { FIELD_HEIGHT, FIELD_WIDTH } from "@/components/ui/ObjectField";
 
 /**
  * 절대적인 경기장 위 좌표 (0.0 ~ 1.0)
@@ -9,8 +9,6 @@ export const BASE_FIELD_COORDINATES: Partial<
   Record<Position, { top: number; left: number }>
 > = {
   ST: { top: 0.0844, left: 0.5026 },
-  LST: { top: 0.2044, left: 0.35 },
-  RST: { top: 0.2044, left: 0.65 },
   CF: { top: 0.25, left: 0.5026 },
   LW: { top: 0.1592, left: 0.2 },
   RW: { top: 0.1592, left: 0.8 },

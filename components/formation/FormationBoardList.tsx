@@ -1,14 +1,14 @@
-"use client";
-
 import React from "react";
 import QuarterFormationBoard from "./QuarterFormationBoard";
-import { QuarterData, Player } from "@/types/formation";
+import { QuarterData, Player, FormationType } from "@/types/formation";
 
 interface FormationBoardListProps {
   quarters: QuarterData[];
   selectedPlayer: Player | null; // Added prop
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   onPositionRemove: (quarterId: number, index: number) => void;
+  currentQuarterId: number | null;
+  setCurrentQuarterId: (id: number | null) => void;
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
@@ -16,6 +16,7 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
   selectedPlayer, // Extracted
   setQuarters,
   onPositionRemove,
+  currentQuarterId,
 }) => {
   return (
     <div className="flex-1 w-full overflow-x-auto">
@@ -31,12 +32,19 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
             quarter={quarter}
             activePosition={null}
             selectedPlayer={selectedPlayer} // Passed
+            isSelected={currentQuarterId === quarter.id}
+            hasSelection={currentQuarterId !== null}
             onPositionSelect={() => {}}
             onPositionRemove={onPositionRemove}
             onFormationChange={(fmt) => {
               setQuarters((prev) =>
                 prev.map((q) =>
-                  q.id === quarter.id ? { ...q, formation: fmt } : q,
+                  q.id === quarter.id
+                    ? {
+                        ...q,
+                        formation: fmt as FormationType,
+                      }
+                    : q,
                 ),
               );
             }}

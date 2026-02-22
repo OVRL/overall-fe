@@ -31,8 +31,6 @@ export type Position =
   | "RB"
   | "LWB"
   | "RWB"
-  | "SW"
-  | "LST"
-  | "RST";
+  | "SW";
 
 export type MainPosition = "FW" | "MF" | "DF" | "GK";

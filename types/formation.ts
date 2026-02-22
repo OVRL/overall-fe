@@ -1,3 +1,5 @@
+import { FormationType } from "@/constants/formation";
+
 export type { FormationType } from "@/constants/formation";
 
 export interface Player {

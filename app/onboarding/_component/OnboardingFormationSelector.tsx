@@ -3,7 +3,7 @@
 import ObjectField, {
   FIELD_HEIGHT,
   FIELD_WIDTH,
-} from "@/components/formation/ObjectField";
+} from "@/components/ui/ObjectField";
 import { cn } from "@/lib/utils";
 import OnboardingPositionChip from "@/components/OnboardingPositionChip";
 import { Position } from "@/types/position";

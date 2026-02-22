@@ -26,7 +26,8 @@ const Dropdown = ({
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null); // For scrolling to focused item
+  const listRef = useRef<HTMLDivElement>(null);
+  const isKeyboardActionRef = useRef<boolean>(false);
 
   const selectedLabel = options?.find((opt) => opt.value === value)?.label;
 
@@ -56,10 +57,12 @@ const Dropdown = ({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
+        isKeyboardActionRef.current = true;
         setFocusedIndex((prev) => (prev + 1) % options.length);
         break;
       case "ArrowUp":
         e.preventDefault();
+        isKeyboardActionRef.current = true;
         setFocusedIndex((prev) => (prev - 1 + options.length) % options.length);
         break;
       case "Enter":
@@ -80,16 +83,18 @@ const Dropdown = ({
     }
   };
 
-  // Scroll focused item into view
+  // Scroll focused item into view (Keyboard only)
   useEffect(() => {
-    if (isOpen && focusedIndex >= 0 && listRef.current) {
+    if (
+      isOpen &&
+      focusedIndex >= 0 &&
+      listRef.current &&
+      isKeyboardActionRef.current
+    ) {
       const list = listRef.current;
       const element = list.children[focusedIndex] as HTMLElement;
       if (element) {
-        // DOM 마운트 직후 스크롤이 안정적으로 동작하도록 setTimeout 사용
-        setTimeout(() => {
-          element.scrollIntoView({ block: "center" });
-        }, 0);
+        element.scrollIntoView({ block: "nearest" });
       }
     }
   }, [focusedIndex, isOpen]);
@@ -148,7 +153,7 @@ const Dropdown = ({
             className="absolute z-50 mt-1 w-39.5 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] shadow-lg overflow-hidden py-2"
           >
             <div
-              className="flex flex-col gap-1 p-2 max-h-60 overflow-y-auto custom-scrollbar"
+              className="flex flex-col gap-1 p-2 max-h-60 overflow-y-auto custom-scrollbar overscroll-contain"
               role="listbox"
               ref={listRef}
             >
@@ -160,15 +165,16 @@ const Dropdown = ({
                   aria-selected={value === option.value}
                   tabIndex={-1} // Manage focus manually
                   className={cn(
-                    "w-full text-left px-3 py-2 text-sm rounded-[0.625rem] transition-colors outline-none",
+                    "w-full text-left px-3 py-2 text-sm rounded-[0.625rem] transition-all outline-none border border-transparent",
                     value === option.value
-                      ? "text-Fill_AccentPrimary bg-Fill_Tertiary" // Selected style
-                      : "text-Label-Secondary", // Default
-                    focusedIndex === index
-                      ? "bg-Fill_Tertiary text-Label-Primary" // Focused style
-                      : "",
+                      ? "text-Fill_AccentPrimary"
+                      : "text-Label-Secondary",
+                    focusedIndex === index && "border-Fill_AccentPrimary",
                   )}
-                  onMouseEnter={() => setFocusedIndex(index)}
+                  onMouseEnter={() => {
+                    isKeyboardActionRef.current = false;
+                    setFocusedIndex(index);
+                  }}
                 >
                   {option.label}
                 </button>

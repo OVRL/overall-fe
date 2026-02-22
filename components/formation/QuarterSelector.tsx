@@ -1,50 +1,65 @@
-import React from "react";
 import { QuarterData } from "@/types/formation";
 import QuarterButton from "@/components/ui/QuarterButton";
 import Icon from "../ui/Icon";
 import clock from "@/public/icons/clock.svg";
 import soccerField from "@/public/icons/soccer_field.svg";
 import Button from "../ui/Button";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 
 interface QuarterSelectorProps {
   quarters: QuarterData[];
-  currentQuarterId: number;
-  setCurrentQuarterId: (id: number) => void;
+  currentQuarterId: number | null;
+  setCurrentQuarterId: (id: number | null) => void;
   addQuarter: () => void;
 }
 
-const QuarterSelector: React.FC<QuarterSelectorProps> = ({
+const QuarterSelector = ({
   quarters,
   currentQuarterId,
   setCurrentQuarterId,
   addQuarter,
-}) => {
+}: QuarterSelectorProps) => {
+  const scrollRef = useHorizontalScroll();
+
   return (
-    <div
-      className="flex items-center overflow-x-auto scrollbar-none h-fit"
-      style={{ scrollbarWidth: "none" }}
-    >
-      <div className="flex-1 flex items-center gap-4">
-        <div className="flex items-center gap-2 text-Fill_Primary">
+    <div className="flex items-center overflow-x-auto h-fit scrollbar-hide">
+      <div className="flex-1 min-w-0 flex items-center gap-4 mr-4">
+        <div className="flex items-center gap-2 text-Fill_Primary shrink-0">
           <Icon src={clock} alt="clock" />{" "}
-          <span className="text-[#f7f8f8] font-semibold leading-6">
+          <span className="text-[#f7f8f8] font-semibold leading-6 whitespace-nowrap">
             쿼터 / 25분 경기
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div
+          ref={scrollRef}
+          className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-1"
+        >
           {quarters.map((q) => (
-            <QuarterButton
-              key={q.id}
-              onClick={() => setCurrentQuarterId(q.id)}
-              variant={currentQuarterId === q.id ? "selected" : "default"}
-            >
-              {q.id}Q
-            </QuarterButton>
+            <div key={q.id} className="shrink-0">
+              <QuarterButton
+                onClick={() => {
+                  if (currentQuarterId === q.id) {
+                    setCurrentQuarterId(null);
+                  } else {
+                    setCurrentQuarterId(q.id);
+                    // 자연스러운 스크롤 이동
+                    document
+                      .getElementById(`quarter-board-${q.id}`)
+                      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
+                }}
+                variant={currentQuarterId === q.id ? "selected" : "default"}
+              >
+                {q.id}Q
+              </QuarterButton>
+            </div>
           ))}
           {quarters.length < 10 && (
-            <QuarterButton onClick={addQuarter} variant="add" size="sm">
-              +
-            </QuarterButton>
+            <div className="shrink-0">
+              <QuarterButton onClick={addQuarter} variant="add" size="sm">
+                +
+              </QuarterButton>
+            </div>
           )}
         </div>
       </div>
