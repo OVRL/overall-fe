@@ -9,7 +9,10 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  rectIntersection,
+  CollisionDetection,
 } from "@dnd-kit/core";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
 
 // Hooks
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
@@ -31,6 +34,45 @@ export default function FormationBuilder({
   initialPlayers,
 }: FormationBuilderProps) {
   const dndId = useId();
+
+  // Custom Collision Detection: Calculate distance from pointer to droppable center
+  const customCollisionDetection: CollisionDetection = (args) => {
+    const { pointerCoordinates, droppableContainers, droppableRects } = args;
+
+    if (!pointerCoordinates) {
+      return rectIntersection(args);
+    }
+
+    const collisions = [];
+
+    for (const container of droppableContainers) {
+      const rect = droppableRects.get(container.id);
+      if (rect) {
+        // 드랍존의 중앙 좌표 계산
+        const center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+
+        // 포인터와 드랍존 중앙 사이의 거리 계산 (유클리드 거리)
+        const dx = pointerCoordinates.x - center.x;
+        const dy = pointerCoordinates.y - center.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // 버튼(드랍퍼블 사이즈)의 대략적인 반지름보다 작을 때 충돌로 판정 (예: 25px)
+        if (distance < 30) {
+          collisions.push({
+            id: container.id,
+            data: { droppableContainer: container, value: distance },
+          });
+        }
+      }
+    }
+
+    // 거리가 가까운 순(오름차순이므로 가장 거리가 짧은 값이 제일 먼저 옴)으로 정렬
+    // dnd-kit 내부 sort 함수는 value 값을 기반으로 결정합니다.
+    return collisions.sort((a, b) => a.data?.value - b.data?.value);
+  };
 
   // 1. Data Hooks
   const { quarters, setQuarters, addQuarter, assignPlayer, removePlayer } =
@@ -83,6 +125,7 @@ export default function FormationBuilder({
     <DndContext
       id={dndId}
       sensors={sensors}
+      collisionDetection={customCollisionDetection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
@@ -124,22 +167,14 @@ export default function FormationBuilder({
       </div>
 
       {/* --- Drag Overlay for smooth DND --- */}
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
         {activePlayer ? (
-          <div className="flex items-center gap-x-3 w-[280px] px-3 py-2 bg-surface-card border border-Fill-AccentPrimary shadow-xl rounded-xl opacity-95">
+          <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
             <ProfileAvatar
               src={activePlayer.image || "/images/player/img_player.png"}
               alt={activePlayer.name}
               size={48}
             />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <span className="text-sm font-semibold text-Label-Strong truncate">
-                {activePlayer.name}
-              </span>
-              <span className="text-xs text-Label-Assistive truncate">
-                {activePlayer.position}
-              </span>
-            </div>
           </div>
         ) : null}
       </DragOverlay>

@@ -44,7 +44,7 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
   const isSelected = player?.id === selectedPlayer?.id;
 
   return (
-    <div ref={setNodeRef} className="relative group">
+    <div ref={setNodeRef} className="relative group z-0">
       {player ? (
         <FormationPlayerImageThumbnail
           imgUrl={player.image || "/images/player/img_player.png"}

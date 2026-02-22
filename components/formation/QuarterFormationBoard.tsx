@@ -92,10 +92,12 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
                 <motion.div
                   key={`${quarter.id}-${index}-${position}`}
                   layoutId={`${quarter.id}-${index}`}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+                  className="absolute pointer-events-auto flex items-center justify-center w-12 h-12"
                   style={{
                     left: styleCoords.left,
                     top: styleCoords.top,
+                    marginLeft: "-1.5rem",
+                    marginTop: "-1.5rem",
                   }}
                   initial={false}
                   animate={{

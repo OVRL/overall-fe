@@ -40,8 +40,10 @@ const FormationPlayerRow: React.FC<FormationPlayerRowProps> = ({
       {...listeners}
       {...attributes}
       onClick={() => onSelect(player)}
-      className={`max-h-12 group relative flex items-center w-full px-4 gap-x-4 rounded-xl border transition-all cursor-pointer select-none overflow-hidden ${
-        isDragging ? "opacity-30 border-Fill-AccentPrimary" : ""
+      className={`max-h-12 group relative flex items-center w-full px-4 gap-x-4 rounded-xl border transition-all select-none overflow-hidden ${
+        isDragging
+          ? "opacity-30 border-Fill-AccentPrimary cursor-grabbing"
+          : "cursor-grab active:cursor-grabbing"
       } ${
         isSelected
           ? "border-[#32400A] border-2 z-10 bg-[#262F0D]"
