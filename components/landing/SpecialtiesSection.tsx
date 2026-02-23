@@ -2,8 +2,8 @@
 
 import { useRef } from "react";
 import { StaticImageData } from "next/image";
-import { motion, useScroll, useTransform } from "motion/react";
-import Icon from "@/components/Icon";
+import { motion } from "motion/react";
+import Icon from "../ui/Icon";
 import imgBall from "@/public/images/soccer_ball.svg";
 import imgShoe from "@/public/images/soccer_shoe.svg";
 import imgGoalpost from "@/public/images/soccer_goalpost.svg";
@@ -27,7 +27,7 @@ const FeatureItem = ({
   return (
     <div className="relative pl-12 md:pl-20 py-12">
       {/* Dot on the timeline - absolute positioned relative to the container */}
-      <div className="absolute left-[-9px] top-12 md:left-[-11px] w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full border-4 border-black z-20" />
+      <div className="absolute left-[-9px] top-26 md:left-[-11px] w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full border-4 border-black z-20" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -61,16 +61,10 @@ const FeatureItem = ({
 
 const SpecialtiesSection = () => {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const lineHeight = useTransform(scrollYProgress, [0, 0.5], ["0%", "100%"]);
 
   return (
     <section
-      className="w-full py-24 md:py-40 bg-black overflow-hidden relative"
+      className="w-full py-24 md:py-40 bg-black relative"
       ref={containerRef}
     >
       <div className="max-w-5xl mx-auto px-6">
@@ -80,12 +74,9 @@ const SpecialtiesSection = () => {
           </h2>
         </div>
 
-        <div className="relative  mx-auto border-l-2 border-gray-1000 pl-0 ml-4 md:ml-0">
+        <div className="relative  mx-auto  pl-0 ml-4 md:ml-0">
           {/* Active Line */}
-          <motion.div
-            className="absolute left-[-2px] top-0 w-[2px] bg-green-500 z-10 origin-top"
-            style={{ height: lineHeight }}
-          />
+          <motion.div className="absolute left-0 w-[2px] h-full top-26 z-10 origin-top bg-[linear-gradient(180deg,#B8FF12_0%,rgba(184,255,18,0.50)_50%,transparent_100%)]" />
 
           <FeatureItem
             index={0}

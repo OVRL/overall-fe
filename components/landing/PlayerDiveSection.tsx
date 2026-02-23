@@ -3,17 +3,14 @@
 import { useRef } from "react";
 import { motion, useInView } from "motion/react";
 import imgPlayerDive from "@/public/images/player/player_dive.svg";
-import Icon from "../Icon";
+import Icon from "../ui/Icon";
 
 const PlayerDiveSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, margin: "-20% 0px" });
 
   return (
-    <section
-      ref={ref}
-      className="w-full py-24 md:py-40 bg-black overflow-hidden"
-    >
+    <section ref={ref} className="w-full py-24 md:py-40 bg-black">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center font-paperlogy">
         <motion.div
           initial={{ opacity: 0, x: -50 }}

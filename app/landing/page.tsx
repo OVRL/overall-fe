@@ -69,9 +69,6 @@ export default function LandingPage() {
       <Player5Section />
       <PlayerDiveSection />
       <SpecialtiesSection />
-      <footer className="py-10 bg-black text-center text-[var(--color-gray-800)] text-sm">
-        © 2024 OVR Platform. All rights reserved.
-      </footer>
     </main>
   );
 }

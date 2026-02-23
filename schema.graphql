@@ -9,9 +9,36 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
-type BackgroundRemovalResult {
+type BackgroundRemovalModel {
   image: String!
 }
+
+type CreateInviteCodeModel {
+  code: String!
+  createdAt: DateTime!
+  expiredAt: DateTime!
+  id: Float!
+  teamId: Float!
+}
+
+input CreateTeamInput {
+  activityArea: String!
+  description: String
+  historyStartDate: DateTime!
+  name: String!
+}
+
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format
+outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for
+representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 """주발"""
 enum Foot {
@@ -26,13 +53,52 @@ enum Gender {
   W
 }
 
+type InviteCodeArrayModel {
+  hasNextPage: Boolean!
+  items: [InviteCodeModel!]!
+  totalCount: Int!
+}
+
+type InviteCodeModel {
+  code: String!
+  createdAt: DateTime!
+  expiredAt: DateTime!
+  id: Float!
+  team: TeamModel!
+  teamId: Float!
+}
+
+type LoginResponseModel {
+  accessToken: String
+  activityArea: String
+  birthDate: String
+  deviceInfo: String
+  email: String!
+  favoritePlayer: String
+  foot: Foot
+  gender: Gender
+  id: ID!
+  mainPosition: Position
+  name: String
+  phone: String
+  preferredNumber: Float
+  profileImage: String
+  provider: String
+  refreshToken: String
+  region: RegionSearchModel
+  subPositions: [Position!]
+}
+
 type Mutation {
-  login(deviceInfo: String, email: String!, password: String!): User!
+  createInviteCode(teamId: Float!): CreateInviteCodeModel!
+  createTeam(emblem: Upload!, input: CreateTeamInput!): TeamModel!
+  deleteTeam(id: Int!): Boolean!
+  login(email: String!, password: String!): LoginResponseModel!
   logout(refreshToken: String!): Boolean!
-  modifyUser(input: UpdateUserInput!, profileImage: Upload!): User!
-  refresh(refreshToken: String!): User!
-  removeBackground(image: Upload!): BackgroundRemovalResult!
-  signUp(input: SignUpInput!): User!
+  refresh(refreshToken: String!): LoginResponseModel!
+  removeBackground(image: Upload!): BackgroundRemovalModel!
+  updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
+  updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
 }
 
 """축구 포지션 목록"""
@@ -73,18 +139,23 @@ enum Position {
 }
 
 type Query {
-  region_search(keyword: String!): RegionSearch!
-  user(email: String!): User!
-  users(limit: Int! = 10, offset: Int! = 0): Users!
+  findInviteCode(code: String!): InviteCodeModel
+  findInviteCodeByTeam(teamId: Int!): InviteCodeModel
+  findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
+  findManyRegion(keyword: String!): RegionSearchArrayModel!
+  findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
+  findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
+  findTeam(id: Int!): TeamModel!
+  findUser(email: String!): UserModel!
 }
 
-type RegionSearch {
+type RegionSearchArrayModel {
   hasNextPage: Boolean!
-  items: [RegionSearchItem!]!
+  items: [RegionSearchModel!]!
   totalCount: Int!
 }
 
-type RegionSearchItem {
+type RegionSearchModel {
   code: String!
   dongName: String
   name: String!
@@ -93,21 +164,28 @@ type RegionSearchItem {
   siggName: String
 }
 
-input SignUpInput {
+type TeamArrayModel {
+  hasNextPage: Boolean!
+  items: [TeamModel!]!
+  totalCount: Int!
+}
+
+type TeamModel {
   activityArea: String
-  birthDate: String
-  email: String!
-  favoritePlayer: String
-  foot: Foot
-  gender: Gender
-  mainPosition: Position
+  description: String
+  emblem: String
+  historyStartDate: Date
+  id: ID!
   name: String
-  password: String
-  phone: String
-  preferredNumber: Float
-  profileImage: String
-  provider: String
-  subPositions: [Position!]
+  region: RegionSearchModel
+}
+
+input UpdateTeamInput {
+  activityArea: String
+  description: String
+  historyStartDate: Date
+  id: Int!
+  name: String
 }
 
 input UpdateUserInput {
@@ -129,8 +207,13 @@ input UpdateUserInput {
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
-type User {
-  accessToken: String
+type UserArrayModel {
+  hasNextPage: Boolean!
+  items: [UserModel!]!
+  totalCount: Int!
+}
+
+type UserModel {
   activityArea: String
   birthDate: String
   email: String!
@@ -144,13 +227,18 @@ type User {
   preferredNumber: Float
   profileImage: String
   provider: String
-  refreshToken: String
+  region: RegionSearchModel
   subPositions: [Position!]
+  tokens: [UserTokenModel!]
 }
 
-type Users {
-  hasNextPage: Boolean!
-  items: [User!]!
-  totalCount: Int!
+type UserTokenModel {
+  accessToken: String
+  createdAt: DateTime!
+  deviceInfo: String
+  id: ID!
+  refreshToken: String
+  updatedAt: DateTime!
+  userId: Float!
 }
 
