@@ -1,5 +1,7 @@
 import { motion } from "motion/react";
-import Button from "../ui/Button";
+import Button, { buttonVariants } from "../ui/Button";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const LandingStartForm = () => {
   return (
@@ -39,14 +41,15 @@ const LandingStartForm = () => {
         <p className="text-[oklch(0.7_0_0)] text-sm leading-5 mb-4">
           아직 팀이 없으신가요?
         </p>
-        <Button
-          type="button"
-          variant="line"
-          size="xl"
-          className="w-full text-white border border-[#555555]/70"
+        <Link
+          href="/create-team"
+          className={cn(
+            buttonVariants({ variant: "line", size: "xl" }),
+            "w-full text-white border border-[#555555]/70",
+          )}
         >
           클럽 만들기
-        </Button>
+        </Link>
       </div>
     </motion.form>
   );
