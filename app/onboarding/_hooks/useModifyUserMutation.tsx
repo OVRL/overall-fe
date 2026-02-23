@@ -7,7 +7,7 @@ export const useModifyUserMutation = () => {
       $input: UpdateUserInput!
       $profileImage: Upload!
     ) {
-      modifyUser(input: $input, profileImage: $profileImage) {
+      updateUser(input: $input, profileImage: $profileImage) {
         id
         email
         name

@@ -53,7 +53,7 @@ const FormationPlayerRow: React.FC<FormationPlayerRowProps> = ({
       {/* Profile Avatar */}
       <div className="flex items-center gap-2">
         <ProfileAvatar
-          src="/images/player/img_player.png"
+          src="/images/player/Rectangle.webp"
           alt={player.name}
           size={48}
           className={cn(isSelected ? "bg-[#262F0D]" : "bg-gray-1100")}

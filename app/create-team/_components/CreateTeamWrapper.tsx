@@ -12,6 +12,9 @@ import EmblemUploader from "./EmblemUploader";
 import ControlledAuthTextField from "./ControlledAuthTextField";
 import { useCreateTeamForm } from "../_hooks/useCreateTeamForm";
 import UniformColorSelector from "./UniformColorSelector";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
@@ -80,12 +83,25 @@ const CreateTeamWrapper = () => {
               placeholder="예: 강남구 슛돌이 FC"
             />
 
-            <ControlledAuthTextField
+            <Controller
               control={control}
               name="foundingDate"
-              label="클럽 창단일"
-              placeholder="예: 2025-01-01"
-              type="date"
+              render={({ field }) => (
+                <div className="flex flex-col w-full gap-y-1.5 px-3">
+                  <span className="text-sm font-semibold text-Label-Primary">
+                    클럽 창단일
+                  </span>
+                  <DatePicker
+                    value={field.value ? new Date(field.value) : undefined}
+                    onChange={(date) =>
+                      field.onChange(
+                        date ? format(date, "yyyy-MM-dd", { locale: ko }) : "",
+                      )
+                    }
+                    placeholder="예: 2025-01-01"
+                  />
+                </div>
+              )}
             />
 
             <Controller

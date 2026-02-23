@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9841c7ce45f8d699c16c8526b14fd506>>
+ * @generated SignedSource<<30c28d9725fdb1b1718cf23e9ef6eea2>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -32,7 +32,7 @@ export type useModifyUserMutation$variables = {
   profileImage: any;
 };
 export type useModifyUserMutation$data = {
-  readonly modifyUser: {
+  readonly updateUser: {
     readonly activityArea: string | null | undefined;
     readonly email: string;
     readonly favoritePlayer: string | null | undefined;
@@ -76,9 +76,9 @@ v1 = [
         "variableName": "profileImage"
       }
     ],
-    "concreteType": "User",
+    "concreteType": "UserModel",
     "kind": "LinkedField",
-    "name": "modifyUser",
+    "name": "updateUser",
     "plural": false,
     "selections": [
       {
@@ -159,16 +159,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "b5ffce3b59a9de6ec1f6041d96176c8a",
+    "cacheID": "260d63d0bd78626097ad43875eb815df",
     "id": null,
     "metadata": {},
     "name": "useModifyUserMutation",
     "operationKind": "mutation",
-    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n  $profileImage: Upload!\n) {\n  modifyUser(input: $input, profileImage: $profileImage) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
+    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n  $profileImage: Upload!\n) {\n  updateUser(input: $input, profileImage: $profileImage) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "402a03b9c1aa5bcb558901b8453a4253";
+(node as any).hash = "73a6ad95d9f725875536cc4f94a5456d";
 
 export default node;

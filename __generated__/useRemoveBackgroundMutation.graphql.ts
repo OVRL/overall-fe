@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<77c23a339f37ae824a5d014093bb5066>>
+ * @generated SignedSource<<ff3278394b97bb0d890247476f377868>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -40,7 +40,7 @@ v1 = [
         "variableName": "image"
       }
     ],
-    "concreteType": "BackgroundRemovalResult",
+    "concreteType": "BackgroundRemovalModel",
     "kind": "LinkedField",
     "name": "removeBackground",
     "plural": false,

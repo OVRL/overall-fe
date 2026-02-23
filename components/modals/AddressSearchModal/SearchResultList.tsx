@@ -5,7 +5,7 @@ import AddressItem from "./AddressItem";
 
 const ADDRESS_SEARCH_QUERY = graphql`
   query SearchResultListQuery($keyword: String!) {
-    region_search(keyword: $keyword) {
+    findManyRegion(keyword: $keyword) {
       hasNextPage
       items {
         code
@@ -43,13 +43,12 @@ const SearchResultList = ({
     ADDRESS_SEARCH_QUERY,
     { keyword },
     {
-      fetchPolicy: "network-only",
-      networkCacheConfig: { force: true },
+      fetchPolicy: "store-or-network",
     },
   );
 
-  const items = data.region_search?.items ?? [];
-  const hasNextPage = data.region_search?.hasNextPage;
+  const items = data.findManyRegion?.items ?? [];
+  const hasNextPage = data.findManyRegion?.hasNextPage;
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
