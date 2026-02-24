@@ -21,16 +21,22 @@ const nextConfig = {
     },
   },
   async rewrites() {
-    return [
-      {
-        source: "/graphql",
-        destination: `${env.BACKEND_URL}/graphql`,
-      },
-      {
-        source: "/api/:path*",
-        destination: `${env.BACKEND_URL}/api/:path*`,
-      },
-    ];
+    return {
+      // beforeFiles: 파일시스템(앱 라우트)보다 먼저 적용됨
+      beforeFiles: [
+        {
+          source: "/graphql",
+          destination: `${env.BACKEND_URL}/graphql`,
+        },
+      ],
+      // afterFiles: app/api/graphql/route.ts 등이 먼저 매칭된 뒤, 나머지 /api/* 만 백엔드로 전달
+      afterFiles: [
+        {
+          source: "/api/:path*",
+          destination: `${env.BACKEND_URL}/api/:path*`,
+        },
+      ],
+    };
   },
 };
 
