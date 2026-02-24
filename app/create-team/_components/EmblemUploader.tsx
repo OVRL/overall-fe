@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import circleLogoDefault from "@/public/icons/circle_logo_default.svg";
 
 interface EmblemUploaderProps {
   onImageSelected: (file: File | null) => void;
@@ -43,13 +45,20 @@ export default function EmblemUploader({
       <span className="text-sm text-Label-Primary leading-4">클럽 엠블럼</span>
       <div className="flex gap-x-3 py-3">
         <div className="relative size-10 bg-gray-900 rounded-sm p-0.5 overflow-hidden flex items-center justify-center">
-          {emblemPreview && (
+          {emblemPreview ? (
             <Image
               src={emblemPreview}
               alt="엠블럼 미리보기"
               fill
               unoptimized
-              className="object-cover rounded-sm"
+              className="object-cover rounded-sm z-10"
+            />
+          ) : (
+            <Icon
+              src={circleLogoDefault}
+              alt="기본 엠블럼"
+              nofill
+              className="w-full h-full"
             />
           )}
         </div>

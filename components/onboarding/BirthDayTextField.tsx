@@ -1,7 +1,7 @@
 import { ComponentProps } from "react";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 
-type Props = Omit<ComponentProps<typeof AuthTextField>, "label"> & {
+type Props = Omit<ComponentProps<typeof TextField>, "label"> & {
   label?: string;
 };
 
@@ -31,7 +31,7 @@ const BirthDayTextField = ({
   };
 
   return (
-    <AuthTextField
+    <TextField
       {...props}
       type="text"
       inputMode="numeric"

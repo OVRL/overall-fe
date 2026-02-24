@@ -2,13 +2,13 @@ import { ComponentProps, useState, useId } from "react";
 import { cn } from "@/lib/utils";
 import Icon from "@/components/ui/Icon";
 import coseCircle from "@/public/icons/close-circle.svg";
-interface AuthTextFieldProps extends ComponentProps<"input"> {
+interface TextFieldProps extends ComponentProps<"input"> {
   label: string;
   errorMessage?: string;
   onClear?: () => void;
 }
 
-const AuthTextField = ({
+const TextField = ({
   label,
   value,
   onChange,
@@ -18,7 +18,7 @@ const AuthTextField = ({
   type = "text",
   ref,
   ...props
-}: AuthTextFieldProps) => {
+}: TextFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const id = useId();
   const errorId = `${id}-error`;
@@ -49,7 +49,7 @@ const AuthTextField = ({
                 : "border-Fill_Tertiary",
             onClear && value ? "pr-8" : "",
             type === "number" &&
-            "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+              "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           )}
           {...props}
         />
@@ -77,4 +77,4 @@ const AuthTextField = ({
   );
 };
 
-export default AuthTextField;
+export default TextField;

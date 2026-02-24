@@ -1,7 +1,7 @@
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 
-interface ControlledAuthTextFieldProps<T extends FieldValues> {
+interface ControlledTextFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
   label: string;
@@ -9,19 +9,19 @@ interface ControlledAuthTextFieldProps<T extends FieldValues> {
   type?: "text" | "date" | "password" | "email";
 }
 
-export default function ControlledAuthTextField<T extends FieldValues>({
+export default function ControlledTextField<T extends FieldValues>({
   name,
   control,
   label,
   placeholder,
   type = "text",
-}: ControlledAuthTextFieldProps<T>) {
+}: ControlledTextFieldProps<T>) {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field: { value, onChange } }) => (
-        <AuthTextField
+        <TextField
           label={label}
           placeholder={placeholder}
           type={type}

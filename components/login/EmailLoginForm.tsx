@@ -3,7 +3,7 @@
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/Button";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import { loginSchema, type LoginSchemaType } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ const EmailLoginForm = ({ onSubmit }: EmailLoginFormProps) => {
       className="flex-1 flex flex-col gap-10 lg:gap-8 md:max-w-layout md:mx-auto w-full"
       onSubmit={handleSubmit(onValid)}
     >
-      <AuthTextField
+      <TextField
         label="이메일"
         placeholder="아이디(이메일)를 입력해주세요"
         errorMessage={errors.email?.message}
@@ -51,7 +51,7 @@ const EmailLoginForm = ({ onSubmit }: EmailLoginFormProps) => {
         {...register("email")}
       />
 
-      <AuthTextField
+      <TextField
         label="비밀번호"
         type="password"
         placeholder="비밀번호를 입력해주세요"

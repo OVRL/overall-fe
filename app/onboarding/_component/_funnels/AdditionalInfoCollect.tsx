@@ -2,7 +2,7 @@ import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import SelectMainFoot from "../SelectMainFoot";
 
 import { OnboardingStepProps } from "@/types/onboarding";
@@ -166,7 +166,7 @@ const AdditionalInfoCollect = ({
               }
             }}
           >
-            <AuthTextField
+            <TextField
               label="활동지역"
               placeholder="주소검색"
               type="text"
@@ -186,7 +186,7 @@ const AdditionalInfoCollect = ({
             }
           />
 
-          <AuthTextField
+          <TextField
             label="선호하는 등번호"
             placeholder="선호하는 등번호를 입력해주세요."
             type="number"
@@ -195,7 +195,7 @@ const AdditionalInfoCollect = ({
               setInfo((prev) => ({ ...prev, preferredNumber: e.target.value }))
             }
           />
-          <AuthTextField
+          <TextField
             label="좋아하는 선수"
             placeholder="좋아하는 선수를 입력해주세요."
             type="text"

@@ -3,13 +3,13 @@
 import Header from "@/components/Header";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import useModal from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 import { Controller } from "react-hook-form";
 import EmblemUploader from "./EmblemUploader";
-import ControlledAuthTextField from "./ControlledAuthTextField";
+import ControlledTextField from "@/components/ui/ControlledTextField";
 import { useCreateTeamForm } from "../_hooks/useCreateTeamForm";
 import UniformColorSelector from "./UniformColorSelector";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -45,6 +45,13 @@ const CreateTeamWrapper = () => {
         <div className="flex-1 min-h-0">
           <OnboardingTitle>클럽 만들기</OnboardingTitle>
           <div className="mt-10 flex flex-col gap-y-6">
+            <ControlledTextField
+              control={control}
+              name="clubName"
+              label="클럽 이름"
+              placeholder="예: 강남구 슛돌이 FC"
+            />
+
             <Controller
               name="activityArea"
               control={control}
@@ -63,7 +70,7 @@ const CreateTeamWrapper = () => {
                     })
                   }
                 >
-                  <AuthTextField
+                  <TextField
                     label="주요 활동지역"
                     placeholder="지번, 도로명, 법정동 등으로 검색해주세요"
                     type="text"
@@ -74,13 +81,6 @@ const CreateTeamWrapper = () => {
                   />
                 </button>
               )}
-            />
-
-            <ControlledAuthTextField
-              control={control}
-              name="clubName"
-              label="클럽 이름"
-              placeholder="예: 강남구 슛돌이 FC"
             />
 
             <Controller
