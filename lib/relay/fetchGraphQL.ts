@@ -1,4 +1,3 @@
-import { env } from "@/lib/env";
 import {
   CacheConfig,
   RequestParameters,
@@ -54,10 +53,11 @@ export const fetchQuery = async (
     });
   }
 
-  const response = await fetch(
-    `${env.NEXT_PUBLIC_BACKEND_URL}/graphql`,
-    request,
-  );
+  // 같은 오리진의 API 라우트로 보내 쿠키가 전달되고, 서버에서 Authorization 헤더가 붙습니다.
+  const response = await fetch("/api/graphql", {
+    ...request,
+    credentials: "include",
+  });
 
   return await response.json();
 };

@@ -2,48 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./lib/env";
 import { GUEST_ONLY_ROUTES, PUBLIC_ROUTES } from "./lib/routes";
+import {
+  refreshAccessToken,
+  type TokenPair,
+} from "./lib/auth/refreshToken";
 
 const BACKEND_URL = env.BACKEND_URL;
-
-interface User {
-  accessToken?: string | null;
-  refreshToken?: string | null;
-}
-
-interface RefreshResponse {
-  data?: {
-    refresh: User;
-  };
-  errors?: unknown[];
-}
-
-// 헬퍼 함수: 토큰 갱신
-async function refreshAccessToken(
-  refreshToken: string,
-): Promise<User | undefined | null> {
-  try {
-    const response = await fetch(`${BACKEND_URL}/graphql`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation Refresh($refreshToken: String!) {
-            refresh(refreshToken: $refreshToken) {
-              accessToken
-              refreshToken
-            }
-          }
-        `,
-        variables: { refreshToken },
-      }),
-    });
-    const data: RefreshResponse = await response.json();
-    return data?.data?.refresh;
-  } catch (error) {
-    console.error("Token refresh error:", error);
-    return null;
-  }
-}
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -149,7 +113,7 @@ export async function proxy(request: NextRequest) {
   // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우)
   const checkAuth = async (): Promise<{
     isAuthenticated: boolean;
-    newTokens?: User;
+    newTokens?: TokenPair;
   }> => {
     if (accessToken) return { isAuthenticated: true };
     if (refreshToken) {
