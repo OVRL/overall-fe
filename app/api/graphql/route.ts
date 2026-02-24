@@ -19,9 +19,12 @@ export async function POST(request: NextRequest) {
     if (newTokens?.accessToken) token = newTokens.accessToken;
   }
 
-  const body = await request.text();
+  const contentType = request.headers.get("content-type") ?? "";
+  const isMultipart = contentType.includes("multipart/form-data");
+
+  const body = isMultipart ? await request.blob() : await request.text();
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    ...(isMultipart ? { "Content-Type": contentType } : { "Content-Type": "application/json" }),
   };
   if (token) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
