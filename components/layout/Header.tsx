@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-
+import RegisterGameButton from "./header/RegisterGameButton";
 export interface MenuItem {
   label: string;
   href: string;
@@ -57,6 +57,7 @@ export default function Header({
           <div className="flex items-center gap-6 lg:gap-10">
             {/* 데스크톱 메뉴 */}
             <ul className="hidden lg:flex items-center gap-8">
+              <RegisterGameButton />
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (

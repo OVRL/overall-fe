@@ -16,10 +16,14 @@ const PlayerSearchModal = dynamic(
     ssr: false,
   },
 );
+const RegisterGameModal = dynamic(() => import("./RegisterGameModal"), {
+  ssr: false,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
   ADDRESS_SEARCH: AddressSearchModal,
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
   PLAYER_SEARCH: PlayerSearchModal,
+  REGISTER_GAME: RegisterGameModal,
 } as ModalComponentMap;

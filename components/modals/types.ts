@@ -19,6 +19,7 @@ export interface ModalPropsMap {
   PLAYER_SEARCH: {
     onComplete: (player: Player) => void;
   };
+  REGISTER_GAME: Record<string, never>;
 }
 
 export type ModalKey = keyof ModalPropsMap;
