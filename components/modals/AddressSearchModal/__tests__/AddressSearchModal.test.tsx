@@ -77,12 +77,12 @@ describe("AddressSearchModal 컴포넌트", () => {
 
     expect(screen.getByText("검색 중...")).toBeInTheDocument();
 
-    // Resolve Relay query
+    // Resolve Relay query (스키마 타입명: RegionSearchArrayModel)
     act(() => {
       mockEnvironment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [
                 {
                   code: "999",

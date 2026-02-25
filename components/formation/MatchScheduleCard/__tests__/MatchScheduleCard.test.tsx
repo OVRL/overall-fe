@@ -1,13 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import MatchScheduleCard from "../MatchScheduleCard";
 
-// 자식 모바일/데스크탑 컴포넌트 모킹
-jest.mock("../MatchScheduleCardMobile", () => {
-  return function MockMobile({ matchDate }: any) {
-    return <div data-testid="mobile-card">{matchDate}</div>;
-  };
-});
-
+// 데스크톱 컴포넌트 모킹 (모바일 카드는 기획 변경으로 제거됨)
 jest.mock("../MatchScheduleCardDesktop", () => {
   return function MockDesktop({ matchDate, opponent }: any) {
     return (
@@ -40,16 +34,11 @@ describe("MatchScheduleCard 컴포넌트", () => {
     expect(innerDiv).toHaveClass("custom-test-class");
   });
 
-  it("모바일 및 데스크탑 뷰 컴포넌트에 올바른 props를 전달해야 한다", () => {
+  it("데스크톱 뷰 컴포넌트에 올바른 props를 전달해야 한다", () => {
     render(<MatchScheduleCard {...defaultProps} />);
 
-    const mobileCard = screen.getByTestId("mobile-card");
     const desktopCard = screen.getByTestId("desktop-card");
-
-    expect(mobileCard).toBeInTheDocument();
     expect(desktopCard).toBeInTheDocument();
-
-    expect(mobileCard).toHaveTextContent("2026-02-03(목)");
     expect(desktopCard).toHaveTextContent("2026-02-03(목) - FC 빠름셀로나");
   });
 

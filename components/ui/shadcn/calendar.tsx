@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { motion, AnimatePresence } from "motion/react";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import Icon from "./Icon";
+import Icon from "../Icon";
 import arrow_down from "@/public/icons/arrow_down.svg";
 import arrow_up from "@/public/icons/arrow_up.svg";
 

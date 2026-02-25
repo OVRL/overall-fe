@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import DroppableSlot from "../DroppableSlot";
+import DroppableSlot from "../board/DroppableSlot";
 import { DndContext } from "@dnd-kit/core";
 
 // FormationPlayerImageThumbnail 컴포넌트 모킹
-jest.mock("../FormationPlayerImageThumbnail", () => {
+jest.mock("../board/FormationPlayerImageThumbnail", () => {
   return function MockThumbnail(props: any) {
     return (
       <div data-testid="player-thumbnail" onClick={() => props.onDelete?.()}>

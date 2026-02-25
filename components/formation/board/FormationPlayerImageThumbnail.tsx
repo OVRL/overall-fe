@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import PlayerCard from "../ui/PlayerCard";
-import Icon from "../ui/Icon";
+import PlayerCard from "../../ui/PlayerCard";
+import Icon from "../../ui/Icon";
 import selectedCircle from "@/public/icons/active_circle.svg";
 
 type Props = {

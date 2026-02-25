@@ -1,7 +1,6 @@
 import DroppableSlot from "./DroppableSlot";
-import QuarterButton from "../ui/QuarterButton";
-import Dropdown from "../ui/Dropdown";
-import ObjectField from "../ui/ObjectField";
+import Dropdown from "../../ui/Dropdown";
+import ObjectField from "../../ui/ObjectField";
 import { QuarterData, Player } from "@/types/formation";
 import { FORMATION_OPTIONS, FORMATION_POSITIONS } from "@/constants/formations";
 import { Position } from "@/types/position";
@@ -24,6 +23,8 @@ interface QuarterFormationBoardProps {
     pos: { quarterId: number; index: number; role: string } | null,
   ) => void;
   onPositionRemove: (quarterId: number, index: number) => void;
+  /** 모바일: 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치 */
+  onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
   onFormationChange?: (formation: string) => void;
 }
 
@@ -35,6 +36,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
   hasSelection,
   onPositionSelect,
   onPositionRemove,
+  onPlaceSelectedPlayer,
   onFormationChange,
 }) => {
   const formationPositions = FORMATION_POSITIONS[quarter.formation] || [];
@@ -49,14 +51,14 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
         !hasSelection
           ? "border-border-card opacity-100"
           : isSelected
-            ? "border-Fill_AccentPrimary opacity-100 shadow-md"
-            : "border-border-card opacity-60"
+          ? "border-Fill_AccentPrimary opacity-100 shadow-md"
+          : "border-border-card opacity-60"
       }`}
     >
       <div className="flex justify-between items-center">
-        <QuarterButton variant="default" size="sm">
+        <span className="font-bold text-Label-Primary w-9.75 h-4.75 flex items-center justify-center">
           {quarter.id}Q
-        </QuarterButton>
+        </span>
         <Dropdown
           options={FORMATION_OPTIONS}
           value={quarter.formation}
@@ -117,12 +119,19 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
                     player={player}
                     selectedPlayer={selectedPlayer}
                     isActive={isActive}
-                    onPositionSelect={() =>
-                      onPositionSelect(
-                        isActive
-                          ? null
-                          : { quarterId: quarter.id, index, role: position },
-                      )
+                    onPositionSelect={
+                      onPlaceSelectedPlayer && selectedPlayer && !player
+                        ? () => onPlaceSelectedPlayer(quarter.id, index)
+                        : () =>
+                            onPositionSelect(
+                              isActive
+                                ? null
+                                : {
+                                    quarterId: quarter.id,
+                                    index,
+                                    role: position,
+                                  },
+                            )
                     }
                     onPlayerRemove={() => onPositionRemove(quarter.id, index)}
                   />

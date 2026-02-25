@@ -1,6 +1,5 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import MatchScheduleCardMobile from "./MatchScheduleCardMobile";
 import MatchScheduleCardDesktop from "./MatchScheduleCardDesktop";
 
 interface MatchScheduleCardProps {
@@ -30,7 +29,6 @@ const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
           className,
         )}
       >
-        <MatchScheduleCardMobile matchDate={matchDate} />
         <MatchScheduleCardDesktop
           matchDate={matchDate}
           matchTime={matchTime}

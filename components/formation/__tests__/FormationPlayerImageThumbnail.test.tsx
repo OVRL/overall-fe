@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import FormationPlayerImageThumbnail from "../FormationPlayerImageThumbnail";
+import FormationPlayerImageThumbnail from "../board/FormationPlayerImageThumbnail";
 
 // Icon 모킹
 jest.mock("@/components/ui/Icon", () => ({ alt }: any) => (

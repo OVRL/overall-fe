@@ -1,0 +1,106 @@
+"use client";
+
+import React, { useMemo } from "react";
+import QuarterSelectorTabs from "@/components/formation/quarter/QuarterSelectorTabs";
+import FormationBoardSingle from "@/components/formation/board/FormationBoardSingle";
+import FormationPlayerListMobile from "@/components/formation/player-list/FormationPlayerListMobile";
+import { QuarterData, Player } from "@/types/formation";
+import fire from "@/public/icons/fire.svg";
+import Icon from "@/components/ui/Icon";
+
+export interface FormationBuilderMobileProps {
+  quarters: QuarterData[];
+  setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
+  addQuarter: () => void;
+  currentQuarterId: number | null;
+  setCurrentQuarterId: (id: number | null) => void;
+  selectedPlayer: Player | null;
+  setSelectedPlayer: (player: Player | null) => void;
+  onPositionRemove: (quarterId: number, index: number) => void;
+  assignPlayer: (quarterId: number, positionIndex: number, player: Player) => void;
+  initialPlayers: Player[];
+}
+
+/**
+ * 모바일 전용 레이아웃: QuarterSelectorTabs + 단일 보드 + 선수 명단.
+ * 데스크톱 전용 컴포넌트를 import하지 않음 (이관 시 분리 용이).
+ */
+export default function FormationBuilderMobile({
+  quarters,
+  setQuarters,
+  addQuarter,
+  currentQuarterId,
+  setCurrentQuarterId,
+  selectedPlayer,
+  setSelectedPlayer,
+  onPositionRemove,
+  assignPlayer,
+  initialPlayers,
+}: FormationBuilderMobileProps) {
+  /** 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치. 중복은 useFormationManager.assignPlayer에서 처리. */
+  const handlePlaceSelectedPlayer = (quarterId: number, index: number) => {
+    if (selectedPlayer) {
+      assignPlayer(quarterId, index, selectedPlayer);
+      setSelectedPlayer(null);
+    }
+  };
+
+  /** 선수별 배치된 쿼터 id 목록 (명단에서 QuarterDotsMobile 표시용) */
+  const getAssignedQuarterIdsForPlayer = useMemo(() => {
+    return (playerId: number): number[] => {
+      return quarters
+        .filter((q) => {
+          const lineup = q.lineup ?? {};
+          return Object.values(lineup).some((p) => p?.id === playerId);
+        })
+        .map((q) => q.id)
+        .sort((a, b) => a - b);
+    };
+  }, [quarters]);
+
+  return (
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 w-full max-w-screen-xl  lg:items-stretch 2xl:max-w-none">
+      <div className="w-full lg:flex-1 2xl:w-225 2xl:flex-none flex flex-col gap-4 shrink-0 transition-all duration-300">
+        {/* 쿼터 탭만 노출 (매치 카드·스쿼드 추천 없음) */}
+        <section aria-label="쿼터 선택" className="flex flex-col gap-6">
+          <div className="flex items-center gap-2.5">
+            <Icon src={fire} nofill width={24} height={24} />
+            <h2 className="font-semibold text-[#f7f8f8] leading-6">
+              경기 정보
+            </h2>
+          </div>
+          <QuarterSelectorTabs
+            quarters={quarters}
+            currentQuarterId={currentQuarterId}
+            setCurrentQuarterId={setCurrentQuarterId}
+            addQuarter={addQuarter}
+          />
+        </section>
+
+        {/* 선택된 쿼터 보드 1개만 렌더 */}
+        <FormationBoardSingle
+          quarters={quarters}
+          currentQuarterId={currentQuarterId}
+          selectedPlayer={selectedPlayer}
+          setQuarters={setQuarters}
+          onPositionRemove={onPositionRemove}
+          onPlaceSelectedPlayer={handlePlaceSelectedPlayer}
+        />
+      </div>
+
+      <FormationPlayerListMobile
+        players={initialPlayers}
+        selectedPlayer={selectedPlayer}
+        onSelectPlayer={(player) =>
+          setSelectedPlayer(
+            selectedPlayer?.id === player.id ? null : player,
+          )
+        }
+        onAddPlayer={() => {}}
+        targetPosition={null}
+        activePosition={null}
+        getAssignedQuarterIdsForPlayer={getAssignedQuarterIdsForPlayer}
+      />
+    </div>
+  );
+}

@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
 
-// Default breakpoint for md in Tailwind is 768px.
-// Devices under 768px are considered mobile.
+/**
+ * 뷰포트가 maxWidth 이하일 때 true.
+ * SSR/하이드레이션 일치를 위해 초기값은 항상 false로 두고, 마운트 후 useEffect에서 실제 값으로 갱신합니다.
+ */
 export function useIsMobile(maxWidth: number = 767) {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia(`(max-width: ${maxWidth}px)`).matches;
-  });
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
-    // SSR Check
     if (typeof window === "undefined") return;
 
     const mediaQueryList = window.matchMedia(`(max-width: ${maxWidth}px)`);
+    setIsMobile(mediaQueryList.matches);
 
-    // Event handler
     const changeHandler = (event: MediaQueryListEvent) => {
       setIsMobile(event.matches);
     };

@@ -12,9 +12,10 @@ import EmblemUploader from "./EmblemUploader";
 import ControlledTextField from "@/components/ui/ControlledTextField";
 import { useCreateTeamForm } from "../_hooks/useCreateTeamForm";
 import UniformColorSelector from "./UniformColorSelector";
-import { DatePicker } from "@/components/ui/DatePicker";
+import { DatePicker } from "@/components/ui/date/DatePicker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import locationIcon from "@/public/icons/location.svg";
 
 const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
@@ -49,7 +50,8 @@ const CreateTeamWrapper = () => {
               control={control}
               name="clubName"
               label="클럽 이름"
-              placeholder="예: 강남구 슛돌이 FC"
+              placeholder="클럽 이름을 입력해주세요."
+              showBorderBottom={false}
             />
 
             <Controller
@@ -72,8 +74,10 @@ const CreateTeamWrapper = () => {
                 >
                   <TextField
                     label="주요 활동지역"
-                    placeholder="지번, 도로명, 법정동 등으로 검색해주세요"
+                    placeholder="클릭해서 주요 활동 장소를 찾아보세요"
                     type="text"
+                    showBorderBottom={false}
+                    leftIcon={locationIcon}
                     value={field.value}
                     readOnly
                     className="pointer-events-none"
@@ -98,7 +102,7 @@ const CreateTeamWrapper = () => {
                         date ? format(date, "yyyy-MM-dd", { locale: ko }) : "",
                       )
                     }
-                    placeholder="예: 2025-01-01"
+                    placeholder="2026. 01. 01."
                   />
                 </div>
               )}

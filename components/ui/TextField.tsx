@@ -1,11 +1,17 @@
 import { ComponentProps, useState, useId } from "react";
+import type { StaticImageData } from "next/image";
 import { cn } from "@/lib/utils";
 import Icon from "@/components/ui/Icon";
 import coseCircle from "@/public/icons/close-circle.svg";
+
 interface TextFieldProps extends ComponentProps<"input"> {
   label: string;
   errorMessage?: string;
   onClear?: () => void;
+  /** 하단 테두리(border-b) 표시 여부. 기본값: false */
+  showBorderBottom?: boolean;
+  /** input 왼쪽에 표시할 아이콘 (24x24, mr-0.5). 없으면 표시 안 함 */
+  leftIcon?: StaticImageData;
 }
 
 const TextField = ({
@@ -16,6 +22,8 @@ const TextField = ({
   errorMessage,
   className,
   type = "text",
+  showBorderBottom = true,
+  leftIcon,
   ref,
   ...props
 }: TextFieldProps) => {
@@ -29,7 +37,28 @@ const TextField = ({
         {label}
       </label>
 
-      <div className="relative w-full pt-4.25">
+      <div
+        className={cn(
+          "relative w-full pt-4.25 pb-3.75 flex items-center transition-colors",
+          showBorderBottom && "border-b",
+          showBorderBottom && errorMessage
+            ? "border-Fill_Error"
+            : showBorderBottom && isFocused
+              ? "border-white"
+              : showBorderBottom
+                ? "border-Fill_Tertiary"
+                : "border-transparent",
+        )}
+      >
+        {leftIcon && (
+          <Icon
+            src={leftIcon}
+            alt="아이콘"
+            width={24}
+            height={24}
+            className="mr-0.5 shrink-0"
+          />
+        )}
         <input
           id={id}
           ref={ref}
@@ -41,12 +70,7 @@ const TextField = ({
           aria-invalid={!!errorMessage}
           aria-describedby={errorMessage ? errorId : undefined}
           className={cn(
-            "w-full bg-transparent pb-3.75 text-base  text-Label-Primary placeholder:text-Label-Tertiary outline-none border-b transition-colors",
-            errorMessage
-              ? "border-Fill_Error"
-              : isFocused
-                ? "border-white"
-                : "border-Fill_Tertiary",
+            "flex-1 w-full bg-transparent text-base text-Label-Primary placeholder:text-Label-Tertiary outline-none",
             onClear && value ? "pr-8" : "",
             type === "number" &&
               "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",

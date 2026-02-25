@@ -3,11 +3,12 @@ import React from "react";
 // Components
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
 import FormationBuilder from "./_components/FormationBuilder";
+import FormationHeader from "./_components/FormationHeader";
 
 // Mock Data
 import { MOCK_PLAYERS } from "@/constants/mock-players";
 
-export default function FormationPage() {
+const FormationPage = () => {
   const scheduleCard = (
     <MatchScheduleCard
       // 목 데이터 - 실제 앱에서는 DB에서 Fetch 후 props로 전달 (SSR)
@@ -21,11 +22,16 @@ export default function FormationPage() {
   );
 
   return (
-    <main className="flex-1 bg-surface-primary flex flex-col px-3 md:px-6 py-4 w-full items-center">
-      <FormationBuilder
-        scheduleCard={scheduleCard}
-        initialPlayers={MOCK_PLAYERS}
-      />
-    </main>
+    <div className="min-h-screen bg-surface-primary flex flex-col">
+      <FormationHeader />
+      <main className="flex-1flex flex-col px-3 md:px-6 py-4 w-full items-center">
+        <FormationBuilder
+          scheduleCard={scheduleCard}
+          initialPlayers={MOCK_PLAYERS}
+        />
+      </main>
+    </div>
   );
-}
+};
+
+export default FormationPage;

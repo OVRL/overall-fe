@@ -1,6 +1,6 @@
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
-import QuarterButton from "../ui/QuarterButton";
+import QuarterButton from "../../ui/QuarterButton";
 import FormationPlayerImageThumbnail from "./FormationPlayerImageThumbnail";
 import { Player } from "@/types/formation";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,11 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
               : "bg-surface-card/80",
           )}
           onClick={onPositionSelect}
+          aria-label={
+            selectedPlayer
+              ? `${selectedPlayer.name}을(를) ${positionName} 포지션에 배치`
+              : undefined
+          }
         >
           <span className="text-sm font-bold">{positionName}</span>
         </QuarterButton>

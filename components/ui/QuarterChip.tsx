@@ -1,66 +1,14 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import {
+  getQuarterColor,
+  getQuarterChipStyle,
+} from "@/lib/quarterColors";
 
 interface QuarterChipProps extends React.HTMLAttributes<HTMLSpanElement> {
   quarters: number[];
-  className?: string; // Additional className for the wrapper
+  className?: string;
 }
-
-const QUARTER_COLORS: Record<
-  number,
-  { border: string; bg: string; text?: string }
-> = {
-  1: {
-    border: "border-Position-DF-Blue",
-    bg: "bg-Position-DF-Blue",
-    text: "text-Position-DF-Blue",
-  },
-  2: {
-    border: "border-Position-MF-Green",
-    bg: "bg-Position-MF-Green",
-    text: "text-Position-MF-Green",
-  },
-  3: {
-    border: "border-Position-GK-Yellow",
-    bg: "bg-Position-GK-Yellow",
-    text: "text-Position-GK-Yellow",
-  },
-  4: {
-    border: "border-Position-FW-Red",
-    bg: "bg-Position-FW-Red",
-    text: "text-Position-FW-Red",
-  },
-  5: {
-    border: "border-purple-500",
-    bg: "bg-purple-500",
-    text: "text-purple-500",
-  },
-  6: {
-    border: "border-orange-500",
-    bg: "bg-orange-500",
-    text: "text-orange-500",
-  },
-  7: { border: "border-pink-500", bg: "bg-pink-500", text: "text-pink-500" },
-  8: { border: "border-cyan-500", bg: "bg-cyan-500", text: "text-cyan-500" },
-  9: { border: "border-teal-500", bg: "bg-teal-500", text: "text-teal-500" },
-  10: {
-    border: "border-indigo-500",
-    bg: "bg-indigo-500",
-    text: "text-indigo-500",
-  },
-};
-
-const getSingleStyle = (q: number) => {
-  const color = QUARTER_COLORS[q] || {
-    border: "border-gray-600",
-    bg: "bg-gray-600",
-  };
-  return `border ${color.border} ${color.bg}`;
-};
-
-const getQuarterColor = (q: number) => {
-  return QUARTER_COLORS[q]?.bg || "bg-gray-600";
-};
 
 const QuarterChip: React.FC<QuarterChipProps> = ({
   quarters = [],
@@ -82,7 +30,7 @@ const QuarterChip: React.FC<QuarterChipProps> = ({
       <span
         className={cn(
           "inline-flex items-center text-white justify-center rounded-sm shadow-[0_2px_10px_rgba(0, 0, 0, 0.30)] opacity-90 text-xs font-semibold transition-colors leading-none tracking-tight px-1 py-0.25",
-          getSingleStyle(q),
+          getQuarterChipStyle(q),
           className,
         )}
         {...props}
@@ -102,7 +50,7 @@ const QuarterChip: React.FC<QuarterChipProps> = ({
       <div
         className={cn(
           "relative inline-flex items-center text-white justify-center rounded-sm shadow-[0_2px_10px_rgba(0, 0, 0, 0.30)] opacity-90 text-xs font-semibold transition-colors leading-none tracking-tight px-1 py-0.25",
-          getSingleStyle(maxQuarter),
+          getQuarterChipStyle(maxQuarter),
           className,
         )}
         {...props}

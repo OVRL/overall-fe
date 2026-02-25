@@ -64,7 +64,7 @@ describe("SearchResultList 컴포넌트", () => {
       environment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [
                 {
                   code: "111",
@@ -94,7 +94,7 @@ describe("SearchResultList 컴포넌트", () => {
       environment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [],
               hasNextPage: false,
             }),
@@ -114,7 +114,7 @@ describe("SearchResultList 컴포넌트", () => {
       environment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [
                 {
                   code: "111",
@@ -131,7 +131,7 @@ describe("SearchResultList 컴포넌트", () => {
       );
     });
 
-    const item = await screen.findByTestId("address-item");
+    const item = await screen.findByText("Seoul Gangnam Yeoksam");
     fireEvent.click(item);
 
     expect(mockOnSelect).toHaveBeenCalledWith("Seoul Gangnam Yeoksam", "111");
@@ -144,7 +144,7 @@ describe("SearchResultList 컴포넌트", () => {
       environment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [
                 {
                   code: "111",

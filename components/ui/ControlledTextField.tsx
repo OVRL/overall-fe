@@ -7,6 +7,7 @@ interface ControlledTextFieldProps<T extends FieldValues> {
   label: string;
   placeholder?: string;
   type?: "text" | "date" | "password" | "email";
+  showBorderBottom?: boolean;
 }
 
 export default function ControlledTextField<T extends FieldValues>({
@@ -15,6 +16,7 @@ export default function ControlledTextField<T extends FieldValues>({
   label,
   placeholder,
   type = "text",
+  showBorderBottom = true,
 }: ControlledTextFieldProps<T>) {
   return (
     <Controller
@@ -28,6 +30,7 @@ export default function ControlledTextField<T extends FieldValues>({
           value={value ?? ""}
           onChange={onChange}
           onClear={() => onChange("")}
+          showBorderBottom={showBorderBottom}
         />
       )}
     />

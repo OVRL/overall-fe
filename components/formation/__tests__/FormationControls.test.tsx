@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import FormationControls from "../FormationControls";
 
-jest.mock("../QuarterSelector", () => {
+jest.mock("../quarter/QuarterSelector", () => {
   return function MockQuarterSelector(props: any) {
     return (
       <div data-testid="quarter-selector">
@@ -28,8 +28,8 @@ describe("FormationControls 컴포넌트", () => {
     const section = screen.getByRole("region", { name: "포메이션 컨트롤" });
     expect(section).toBeInTheDocument();
 
-    // 이미지 렌더링 확인
-    const image = screen.getByAltText("matchlineup");
+    // 이미지 렌더링 확인 (FormationControls의 Icon alt="로고")
+    const image = screen.getByAltText("로고");
     expect(image).toBeInTheDocument();
 
     // QuarterSelector 모킹 확인

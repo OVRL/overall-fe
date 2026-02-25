@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import QuarterFormationBoard from "../QuarterFormationBoard";
+import QuarterFormationBoard from "../board/QuarterFormationBoard";
 import { DndContext } from "@dnd-kit/core";
 
 // 하위 컴포넌트 모킹
-jest.mock("../DroppableSlot", () => {
+jest.mock("../board/DroppableSlot", () => {
   return function MockDroppableSlot(props: any) {
     return (
       <div

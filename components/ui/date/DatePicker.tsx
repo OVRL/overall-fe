@@ -5,13 +5,13 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import calendar from "@/public/icons/calendar.svg";
 import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/shadcn/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import Icon from "./Icon";
+} from "@/components/ui/shadcn/popover";
+import Icon from "../Icon";
 
 interface DatePickerProps {
   value?: Date;

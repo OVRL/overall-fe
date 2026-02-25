@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import FormationPlayerList from "../FormationPlayerList";
+import FormationPlayerList from "../player-list/FormationPlayerList";
 
-jest.mock("../PlayerListFilter", () => {
+jest.mock("../player-list/PlayerListFilter", () => {
   return function MockPlayerListFilter(props: any) {
     return (
       <div data-testid="player-filter">
@@ -15,7 +15,7 @@ jest.mock("../PlayerListFilter", () => {
   };
 });
 
-jest.mock("../FormationPlayerGroupList", () => {
+jest.mock("../player-list/FormationPlayerGroupList", () => {
   return function MockFormationPlayerGroupList(props: any) {
     return (
       <div data-testid="group-list">
@@ -31,6 +31,18 @@ jest.mock("@/components/ui/Button", () => ({ children, onClick }: any) => (
   </button>
 ));
 jest.mock("@/components/ui/Icon", () => () => <span />);
+
+// 선수 추가는 모달(PLAYER_SEARCH) 완료 시 onAddPlayer가 호출되는 방식으로 동작함
+jest.mock("@/hooks/useModal", () => ({
+  __esModule: true,
+  default: () => ({
+    openModal: (options: { onComplete?: (player: { name: string }) => void }) => {
+      if (options?.onComplete) {
+        options.onComplete({ name: "새 선수" });
+      }
+    },
+  }),
+}));
 
 describe("FormationPlayerList 컴포넌트", () => {
   const mockOnSelectPlayer = jest.fn();
@@ -56,7 +68,6 @@ describe("FormationPlayerList 컴포넌트", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    window.prompt = jest.fn().mockReturnValue("새 선수");
   });
 
   it("기본 렌더링 및 하위 컴포넌트들이 정상적으로 나타나야 한다", () => {
@@ -67,11 +78,10 @@ describe("FormationPlayerList 컴포넌트", () => {
     expect(screen.getByTestId("mock-add-btn")).toBeInTheDocument();
   });
 
-  it("선수 추가 버튼 클릭 시 prompt가 호출되며 onAddPlayer가 실행되어야 한다", () => {
+  it("선수 추가 버튼 클릭 시 모달 완료 콜백이 호출되며 onAddPlayer가 실행되어야 한다", () => {
     render(<FormationPlayerList {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId("mock-add-btn"));
-    expect(window.prompt).toHaveBeenCalled();
     expect(mockOnAddPlayer).toHaveBeenCalledWith("새 선수");
   });
 

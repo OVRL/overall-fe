@@ -1,7 +1,8 @@
 import React from "react";
 import { QuarterData } from "@/types/formation";
-import Image from "next/image";
-import QuarterSelector from "./QuarterSelector";
+import QuarterSelector from "./quarter/QuarterSelector";
+import Icon from "../ui/Icon";
+import matchLineup from "@/public/icons/title_matchlineup.svg";
 
 interface FormationControlsProps {
   currentQuarterId: number | null;
@@ -19,12 +20,7 @@ const FormationControls: React.FC<FormationControlsProps> = ({
   return (
     <section aria-label="포메이션 컨트롤">
       <div className="flex flex-col gap-4 my-6">
-        <Image
-          src="/images/title_matchlineup.webp"
-          alt="matchlineup"
-          width={192}
-          height={34}
-        />
+        <Icon src={matchLineup} alt="로고" nofill width={192} height={34} />
         <QuarterSelector
           quarters={quarters}
           currentQuarterId={currentQuarterId}

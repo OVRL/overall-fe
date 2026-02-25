@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import DateTimePicker from "@/components/ui/DateTimePicker";
+import DateTimePicker from "@/components/ui/date/DateTimePicker";
 
 type VoteStatus = "active" | "closed" | "confirmed";
 

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import QuarterSelector from "../QuarterSelector";
+import QuarterSelector from "../quarter/QuarterSelector";
 
 // Icon 컴포넌트 모킹 (next/image 프로퍼티 에러 방지)
 jest.mock("@/components/ui/Icon", () => {

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import PositionChip from "@/components/PositionChip";
 import FormationField from "@/components/home/StartingXI/FormationField";
-import DateTimePicker from "@/components/ui/DateTimePicker";
+import DateTimePicker from "@/components/ui/date/DateTimePicker";
 import { Position } from "@/types/position";
 import { Player } from "@/types/player";
 

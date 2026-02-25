@@ -22,6 +22,12 @@ type RightActionProp = {
   rightAction?: ActionButton;
 };
 
+/** 오른쪽에 텍스트 버튼을 쓸 때 (rightAction 대신 사용) */
+type RightLabelProp = {
+  rightLabel?: string;
+  onRightClick?: () => void;
+};
+
 type WithCenter = BaseHeaderProps & {
   title?: string;
   logo?: ReactNode;
@@ -30,7 +36,8 @@ type WithCenter = BaseHeaderProps & {
     | { title?: string; logo: ReactNode }
   ) &
   LeftActionProp &
-  RightActionProp;
+  RightActionProp &
+  RightLabelProp;
 
 type WithoutCenter = BaseHeaderProps & {
   title?: never;
@@ -38,12 +45,19 @@ type WithoutCenter = BaseHeaderProps & {
 } & {
   leftAction?: ActionButton;
   rightAction?: ActionButton;
-};
+} & RightLabelProp;
 
 export type HeaderProps = WithCenter | WithoutCenter;
 
 export const Header = (props: HeaderProps) => {
-  const { className, leftAction, rightAction, transparent } = props;
+  const {
+    className,
+    leftAction,
+    rightAction,
+    rightLabel,
+    onRightClick,
+    transparent,
+  } = props;
 
   const title = props.title;
   const logo = props.logo;
@@ -86,7 +100,16 @@ export const Header = (props: HeaderProps) => {
       </div>
 
       <div className="flex flex-1 items-center justify-end">
-        {rightAction && (
+        {rightLabel != null && onRightClick != null ? (
+          <button
+            type="button"
+            onClick={onRightClick}
+            className="flex items-center justify-center px-3 py-3 text-body-m text-white hover:opacity-80 active:scale-95 transition-all"
+            aria-label={rightLabel}
+          >
+            {rightLabel}
+          </button>
+        ) : rightAction ? (
           <button
             onClick={rightAction.onClick}
             className="flex items-center justify-center p-3 hover:bg-gray-100/10 active:scale-95 transition-all"
@@ -100,7 +123,7 @@ export const Header = (props: HeaderProps) => {
               nofill={rightAction.nofill}
             />
           </button>
-        )}
+        ) : null}
       </div>
     </header>
   );

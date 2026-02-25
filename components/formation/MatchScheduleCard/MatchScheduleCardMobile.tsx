@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import calendar from "@/public/icons/calendar.svg";
 import Dropdown from "@/components/ui/Dropdown";
+import matchLineup from "@/public/icons/title_matchlineup.svg";
 
 interface MatchScheduleCardMobileProps {
   matchDate: string;
@@ -19,12 +19,7 @@ const MatchScheduleCardMobile: React.FC<MatchScheduleCardMobileProps> = ({
       <div className="flex flex-col gap-6 items-center w-full">
         <div className="flex flex-col gap-6 items-center w-full">
           <div className="h-8.5 w-48 relative shrink-0">
-            <Image
-              src="/images/title_matchlineup.webp"
-              alt="Match Logo"
-              fill
-              className="object-contain"
-            />
+            <Icon src={matchLineup} alt="로고" nofill width={192} height={34} />
           </div>
           <div className="flex gap-3 items-center w-[184px]">
             <Button variant="primary" size="m">

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import FormationPlayerRow from "../FormationPlayerRow";
+import FormationPlayerRow from "../player-list/FormationPlayerRow";
 import { DndContext } from "@dnd-kit/core";
 
 // 하위 컴포넌트 및 훅 모킹

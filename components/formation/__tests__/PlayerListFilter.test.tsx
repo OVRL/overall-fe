@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import PlayerListFilter from "../PlayerListFilter";
+import PlayerListFilter from "../player-list/PlayerListFilter";
 
 // Icon 컴포넌트 모킹
 jest.mock("@/components/ui/Icon", () => ({ alt }: any) => (

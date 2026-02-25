@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import FormationPlayerGroupList from "../FormationPlayerGroupList";
+import FormationPlayerGroupList from "../player-list/FormationPlayerGroupList";
 
-jest.mock("../FormationPlayerRow", () => {
+jest.mock("../player-list/FormationPlayerRow", () => {
   return function MockFormationPlayerRow(props: any) {
     return (
       <div

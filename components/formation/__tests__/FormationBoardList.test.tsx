@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import FormationBoardList from "../FormationBoardList";
+import FormationBoardList from "../board/FormationBoardList";
 
-jest.mock("../QuarterFormationBoard", () => {
+jest.mock("../board/QuarterFormationBoard", () => {
   return function MockQuarterFormationBoard({
     quarter,
     isSelected,

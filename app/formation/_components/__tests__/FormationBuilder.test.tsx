@@ -4,45 +4,39 @@ import { useFormationManager } from "@/hooks/formation/useFormationManager";
 
 // 1. 모듈 모킹
 jest.mock("@/hooks/formation/useFormationManager");
-jest.mock("@dnd-kit/core", () => ({
-  DndContext: ({ children }: any) => (
-    <div data-testid="dnd-context">{children}</div>
-  ),
-  DragOverlay: () => <div data-testid="drag-overlay" />,
-  useSensor: jest.fn(),
-  useSensors: jest.fn(),
-  PointerSensor: jest.fn(),
+jest.mock("@/hooks/useIsMobile", () => ({
+  useIsMobile: jest.fn(() => false), // 데스크톱 분기로 테스트
 }));
 
-jest.mock("@/components/formation/FormationControls", () => {
-  return function MockControls(props: any) {
-    return (
-      <div data-testid="formation-controls">
-        <button
-          onClick={() => props.setCurrentQuarterId(2)}
-          data-testid="mock-control-button"
-        >
-          Change Quarter
-        </button>
+// 데스크톱 분기: dynamic으로 로드되는 FormationBuilderDesktopWithDnd 모킹
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () => {
+    const MockDesktopWithDnd = (props: any) => (
+      <div data-testid="formation-builder-desktop">
+        {props.scheduleCard}
+        <div data-testid="formation-controls">
+          <button
+            onClick={() => props.setCurrentQuarterId(2)}
+            data-testid="mock-control-button"
+          >
+            Change Quarter
+          </button>
+        </div>
+        <div data-testid="formation-board-list">
+          Current Quarter:{" "}
+          {props.currentQuarterId === null ? "null" : props.currentQuarterId}
+        </div>
+        <div data-testid="formation-player-list">Player List</div>
       </div>
     );
-  };
-});
+    return MockDesktopWithDnd;
+  },
+}));
 
-jest.mock("@/components/formation/FormationBoardList", () => {
-  return function MockBoardList(props: any) {
-    return (
-      <div data-testid="formation-board-list">
-        Current Quarter:{" "}
-        {props.currentQuarterId === null ? "null" : props.currentQuarterId}
-      </div>
-    );
-  };
-});
-
-jest.mock("@/components/formation/FormationPlayerList", () => {
-  return function MockPlayerList(props: any) {
-    return <div data-testid="formation-player-list">Player List</div>;
+jest.mock("../FormationBuilderMobile", () => {
+  return function MockFormationBuilderMobile() {
+    return <div data-testid="formation-builder-mobile">Mobile</div>;
   };
 });
 
@@ -71,7 +65,7 @@ describe("FormationBuilder 컴포넌트", () => {
       />,
     );
 
-    expect(screen.getByTestId("dnd-context")).toBeInTheDocument();
+    expect(screen.getByTestId("formation-builder-desktop")).toBeInTheDocument();
     expect(screen.getByTestId("schedule-card")).toBeInTheDocument();
     expect(screen.getByTestId("formation-controls")).toBeInTheDocument();
     expect(screen.getByTestId("formation-board-list")).toBeInTheDocument();
