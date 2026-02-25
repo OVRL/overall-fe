@@ -8,7 +8,7 @@ interface FormSectionProps {
 
 function FormSection({ label, children, className }: FormSectionProps) {
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-3 pl-3", className)}>
       <span className="text-sm font-semibold text-Label-Primary">{label}</span>
       {children}
     </div>

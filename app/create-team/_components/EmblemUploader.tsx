@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
@@ -16,20 +16,30 @@ export default function EmblemUploader({
   const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // createObjectURL 해제 — 메모리 누수 방지 (Vercel best practice)
+  useEffect(() => {
+    return () => {
+      if (emblemPreview) URL.revokeObjectURL(emblemPreview);
+    };
+  }, [emblemPreview]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const url = URL.createObjectURL(file);
     const img = document.createElement("img");
-    img.src = url;
 
     img.onload = () => {
       // 256x256 정사각형 해상도 검증
       if (img.width === 256 && img.height === 256) {
-        setEmblemPreview(url);
+        setEmblemPreview((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
+        });
         onImageSelected(file);
       } else {
+        URL.revokeObjectURL(url);
         alert("로고 이미지 해상도는 256x256 정사각형이어야 합니다.");
         setEmblemPreview(null);
         onImageSelected(null);
@@ -38,6 +48,12 @@ export default function EmblemUploader({
         }
       }
     };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      setEmblemPreview(null);
+      onImageSelected(null);
+    };
+    img.src = url;
   };
 
   return (

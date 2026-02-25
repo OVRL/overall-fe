@@ -1,29 +1,18 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import React from "react";
-import uniformSvg from "@/public/icons/uniform.svg";
-import Icon from "@/components/ui/Icon";
-
-export const UNIFORM_COLORS = [
-  { name: "레드", hex: "#E30613" },
-  { name: "블루", hex: "#034694" },
-  { name: "라이트 블루", hex: "#6CABDD" },
-  { name: "블랙", hex: "#000000" },
-  { name: "화이트", hex: "#FFFFFF" },
-  { name: "옐로우", hex: "#FDE100" },
-  { name: "그린", hex: "#00A650" },
-  { name: "오렌지", hex: "#F36C21" },
-  { name: "네이비", hex: "#132257" },
-  { name: "퍼플", hex: "#7A259D" },
-  { name: "버건디", hex: "#670E36" },
-  { name: "핑크", hex: "#FFC0CB" },
-];
+import Image from "next/image";
+import {
+  type UniformDesign,
+  UNIFORM_DESIGNS,
+} from "../_lib/uniformDesign";
 
 interface UniformColorSelectorProps {
   label: string;
-  value?: string;
-  onChange: (colorHex: string) => void;
+  value?: UniformDesign;
+  onChange: (design: UniformDesign) => void;
+  /** 다른 쪽(홈/어웨이)에서 선택된 디자인 — 이 옵션은 비활성화 및 시각적 처리 */
+  disabledDesign?: UniformDesign;
   className?: string;
 }
 
@@ -31,40 +20,44 @@ export default function UniformColorSelector({
   label,
   value,
   onChange,
+  disabledDesign,
   className,
 }: UniformColorSelectorProps) {
   return (
     <div className={cn("flex flex-col gap-3 px-3", className)}>
       <span className="text-Label-Primary text-sm font-semibold">{label}</span>
-      <div className="grid grid-cols-6 gap-2 max-w-90 place-items-center">
-        {UNIFORM_COLORS.map((color) => {
-          const isSelected = value === color.hex;
+      <div className="grid grid-cols-5 gap-2 max-w-90 place-items-center">
+        {UNIFORM_DESIGNS.map((item) => {
+          const isSelected = value === item.design;
+          const isDisabled = disabledDesign != null && item.design === disabledDesign;
           return (
             <button
-              key={color.hex}
+              key={item.design}
               type="button"
-              onClick={() => onChange(color.hex)}
+              disabled={isDisabled}
+              onClick={() => !isDisabled && onChange(item.design)}
               className={cn(
-                "relative flex aspect-square items-center justify-center rounded-lg border transition-all size-7.5",
+                "relative flex aspect-square items-center justify-center rounded-sm border transition-all size-7.5 overflow-hidden cursor-pointer",
                 isSelected
-                  ? "border-primary bg-primary/10"
-                  : "border-transparent",
+                  ? "border-Fill_AccentPrimary bg-primary/10"
+                  : "border-transparent hover:border-Fill_Tertiary",
+                isDisabled &&
+                  "cursor-not-allowed opacity-40 bg-Fill_Quatiary border-Fill_Tertiary hover:border-Fill_Tertiary",
               )}
-              title={color.name}
-              style={{ color: color.hex }}
+              title={isDisabled ? `${item.label} (다른 유니폼에서 선택됨)` : item.label}
+              aria-label={isDisabled ? `${item.label} (선택 불가)` : `${item.label} 유니폼 선택`}
+              aria-disabled={isDisabled}
+              aria-pressed={isSelected}
             >
-              <Icon
-                src={uniformSvg}
-                alt={`${color.name} 유니폼`}
-                width={28}
-                height={28}
-                className="w-7 h-7"
-                style={{
-                  filter:
-                    color.hex === "#FFFFFF"
-                      ? "drop-shadow(0px 0px 4px rgba(0,0,0,0.4))"
-                      : "drop-shadow(0px 0px 2px rgba(0,0,0,0.15))",
-                }}
+              <Image
+                src={item.imagePath}
+                alt={`${item.label} 유니폼`}
+                width={30}
+                height={30}
+                sizes="30px"
+                quality={100}
+                className="object-contain w-full h-full"
+                aria-hidden
               />
             </button>
           );

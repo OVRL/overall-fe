@@ -8,20 +8,24 @@ export const UNIFORM = {
   AWAY: "어웨이",
 } as const;
 
-export const QUARTER_COUNT_OPTIONS = [
-  { label: "4", value: "4" },
-  { label: "6", value: "6" },
-  { label: "8", value: "8" },
-];
+export const QUARTER_COUNT_OPTIONS = Array.from(
+  { length: 10 },
+  (_, i) => ({ label: String(i + 1), value: String(i + 1) }),
+);
 
-export const QUARTER_DURATION_OPTIONS = [
-  { label: "10분", value: "10" },
-  { label: "15분", value: "15" },
-  { label: "25분", value: "25" },
-];
+/** 5분 단위, 5분 ~ 55분 */
+export const QUARTER_DURATION_OPTIONS = Array.from(
+  { length: 11 },
+  (_, i) => {
+    const minutes = (i + 1) * 5;
+    return { label: `${minutes}분`, value: String(minutes) };
+  },
+);
 
 export const VOTE_DEADLINE_OPTIONS = [
   { label: "당일", value: "SAME_DAY" },
   { label: "하루 전", value: "1_DAY_BEFORE" },
   { label: "이틀 전", value: "2_DAYS_BEFORE" },
+  { label: "3일 전", value: "3_DAYS_BEFORE" },
+  { label: "일주일 전", value: "1_WEEK_BEFORE" },
 ];

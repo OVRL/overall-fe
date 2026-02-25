@@ -1,14 +1,15 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { UNIFORM_DESIGN_VALUES } from "../_lib/uniformDesign";
 
 export const createTeamSchema = z.object({
   clubName: z.string().min(1, "클럽 이름을 입력해주세요."),
   activityArea: z.string().min(1, "지역을 선택해주세요."),
   activityAreaCode: z.string(),
   foundingDate: z.string().optional(),
-  homeUniform: z.string().optional(),
-  awayUniform: z.string().optional(),
+  homeUniform: z.enum(UNIFORM_DESIGN_VALUES).optional(),
+  awayUniform: z.enum(UNIFORM_DESIGN_VALUES).optional(),
   emblemFile: z.instanceof(File).optional(),
 });
 
@@ -23,8 +24,8 @@ export const useCreateTeamForm = () => {
       activityArea: "",
       activityAreaCode: "",
       foundingDate: "",
-      homeUniform: "",
-      awayUniform: "",
+      homeUniform: undefined,
+      awayUniform: undefined,
       emblemFile: undefined,
     },
   });

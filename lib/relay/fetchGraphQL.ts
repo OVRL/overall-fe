@@ -1,8 +1,9 @@
 import {
-  CacheConfig,
-  RequestParameters,
-  UploadableMap,
-  Variables,
+  type CacheConfig,
+  type GraphQLResponse,
+  type RequestParameters,
+  type UploadableMap,
+  type Variables,
 } from "relay-runtime";
 import { env } from "@/lib/env";
 
@@ -11,7 +12,7 @@ export const fetchQuery = async (
   variables: Variables,
   _cacheConfig: CacheConfig,
   uploadables?: UploadableMap | null,
-) => {
+): Promise<GraphQLResponse> => {
   const request: RequestInit = {
     method: "POST",
   };
@@ -95,5 +96,5 @@ export const fetchQuery = async (
     throw new Error(`GraphQL 요청 실패 (${response.status}): ${detail}`);
   }
 
-  return payload;
+  return payload as GraphQLResponse;
 };

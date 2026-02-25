@@ -101,7 +101,7 @@ const Dropdown = ({
 
   return (
     <div
-      className="relative inline-block text-left"
+      className={cn("relative text-left", className)}
       ref={dropdownRef}
       onKeyDown={handleKeyDown}
     >
@@ -119,15 +119,14 @@ const Dropdown = ({
         aria-expanded={isOpen}
         aria-label={placeholder}
         className={cn(
-          "flex items-center justify-between w-39.5 h-12 pl-4 pr-1.75 py-3 border rounded-[0.625rem] transition-colors duration-200",
+          "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-1.75 py-3 border rounded-[0.625rem] transition-colors duration-200",
           "bg-Fill_Quatiary border-transparent",
           isOpen ? "border-Fill_AccentPrimary" : "",
-          className,
         )}
       >
         <span
           className={cn(
-            "text-sm font-normal truncate w-25.25 ",
+            "text-sm font-normal truncate w-25.25 text-left",
             selectedLabel ? "text-Label-Secondary" : "text-Label-Primary",
           )}
         >

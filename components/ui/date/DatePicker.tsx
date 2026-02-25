@@ -40,7 +40,13 @@ export function DatePicker({
             className,
           )}
         >
-          <Icon src={calendar} alt="달력 아이콘" />
+          <Icon
+            src={calendar}
+            alt="달력 아이콘"
+            width={24}
+            height={24}
+            className="ml-0.5"
+          />
           {value ? (
             format(value, "yyyy. MM. dd.", { locale: ko })
           ) : (

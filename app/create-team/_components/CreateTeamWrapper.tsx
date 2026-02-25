@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import Header from "@/components/Header";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
@@ -12,35 +13,70 @@ import EmblemUploader from "./EmblemUploader";
 import ControlledTextField from "@/components/ui/ControlledTextField";
 import { useCreateTeamForm } from "../_hooks/useCreateTeamForm";
 import UniformColorSelector from "./UniformColorSelector";
+import { type UniformDesign } from "../_lib/uniformDesign";
 import { DatePicker } from "@/components/ui/date/DatePicker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import locationIcon from "@/public/icons/location.svg";
+import { useRouter } from "next/navigation";
 
 const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
-
+  const router = useRouter();
   const { form, onSubmit } = useCreateTeamForm();
   const {
     control,
     handleSubmit,
     setValue,
+    watch,
     formState: { isValid },
   } = form;
 
+  const homeUniform = watch("homeUniform");
+  const awayUniform = watch("awayUniform");
+
+  // rerender-최소화: 안정된 콜백 참조로 자식 리렌더 감소 (Vercel best practice)
+  const setHomeUniform = useCallback(
+    (design: UniformDesign) =>
+      setValue("homeUniform", design, { shouldValidate: true }),
+    [setValue],
+  );
+  const setAwayUniform = useCallback(
+    (design: UniformDesign) =>
+      setValue("awayUniform", design, { shouldValidate: true }),
+    [setValue],
+  );
+  const setEmblemFile = useCallback(
+    (file: File | null) =>
+      setValue("emblemFile", file ?? undefined, { shouldValidate: true }),
+    [setValue],
+  );
+
+  const headerLeftAction = useMemo(
+    () => ({
+      icon: backIcon,
+      onClick: router.back,
+      alt: "뒤로가기 버튼",
+      nofill: true as const,
+    }),
+    [router],
+  );
+
+  // Mutation은 추후 연동. 제출 후 /home으로 이동
+  const handleFormSubmit = useCallback(
+    (data: Parameters<typeof onSubmit>[0]) => {
+      onSubmit(data);
+      router.replace("/home");
+    },
+    [onSubmit, router],
+  );
+
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       className="flex flex-col pb-12 gap-10 h-full"
     >
-      <Header
-        leftAction={{
-          icon: backIcon,
-          onClick: () => {},
-          alt: "뒤로가기 버튼",
-          nofill: true,
-        }}
-      />
+      <Header leftAction={headerLeftAction} />
 
       <section className="flex flex-col h-full">
         <div className="flex-1 min-h-0">
@@ -60,7 +96,7 @@ const CreateTeamWrapper = () => {
               render={({ field }) => (
                 <button
                   type="button"
-                  className="w-full text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+                  className="w-full cursor-pointer text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
                   onClick={() =>
                     openModal({
                       onComplete: ({ address, code }) => {
@@ -71,6 +107,7 @@ const CreateTeamWrapper = () => {
                       },
                     })
                   }
+                  aria-label="주요 활동지역 선택하기"
                 >
                   <TextField
                     label="주요 활동지역"
@@ -111,15 +148,7 @@ const CreateTeamWrapper = () => {
             <Controller
               name="emblemFile"
               control={control}
-              render={() => (
-                <EmblemUploader
-                  onImageSelected={(file) => {
-                    setValue("emblemFile", file || undefined, {
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-              )}
+              render={() => <EmblemUploader onImageSelected={setEmblemFile} />}
             />
 
             <div className="flex flex-col gap-6">
@@ -128,11 +157,10 @@ const CreateTeamWrapper = () => {
                 control={control}
                 render={({ field }) => (
                   <UniformColorSelector
-                    label="홈 유니폼 컬러"
+                    label="홈 유니폼"
                     value={field.value}
-                    onChange={(color) =>
-                      setValue("homeUniform", color, { shouldValidate: true })
-                    }
+                    onChange={setHomeUniform}
+                    disabledDesign={awayUniform}
                   />
                 )}
               />
@@ -142,11 +170,10 @@ const CreateTeamWrapper = () => {
                 control={control}
                 render={({ field }) => (
                   <UniformColorSelector
-                    label="어웨이 유니폼 컬러"
+                    label="어웨이 유니폼"
                     value={field.value}
-                    onChange={(color) =>
-                      setValue("awayUniform", color, { shouldValidate: true })
-                    }
+                    onChange={setAwayUniform}
+                    disabledDesign={homeUniform}
                   />
                 )}
               />
@@ -165,7 +192,7 @@ const CreateTeamWrapper = () => {
               !isValid && "bg-gray-900 text-Label-Tertiary",
             )}
           >
-            다음
+            만들기
           </Button>
         </div>
       </section>

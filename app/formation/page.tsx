@@ -24,7 +24,7 @@ const FormationPage = () => {
   return (
     <div className="min-h-screen bg-surface-primary flex flex-col">
       <FormationHeader />
-      <main className="flex-1flex flex-col px-3 md:px-6 py-4 w-full items-center">
+      <main className="flex-1flex flex-col px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
         <FormationBuilder
           scheduleCard={scheduleCard}
           initialPlayers={MOCK_PLAYERS}
