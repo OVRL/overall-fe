@@ -19,14 +19,14 @@ const OnboardingCompletion = () => {
         particleCount: 2,
         angle: 60,
         spread: 55,
-        origin: { x: 0, y: 0.2 },
+        origin: { x: 0, y: 0.45 },
         colors: ["#FFD700", "#FF4500", "#008080"], // Example festive colors
       });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
-        origin: { x: 1, y: 0.2 }, // Top right
+        origin: { x: 1, y: 0.45 }, // Top right
         colors: ["#FFD700", "#FF4500", "#008080"],
       });
 
@@ -39,7 +39,7 @@ const OnboardingCompletion = () => {
   }, []);
 
   return (
-    <section className="flex flex-col h-full">
+    <section className="flex flex-col h-full pb-12">
       <div className="flex flex-col flex-1 min-h-0 gap-y-4 pb-4">
         <OnboardingTitle>회원 가입을 축하합니다!</OnboardingTitle>
         <div className="relative w-full flex-1 min-h-0">
@@ -55,7 +55,7 @@ const OnboardingCompletion = () => {
       </div>
 
       <Button
-        onClick={() => router.push("/home")}
+        onClick={() => router.replace("/landing")}
         variant="primary"
         size="xl"
         className="w-full py-4 rounded-xl bg-[#CCFF00] text-black font-bold text-lg hover:bg-[#b3e600] transition-colors"
