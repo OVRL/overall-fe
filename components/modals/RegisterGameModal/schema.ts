@@ -20,6 +20,8 @@ export const registerGameSchema = z
       error: "유니폼을 선택해주세요.",
     }),
     memo: z.string().optional(),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
   })
   .refine(
     (data) => {

@@ -10,6 +10,13 @@ const AddressSearchModal = dynamic(() => import("./AddressSearchModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const DetailAddressSearchModal = dynamic(
+  () => import("./DetailAddressSearchModal/DetailAddressSearchModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
 const EditProfileImageModal = dynamic(() => import("./EditProfileImageModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
@@ -29,6 +36,7 @@ const RegisterGameModal = dynamic(() => import("./RegisterGameModal"), {
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
   ADDRESS_SEARCH: AddressSearchModal,
+  DETAIL_ADDRESS_SEARCH: DetailAddressSearchModal,
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
   PLAYER_SEARCH: PlayerSearchModal,
   REGISTER_GAME: RegisterGameModal,

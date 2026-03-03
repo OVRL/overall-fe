@@ -19,6 +19,13 @@ export interface ModalPropsMap {
   PLAYER_SEARCH: {
     onComplete: (player: Player) => void;
   };
+  DETAIL_ADDRESS_SEARCH: {
+    onComplete: (result: {
+      address: string;
+      latitude: number;
+      longitude: number;
+    }) => void;
+  };
   REGISTER_GAME: Record<string, never>;
 }
 

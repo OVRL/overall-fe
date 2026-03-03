@@ -1,8 +1,9 @@
 "use client";
 
 import { useId } from "react";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { format } from "date-fns";
+import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
 import Dropdown from "@/components/ui/Dropdown";
 import { DatePicker } from "@/components/ui/date/DatePicker";
@@ -30,8 +31,24 @@ const gameTypeOptions = [
   { value: "INTERNAL" as const, label: GAME_TYPE.INTERNAL },
 ];
 
+const NaverDynamicMap = dynamic(
+  () => import("@/components/ui/map/NaverDynamicMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full max-w-sm aspect-square mx-auto rounded-[0.625rem] bg-Fill_Tertiary flex items-center justify-center text-Label-Tertiary text-sm">
+        지도 정보를 불러오는 중...
+      </div>
+    ),
+  },
+);
+
 function RegisterGameModal() {
   const { hideModal } = useModal();
+  const { openModal: openAddressModal, hideModal: hideAddressModal } = useModal(
+    "DETAIL_ADDRESS_SEARCH",
+  );
+
   const id = useId();
   const { form, resetToDefaults } = useRegisterGameForm();
   const {
@@ -41,6 +58,24 @@ function RegisterGameModal() {
     setValue,
     formState: { errors },
   } = form;
+
+  const currentLat = useWatch({ control, name: "latitude" });
+  const currentLng = useWatch({ control, name: "longitude" });
+
+  const handleAddressClick = () => {
+    openAddressModal({
+      onComplete: (result: {
+        address: string;
+        latitude: number;
+        longitude: number;
+      }) => {
+        setValue("venue", result.address, { shouldValidate: true });
+        setValue("latitude", result.latitude);
+        setValue("longitude", result.longitude);
+        hideAddressModal();
+      },
+    });
+  };
 
   const onValid = (data: RegisterGameValues) => {
     // TODO: API 연동 시 payload 전송
@@ -163,19 +198,27 @@ function RegisterGameModal() {
               name="venue"
               control={control}
               render={({ field, fieldState }) => (
-                <TextField
-                  label="경기 장소"
-                  placeholder="경기 장소를 입력하세요"
-                  showBorderBottom={false}
-                  leftIcon={location}
-                  errorMessage={fieldState.error?.message}
-                  onClear={() => field.onChange("")}
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
-                />
+                <div className="flex flex-col gap-4">
+                  <div onClick={handleAddressClick} className="cursor-pointer">
+                    <TextField
+                      label="경기 장소"
+                      placeholder="경기 장소를 검색하세요"
+                      className="text-Fill_Primary pointer-events-none"
+                      showBorderBottom={false}
+                      leftIcon={location}
+                      errorMessage={fieldState.error?.message}
+                      value={field.value}
+                      name={field.name}
+                      readOnly
+                    />
+                  </div>
+                  {currentLat !== undefined && currentLng !== undefined && (
+                    <NaverDynamicMap
+                      latitude={currentLat}
+                      longitude={currentLng}
+                    />
+                  )}
+                </div>
               )}
             />
 
@@ -251,10 +294,10 @@ function RegisterGameModal() {
               />
             </FormSection>
 
-            <FormSection label="메모">
+            <FormSection label="클럽 소개">
               <textarea
                 id={`${id}-memo`}
-                placeholder="추가 메모사항을 입력하세요"
+                placeholder="클럽을 소개해주세요"
                 rows={3}
                 className="w-full px-4 py-3 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] text-sm text-Label-Primary placeholder:text-Label-Tertiary outline-none focus:border-Fill_AccentPrimary transition-colors resize-none"
                 {...register("memo")}
