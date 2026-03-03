@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { Controller, useWatch } from "react-hook-form";
+import { Controller, useWatch, type SubmitHandler } from "react-hook-form";
 import { format } from "date-fns";
 import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
@@ -12,24 +12,16 @@ import ModalLayout from "../ModalLayout";
 import useModal from "@/hooks/useModal";
 import FormSection from "./FormSection";
 import SegmentToggle from "./SegmentToggle";
-import UniformOption from "./UniformOption";
 import {
-  GAME_TYPE,
-  UNIFORM,
+  MATCH_TYPE_OPTIONS,
   QUARTER_COUNT_OPTIONS,
   QUARTER_DURATION_OPTIONS,
   VOTE_DEADLINE_OPTIONS,
 } from "./constants";
-import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
 import TextField from "@/components/ui/TextField";
 import location from "@/public/icons/location.svg";
 import type { RegisterGameValues } from "./schema";
 import { useRegisterGameForm } from "./useRegisterGameForm";
-
-const gameTypeOptions = [
-  { value: "MATCH" as const, label: GAME_TYPE.MATCH },
-  { value: "INTERNAL" as const, label: GAME_TYPE.INTERNAL },
-];
 
 const NaverDynamicMap = dynamic(
   () => import("@/components/ui/map/NaverDynamicMap"),
@@ -59,8 +51,8 @@ function RegisterGameModal() {
     formState: { errors },
   } = form;
 
-  const currentLat = useWatch({ control, name: "latitude" });
-  const currentLng = useWatch({ control, name: "longitude" });
+  const currentVenue = useWatch({ control, name: "venue" });
+  const currentMatchType = useWatch({ control, name: "matchType" });
 
   const handleAddressClick = () => {
     openAddressModal({
@@ -69,15 +61,21 @@ function RegisterGameModal() {
         latitude: number;
         longitude: number;
       }) => {
-        setValue("venue", result.address, { shouldValidate: true });
-        setValue("latitude", result.latitude);
-        setValue("longitude", result.longitude);
+        setValue(
+          "venue",
+          {
+            address: result.address,
+            latitude: result.latitude,
+            longitude: result.longitude,
+          },
+          { shouldValidate: true },
+        );
         hideAddressModal();
       },
     });
   };
 
-  const onValid = (data: RegisterGameValues) => {
+  const onValid: SubmitHandler<RegisterGameValues> = (data) => {
     // TODO: API 연동 시 payload 전송
     console.log("Form submitted:", data);
     hideModal();
@@ -103,11 +101,11 @@ function RegisterGameModal() {
           >
             <FormSection label="경기 성격">
               <Controller
-                name="gameType"
+                name="matchType"
                 control={control}
                 render={({ field }) => (
                   <SegmentToggle
-                    options={gameTypeOptions}
+                    options={MATCH_TYPE_OPTIONS}
                     value={field.value}
                     onChange={field.onChange}
                   />
@@ -115,16 +113,18 @@ function RegisterGameModal() {
               />
             </FormSection>
 
-            <TextField
-              label="상대팀"
-              placeholder="상대팀 이름을 입력해주세요."
-              showBorderBottom={false}
-              errorMessage={errors.opponentName?.message}
-              onClear={() =>
-                setValue("opponentName", "", { shouldValidate: true })
-              }
-              {...register("opponentName")}
-            />
+            {currentMatchType === "MATCH" && (
+              <TextField
+                label="상대팀"
+                placeholder="상대팀 이름을 입력해주세요."
+                showBorderBottom={false}
+                errorMessage={errors.opponentName?.message}
+                onClear={() =>
+                  setValue("opponentName", "", { shouldValidate: true })
+                }
+                {...register("opponentName")}
+              />
+            )}
 
             <FormSection label="일정">
               <div className="flex flex-col gap-3">
@@ -206,18 +206,27 @@ function RegisterGameModal() {
                       className="text-Fill_Primary pointer-events-none"
                       showBorderBottom={false}
                       leftIcon={location}
-                      errorMessage={fieldState.error?.message}
-                      value={field.value}
+                      errorMessage={
+                        (
+                          fieldState.error as unknown as {
+                            address?: { message?: string };
+                          }
+                        )?.address?.message || fieldState.error?.message
+                      }
+                      value={field.value?.address || ""}
                       name={field.name}
                       readOnly
                     />
                   </div>
-                  {currentLat !== undefined && currentLng !== undefined && (
-                    <NaverDynamicMap
-                      latitude={currentLat}
-                      longitude={currentLng}
-                    />
-                  )}
+                  {currentVenue?.latitude !== undefined &&
+                    currentVenue?.longitude !== undefined &&
+                    currentVenue.latitude !== 0 &&
+                    currentVenue.longitude !== 0 && (
+                      <NaverDynamicMap
+                        latitude={currentVenue.latitude}
+                        longitude={currentVenue.longitude}
+                      />
+                    )}
                 </div>
               )}
             />
@@ -230,8 +239,8 @@ function RegisterGameModal() {
                   render={({ field }) => (
                     <Dropdown
                       options={QUARTER_COUNT_OPTIONS}
-                      value={field.value}
-                      onChange={field.onChange}
+                      value={String(field.value)}
+                      onChange={(val) => field.onChange(Number(val))}
                       placeholder="쿼터 수"
                       className="w-full"
                     />
@@ -243,8 +252,8 @@ function RegisterGameModal() {
                   render={({ field }) => (
                     <Dropdown
                       options={QUARTER_DURATION_OPTIONS}
-                      value={field.value}
-                      onChange={field.onChange}
+                      value={String(field.value)}
+                      onChange={(val) => field.onChange(Number(val))}
                       placeholder="시간"
                       className="w-full"
                     />
@@ -269,35 +278,10 @@ function RegisterGameModal() {
               />
             </FormSection>
 
-            <FormSection label="유니폼">
-              <Controller
-                name="uniform"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex gap-2">
-                    <UniformOption
-                      type="HOME"
-                      label={UNIFORM.HOME}
-                      isSelected={field.value === "HOME"}
-                      onSelect={() => field.onChange("HOME")}
-                      imagePath={getUniformImagePath("SOLID_RED")}
-                    />
-                    <UniformOption
-                      type="AWAY"
-                      label={UNIFORM.AWAY}
-                      isSelected={field.value === "AWAY"}
-                      onSelect={() => field.onChange("AWAY")}
-                      imagePath={getUniformImagePath("SOLID_BLUE")}
-                    />
-                  </div>
-                )}
-              />
-            </FormSection>
-
-            <FormSection label="클럽 소개">
+            <FormSection label="메모">
               <textarea
                 id={`${id}-memo`}
-                placeholder="클럽을 소개해주세요"
+                placeholder="추가 메모사항을 입력하세요."
                 rows={3}
                 className="w-full px-4 py-3 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] text-sm text-Label-Primary placeholder:text-Label-Tertiary outline-none focus:border-Fill_AccentPrimary transition-colors resize-none"
                 {...register("memo")}

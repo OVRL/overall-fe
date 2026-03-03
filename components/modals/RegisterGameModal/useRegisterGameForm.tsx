@@ -1,13 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  getRegisterGameDefaultValues,
-  registerGameSchema,
-  type RegisterGameValues,
-} from "./schema";
+import { getRegisterGameDefaultValues, registerGameSchema } from "./schema";
 
 export function useRegisterGameForm() {
-  const form = useForm<RegisterGameValues>({
+  const form = useForm({
     resolver: zodResolver(registerGameSchema),
     mode: "onTouched",
     defaultValues: getRegisterGameDefaultValues(),
