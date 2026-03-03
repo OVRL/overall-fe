@@ -7,6 +7,7 @@ import { GlobalPortalProvider } from "@/components/GlobalPortal";
 import Modals from "@/components/modals/Modals";
 import Script from "next/script";
 import { env } from "@/lib/env";
+import { Analytics } from "@vercel/analytics/next";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -43,6 +44,7 @@ export default function RootLayout({
             </GlobalPortalProvider>
           </RelayProvider>
         </ThemeProvider>
+        <Analytics />
         <Script
           src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${env.NEXT_PUBLIC_NAVER_CLIENT_ID}&submodules=geocoder`}
           strategy="lazyOnload"

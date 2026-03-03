@@ -22,6 +22,7 @@
     "@t3-oss/env-nextjs": "^0.13.10",
     "@toss/react": "^1.8.1",
     "@toss/utils": "^1.6.1",
+    "@vercel/analytics": "^1.6.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
