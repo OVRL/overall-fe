@@ -39,7 +39,7 @@ const PlayerCard = ({
     <div className={cn(cardVariants({ type }), "relative", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-[5px] bg-gray-200 shrink-0 bg-transparent",
+          "relative overflow-hidden rounded-[5px] shrink-0 bg-transparent",
           type === "L" && "w-16 h-21",
           type === "S" && "w-12 h-16",
           type === "XS" && "w-8 h-10",

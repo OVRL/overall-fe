@@ -12,6 +12,7 @@ const avatarVariants = cva(
         36: "w-9 h-9", // 36px (square)
         48: "w-12 h-12", // 48px (square)
         56: "w-14 h-14", // 56px (square)
+        72: "w-18 h-18",
       },
     },
     defaultVariants: {
