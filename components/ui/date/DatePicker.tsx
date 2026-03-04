@@ -48,7 +48,7 @@ export function DatePicker({
             className="ml-0.5"
           />
           {value ? (
-            format(value, "yyyy. MM. dd.", { locale: ko })
+            format(value, "yyyy. MM. dd. eee", { locale: ko })
           ) : (
             <span>{placeholder}</span>
           )}

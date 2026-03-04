@@ -1,8 +1,9 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useEffect } from "react";
 import { Controller, useWatch, type SubmitHandler } from "react-hook-form";
 import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
 import Dropdown from "@/components/ui/Dropdown";
@@ -53,6 +54,12 @@ function RegisterGameModal() {
 
   const currentVenue = useWatch({ control, name: "venue" });
   const currentMatchType = useWatch({ control, name: "matchType" });
+
+  useEffect(() => {
+    if (currentMatchType !== "MATCH") {
+      setValue("opponentName", "", { shouldValidate: true });
+    }
+  }, [currentMatchType, setValue]);
 
   const handleAddressClick = () => {
     openAddressModal({
@@ -113,18 +120,28 @@ function RegisterGameModal() {
               />
             </FormSection>
 
-            {currentMatchType === "MATCH" && (
-              <TextField
-                label="상대팀"
-                placeholder="상대팀 이름을 입력해주세요."
-                showBorderBottom={false}
-                errorMessage={errors.opponentName?.message}
-                onClear={() =>
-                  setValue("opponentName", "", { shouldValidate: true })
-                }
-                {...register("opponentName")}
-              />
-            )}
+            <AnimatePresence>
+              {currentMatchType === "MATCH" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <TextField
+                    label="상대팀"
+                    placeholder="상대팀 이름을 입력해주세요."
+                    showBorderBottom={false}
+                    errorMessage={errors.opponentName?.message}
+                    onClear={() =>
+                      setValue("opponentName", "", { shouldValidate: true })
+                    }
+                    {...register("opponentName")}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <FormSection label="일정">
               <div className="flex flex-col gap-3">
