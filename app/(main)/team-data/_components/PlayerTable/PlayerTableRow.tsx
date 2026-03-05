@@ -7,6 +7,7 @@ import {
 } from "../../_constants/playerTableColumns";
 import PlayerNameCell from "./PlayerNameCell";
 import StatsCell from "./StatsCell";
+import { cn } from "@/lib/utils";
 
 export interface PlayerTableRowProps {
   player: Player;
@@ -17,7 +18,7 @@ export interface PlayerTableRowProps {
 
 const ROW_BASE_CLASS = "transition-colors cursor-pointer group";
 const CELL_BASE_CLASS =
-  "text-gray-400 text-center flex items-center justify-center";
+  "text-Label-Tertiary text-center flex items-center justify-center";
 const CELL_LEFT_CLASS = "flex items-center overflow-hidden";
 
 const PlayerTableRow = memo(function PlayerTableRow({
@@ -28,7 +29,10 @@ const PlayerTableRow = memo(function PlayerTableRow({
 }: PlayerTableRowProps) {
   return (
     <tr
-      className={`${ROW_BASE_CLASS} flex items-center w-full min-w-max md:min-w-full`}
+      className={cn(
+        ROW_BASE_CLASS,
+        "flex items-center w-full min-w-max md:min-w-full justify-between pl-2 pr-1.5 relative",
+      )}
       onClick={() => onPlayerClick?.(player)}
     >
       {PLAYER_TABLE_COLUMNS.map((col) => {
@@ -36,35 +40,36 @@ const PlayerTableRow = memo(function PlayerTableRow({
 
         if (col.key === "등수") {
           return (
-            <td key={col.key} className={`${CELL_BASE_CLASS} ${colStyle}`}>
+            <td
+              key={col.key}
+              className={cn(
+                CELL_BASE_CLASS,
+                colStyle,
+                "font-medium",
+                "text-Label-Primary",
+              )}
+            >
               {index + 1}
             </td>
           );
         }
         if (col.key === "포지션") {
           return (
-            <td key={col.key} className={`${CELL_BASE_CLASS} ${colStyle}`}>
-              <PositionChip
-                position={player.position}
-                variant="filled"
-                className="text-[10px] px-1.5 py-0.5"
-              />
+            <td key={col.key} className={cn(CELL_BASE_CLASS, colStyle)}>
+              <PositionChip position={player.position} variant="outline" />
             </td>
           );
         }
         if (col.key === "등번호") {
           return (
-            <td key={col.key} className={`${CELL_BASE_CLASS} ${colStyle}`}>
+            <td key={col.key} className={cn(CELL_BASE_CLASS, colStyle)}>
               {player.backNumber}
             </td>
           );
         }
         if (col.key === "이름") {
           return (
-            <td
-              key={col.key}
-              className={`${CELL_LEFT_CLASS} ${colStyle} w-full`}
-            >
+            <td key={col.key} className={cn(CELL_LEFT_CLASS, colStyle)}>
               <PlayerNameCell name={player.name} image={player.image} />
             </td>
           );
@@ -76,14 +81,15 @@ const PlayerTableRow = memo(function PlayerTableRow({
             : (player.stats?.[col.statsKey!] ?? col.defaultValue ?? "-");
         const highlight = getCellClass(col.key).includes("primary");
         return (
-          <div
+          <StatsCell
             key={col.key}
-            className={`flex items-center justify-center ${colStyle}`}
-          >
-            <StatsCell value={value} highlight={highlight} />
-          </div>
+            value={value}
+            highlight={highlight}
+            className={colStyle}
+          />
         );
       })}
+      <div className="w-full h-0.25 bg-Fill_Quatiary absolute bottom-0 left-0 z-50" />
     </tr>
   );
 });

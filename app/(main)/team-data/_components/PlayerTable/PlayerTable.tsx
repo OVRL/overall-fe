@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { Player } from "../../_types/player";
 import PlayerTableHeader from "./PlayerTableHeader";
 import PlayerTableRow from "./PlayerTableRow";
+import { cn } from "@/lib/utils";
 
 export interface PlayerTableProps {
   players: Player[];
@@ -26,10 +27,10 @@ const PlayerTable = ({
   );
 
   return (
-    <div className="mt-12 overflow-x-auto select-none">
-      <table className="block w-full text-sm">
+    <div className={cn("mt-12 overflow-x-auto select-none")}>
+      <table className={cn("block w-full text-sm")}>
         <PlayerTableHeader sortConfig={sortConfig} onSort={onSort} />
-        <tbody className="block w-full">
+        <tbody className={cn("block w-full")}>
           {players.map((player, index) => (
             <PlayerTableRow
               key={player.id}

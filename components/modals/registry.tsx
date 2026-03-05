@@ -32,6 +32,17 @@ const RegisterGameModal = dynamic(() => import("./RegisterGameModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const TeamDataPlayerDetailModal = dynamic(
+  () => import("./team-data/PlayerDetailModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
+const TeamDataStatsModal = dynamic(() => import("./team-data/StatsModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -40,4 +51,6 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
   PLAYER_SEARCH: PlayerSearchModal,
   REGISTER_GAME: RegisterGameModal,
+  TEAM_DATA_PLAYER_DETAIL: TeamDataPlayerDetailModal,
+  TEAM_DATA_STATS: TeamDataStatsModal,
 } as ModalComponentMap;

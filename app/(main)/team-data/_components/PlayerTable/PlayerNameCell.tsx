@@ -1,4 +1,5 @@
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { cn } from "@/lib/utils";
 
 export interface PlayerNameCellProps {
   name: string;
@@ -6,9 +7,9 @@ export interface PlayerNameCellProps {
 }
 
 const PlayerNameCell = ({ name, image }: PlayerNameCellProps) => (
-  <div className="flex items-center gap-3.75 justify-start w-full">
+  <div className={cn("flex items-center gap-3.75 justify-start w-full")}>
     <ProfileAvatar src={image || "/images/ovr.png"} alt={name} size={36} />
-    <span className="w-18.75 text-sm text-Label-Tertiary">{name}</span>
+    <span className={cn("w-18.75 text-sm text-Label-Tertiary")}>{name}</span>
   </div>
 );
 

@@ -1,5 +1,6 @@
 import { ComponentType } from "react";
 import { Player } from "@/types/formation";
+import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
 
 export interface ModalPropsMap {
   // 예시:
@@ -25,6 +26,14 @@ export interface ModalPropsMap {
       latitude: number;
       longitude: number;
     }) => void;
+  };
+  TEAM_DATA_PLAYER_DETAIL: {
+    player: TeamDataPlayer | null;
+  };
+  TEAM_DATA_STATS: {
+    category: string;
+    players: TeamDataPlayer[];
+    onPlayerClick?: (player: TeamDataPlayer) => void;
   };
   REGISTER_GAME: Record<string, never>;
 }

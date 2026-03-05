@@ -4,6 +4,7 @@ import {
   COLUMN_WIDTH_MAP,
   type PlayerTableColumnConfig,
 } from "../../_constants/playerTableColumns";
+import { cn } from "@/lib/utils";
 
 export interface PlayerTableHeaderProps {
   sortConfig?: { key: string; direction: "asc" | "desc" } | null;
@@ -11,20 +12,22 @@ export interface PlayerTableHeaderProps {
 }
 
 const thClass = (col: PlayerTableColumnConfig, sortable: boolean) =>
-  [
+  cn(
     col.align === "left"
       ? "text-left overflow-hidden text-ellipsis"
       : "text-center",
     "text-gray-500 font-medium whitespace-nowrap text-xs flex items-center justify-center",
-    sortable ? "cursor-pointer hover:text-white transition-colors" : "",
+    sortable && "cursor-pointer hover:text-white transition-colors",
     COLUMN_WIDTH_MAP[col.key] || COLUMN_WIDTH_MAP.default,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  );
 
 const PlayerTableHeader = ({ sortConfig, onSort }: PlayerTableHeaderProps) => (
   <thead className="block w-full">
-    <tr className="bg-gray-1100 rounded-t-xl px-2.5 py-3 flex items-center w-full min-w-max md:min-w-full">
+    <tr
+      className={cn(
+        "bg-gray-1100 rounded-t-xl px-2.5 py-3 flex items-center w-full min-w-max md:min-w-full justify-between",
+      )}
+    >
       {PLAYER_TABLE_COLUMNS.map((col) => {
         const sortable = SORTABLE_COLUMN_KEYS.has(col.key);
         return (

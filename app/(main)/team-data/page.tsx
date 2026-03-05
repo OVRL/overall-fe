@@ -4,21 +4,17 @@ import React, { useState, useMemo } from "react";
 import type { Player } from "./_types/player";
 import { allPlayers, getPlayerValue } from "./_constants/mockPlayers";
 import RankingCarousel from "./_components/RankingCarousel";
-import StatsModal from "./_components/StatsModal";
-import PlayerDetailModal from "./_components/PlayerDetailModal";
+import useModal from "@/hooks/useModal";
 import PlayerTable from "./_components/PlayerTable/PlayerTable";
 import Dropdown from "@/components/ui/Dropdown";
 
 export default function TeamDataPage() {
   const [activeTab, setActiveTab] = useState("2026 시즌");
 
-  // 모달 상태
-  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-  const [modalCategory, setModalCategory] = useState("");
-  const [modalPlayers, setModalPlayers] = useState<Player[]>([]);
-
-  const [isPlayerDetailOpen, setIsPlayerDetailOpen] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const { openModal: openStatsModal } = useModal("TEAM_DATA_STATS");
+  const { openModal: openPlayerDetailModal } = useModal(
+    "TEAM_DATA_PLAYER_DETAIL",
+  );
 
   // 검색
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,17 +111,19 @@ export default function TeamDataPage() {
 
   // 더보기 클릭
   const handleMoreClick = (category: string, players: Player[]) => {
-    setModalCategory(category);
-    setModalPlayers(
-      players.map((p) => ({ ...p, value: getPlayerValue(p, category) })),
-    );
-    setIsStatsModalOpen(true);
+    openStatsModal({
+      category,
+      players: players.map((p) => ({
+        ...p,
+        value: getPlayerValue(p, category),
+      })),
+      onPlayerClick: handlePlayerClick,
+    });
   };
 
   // 선수 클릭
   const handlePlayerClick = (player: Player) => {
-    setSelectedPlayer(player);
-    setIsPlayerDetailOpen(true);
+    openPlayerDetailModal({ player });
   };
 
   // 검색
@@ -165,17 +163,17 @@ export default function TeamDataPage() {
 
         {/* 검색 박스 - PC (기존 디자인: 아이콘 포함, 왼쪽 정렬) */}
         <div className="hidden md:flex justify-start gap-2 mb-4 mt-8">
-          <div className="relative">
+          <div className="flex items-center gap-1">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="선수 검색"
-              className="w-35 bg-surface-card rounded-[0.625rem] px-10 py-1 text-white text-sm focus:outline-none  transition-colors"
+              className="w-35 bg-surface-card rounded-[0.625rem] px-10 py-1.5 text-white text-sm focus:outline-none transition-colors placeholder:text-Label-Secondary placeholder:text-sm"
             />
             <button
               onClick={handleSearch}
-              className="text-gray-400 hover:text-white"
+              className="bg-Fill_Quatiary py-1 px-3 h-7.5 rounded-[0.625rem] text-Label-Tertiary text-xshover:text-white"
             >
               검색
             </button>
@@ -190,49 +188,6 @@ export default function TeamDataPage() {
           onSort={handleSort}
         />
       </main>
-
-      {/* 선수 상세 모달 */}
-      <PlayerDetailModal
-        isOpen={isPlayerDetailOpen}
-        onClose={() => setIsPlayerDetailOpen(false)}
-        player={selectedPlayer}
-      />
-
-      {/* 더보기 통계 모달 */}
-      <StatsModal
-        isOpen={isStatsModalOpen}
-        onClose={() => setIsStatsModalOpen(false)}
-        category={modalCategory}
-        players={modalPlayers}
-        onPlayerClick={handlePlayerClick}
-      />
-
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 }

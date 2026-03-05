@@ -1,13 +1,20 @@
+import { cn } from "@/lib/utils";
+
 export interface StatsCellProps {
   value: number | string;
   highlight: boolean;
+  className?: string;
 }
 
 const BASE_CLASS = "text-center text-base";
 
-const StatsCell = ({ value, highlight }: StatsCellProps) => (
+const StatsCell = ({ value, highlight, className = "" }: StatsCellProps) => (
   <td
-    className={`${BASE_CLASS} ${highlight ? "text-primary font-bold" : "text-gray-300"}`}
+    className={cn(
+      BASE_CLASS,
+      highlight ? "text-primary font-bold" : "text-Label-Tertiary",
+      className,
+    )}
   >
     {value}
   </td>
