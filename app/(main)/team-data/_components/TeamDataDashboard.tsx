@@ -1,19 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
-import type { Player } from "../_types/player";
+import { useState } from "react";
+import type { Player, StatTabType } from "../_types/player";
 import { getPlayerValue } from "../_constants/mockPlayers";
 import RankingCarousel from "./RankingCarousel";
 import useModal from "@/hooks/useModal";
 import PlayerListBoard from "./PlayerListBoard";
 import Dropdown from "@/components/ui/Dropdown";
+import DashboardTabMenu from "./DashboardTabMenu";
 
 interface TeamDataDashboardProps {
   allPlayers: Player[];
 }
 
 const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("2026 시즌");
+  const [selectedSeason, setSelectedSeason] = useState("2026 시즌");
+  const [dataTab, setDataTab] = useState<StatTabType>("시즌기록");
 
   const { openModal: openStatRankingModal } = useModal(
     "TEAM_DATA_STAT_RANKING",
@@ -51,11 +53,13 @@ const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
         <div className="relative z-40">
           <Dropdown
             options={[{ label: "2026 시즌", value: "2026 시즌" }]}
-            value={activeTab}
-            onChange={setActiveTab}
+            value={selectedSeason}
+            onChange={setSelectedSeason}
           />
         </div>
       </div>
+
+      <DashboardTabMenu activeTab={dataTab} onChange={setDataTab} />
 
       {/* 순위 카드 그리드 - 투명 배경, 스크롤 버튼 */}
       <RankingCarousel
