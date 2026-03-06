@@ -1,6 +1,6 @@
-import React from "react";
 import type { PlayerStats } from "@/app/(main)/team-data/_types/player";
 import Icon from "@/components/ui/Icon";
+import { cn } from "@/lib/utils";
 
 import cleatsIcon from "@/public/icons/player-infos/cleats.svg";
 import ballIcon from "@/public/icons/player-infos/ball.svg";
@@ -11,6 +11,8 @@ import trophyIcon from "@/public/icons/player-infos/trophy.svg";
 
 interface StatGridProps {
   stats: PlayerStats;
+  className?: string;
+  itemClassName?: string;
 }
 
 import { StaticImageData } from "next/image";
@@ -25,7 +27,7 @@ const STAT_ICONS: Record<string, StaticImageData> = {
   승률: trophyIcon,
 };
 
-const StatGrid = ({ stats }: StatGridProps) => {
+const StatGrid = ({ stats, className, itemClassName }: StatGridProps) => {
   const statItems = [
     { label: "출장", value: stats.출장 },
     { label: "골", value: stats.골 },
@@ -36,11 +38,14 @@ const StatGrid = ({ stats }: StatGridProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div className={cn("grid grid-cols-3 gap-1", className)}>
       {statItems.map(({ label, value }) => (
         <div
           key={label}
-          className="flex flex-col items-center justify-center py-3 bg-white/5 rounded-lg relative h-14"
+          className={cn(
+            "flex flex-col items-center justify-center py-3 bg-white/5 rounded-lg relative",
+            itemClassName || "h-14",
+          )}
         >
           <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5">
             <Icon

@@ -3,7 +3,7 @@ import MainProfileCard from "@/components/ui/MainProfileCard";
 import type { Player, StatTabType } from "@/app/(main)/team-data/_types/player";
 import useModal from "@/hooks/useModal";
 import StatTabMenu from "./_components/StatTabMenu";
-import StatGrid from "./_components/StatGrid";
+import StatGrid from "@/components/ui/StatGrid";
 import Icon from "@/components/ui/Icon";
 import close from "@/public/icons/close.svg";
 

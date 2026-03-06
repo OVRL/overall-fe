@@ -1,7 +1,6 @@
 import RosterDetail from "./RosterDetail";
 import RosterList from "./RosterList";
 import { Player } from "@/types/player";
-import Button from "@/components/ui/Button";
 
 interface PlayerRosterPanelProps {
   players: Player[];
@@ -17,11 +16,8 @@ const PlayerRosterPanel = ({
   className,
 }: PlayerRosterPanelProps) => {
   return (
-    <aside className={`h-full  p-4 flex flex-col gap-3  ${className}`}>
+    <aside className={`h-full p-4 flex flex-col gap-3  ${className}`}>
       {selectedPlayer && <RosterDetail player={selectedPlayer} />}
-      <Button variant="line" size="m">
-        선수 정보 더보기
-      </Button>
       <RosterList players={players} onPlayerSelect={onPlayerSelect} />
     </aside>
   );
