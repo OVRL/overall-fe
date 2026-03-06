@@ -52,20 +52,22 @@ describe("PlayerDetailModal 컴포넌트", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
     expect(screen.getByTestId("profile-card")).toHaveTextContent("손흥민 (7)");
-    expect(screen.getByText("시즌기록")).toHaveClass("bg-primary"); // 활성 탭
+    expect(screen.getByText("시즌기록")).toHaveClass(
+      "text-Label-AccentPrimary",
+    ); // 활성 탭
 
     // 시즌 기록 값 확인
     expect(screen.getByText("10")).toBeInTheDocument(); // 출장
     expect(screen.getByText("5")).toBeInTheDocument(); // 골
   });
 
-  it("탭 클릭 시 통산 기록으로 전환되어야 한다", () => {
+  it("탭 클릭 시 누적기록으로 전환되어야 한다", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
-    const cumulativeTab = screen.getByText("통산기록");
+    const cumulativeTab = screen.getByText("누적기록");
     fireEvent.click(cumulativeTab);
 
-    expect(cumulativeTab).toHaveClass("bg-primary");
+    expect(cumulativeTab).toHaveClass("text-Label-AccentPrimary");
 
     // 통산 기록 값 확인
     expect(screen.getByText("100")).toBeInTheDocument(); // 출장
@@ -75,7 +77,7 @@ describe("PlayerDetailModal 컴포넌트", () => {
   it("닫기 버튼 클릭 시 hideModal이 호출되어야 한다", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
-    const closeBtn = screen.getByText("✕");
+    const closeBtn = screen.getByAltText("close");
     fireEvent.click(closeBtn);
 
     expect(mockHideModal).toHaveBeenCalledTimes(1);

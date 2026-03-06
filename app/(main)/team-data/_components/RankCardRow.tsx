@@ -49,7 +49,7 @@ const RankCardRow = ({ player, index, onPlayerClick }: RankCardRowProps) => {
 
       {/* 값 */}
       <span className="w-12.25 font-bold text-Label-Primary text-sm text-center">
-        {player.value.replace(/[^0-9%]/g, "")}
+        {String(player.value).replace(/[^0-9%]/g, "")}
       </span>
     </li>
   );

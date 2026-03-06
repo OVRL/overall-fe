@@ -95,7 +95,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
     fireEvent.click(moreClickBtn);
 
     expect(mockOpenModal).toHaveBeenCalledWith(
-      "TEAM_DATA_STATS",
+      "TEAM_DATA_STAT_RANKING",
       expect.objectContaining({
         category: "득점",
         players: [],

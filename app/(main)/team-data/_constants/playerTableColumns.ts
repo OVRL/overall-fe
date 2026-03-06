@@ -1,4 +1,4 @@
-import type { PlayerStats } from "../_types/player";
+import type { Player, PlayerStats } from "../_types/player";
 
 /** 테이블 컬럼 메타: 헤더 라벨, 정렬 여부, 정렬, 통계 키/기본값 */
 export interface PlayerTableColumnConfig {
@@ -11,6 +11,8 @@ export interface PlayerTableColumnConfig {
   defaultValue?: number | string;
   /** 정렬 없을 때 기본 하이라이트(OVR) */
   defaultHighlight?: boolean;
+  /** 표시 단위 (예: '골', '경기', 'P') */
+  suffix?: string;
 }
 
 export const PLAYER_TABLE_COLUMNS: PlayerTableColumnConfig[] = [
@@ -24,56 +26,63 @@ export const PLAYER_TABLE_COLUMNS: PlayerTableColumnConfig[] = [
     sortable: true,
     align: "center",
     statsKey: "출장",
-    defaultValue: 10,
+    defaultValue: 0,
+    suffix: "경기",
   },
   {
     key: "득점",
     sortable: true,
     align: "center",
     statsKey: "득점",
-    defaultValue: 7,
+    defaultValue: 0,
+    suffix: "골",
   },
   {
     key: "도움",
     sortable: true,
     align: "center",
     statsKey: "도움",
-    defaultValue: 3,
+    defaultValue: 0,
+    suffix: "개",
   },
   {
     key: "기점",
     sortable: true,
     align: "center",
     statsKey: "기점",
-    defaultValue: 4,
+    defaultValue: 0,
+    suffix: "P",
   },
   {
     key: "공격P",
     sortable: true,
     align: "center",
     statsKey: "공격P",
-    defaultValue: 10,
+    defaultValue: 0,
+    suffix: "P",
   },
   {
     key: "클린시트",
     sortable: true,
     align: "center",
     statsKey: "클린시트",
-    defaultValue: 2,
+    defaultValue: 0,
+    suffix: "회",
   },
   {
     key: "MOM3",
     sortable: true,
     align: "center",
     statsKey: "MOM3",
-    defaultValue: 5,
+    defaultValue: 0,
+    suffix: "회",
   },
   {
     key: "승률",
     sortable: true,
     align: "center",
     statsKey: "승률",
-    defaultValue: "40%",
+    defaultValue: "0%",
   },
 ];
 
@@ -89,4 +98,27 @@ export const COLUMN_WIDTH_MAP: Record<string, string> = {
   등번호: "w-13.25 shrink-0",
   이름: "justify-start w-31.25 shrink-0",
   default: "w-12.25 shrink-0",
+};
+
+/**
+ * 선수 데이터를 설정된 컬럼 규칙에 따라 포맷팅된 문자열로 반환
+ */
+export const formatPlayerValue = (
+  player: Player,
+  colKey: string,
+): string | number => {
+  const col = PLAYER_TABLE_COLUMNS.find((c) => c.key === colKey);
+  if (!col) return "-";
+
+  if (col.key === "OVR") return player.ovr;
+
+  if (col.statsKey) {
+    const rawValue = player.stats?.[col.statsKey] ?? col.defaultValue;
+    if (col.suffix && typeof rawValue === "number") {
+      return `${rawValue}${col.suffix}`;
+    }
+    return rawValue ?? "-";
+  }
+
+  return "-";
 };

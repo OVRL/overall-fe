@@ -30,7 +30,7 @@ export interface ModalPropsMap {
   TEAM_DATA_PLAYER_DETAIL: {
     player: TeamDataPlayer | null;
   };
-  TEAM_DATA_STATS: {
+  TEAM_DATA_STAT_RANKING: {
     category: string;
     players: TeamDataPlayer[];
     onPlayerClick?: (player: TeamDataPlayer) => void;

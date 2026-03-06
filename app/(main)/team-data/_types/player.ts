@@ -20,7 +20,7 @@ export interface Player {
   id: number;
   name: string;
   team: string;
-  value: string;
+  value: string | number;
   image?: string;
   position: Position;
   backNumber: number;
@@ -28,3 +28,5 @@ export interface Player {
   stats?: PlayerStats;
   cumulativeStats?: PlayerStats;
 }
+
+export type StatTabType = "시즌기록" | "누적기록" | "단일기록";

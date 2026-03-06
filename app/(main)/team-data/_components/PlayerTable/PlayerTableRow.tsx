@@ -32,6 +32,7 @@ const PlayerTableRow = memo(function PlayerTableRow({
       className={cn(
         ROW_BASE_CLASS,
         "flex items-center w-full min-w-max md:min-w-full justify-between pl-2 pr-1.5 relative",
+        "after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-Fill_Quatiary after:z-50",
       )}
       onClick={() => onPlayerClick?.(player)}
     >
@@ -89,7 +90,6 @@ const PlayerTableRow = memo(function PlayerTableRow({
           />
         );
       })}
-      <div className="w-full h-0.25 bg-Fill_Quatiary absolute bottom-0 left-0 z-50" />
     </tr>
   );
 });

@@ -1,4 +1,5 @@
 import type { Player } from "../_types/player";
+import { PLAYER_TABLE_COLUMNS, formatPlayerValue } from "./playerTableColumns";
 
 // 실제 축구 선수 더미 데이터
 export const allPlayers: Player[] = [
@@ -356,57 +357,43 @@ export const allPlayers: Player[] = [
 
 // 카테고리에 맞는 value 표시
 export const getPlayerValue = (player: Player, category: string) => {
-  switch (category) {
-    case "OVR":
-      return `${player.ovr}`;
-    case "출장수":
-      return `${player.stats?.출장 || 0}경기`;
-    case "득점":
-      return `${player.stats?.득점 || 0}골`;
-    case "도움":
-      return `${player.stats?.도움 || 0}개`;
-    case "기점":
-      return `${player.stats?.기점 || 0}P`;
-    case "공격P":
-      return `${player.stats?.공격P || 0}P`;
-    case "클린시트":
-      return `${player.stats?.클린시트 || 0}회`;
-    case "MOM3":
-      return `${player.stats?.MOM3 || 0}회`;
-    case "승률":
-      return `${player.stats?.승률 || "0%"}`;
-    default:
-      return player.value;
-  }
+  return formatPlayerValue(player, category);
 };
 
-// 카테고리별 데이터 (9개 카테고리)
-export const statsData: Record<string, Player[]> = {
-  OVR: [...allPlayers].sort((a, b) => (b.ovr || 0) - (a.ovr || 0)),
-  출장수: [...allPlayers].sort(
-    (a, b) => (b.stats?.출장 || 0) - (a.stats?.출장 || 0),
-  ),
-  득점: [...allPlayers].sort(
-    (a, b) => (b.stats?.득점 || 0) - (a.stats?.득점 || 0),
-  ),
-  도움: [...allPlayers].sort(
-    (a, b) => (b.stats?.도움 || 0) - (a.stats?.도움 || 0),
-  ),
-  기점: [...allPlayers].sort(
-    (a, b) => (b.stats?.기점 || 0) - (a.stats?.기점 || 0),
-  ),
-  공격P: [...allPlayers].sort(
-    (a, b) => (b.stats?.공격P || 0) - (a.stats?.공격P || 0),
-  ),
-  클린시트: [...allPlayers].sort(
-    (a, b) => (b.stats?.클린시트 || 0) - (a.stats?.클린시트 || 0),
-  ),
-  MOM3: [...allPlayers].sort(
-    (a, b) => (b.stats?.MOM3 || 0) - (a.stats?.MOM3 || 0),
-  ),
-  승률: [...allPlayers].sort((a, b) => {
-    const aRate = parseInt((a.stats?.승률 || "0%").replace("%", "")) || 0;
-    const bRate = parseInt((b.stats?.승률 || "0%").replace("%", "")) || 0;
-    return bRate - aRate;
-  }),
-};
+// 카테고리별 데이터 (정렬 가능한 컬럼 기반 자동 생성)
+export const statsData: Record<string, Player[]> = PLAYER_TABLE_COLUMNS.filter(
+  (col) => col.sortable,
+).reduce(
+  (acc, col) => {
+    const sorted = [...allPlayers].sort((a, b) => {
+      let aValue: number = 0;
+      let bValue: number = 0;
+
+      if (col.key === "OVR") {
+        aValue = a.ovr;
+        bValue = b.ovr;
+      } else if (col.statsKey) {
+        const aRaw = a.stats?.[col.statsKey];
+        const bRaw = b.stats?.[col.statsKey];
+
+        if (typeof aRaw === "string" && aRaw.includes("%")) {
+          aValue = parseInt(aRaw.replace("%", ""), 10);
+        } else {
+          aValue = (aRaw as number) || 0;
+        }
+
+        if (typeof bRaw === "string" && bRaw.includes("%")) {
+          bValue = parseInt(bRaw.replace("%", ""), 10);
+        } else {
+          bValue = (bRaw as number) || 0;
+        }
+      }
+
+      return bValue - aValue; // 내림차순 정렬
+    });
+
+    acc[col.key] = sorted;
+    return acc;
+  },
+  {} as Record<string, Player[]>,
+);

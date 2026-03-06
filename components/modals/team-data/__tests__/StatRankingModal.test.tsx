@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import StatsModal from "../StatsModal";
+import StatRankingModal from "../StatRankingModal";
 import { Player } from "@/app/(main)/team-data/_types/player";
 
 // 모킹
@@ -40,7 +40,7 @@ jest.mock("../_components/StatsPlayerRow", () => ({
   ),
 }));
 
-describe("StatsModal 컴포넌트", () => {
+describe("StatRankingModal 컴포넌트", () => {
   const mockPlayers: Player[] = Array.from({ length: 15 }, (_, i) => ({
     id: i + 1,
     name: `선수${i + 1}`,
@@ -69,7 +69,7 @@ describe("StatsModal 컴포넌트", () => {
 
   it("카테고리 제목과 상위 10명의 선수를 내림차순으로 렌더링해야 한다", () => {
     render(
-      <StatsModal
+      <StatRankingModal
         category="득점"
         players={mockPlayers}
         onPlayerClick={mockOnPlayerClick}
@@ -92,7 +92,7 @@ describe("StatsModal 컴포넌트", () => {
 
   it("선수 행 클릭 시 onPlayerClick 콜백이 호출되어야 한다", () => {
     render(
-      <StatsModal
+      <StatRankingModal
         category="득점"
         players={mockPlayers}
         onPlayerClick={mockOnPlayerClick}
@@ -108,7 +108,7 @@ describe("StatsModal 컴포넌트", () => {
   });
 
   it("닫기 버튼 클릭 시 hideModal이 호출되어야 한다", () => {
-    render(<StatsModal category="득점" players={mockPlayers} />);
+    render(<StatRankingModal category="득점" players={mockPlayers} />);
 
     const closeBtn = screen.getByAltText("close");
     fireEvent.click(closeBtn);
