@@ -46,6 +46,10 @@ const TeamDataStatRankingModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const AttendanceVoteModal = dynamic(() => import("./AttendanceVoteModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -56,4 +60,5 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   REGISTER_GAME: RegisterGameModal,
   TEAM_DATA_PLAYER_DETAIL: TeamDataPlayerDetailModal,
   TEAM_DATA_STAT_RANKING: TeamDataStatRankingModal,
+  ATTENDANCE_VOTE: AttendanceVoteModal,
 } as ModalComponentMap;

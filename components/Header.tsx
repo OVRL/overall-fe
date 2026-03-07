@@ -1,8 +1,27 @@
-import { ReactNode } from "react";
-import Icon from "@/components/ui/Icon";
-import { StaticImageData } from "next/image";
+"use client";
 
-interface ActionButton {
+import { ReactNode, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
+import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
+import Icon from "@/components/ui/Icon";
+import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
+import { useScrollLock } from "@/hooks/useScrollLock";
+import { useClickOutside } from "@/hooks/useClickOutside";
+
+export interface MenuItem {
+  label: string;
+  href: string;
+}
+
+const defaultMenuItems: MenuItem[] = [
+  { label: "팀 관리", href: "/team-management" },
+  { label: "팀 데이터", href: "/team-data" },
+  { label: "경기 기록", href: "#" },
+  { label: "경기 일정", href: "#" },
+];
+
+export interface ActionButton {
   icon: StaticImageData;
   onClick: () => void;
   alt: string;
@@ -12,6 +31,12 @@ interface ActionButton {
 type BaseHeaderProps = {
   className?: string;
   transparent?: boolean;
+};
+
+type GlobalHeaderProps = BaseHeaderProps & {
+  variant: "global";
+  menuItems?: MenuItem[];
+  showHamburger?: boolean;
 };
 
 type LeftActionProp = {
@@ -28,7 +53,8 @@ type RightLabelProp = {
   onRightClick?: () => void;
 };
 
-type WithCenter = BaseHeaderProps & {
+export type WithCenter = BaseHeaderProps & {
+  variant?: "topbar";
   title?: string;
   logo?: ReactNode;
 } & (
@@ -39,7 +65,8 @@ type WithCenter = BaseHeaderProps & {
   RightActionProp &
   RightLabelProp;
 
-type WithoutCenter = BaseHeaderProps & {
+export type WithoutCenter = BaseHeaderProps & {
+  variant?: "topbar";
   title?: never;
   logo?: never;
 } & {
@@ -47,9 +74,131 @@ type WithoutCenter = BaseHeaderProps & {
   rightAction?: ActionButton;
 } & RightLabelProp;
 
-export type HeaderProps = WithCenter | WithoutCenter;
+export type HeaderProps = GlobalHeaderProps | WithCenter | WithoutCenter;
 
-export const Header = (props: HeaderProps) => {
+const GlobalHeader = (props: GlobalHeaderProps) => {
+  const {
+    menuItems = defaultMenuItems,
+    showHamburger = true,
+    className = "",
+  } = props;
+  const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  // 모바일 메뉴 오픈 시 바디 스크롤 방지
+  useScrollLock(isMenuOpen);
+
+  // 외부 영역 클릭 시 메뉴 닫기
+  useClickOutside(headerRef, () => {
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  });
+
+  return (
+    <header
+      ref={headerRef}
+      className={`relative bg-surface-primary border-b border-gray-800 z-50 ${className}`}
+    >
+      <div className="flex justify-between items-center px-4 lg:px-8 py-3 lg:py-4">
+        {/* 로고 */}
+        <div className="flex items-center gap-3 lg:gap-4">
+          <Link
+            href="/home"
+            className="relative w-16 lg:w-20 h-8 lg:h-10"
+            aria-label="홈으로 가기"
+          >
+            <Image
+              src="/images/logo_OVR_head.png"
+              alt="OVR Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </Link>
+        </div>
+
+        {/* 네비게이션 */}
+        <nav aria-label="메인 네비게이션">
+          <div className="flex items-center gap-6 lg:gap-10">
+            {/* 데스크톱 메뉴 */}
+            <ul className="hidden lg:flex items-center gap-8">
+              <RegisterGameButton />
+              {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className={`transition-colors px-4 py-2.5 rounded-xl ${
+                        isActive
+                          ? "bg-surface-card text-Label-AccentPrimary border border-border-card"
+                          : "text-white hover:text-gray-500"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* 햄버거 버튼 */}
+            {showHamburger && (
+              <button
+                onClick={toggleMenu}
+                className="lg:hidden text-white hover:text-primary transition-colors text-xl cursor-pointer p-2"
+                aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-dropdown-menu"
+              >
+                ≡
+              </button>
+            )}
+          </div>
+        </nav>
+      </div>
+
+      {/* 모바일 메뉴 드롭다운 */}
+      {isMenuOpen && (
+        <nav
+          id="mobile-dropdown-menu"
+          className="lg:hidden absolute top-full left-0 w-full bg-surface-secondary border-b border-gray-700 shadow-xl overflow-hidden animate-slideDown"
+          aria-label="모바일 네비게이션"
+        >
+          <ul className="flex flex-col p-4 gap-2">
+            <RegisterGameButton />
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`block text-sm py-3 px-4 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-primary text-black font-bold"
+                        : "text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      )}
+    </header>
+  );
+};
+
+const TopbarHeader = (props: WithCenter | WithoutCenter) => {
   const {
     className,
     leftAction,
@@ -57,10 +206,9 @@ export const Header = (props: HeaderProps) => {
     rightLabel,
     onRightClick,
     transparent,
+    title,
+    logo,
   } = props;
-
-  const title = props.title;
-  const logo = props.logo;
 
   return (
     <header
@@ -75,7 +223,7 @@ export const Header = (props: HeaderProps) => {
         {leftAction && (
           <button
             onClick={leftAction.onClick}
-            className="flex items-center justify-center p-3 hover:bg-gray-100/10 active:scale-95 transition-all"
+            className="flex items-center justify-center p-3 hover:bg-gray-100/10 active:scale-95 transition-all cursor-pointer"
             aria-label={leftAction.alt}
           >
             <Icon
@@ -93,9 +241,9 @@ export const Header = (props: HeaderProps) => {
         {logo ? (
           <div className="flex items-center justify-center">{logo}</div>
         ) : title ? (
-          <h1 className="text-xl font-bold truncate max-w-50 text-center text-white">
+          <h2 className="text-xl font-bold truncate max-w-50 text-center text-white">
             {title}
-          </h1>
+          </h2>
         ) : null}
       </div>
 
@@ -104,7 +252,7 @@ export const Header = (props: HeaderProps) => {
           <button
             type="button"
             onClick={onRightClick}
-            className="flex items-center justify-center px-3 py-3 text-body-m text-white hover:opacity-80 active:scale-95 transition-all"
+            className="flex items-center justify-center px-3 py-3 text-body-m text-white hover:opacity-80 active:scale-95 transition-all cursor-pointer"
             aria-label={rightLabel}
           >
             {rightLabel}
@@ -112,7 +260,7 @@ export const Header = (props: HeaderProps) => {
         ) : rightAction ? (
           <button
             onClick={rightAction.onClick}
-            className="flex items-center justify-center p-3 hover:bg-gray-100/10 active:scale-95 transition-all"
+            className="flex items-center justify-center p-3 hover:bg-gray-100/10 active:scale-95 transition-all cursor-pointer"
             aria-label={rightAction.alt}
           >
             <Icon
@@ -127,6 +275,13 @@ export const Header = (props: HeaderProps) => {
       </div>
     </header>
   );
+};
+
+export const Header = (props: HeaderProps) => {
+  if (props.variant === "global") {
+    return <GlobalHeader {...props} />;
+  }
+  return <TopbarHeader {...props} />;
 };
 
 export default Header;

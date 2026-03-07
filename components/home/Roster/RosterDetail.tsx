@@ -36,7 +36,7 @@ const RosterDetail = ({ player }: PlayerCardProps) => {
         <PlayerProfileHeader player={player} />
 
         <section
-          className="flex-1 px-4 pb-1.5 bg-transparent"
+          className="flex-1 px-4 pb-1.5 bg-transparent z-30"
           aria-label="선수 스탯"
         >
           <StatGrid

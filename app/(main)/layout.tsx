@@ -1,4 +1,4 @@
-import Header from "@/components/layout/Header";
+import Header from "@/components/Header";
 
 export default function MainLayout({
   children,
@@ -7,7 +7,7 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen bg-surface-primary flex flex-col">
-      <Header />
+      <Header variant="global" />
       {children}
     </div>
   );

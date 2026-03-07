@@ -12,7 +12,7 @@ const RegisterGameButton = () => {
       <button
         type="button"
         onClick={() => openModal({})}
-        className="flex items-center gap-1 border border-fill-primary text-Label-AccentPrimary py-1.5 px-3 rounded-[1.25rem] text-sm font-semibold"
+        className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-1 border border-fill-primary text-Label-AccentPrimary py-3 lg:py-1.5 px-4 lg:px-3 rounded-lg lg:rounded-[1.25rem] text-sm font-semibold cursor-pointer"
       >
         <Icon src={plus} alt="plus icon" aria-hidden /> 경기 등록하기
       </button>

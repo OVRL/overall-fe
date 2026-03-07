@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import LayoutHeader from "@/components/layout/Header";
 import Header from "@/components/Header";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import arrowBack from "@/public/icons/arrow_back.svg";
@@ -36,7 +35,7 @@ const FormationHeader = (props: FormationHeaderProps) => {
     );
   }
 
-  return <LayoutHeader />;
+  return <Header variant="global" />;
 };
 
 export default FormationHeader;

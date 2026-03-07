@@ -36,6 +36,7 @@ export interface ModalPropsMap {
     onPlayerClick?: (player: TeamDataPlayer) => void;
   };
   REGISTER_GAME: Record<string, never>;
+  ATTENDANCE_VOTE: Record<string, never>;
 }
 
 export type ModalKey = keyof ModalPropsMap;
