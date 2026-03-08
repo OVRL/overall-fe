@@ -1,5 +1,5 @@
 import React from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import QuarterButton from "../../ui/QuarterButton";
 import FormationPlayerImageThumbnail from "./FormationPlayerImageThumbnail";
 import { Player } from "@/types/formation";
@@ -26,10 +26,10 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
   onPositionSelect,
   onPlayerRemove,
 }) => {
-  // Unique ID for the droppable area, so we know exactly where a player is dropped
   const id = `quarter-${quarterId}-pos-${index}`;
+  const draggableId = `draggable-quarter-${quarterId}-pos-${index}`;
 
-  const { isOver, setNodeRef } = useDroppable({
+  const { isOver, setNodeRef: setDroppableRef } = useDroppable({
     id,
     data: {
       type: "QuarterSlot",
@@ -39,21 +39,44 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
     },
   });
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDraggableRef,
+    isDragging,
+  } = useDraggable({
+    id: draggableId,
+    data: {
+      type: "BoardPlayer",
+      player,
+      sourceQuarterId: quarterId,
+      sourcePositionIndex: index,
+    },
+    disabled: !player,
+  });
+
   // Provide visual feedback when a draggable item is hovering over this slot
   const isHovered = isOver && !player;
   const isSelected = player?.id === selectedPlayer?.id;
 
   return (
-    <div ref={setNodeRef} className="relative group z-0">
+    <div ref={setDroppableRef} className="relative group z-0">
       {player ? (
-        <FormationPlayerImageThumbnail
-          imgUrl={player.image || "/images/player/img_player.png"}
-          playerName={player.name}
-          playerSeason={player.season}
-          isSelected={isSelected}
-          onDelete={onPlayerRemove}
-          className="transition-transform hover:scale-110 bg-transparent"
-        />
+        <div
+          ref={setDraggableRef}
+          {...attributes}
+          {...listeners}
+          className={cn("touch-none", isDragging ? "opacity-50" : "")}
+        >
+          <FormationPlayerImageThumbnail
+            imgUrl={player.image || "/images/player/img_player.png"}
+            playerName={player.name}
+            playerSeason={player.season}
+            isSelected={isSelected}
+            onDelete={onPlayerRemove}
+            className="transition-transform hover:scale-110 bg-transparent"
+          />
+        </div>
       ) : (
         <QuarterButton
           variant={isActive ? "selected" : "assistive"}

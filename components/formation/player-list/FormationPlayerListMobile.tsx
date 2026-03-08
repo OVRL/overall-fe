@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import calendar from "@/public/icons/calendar.svg";
 import useModal from "@/hooks/useModal";
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
+import { useDraggable } from "@dnd-kit/core";
 import QuarterDotsMobile from "../quarter/QuarterDotsMobile";
 
 export interface FormationPlayerListMobileProps {
@@ -44,21 +45,33 @@ function PlayerCardMobile({
 }) {
   const hasAssignment = assignedQuarterIds && assignedQuarterIds.length > 0;
 
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `player-list-mobile-${player.id}`,
+    data: {
+      type: "ListPlayer",
+      player,
+    },
+  });
+
   return (
     <button
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       type="button"
       onClick={() => onSelect(player)}
       className={cn(
-        "shrink-0 flex flex-col items-center gap-2 transition-colors text-left rounded-lg p-2 min-w-18.75 relative",
+        "shrink-0 flex flex-col items-center gap-2 transition-colors text-left rounded-lg p-2 min-w-18.75 relative touch-none",
         isSelected && "bg-surface-card border border-Fill_AccentPrimary",
+        isDragging && "opacity-50",
       )}
       aria-pressed={isSelected}
       aria-label={
         hasAssignment
           ? `${player.name} (${assignedQuarterIds!.length}개 쿼터 배치됨)`
           : isSelected
-          ? `${player.name} 선택됨, 다시 탭하면 선택 해제`
-          : player.name
+            ? `${player.name} 선택됨, 다시 탭하면 선택 해제`
+            : player.name
       }
     >
       <ProfileAvatar
