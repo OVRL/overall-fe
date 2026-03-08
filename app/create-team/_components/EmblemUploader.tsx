@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import circleLogoDefault from "@/public/icons/circle_logo_default.svg";
 
+import useModal from "@/hooks/useModal";
+
 interface EmblemUploaderProps {
   onImageSelected: (file: File | null) => void;
 }
@@ -15,6 +17,7 @@ export default function EmblemUploader({
 }: EmblemUploaderProps) {
   const [emblemPreview, setEmblemPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { openModal } = useModal("EDIT_EMBLEM_IMAGE");
 
   // createObjectURL 해제 — 메모리 누수 방지 (Vercel best practice)
   useEffect(() => {
@@ -28,32 +31,20 @@ export default function EmblemUploader({
     if (!file) return;
 
     const url = URL.createObjectURL(file);
-    const img = document.createElement("img");
 
-    img.onload = () => {
-      // 256x256 정사각형 해상도 검증
-      if (img.width === 256 && img.height === 256) {
-        setEmblemPreview((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return url;
-        });
-        onImageSelected(file);
-      } else {
-        URL.revokeObjectURL(url);
-        alert("로고 이미지 해상도는 256x256 정사각형이어야 합니다.");
-        setEmblemPreview(null);
-        onImageSelected(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      }
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      setEmblemPreview(null);
-      onImageSelected(null);
-    };
-    img.src = url;
+    // 모달을 통한 크롭 진행
+    openModal({
+      initialImage: url,
+      onSave: (croppedImagePreview, croppedFile) => {
+        setEmblemPreview(croppedImagePreview);
+        onImageSelected(croppedFile);
+      },
+    });
+
+    // 선택 초기화 (같은 파일 다시 선택 가능하도록)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (

@@ -21,6 +21,10 @@ const EditProfileImageModal = dynamic(() => import("./EditProfileImageModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const EditEmblemImageModal = dynamic(() => import("./EditEmblemImageModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 const PlayerSearchModal = dynamic(
   () => import("./PlayerSearchModal/PlayerSearchModal"),
   {
@@ -56,6 +60,7 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   ADDRESS_SEARCH: AddressSearchModal,
   DETAIL_ADDRESS_SEARCH: DetailAddressSearchModal,
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
+  EDIT_EMBLEM_IMAGE: EditEmblemImageModal,
   PLAYER_SEARCH: PlayerSearchModal,
   REGISTER_GAME: RegisterGameModal,
   TEAM_DATA_PLAYER_DETAIL: TeamDataPlayerDetailModal,

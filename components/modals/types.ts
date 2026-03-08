@@ -17,6 +17,10 @@ export interface ModalPropsMap {
     initialImage: string;
     onSave: (image: string, file: File) => void;
   };
+  EDIT_EMBLEM_IMAGE: {
+    initialImage: string;
+    onSave: (image: string, file: File) => void;
+  };
   PLAYER_SEARCH: {
     onComplete: (player: Player) => void;
   };

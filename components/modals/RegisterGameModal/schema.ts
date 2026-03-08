@@ -1,19 +1,26 @@
 import { format } from "date-fns";
 import { z } from "zod";
 
+/** 한글, 영문, 공백만 허용하는 정규식 (자모음 포함) */
+const RE_KOREAN_ENGLISH_SPACE = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]*$/;
+
 /** 경기 등록 폼 스키마 (zod + react-hook-form) */
 export const registerGameSchema = z
   .object({
     matchType: z.enum(["MATCH", "INTERNAL"], {
       error: "경기 성격을 선택해주세요.",
     }),
-    opponentName: z.string().optional(),
+    opponentName: z.string().max(30).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
     startDate: z.string().min(1, "시작 날짜를 선택해주세요."),
     startTime: z.string().min(1, "시작 시간을 선택해주세요."),
     endDate: z.string(),
     endTime: z.string().min(1, "종료 시간을 선택해주세요."),
     venue: z.object({
-      address: z.string().min(1, "경기 장소를 입력해주세요."),
+      address: z
+        .string()
+        .min(1, "경기 장소를 입력해주세요.")
+        .max(30)
+        .regex(RE_KOREAN_ENGLISH_SPACE),
       latitude: z.number(),
       longitude: z.number(),
     }),
@@ -32,10 +39,8 @@ export const registerGameSchema = z
       ],
       { error: "투표 마감 일정을 선택해주세요." },
     ),
-    uniform: z.enum(["HOME", "AWAY"], {
-      error: "유니폼을 선택해주세요.",
-    }),
-    memo: z.string().optional(),
+    uniform: z.enum(["HOME", "AWAY"]).nullable(),
+    memo: z.string().max(100).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.matchType === "MATCH") {
@@ -44,6 +49,13 @@ export const registerGameSchema = z
           code: z.ZodIssueCode.custom,
           message: "상대팀을 입력해주세요.",
           path: ["opponentName"],
+        });
+      }
+      if (!data.uniform) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "유니폼을 선택해주세요.",
+          path: ["uniform"],
         });
       }
     }
@@ -72,7 +84,7 @@ export function getRegisterGameDefaultValues(): RegisterGameValues {
     quarterCount: 4,
     quarterDuration: 25,
     voteDeadline: "1_DAY_BEFORE",
-    uniform: "HOME",
+    uniform: null,
     memo: "",
   };
 }

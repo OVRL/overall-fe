@@ -4,7 +4,11 @@ import * as z from "zod";
 import { UNIFORM_DESIGN_VALUES } from "../_lib/uniformDesign";
 
 export const createTeamSchema = z.object({
-  clubName: z.string().min(1, "클럽 이름을 입력해주세요."),
+  clubName: z
+    .string()
+    .min(1, "클럽 이름을 입력해주세요.")
+    .max(15, "최대 15자까지만 입력 가능합니다.")
+    .regex(/^[a-zA-Z0-9가-힣\s]*$/, "특수문자는 입력할 수 없습니다."),
   activityArea: z.string().min(1, "지역을 선택해주세요."),
   activityAreaCode: z.string(),
   foundingDate: z.string().optional(),

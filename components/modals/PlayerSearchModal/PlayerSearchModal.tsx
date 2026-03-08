@@ -18,6 +18,7 @@ const PlayerSearchModal = ({ onComplete }: PlayerSearchModalProps) => {
     debouncedKeyword,
     searchResults,
     selectedPlayer,
+    mercenaryPlayer,
     isSearching,
     handleSelect,
     handleComplete,
@@ -36,6 +37,7 @@ const PlayerSearchModal = ({ onComplete }: PlayerSearchModalProps) => {
             keyword={debouncedKeyword}
             isSearching={isSearching}
             results={searchResults}
+            mercenary={mercenaryPlayer}
             selectedPlayerId={selectedPlayer?.id}
             onSelect={handleSelect}
           />

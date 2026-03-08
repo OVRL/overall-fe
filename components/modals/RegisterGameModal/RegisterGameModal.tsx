@@ -23,6 +23,8 @@ import TextField from "@/components/ui/TextField";
 import location from "@/public/icons/location.svg";
 import type { RegisterGameValues } from "./schema";
 import { useRegisterGameForm } from "./useRegisterGameForm";
+import UniformOption from "./UniformOption";
+import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
 
 const NaverDynamicMap = dynamic(
   () => import("@/components/ui/map/NaverDynamicMap"),
@@ -46,10 +48,9 @@ function RegisterGameModal() {
   const { form, resetToDefaults } = useRegisterGameForm();
   const {
     control,
-    register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { isValid },
   } = form;
 
   const currentVenue = useWatch({ control, name: "venue" });
@@ -129,15 +130,26 @@ function RegisterGameModal() {
                   className="overflow-hidden"
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
-                  <TextField
-                    label="상대팀"
-                    placeholder="상대팀 이름을 입력해주세요."
-                    showBorderBottom={false}
-                    errorMessage={errors.opponentName?.message}
-                    onClear={() =>
-                      setValue("opponentName", "", { shouldValidate: true })
-                    }
-                    {...register("opponentName")}
+                  <Controller
+                    name="opponentName"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="상대팀"
+                        placeholder="상대팀 이름을 입력해주세요."
+                        showBorderBottom={false}
+                        maxLength={30}
+                        onClear={() => field.onChange("")}
+                        onChange={(e) => {
+                          const filteredValue = e.target.value.replace(
+                            /[^a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]/g,
+                            "",
+                          );
+                          field.onChange(filteredValue);
+                        }}
+                      />
+                    )}
                   />
                 </motion.div>
               )}
@@ -203,11 +215,6 @@ function RegisterGameModal() {
                     )}
                   />
                 </div>
-                {errors.endDate && (
-                  <p className="text-sm text-Fill_Error">
-                    {errors.endDate.message}
-                  </p>
-                )}
               </div>
             </FormSection>
 
@@ -295,13 +302,64 @@ function RegisterGameModal() {
               />
             </FormSection>
 
+            <AnimatePresence>
+              {currentMatchType === "MATCH" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <FormSection label="유니폼">
+                    <Controller
+                      name="uniform"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="flex gap-6">
+                          <UniformOption
+                            type="HOME"
+                            label="홈"
+                            isSelected={field.value === "HOME"}
+                            onSelect={() => field.onChange("HOME")}
+                            imagePath={getUniformImagePath("SOLID_RED")}
+                          />
+                          <UniformOption
+                            type="AWAY"
+                            label="어웨이"
+                            isSelected={field.value === "AWAY"}
+                            onSelect={() => field.onChange("AWAY")}
+                            imagePath={getUniformImagePath("SOLID_BLUE")}
+                          />
+                        </div>
+                      )}
+                    />
+                  </FormSection>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <FormSection label="메모">
-              <textarea
-                id={`${id}-memo`}
-                placeholder="추가 메모사항을 입력하세요."
-                rows={3}
-                className="w-full px-4 py-3 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] text-sm text-Label-Primary placeholder:text-Label-Tertiary outline-none focus:border-Fill_AccentPrimary transition-colors resize-none"
-                {...register("memo")}
+              <Controller
+                name="memo"
+                control={control}
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    id={`${id}-memo`}
+                    placeholder="추가 메모사항을 입력하세요."
+                    rows={3}
+                    maxLength={100}
+                    className="w-full px-4 py-3 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] text-sm text-Label-Primary placeholder:text-Label-Tertiary outline-none focus:border-Fill_AccentPrimary transition-colors resize-none"
+                    onChange={(e) => {
+                      const filteredValue = e.target.value.replace(
+                        /[^a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]/g,
+                        "",
+                      );
+                      field.onChange(filteredValue);
+                    }}
+                  />
+                )}
               />
             </FormSection>
 
@@ -311,6 +369,7 @@ function RegisterGameModal() {
                 variant="primary"
                 size="xl"
                 className="flex-1"
+                disabled={!isValid}
               >
                 등록
               </Button>

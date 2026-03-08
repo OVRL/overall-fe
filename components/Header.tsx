@@ -16,9 +16,10 @@ export interface MenuItem {
 
 const defaultMenuItems: MenuItem[] = [
   { label: "팀 관리", href: "/team-management" },
-  { label: "팀 데이터", href: "/team-data" },
-  { label: "경기 기록", href: "#" },
+  { label: "팀 소식", href: "#" },
+  { label: "선수 기록", href: "/team-data" },
   { label: "경기 일정", href: "#" },
+  { label: "마이페이지", href: "#" },
 ];
 
 export interface ActionButton {

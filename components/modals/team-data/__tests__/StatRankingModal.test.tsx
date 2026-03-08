@@ -110,7 +110,7 @@ describe("StatRankingModal 컴포넌트", () => {
   it("닫기 버튼 클릭 시 hideModal이 호출되어야 한다", () => {
     render(<StatRankingModal category="득점" players={mockPlayers} />);
 
-    const closeBtn = screen.getByAltText("close");
+    const closeBtn = screen.getByLabelText("close");
     fireEvent.click(closeBtn);
 
     expect(mockHideModal).toHaveBeenCalledTimes(1);

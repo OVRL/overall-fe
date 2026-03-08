@@ -10,7 +10,6 @@ import useModal from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 import { Controller } from "react-hook-form";
 import EmblemUploader from "./EmblemUploader";
-import ControlledTextField from "@/components/ui/ControlledTextField";
 import { useCreateTeamForm } from "../_hooks/useCreateTeamForm";
 import UniformColorSelector from "./UniformColorSelector";
 import { type UniformDesign } from "../_lib/uniformDesign";
@@ -82,12 +81,25 @@ const CreateTeamWrapper = () => {
         <div className="flex-1 min-h-0">
           <OnboardingTitle>클럽 만들기</OnboardingTitle>
           <div className="mt-10 flex flex-col gap-y-6">
-            <ControlledTextField
-              control={control}
+            <Controller
               name="clubName"
-              label="클럽 이름"
-              placeholder="클럽 이름을 입력해주세요."
-              showBorderBottom={false}
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  {...field}
+                  label="클럽 이름"
+                  placeholder="클럽 이름을 입력해주세요."
+                  showBorderBottom={false}
+                  errorMessage={error?.message}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const filteredValue = value
+                      .replace(/[^a-zA-Z0-9가-힣\s]/g, "")
+                      .slice(0, 15);
+                    field.onChange(filteredValue);
+                  }}
+                />
+              )}
             />
 
             <Controller
@@ -115,6 +127,7 @@ const CreateTeamWrapper = () => {
                     type="text"
                     showBorderBottom={false}
                     leftIcon={locationIcon}
+                    leftIconClassName="text-Label-Primary"
                     value={field.value}
                     readOnly
                     className="pointer-events-none"

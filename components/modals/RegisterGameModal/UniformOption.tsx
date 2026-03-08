@@ -29,7 +29,7 @@ function UniformOption({
       {imagePath ? (
         <span
           className={cn(
-            "relative size-8 shrink-0 overflow-hidden rounded-sm border transition-colors",
+            "relative size-10 shrink-0 overflow-hidden rounded border transition-colors",
             isSelected
               ? "border-Fill_AccentPrimary"
               : "border-transparent hover:bg-Fill_Quatiary/80",
@@ -38,9 +38,9 @@ function UniformOption({
           <Image
             src={imagePath}
             alt=""
-            width={30}
-            height={30}
-            sizes="30px"
+            width={40}
+            height={40}
+            sizes="40px"
             quality={100}
             className="object-contain w-full h-full"
             aria-hidden

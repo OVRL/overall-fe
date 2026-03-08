@@ -25,16 +25,19 @@ jest.mock("@/hooks/useModal", () => ({
 
 jest.mock("next/dynamic", () => ({
   __esModule: true,
-  default: () => function MockNaverMap() {
-    return <div data-testid="naver-map" />;
-  },
+  default: () =>
+    function MockNaverMap() {
+      return <div data-testid="naver-map" />;
+    },
 }));
 
 const defaultFormValues = getRegisterGameDefaultValues();
 
 jest.mock("react-hook-form", () => {
   const actual = jest.requireActual("react-hook-form");
-  const defaults = jest.requireActual("../schema").getRegisterGameDefaultValues();
+  const defaults = jest
+    .requireActual("../schema")
+    .getRegisterGameDefaultValues();
   return {
     ...actual,
     useWatch: (opts: { name: string }) => {
@@ -45,7 +48,10 @@ jest.mock("react-hook-form", () => {
     Controller: (props: {
       name: keyof RegisterGameValues;
       control: unknown;
-      render: (opts: { field: { value: unknown; onChange: (v: unknown) => void }; fieldState: { error?: { message?: string } } }) => React.ReactElement;
+      render: (opts: {
+        field: { value: unknown; onChange: (v: unknown) => void };
+        fieldState: { error?: { message?: string } };
+      }) => React.ReactElement;
     }) => {
       const value = (defaults as Record<string, unknown>)[props.name] ?? "";
       return props.render({
@@ -65,18 +71,24 @@ const mockUseRegisterGameForm = jest.requireMock(
 ).useRegisterGameForm;
 
 function createMockForm(overrides = {}) {
-  const register = jest.fn(() => ({ onChange: jest.fn(), onBlur: jest.fn(), ref: jest.fn() }));
+  const register = jest.fn(() => ({
+    onChange: jest.fn(),
+    onBlur: jest.fn(),
+    ref: jest.fn(),
+  }));
   const setValue = jest.fn();
-  const handleSubmit = jest.fn((fn: (data: unknown) => void) => (e: React.FormEvent) => {
-    e?.preventDefault();
-    fn(defaultFormValues);
-  });
+  const handleSubmit = jest.fn(
+    (fn: (data: unknown) => void) => (e: React.FormEvent) => {
+      e?.preventDefault();
+      fn(defaultFormValues);
+    },
+  );
   return {
     control: {},
     register,
     handleSubmit,
     setValue,
-    formState: { errors: {} as Record<string, { message?: string }> },
+    formState: { isValid: true },
     ...overrides,
   };
 }
@@ -119,10 +131,12 @@ describe("RegisterGameModal", () => {
   });
 
   it("폼 제출 시 handleSubmit 콜백이 호출된 뒤 hideModal이 호출된다", () => {
-    const handleSubmitFn = jest.fn((fn: (data: unknown) => void) => (e: React.FormEvent) => {
-      e?.preventDefault();
-      fn(defaultFormValues);
-    });
+    const handleSubmitFn = jest.fn(
+      (fn: (data: unknown) => void) => (e: React.FormEvent) => {
+        e?.preventDefault();
+        fn(defaultFormValues);
+      },
+    );
     mockUseRegisterGameForm.mockReturnValue({
       form: createMockForm({ handleSubmit: handleSubmitFn }),
       resetToDefaults: mockResetToDefaults,
@@ -142,6 +156,8 @@ describe("RegisterGameModal", () => {
     });
     render(<RegisterGameModal />);
 
-    expect(screen.getByPlaceholderText("상대팀 이름을 입력해주세요.")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("상대팀 이름을 입력해주세요."),
+    ).toBeInTheDocument();
   });
 });

@@ -5,7 +5,7 @@ import { getRegisterGameDefaultValues, registerGameSchema } from "./schema";
 export function useRegisterGameForm() {
   const form = useForm({
     resolver: zodResolver(registerGameSchema),
-    mode: "onTouched",
+    mode: "onChange",
     defaultValues: getRegisterGameDefaultValues(),
   });
 

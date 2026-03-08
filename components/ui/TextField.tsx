@@ -12,6 +12,8 @@ interface TextFieldProps extends ComponentProps<"input"> {
   showBorderBottom?: boolean;
   /** input 왼쪽에 표시할 아이콘 (24x24, mr-0.5). 없으면 표시 안 함 */
   leftIcon?: StaticImageData;
+  /** leftIcon에 적용할 추가 클래스명 (색상 등) */
+  leftIconClassName?: string;
 }
 
 const TextField = ({
@@ -24,6 +26,7 @@ const TextField = ({
   type = "text",
   showBorderBottom = true,
   leftIcon,
+  leftIconClassName,
   ref,
   ...props
 }: TextFieldProps) => {
@@ -39,7 +42,7 @@ const TextField = ({
 
       <div
         className={cn(
-          "relative w-full pt-4.25 pb-3.75 flex items-center transition-colors",
+          "relative w-full pt-4.25 pb-3 flex items-center transition-colors",
           showBorderBottom && "border-b",
           showBorderBottom && errorMessage
             ? "border-Fill_Error"
@@ -56,7 +59,7 @@ const TextField = ({
             alt="아이콘"
             width={24}
             height={24}
-            className="mr-0.5 shrink-0"
+            className={cn("mr-0.5 shrink-0", leftIconClassName)}
           />
         )}
         <input
@@ -92,7 +95,7 @@ const TextField = ({
       {errorMessage && (
         <p
           id={errorId}
-          className="mt-2 text-xs font-medium leading-4 text-Fill_Error"
+          className="mt-1.5 text-xs font-medium leading-4 text-Fill_Error"
         >
           {errorMessage}
         </p>

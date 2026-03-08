@@ -90,13 +90,27 @@ export const usePlayerSearch = ({ onComplete }: UsePlayerSearchProps) => {
     }
   };
 
+  const mercenaryPlayer: Player | null = inputValue.trim()
+    ? {
+        id: 0, // 용병 섹션에는 하나만 존재하므로 0으로 고정
+        name: `${inputValue.trim()} (용병)`,
+        position: "용병",
+        number: 0,
+        overall: 0,
+        image: "/images/player/img_player.png",
+      }
+    : null;
+
+  const isLoading = isSearching || inputValue !== debouncedKeyword;
+
   return {
     inputValue,
     setInputValue,
     debouncedKeyword,
     searchResults,
     selectedPlayer,
-    isSearching,
+    mercenaryPlayer,
+    isSearching: isLoading, // 디바운스 대기 중에도 로딩으로 처리
     handleSelect,
     handleComplete,
     hideModal,
