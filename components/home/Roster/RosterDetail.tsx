@@ -21,18 +21,22 @@ const RosterDetail = ({ player }: PlayerCardProps) => {
   } as const;
 
   return (
-    <article className="-mx-4 -mt-4 h-72.25 rounded-t-2xl overflow-hidden relative">
-      <Image
-        src="/images/card-bgs/normal-green.webp"
-        alt=""
-        role="presentation"
-        fill
-        priority
-        className="object-cover opacity-50"
-      />
-      <PlayerProfileDim className="-bottom-13 h-76" />
+    <article className="-mx-4 -mt-4 h-72.25 rounded-t-2xl">
+      <div className="absolute top-0 left-0 w-full h-72.25 z-0 overflow-hidden">
+        <div className="bg-linear-to-t from-surface-card to-black/0 absolute top-0 left-0 w-full h-full z-20" />
+        <div className="absolute top-0 left-0 w-full h-full z-10 bg-surface-card opacity-50" />
+        <Image
+          src="/images/card-bgs/normal-green.webp"
+          alt=""
+          role="presentation"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
 
-      <div className="relative z-20 flex flex-col gap-2 h-full">
+      <div className="relative z-20 flex flex-col gap-2 h-full overflow-hidden rounded-t-2xl">
+        <PlayerProfileDim className="-bottom-13 h-59 lg:h-76 w-full -z-10 opacity-50 lg:opacity-100 to-surface-card" />
         <PlayerProfileHeader player={player} />
 
         <section

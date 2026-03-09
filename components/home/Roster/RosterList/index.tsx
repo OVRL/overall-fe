@@ -13,7 +13,7 @@ const RosterList = ({
   const { sortedPlayers, sortConfig, handleSort } = usePlayerSort(players);
 
   return (
-    <div className="flex-1 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="flex-1 overflow-y-auto scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ">
       <div
         className="w-full flex flex-col gap-y-1"
         role="table"

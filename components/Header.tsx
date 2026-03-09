@@ -2,8 +2,9 @@
 
 import { ReactNode, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
-import Image, { StaticImageData } from "next/image";
+import { type StaticImageData } from "next/image";
 import Link from "next/link";
+import logoOvr from "@/public/icons/logo_OVR.svg";
 import Icon from "@/components/ui/Icon";
 import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
 import { useScrollLock } from "@/hooks/useScrollLock";
@@ -109,16 +110,10 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
         <div className="flex items-center gap-3 lg:gap-4">
           <Link
             href="/home"
-            className="relative w-16 lg:w-20 h-8 lg:h-10"
+            className="flex items-center"
             aria-label="홈으로 가기"
           >
-            <Image
-              src="/images/logo_OVR_head.png"
-              alt="OVR Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+            <Icon src={logoOvr} alt="OVR Logo" className="w-23 h-12" nofill />
           </Link>
         </div>
 

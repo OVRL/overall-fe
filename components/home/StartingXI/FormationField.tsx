@@ -27,20 +27,10 @@ const FORMATION_POSITIONS: Record<number, FormationPosition> = {
 
 interface FormationFieldProps {
   players: Player[];
-  handleDragStart: (e: React.DragEvent, player: Player) => void;
-  handleDrop: (e: React.DragEvent, player: Player) => void;
-  handleDragOver: (e: React.DragEvent) => void;
-  onPlayerSelect?: (player: Player) => void;
+  className?: string;
 }
 
-const FormationField = ({
-  players,
-  handleDragStart,
-  handleDrop,
-  handleDragOver,
-  onPlayerSelect,
-  className,
-}: FormationFieldProps & { className?: string }) => (
+const FormationField = ({ players, className }: FormationFieldProps) => (
   <div className={`relative w-full rounded-2xl overflow-hidden ${className}`}>
     {/* 필드 이미지 배경 */}
     <Image
@@ -60,13 +50,7 @@ const FormationField = ({
           className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
           style={{ top: position.top, left: position.left }}
         >
-          <PlayerPositionCard
-            player={player}
-            onDragStart={(e) => handleDragStart(e, player)}
-            onDrop={(e) => handleDrop(e, player)}
-            onDragOver={handleDragOver}
-            onClick={() => onPlayerSelect && onPlayerSelect(player)}
-          />
+          <PlayerPositionCard player={player} />
         </div>
       );
     })}

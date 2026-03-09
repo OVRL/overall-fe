@@ -48,12 +48,12 @@ export default function SquadManager({
       </section>
 
       {/* Right: Player Card + Player List */}
-      <div className="max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-card">
+      <div className="relative overflow-hidden max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-card">
         <PlayerRosterPanel
           players={players}
           selectedPlayer={selectedPlayer}
           onPlayerSelect={handlePlayerSelect}
-          className="md:w-92 lg:w-84 xl:w-90 2xl:w-98.25"
+          className="md:w-92 lg:w-84 xl:w-90 2xl:w-98.2"
         />
       </div>
     </div>
