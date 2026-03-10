@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@/lib/utils";
 
 export type SortKey = "position" | "number" | "name" | "overall";
@@ -19,7 +18,6 @@ interface HeaderCellProps {
   sortKey: SortKey;
   className?: string;
   align?: "left" | "center" | "right";
-  sortConfig?: SortConfig | null;
   onSort?: (key: SortKey) => void;
 }
 
@@ -28,7 +26,6 @@ const HeaderCell = ({
   sortKey,
   className,
   align = "center",
-  sortConfig,
   onSort,
 }: HeaderCellProps) => {
   const handleSort = () => {
@@ -37,20 +34,11 @@ const HeaderCell = ({
     }
   };
 
-  const renderSortIcon = () => {
-    if (!sortConfig || sortConfig.key !== sortKey) return null;
-    return (
-      <span className="ml-1 text-[0.6rem]">
-        {sortConfig.direction === "asc" ? "▲" : "▼"}
-      </span>
-    );
-  };
-
   return (
     <div
       role="columnheader"
       className={cn(
-        "font-normal cursor-pointer hover:text-gray-900 transition-colors select-none",
+        "font-normal cursor-pointer hover:text-gray-500 transition-colors select-none",
         align === "left" && "text-left",
         align === "center" && "text-center",
         align === "right" && "text-right",
@@ -65,7 +53,6 @@ const HeaderCell = ({
         )}
       >
         {title}
-        {renderSortIcon()}
       </div>
     </div>
   );
@@ -81,15 +68,6 @@ const PlayerListCategory = ({
     }
   };
 
-  const renderSortIcon = (key: SortKey) => {
-    if (!sortConfig || sortConfig.key !== key) return null;
-    return (
-      <span className="ml-1 text-[0.6rem]">
-        {sortConfig.direction === "asc" ? "▲" : "▼"}
-      </span>
-    );
-  };
-
   return (
     <div className="w-full text-[0.6875rem] text-gray-800" role="rowgroup">
       <div
@@ -103,18 +81,16 @@ const PlayerListCategory = ({
         >
           <div className="flex items-center">
             <div
-              className="w-12.25 h-3.25 flex items-center justify-center cursor-pointer hover:text-gray-900 transition-colors select-none"
+              className="w-12.25 h-3.25 flex items-center justify-center cursor-pointer hover:text-gray-500 transition-colors select-none"
               onClick={() => handleSort("position")}
             >
               포지션
-              {renderSortIcon("position")}
             </div>
             <div
-              className="w-9.75 h-3.25 flex items-center justify-center cursor-pointer hover:text-gray-900 transition-colors select-none"
+              className="w-9.75 h-3.25 flex items-center justify-center cursor-pointer hover:text-gray-500 transition-colors select-none"
               onClick={() => handleSort("number")}
             >
               등번호
-              {renderSortIcon("number")}
             </div>
           </div>
         </div>
@@ -123,7 +99,6 @@ const PlayerListCategory = ({
           sortKey="name"
           className="flex-1"
           align="center"
-          sortConfig={sortConfig}
           onSort={onSort}
         />
         <HeaderCell
@@ -131,7 +106,6 @@ const PlayerListCategory = ({
           sortKey="overall"
           className="w-12.25"
           align="center"
-          sortConfig={sortConfig}
           onSort={onSort}
         />
       </div>

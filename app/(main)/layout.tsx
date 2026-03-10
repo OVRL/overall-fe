@@ -6,7 +6,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-surface-primary flex flex-col">
+    <div className="min-h-screen bg-bg-basic flex flex-col">
       <Header variant="global" />
       {children}
     </div>

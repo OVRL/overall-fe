@@ -103,7 +103,7 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
   return (
     <header
       ref={headerRef}
-      className={`relative bg-surface-primary border-b border-gray-800 z-50 ${className}`}
+      className={`relative bg-black/20 backdrop-blur-[0.625rem] z-50 ${className}`}
     >
       <div className="flex justify-between items-center px-4 lg:px-8 py-3 lg:py-4">
         {/* 로고 */}
@@ -121,7 +121,7 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
         <nav aria-label="메인 네비게이션">
           <div className="flex items-center gap-6 lg:gap-10">
             {/* 데스크톱 메뉴 */}
-            <ul className="hidden lg:flex items-center gap-8">
+            <ul className="hidden lg:flex items-center gap-8 text-[0.9375rem]">
               <RegisterGameButton />
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;

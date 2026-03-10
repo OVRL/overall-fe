@@ -36,7 +36,7 @@ export default function SquadManager({
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full max-w-screen-xl justify-center items-center lg:items-start 2xl:max-w-none">
+    <div className="flex flex-col lg:flex-row gap-4 w-full max-w-screen-xl justify-center items-center lg:items-start 2xl:max-w-none">
       {/* Left: Next Match + Starting XI */}
       <section className="w-full lg:w-156 xl:w-225 2xl:w-225 h-full flex flex-col gap-4">
         {upcomingMatchSlot}

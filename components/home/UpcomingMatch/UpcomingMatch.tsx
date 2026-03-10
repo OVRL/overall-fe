@@ -9,9 +9,9 @@ import UpcomingMatchMobile from "./UpcomingMatchMobile";
 const UpcomingMatch = () => {
   return (
     <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
-      {/* <UpcomingMatchMobile />
-      <UpcomingMatchDesktop /> */}
-      <NoUpcomingMatch />
+      <UpcomingMatchMobile />
+      <UpcomingMatchDesktop />
+      {/* <NoUpcomingMatch /> */}
     </div>
   );
 };

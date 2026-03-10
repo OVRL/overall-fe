@@ -23,7 +23,7 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
   return (
     <div
       onClick={onClick}
-      className="flex items-center w-full hover:bg-gray-800/30 transition-colors cursor-pointer pl-2 pr-1.5 relative"
+      className="flex items-center w-full hover:bg-gray-800/30 transition-colors cursor-pointer pl-2 pr-1.5 relative py-1"
       role="row"
     >
       <div className="flex items-center" role="cell">
@@ -53,7 +53,7 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
           />
         </div>
 
-        <span className="text-white font-medium truncate text-xs md:text-base w-18.75 text-ellipsis">
+        <span className="text-white font-medium truncate text-sm w-18.75 text-ellipsis">
           {player.name}
         </span>
       </div>
