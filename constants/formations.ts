@@ -172,3 +172,19 @@ export const FORMATION_OPTIONS = [
   { label: "5-4-1", value: "5-4-1" },
   { label: "5-2-3", value: "5-2-3" },
 ];
+
+/** GraphQL Formation enum → FORMATION_POSITIONS 키 (getHomePageData.formation 응답 매핑용) */
+export const FORMATION_ENUM_TO_VALUE: Record<string, string> = {
+  FORMATION_3_4_1_2: "3-4-1-2",
+  FORMATION_3_4_3: "3-4-3",
+  FORMATION_3_5_2: "3-5-2",
+  FORMATION_4_1_4_1: "4-1-4-1",
+  FORMATION_4_2_2_2: "4-2-2-2",
+  FORMATION_4_2_3_1: "4-2-3-1",
+  FORMATION_4_3_2_1: "4-3-2-1",
+  FORMATION_4_3_3: "4-3-3",
+  FORMATION_4_4_2: "4-4-2",
+  FORMATION_5_2_3: "5-2-3",
+  FORMATION_5_3_2: "5-3-2",
+  FORMATION_5_4_1: "5-4-1",
+};

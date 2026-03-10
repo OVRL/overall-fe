@@ -1,6 +1,7 @@
 import { Player } from "@/types/player";
 import PlayerCard from "@/components/ui/PlayerCard";
-
+import captain from "@/public/images/captain.webp";
+import Image from "next/image";
 interface PlayerPositionCardProps {
   player: Player;
 }
@@ -17,9 +18,13 @@ const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
     <div className="relative flex flex-col items-center">
       {/* 주장 배지 (첫 번째 선수에만 - Mock logic) */}
       {player.id === 5 && (
-        <div className="absolute top-1 left-2 z-20 bg-yellow-400 text-black w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[0.625rem] md:text-xs font-black shadow-sm">
-          C
-        </div>
+        <Image
+          src={captain}
+          alt="captain"
+          width={24}
+          height={24}
+          className="absolute bottom-4 right-2 z-20"
+        />
       )}
       {(
         [

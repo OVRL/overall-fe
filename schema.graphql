@@ -23,9 +23,15 @@ type CreateInviteCodeModel {
 
 input CreateTeamInput {
   activityArea: String!
+  awayUniform: UniformDesign!
   description: String
+  email: String!
   historyStartDate: DateTime!
+  homeUniform: UniformDesign!
   name: String!
+
+  """팀 생성자 유저 ID"""
+  userId: Int!
 }
 
 """
@@ -68,6 +74,26 @@ type InviteCodeModel {
   teamId: Float!
 }
 
+input JoinTeamInput {
+  """등번호 (선택)"""
+  backNumber: Int
+
+  """유저 이메일"""
+  email: String!
+
+  """팀 초대 코드"""
+  inviteCode: String!
+
+  """포지션 (선택)"""
+  position: String
+
+  """프로필 이미지 (선택)"""
+  profileImg: String
+
+  """역할 (player, coach, manager)"""
+  role: String! = "player"
+}
+
 type LoginResponseModel {
   accessToken: String
   activityArea: String
@@ -92,12 +118,15 @@ type LoginResponseModel {
 type Mutation {
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
   createTeam(emblem: Upload!, input: CreateTeamInput!): TeamModel!
+  createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteTeam(id: Int!): Boolean!
+  deleteTeamMember(id: Int!): Boolean!
   login(email: String!, password: String!): LoginResponseModel!
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
   removeBackground(image: Upload!): BackgroundRemovalModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
+  updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
 }
 
@@ -144,8 +173,10 @@ type Query {
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
+  findManyTeamMember(limit: Int! = 10, offset: Int! = 0): TeamMemberArrayModel!
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findTeam(id: Int!): TeamModel!
+  findTeamMember(id: Int!): TeamMemberModel
   findUser(email: String!): UserModel!
 }
 
@@ -170,22 +201,91 @@ type TeamArrayModel {
   totalCount: Int!
 }
 
+type TeamMemberArrayModel {
+  """팀 멤버 목록"""
+  members: [TeamMemberModel!]!
+
+  """전체 개수"""
+  totalCount: Int!
+}
+
+type TeamMemberModel {
+  """등번호"""
+  backNumber: Int
+
+  """팀 멤버 ID"""
+  id: Int!
+
+  """가입일"""
+  joinedAt: DateTime!
+
+  """포지션"""
+  position: String
+
+  """프로필 이미지"""
+  profileImg: String
+
+  """역할"""
+  role: String!
+
+  """팀 ID"""
+  teamId: Int!
+
+  """유저 ID"""
+  userId: Int!
+}
+
 type TeamModel {
   activityArea: String
+  awayUniform: UniformDesign
   description: String
   emblem: String
   historyStartDate: Date
+  homeUniform: UniformDesign
   id: ID!
   name: String
   region: RegionSearchModel
 }
 
+"""팀 유니폼 디자인"""
+enum UniformDesign {
+  DEFAULT
+  SOLID_BLACK
+  SOLID_BLUE
+  SOLID_PURPLE
+  SOLID_RED
+  SOLID_WHITE
+  STRIPE_BLUE
+  STRIPE_RED
+  STRIPE_WHITE
+  STRIPE_YELLOW
+}
+
 input UpdateTeamInput {
   activityArea: String
+  awayUniform: UniformDesign
   description: String
   historyStartDate: Date
+  homeUniform: UniformDesign
   id: Int!
   name: String
+}
+
+input UpdateTeamMemberInput {
+  """등번호 (선택)"""
+  backNumber: Int
+
+  """팀 멤버 ID"""
+  id: Int!
+
+  """포지션 (선택)"""
+  position: String
+
+  """프로필 이미지 (선택)"""
+  profileImg: String
+
+  """역할 (선택)"""
+  role: String
 }
 
 input UpdateUserInput {

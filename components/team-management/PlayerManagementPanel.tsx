@@ -7,7 +7,6 @@ import PositionChip from "@/components/PositionChip";
 import FormationField from "@/components/home/StartingXI/FormationField";
 import DateTimePicker from "@/components/ui/date/DateTimePicker";
 import { Position } from "@/types/position";
-import { Player } from "@/types/player";
 
 // Mock 선수 데이터
 interface PlayerRecord {
