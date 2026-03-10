@@ -34,17 +34,20 @@ export async function GET(request: NextRequest) {
     path: "/",
   });
 
+  // 3. 회원가입(pending), 기존유저(success) 상관없이 id 파라미터가 있다면 'userId' 쿠키로 무조건 저장!
+  const id = searchParams.get("id");
+  if (id) {
+    cookieStore.set("userId", id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days (Refresh Token과 동일한 주기로 유지)
+      path: "/",
+    });
+  }
+
+  // 4. 라우팅 분기 처리
   if (signupStatus === "pending") {
-    const id = searchParams.get("id");
-    if (id) {
-      cookieStore.set("onboarding_user_id", id, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60, // 1 hour
-        path: "/",
-      });
-    }
     return redirect("/onboarding");
   }
 

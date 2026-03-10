@@ -3,9 +3,13 @@ Indicates exactly one field must be supplied and this field must not be `null`.
 """
 directive @oneOf on INPUT_OBJECT
 
-"""Exposes a URL that specifies the behavior of this scalar."""
+"""
+Exposes a URL that specifies the behavior of this scalar.
+"""
 directive @specifiedBy(
-  """The URL that specifies the behavior of this scalar."""
+  """
+  The URL that specifies the behavior of this scalar.
+  """
   url: String!
 ) on SCALAR
 
@@ -30,7 +34,9 @@ input CreateTeamInput {
   homeUniform: UniformDesign!
   name: String!
 
-  """팀 생성자 유저 ID"""
+  """
+  팀 생성자 유저 ID
+  """
   userId: Int!
 }
 
@@ -46,14 +52,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""주발"""
+"""
+주발
+"""
 enum Foot {
   B
   L
   R
 }
 
-"""성별"""
+"""
+성별
+"""
 enum Gender {
   M
   W
@@ -75,22 +85,34 @@ type InviteCodeModel {
 }
 
 input JoinTeamInput {
-  """등번호 (선택)"""
+  """
+  등번호 (선택)
+  """
   backNumber: Int
 
-  """유저 이메일"""
+  """
+  유저 이메일
+  """
   email: String!
 
-  """팀 초대 코드"""
+  """
+  팀 초대 코드
+  """
   inviteCode: String!
 
-  """포지션 (선택)"""
+  """
+  포지션 (선택)
+  """
   position: String
 
-  """프로필 이미지 (선택)"""
+  """
+  프로필 이미지 (선택)
+  """
   profileImg: String
 
-  """역할 (player, coach, manager)"""
+  """
+  역할 (player, coach, manager)
+  """
   role: String! = "player"
 }
 
@@ -117,7 +139,7 @@ type LoginResponseModel {
 
 type Mutation {
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
-  createTeam(emblem: Upload!, input: CreateTeamInput!): TeamModel!
+  createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
@@ -130,7 +152,9 @@ type Mutation {
   updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
 }
 
-"""축구 포지션 목록"""
+"""
+축구 포지션 목록
+"""
 enum Position {
   CAM
   CB
@@ -202,36 +226,56 @@ type TeamArrayModel {
 }
 
 type TeamMemberArrayModel {
-  """팀 멤버 목록"""
+  """
+  팀 멤버 목록
+  """
   members: [TeamMemberModel!]!
 
-  """전체 개수"""
+  """
+  전체 개수
+  """
   totalCount: Int!
 }
 
 type TeamMemberModel {
-  """등번호"""
+  """
+  등번호
+  """
   backNumber: Int
 
-  """팀 멤버 ID"""
+  """
+  팀 멤버 ID
+  """
   id: Int!
 
-  """가입일"""
+  """
+  가입일
+  """
   joinedAt: DateTime!
 
-  """포지션"""
+  """
+  포지션
+  """
   position: String
 
-  """프로필 이미지"""
+  """
+  프로필 이미지
+  """
   profileImg: String
 
-  """역할"""
+  """
+  역할
+  """
   role: String!
 
-  """팀 ID"""
+  """
+  팀 ID
+  """
   teamId: Int!
 
-  """유저 ID"""
+  """
+  유저 ID
+  """
   userId: Int!
 }
 
@@ -247,7 +291,9 @@ type TeamModel {
   region: RegionSearchModel
 }
 
-"""팀 유니폼 디자인"""
+"""
+팀 유니폼 디자인
+"""
 enum UniformDesign {
   DEFAULT
   SOLID_BLACK
@@ -272,19 +318,29 @@ input UpdateTeamInput {
 }
 
 input UpdateTeamMemberInput {
-  """등번호 (선택)"""
+  """
+  등번호 (선택)
+  """
   backNumber: Int
 
-  """팀 멤버 ID"""
+  """
+  팀 멤버 ID
+  """
   id: Int!
 
-  """포지션 (선택)"""
+  """
+  포지션 (선택)
+  """
   position: String
 
-  """프로필 이미지 (선택)"""
+  """
+  프로필 이미지 (선택)
+  """
   profileImg: String
 
-  """역할 (선택)"""
+  """
+  역할 (선택)
+  """
   role: String
 }
 
@@ -304,7 +360,9 @@ input UpdateUserInput {
   subPositions: [Position!]
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
 
 type UserArrayModel {
@@ -341,4 +399,3 @@ type UserTokenModel {
   updatedAt: DateTime!
   userId: Float!
 }
-

@@ -3,7 +3,7 @@ import OnboardingFunnelWrapper from "./_component/OnboardingFunnelWrapper";
 
 const OnboardingPage = async () => {
   const cookieStore = await cookies();
-  const userId = cookieStore.get("onboarding_user_id")?.value;
+  const userId = cookieStore.get("userId")?.value;
 
   return (
     <div className="flex flex-col gap-y-10 h-full">

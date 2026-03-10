@@ -19,10 +19,14 @@ import { ko } from "date-fns/locale";
 import locationIcon from "@/public/icons/location.svg";
 import { useRouter } from "next/navigation";
 
-const CreateTeamWrapper = () => {
+interface CreateTeamWrapperProps {
+  userId: number;
+}
+
+const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
   const { openModal } = useModal("ADDRESS_SEARCH");
   const router = useRouter();
-  const { form, onSubmit } = useCreateTeamForm();
+  const { form, onSubmit } = useCreateTeamForm(userId);
   const {
     control,
     handleSubmit,

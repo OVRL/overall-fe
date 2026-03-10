@@ -1,3 +1,4 @@
+import NoUpcomingMatch from "./NoUpcomingMatch";
 import UpcomingMatchDesktop from "./UpcomingMatchDesktop";
 import UpcomingMatchMobile from "./UpcomingMatchMobile";
 
@@ -8,8 +9,9 @@ import UpcomingMatchMobile from "./UpcomingMatchMobile";
 const UpcomingMatch = () => {
   return (
     <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
-      <UpcomingMatchMobile />
-      <UpcomingMatchDesktop />
+      {/* <UpcomingMatchMobile />
+      <UpcomingMatchDesktop /> */}
+      <NoUpcomingMatch />
     </div>
   );
 };
