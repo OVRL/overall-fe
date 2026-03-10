@@ -14,7 +14,6 @@ jest.mock("@/components/ui/Icon", () => {
 
 describe("QuarterSelector 컴포넌트", () => {
   const mockSetCurrentQuarterId = jest.fn();
-  const mockAddQuarter = jest.fn();
 
   const mockQuarters: any[] = [
     { id: 1, formation: "4-3-3", lineup: {}, type: "match", matchup: "home" },
@@ -43,7 +42,6 @@ describe("QuarterSelector 컴포넌트", () => {
         quarters={mockQuarters}
         currentQuarterId={currentQuarterId}
         setCurrentQuarterId={mockSetCurrentQuarterId}
-        addQuarter={mockAddQuarter}
       />,
     );
   };
@@ -75,14 +73,5 @@ describe("QuarterSelector 컴포넌트", () => {
     fireEvent.click(btn2Q);
 
     expect(mockSetCurrentQuarterId).toHaveBeenCalledWith(null);
-  });
-
-  it("쿼터 추가(+) 버튼을 클릭하면 addQuarter 액션이 호출되어야 한다", () => {
-    setup();
-    const addBtn = screen.getByRole("button", { name: "+" });
-
-    fireEvent.click(addBtn);
-
-    expect(mockAddQuarter).toHaveBeenCalledTimes(1);
   });
 });

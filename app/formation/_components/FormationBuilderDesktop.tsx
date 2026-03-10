@@ -10,13 +10,19 @@ export interface FormationBuilderDesktopProps {
   scheduleCard: React.ReactNode;
   quarters: QuarterData[];
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
-  addQuarter: () => void;
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
+  matchType?: "MATCH" | "INTERNAL";
+  selectedSubTeam?: "A" | "B";
+  onSubTeamChange?: (team: "A" | "B") => void;
   selectedPlayer: Player | null;
   setSelectedPlayer: (player: Player | null) => void;
   onPositionRemove: (quarterId: number, index: number) => void;
-  assignPlayer?: (quarterId: number, positionIndex: number, player: Player) => void;
+  assignPlayer?: (
+    quarterId: number,
+    positionIndex: number,
+    player: Player,
+  ) => void;
   initialPlayers: Player[];
 }
 
@@ -28,9 +34,11 @@ export default function FormationBuilderDesktop({
   scheduleCard,
   quarters,
   setQuarters,
-  addQuarter,
   currentQuarterId,
   setCurrentQuarterId,
+  matchType,
+  selectedSubTeam,
+  onSubTeamChange,
   selectedPlayer,
   setSelectedPlayer,
   onPositionRemove,
@@ -45,7 +53,9 @@ export default function FormationBuilderDesktop({
           currentQuarterId={currentQuarterId}
           setCurrentQuarterId={setCurrentQuarterId}
           quarters={quarters}
-          addQuarter={addQuarter}
+          matchType={matchType}
+          selectedSubTeam={selectedSubTeam}
+          onSubTeamChange={onSubTeamChange}
         />
 
         <FormationBoardList

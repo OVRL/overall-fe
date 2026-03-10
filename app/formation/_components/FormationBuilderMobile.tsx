@@ -25,7 +25,6 @@ import Icon from "@/components/ui/Icon";
 export interface FormationBuilderMobileProps {
   quarters: QuarterData[];
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
-  addQuarter: () => void;
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
   selectedPlayer: Player | null;
@@ -46,7 +45,6 @@ export interface FormationBuilderMobileProps {
 export default function FormationBuilderMobile({
   quarters,
   setQuarters,
-  addQuarter,
   currentQuarterId,
   setCurrentQuarterId,
   selectedPlayer,
@@ -154,7 +152,6 @@ export default function FormationBuilderMobile({
               quarters={quarters}
               currentQuarterId={currentQuarterId}
               setCurrentQuarterId={setCurrentQuarterId}
-              addQuarter={addQuarter}
             />
           </section>
 

@@ -53,20 +53,25 @@ export default function FormationBuilder({
   scheduleCard,
   initialPlayers,
 }: FormationBuilderProps) {
-  const { quarters, setQuarters, addQuarter, assignPlayer, removePlayer } =
+  const { quarters, setQuarters, assignPlayer, removePlayer } =
     useFormationManager();
   const isLgOrBelow = useIsMobile(1023);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(null);
   const [selectedListPlayer, setSelectedListPlayer] = useState<Player | null>(
     null,
   );
+  // 임시 테스트용 상태
+  const [matchType] = useState<"MATCH" | "INTERNAL">("INTERNAL");
+  const [selectedSubTeam, setSelectedSubTeam] = useState<"A" | "B">("A");
 
   const commonProps = {
     quarters,
     setQuarters,
-    addQuarter,
     currentQuarterId,
     setCurrentQuarterId,
+    matchType,
+    selectedSubTeam,
+    onSubTeamChange: setSelectedSubTeam,
     selectedPlayer: selectedListPlayer,
     setSelectedPlayer: setSelectedListPlayer,
     onPositionRemove: removePlayer,

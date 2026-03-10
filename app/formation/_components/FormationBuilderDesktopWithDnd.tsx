@@ -22,13 +22,19 @@ export interface FormationBuilderDesktopWithDndProps {
   scheduleCard: React.ReactNode;
   quarters: QuarterData[];
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
-  addQuarter: () => void;
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
+  matchType?: "MATCH" | "INTERNAL";
+  selectedSubTeam?: "A" | "B";
+  onSubTeamChange?: (team: "A" | "B") => void;
   selectedPlayer: Player | null;
   setSelectedPlayer: (player: Player | null) => void;
   onPositionRemove: (quarterId: number, index: number) => void;
-  assignPlayer: (quarterId: number, positionIndex: number, player: Player) => void;
+  assignPlayer: (
+    quarterId: number,
+    positionIndex: number,
+    player: Player,
+  ) => void;
   initialPlayers: Player[];
 }
 
@@ -104,9 +110,11 @@ export default function FormationBuilderDesktopWithDnd(
         scheduleCard={props.scheduleCard}
         quarters={props.quarters}
         setQuarters={props.setQuarters}
-        addQuarter={props.addQuarter}
         currentQuarterId={props.currentQuarterId}
         setCurrentQuarterId={props.setCurrentQuarterId}
+        matchType={props.matchType}
+        selectedSubTeam={props.selectedSubTeam}
+        onSubTeamChange={props.onSubTeamChange}
         selectedPlayer={props.selectedPlayer}
         setSelectedPlayer={props.setSelectedPlayer}
         onPositionRemove={props.onPositionRemove}

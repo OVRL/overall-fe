@@ -6,7 +6,6 @@ export interface QuarterSelectorTabsProps {
   quarters: QuarterData[];
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
-  addQuarter: () => void;
 }
 
 /**
@@ -17,7 +16,6 @@ const QuarterSelectorTabs = ({
   quarters,
   currentQuarterId,
   setCurrentQuarterId,
-  addQuarter,
 }: QuarterSelectorTabsProps) => {
   const scrollRef = useHorizontalScroll();
 
@@ -42,13 +40,6 @@ const QuarterSelectorTabs = ({
           </QuarterButton>
         </div>
       ))}
-      {quarters.length < 10 && (
-        <div className="shrink-0">
-          <QuarterButton onClick={addQuarter} variant="add" size="sm">
-            +
-          </QuarterButton>
-        </div>
-      )}
     </div>
   );
 };
