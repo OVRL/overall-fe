@@ -1,11 +1,6 @@
-"use client";
-
 import localFont from "next/font/local";
 import HeroSection from "@/components/landing/HeroSection";
-import Player2Section from "@/components/landing/Player2Section";
-import Player5Section from "@/components/landing/Player5Section";
-import PlayerDiveSection from "@/components/landing/PlayerDiveSection";
-import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
+import Header from "@/components/landing/Header";
 
 const paperlogy = localFont({
   src: [
@@ -64,11 +59,8 @@ export default function LandingPage() {
     <main
       className={`bg-black min-h-screen font-sans ${paperlogy.variable} ${paperlogy.className} flex flex-col w-full overflow-x-hidden`}
     >
+      <Header />
       <HeroSection />
-      <Player2Section />
-      <Player5Section />
-      <PlayerDiveSection />
-      <SpecialtiesSection />
     </main>
   );
 }
