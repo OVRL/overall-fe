@@ -2,14 +2,17 @@ import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import SelectMainFoot from "../SelectMainFoot";
 
 import { OnboardingStepProps } from "@/types/onboarding";
 import SelectGender from "../SelectGender";
 
 import { useModifyUserMutation } from "../../_hooks/useModifyUserMutation";
-import { UpdateUserInput } from "@/__generated__/useModifyUserMutation.graphql";
+import {
+  UpdateUserInput,
+  Position,
+} from "@/__generated__/useModifyUserMutation.graphql";
 import useModal from "@/hooks/useModal";
 
 const AdditionalInfoCollect = ({
@@ -30,6 +33,11 @@ const AdditionalInfoCollect = ({
   const { openModal } = useModal("ADDRESS_SEARCH");
 
   const handleComplete = () => {
+    if (!data.profileImageFile) {
+      alert("프로필 이미지가 필요합니다.");
+      return;
+    }
+
     onDataChange((prev) => ({
       ...prev,
       gender: info.gender,
@@ -41,19 +49,29 @@ const AdditionalInfoCollect = ({
       favoritePlayer: info.favoritePlayer,
     }));
 
+    const updateInput: UpdateUserInput = {
+      id: data.id!, // data.id is checked above
+      name: data.name!, // Name should be collected by now
+      phone: data.phone!, // Phone should be collected
+      birthDate: data.birthDate,
+      mainPosition: data.mainPosition as Position | undefined | null,
+      subPositions: data.subPositions as readonly Position[] | null | undefined,
+      gender: info.gender,
+      activityArea: info.activityAreaCode || info.activityArea,
+      foot: info.foot,
+      preferredNumber: info.preferredNumber
+        ? parseFloat(info.preferredNumber)
+        : null,
+      favoritePlayer: info.favoritePlayer,
+    };
+
     commit({
       variables: {
-        input: {
-          ...data,
-          email: data.email,
-          gender: info.gender,
-          activityArea: info.activityAreaCode || info.activityArea,
-          foot: info.foot,
-          preferredNumber: info.preferredNumber
-            ? parseFloat(info.preferredNumber)
-            : null,
-          favoritePlayer: info.favoritePlayer,
-        } as unknown as UpdateUserInput,
+        input: updateInput,
+        profileImage: null, // Placeholder for uploadable, handled by network layer
+      },
+      uploadables: {
+        profileImage: data.profileImageFile,
       },
       onCompleted: () => {
         onNext();
@@ -65,19 +83,31 @@ const AdditionalInfoCollect = ({
   };
 
   const handleLater = () => {
+    if (!data.profileImageFile) {
+      alert("프로필 이미지가 필요합니다.");
+      return;
+    }
+
     const previousData = { ...data };
-    delete previousData.gender;
-    delete previousData.activityArea;
-    delete previousData.foot;
-    delete previousData.preferredNumber;
-    delete previousData.favoritePlayer;
+    const updateInput: UpdateUserInput = {
+      id: data.id!,
+      name: previousData.name!,
+      phone: previousData.phone!,
+      birthDate: previousData.birthDate,
+      mainPosition: previousData.mainPosition as Position | undefined | null,
+      subPositions: previousData.subPositions as
+        | readonly Position[]
+        | null
+        | undefined,
+    };
 
     commit({
       variables: {
-        input: {
-          ...previousData,
-          email: data.email,
-        } as unknown as UpdateUserInput,
+        input: updateInput,
+        profileImage: null,
+      },
+      uploadables: {
+        profileImage: data.profileImageFile,
       },
       onCompleted: () => {
         onNext(); // Next step or finish
@@ -136,7 +166,7 @@ const AdditionalInfoCollect = ({
               }
             }}
           >
-            <AuthTextField
+            <TextField
               label="활동지역"
               placeholder="주소검색"
               type="text"
@@ -156,7 +186,7 @@ const AdditionalInfoCollect = ({
             }
           />
 
-          <AuthTextField
+          <TextField
             label="선호하는 등번호"
             placeholder="선호하는 등번호를 입력해주세요."
             type="number"
@@ -165,7 +195,7 @@ const AdditionalInfoCollect = ({
               setInfo((prev) => ({ ...prev, preferredNumber: e.target.value }))
             }
           />
-          <AuthTextField
+          <TextField
             label="좋아하는 선수"
             placeholder="좋아하는 선수를 입력해주세요."
             type="text"

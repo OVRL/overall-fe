@@ -1,6 +1,6 @@
 import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ const AuthNumber = () => {
           인증번호를 입력해주세요.
         </OnboardingTitle>
         <div className="mt-20">
-          <AuthTextField
+          <TextField
             label="인증번호"
             placeholder="인증번호를 입력해주세요."
             type="number"

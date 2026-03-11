@@ -23,6 +23,7 @@ export const onboardingSchema = z.object({
   preferredNumber: z.number().optional(),
   favoritePlayer: z.string().optional(),
   id: z.number(),
+  profileImageFile: z.custom<File>().optional(),
 });
 
 export type OnboardingState = z.infer<typeof onboardingSchema>;

@@ -3,7 +3,7 @@ import AddressItem from "../AddressItem";
 import "@testing-library/jest-dom";
 
 // Mock the Icon component and SVG import
-jest.mock("@/components/Icon", () => {
+jest.mock("@/components/ui/Icon", () => {
   return function MockIcon() {
     return <div data-testid="mock-icon" />;
   };

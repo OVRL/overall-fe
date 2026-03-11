@@ -10,4 +10,7 @@ export const PUBLIC_ROUTES = [
   /^\/team-data(\/.*)?$/,
   /^\/formation(\/.*)?$/,
   /^\/team-management(\/.*)?$/,
+  /^\/landing(\/.*)?$/,
+  /^\/create-team(\/.*)?$/,
+  /^\/calculation(\/.*)?$/,
 ];

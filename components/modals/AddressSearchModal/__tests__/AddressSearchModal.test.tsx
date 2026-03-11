@@ -11,7 +11,7 @@ jest.mock("@/lib/relay/environment", () => ({
 }));
 
 // Mock Icon to avoid SVG issues
-jest.mock("@/components/Icon");
+jest.mock("@/components/ui/Icon");
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 jest.mock("@/public/icons/check.svg", () => "check.svg");
 
@@ -77,12 +77,12 @@ describe("AddressSearchModal 컴포넌트", () => {
 
     expect(screen.getByText("검색 중...")).toBeInTheDocument();
 
-    // Resolve Relay query
+    // Resolve Relay query (스키마 타입명: RegionSearchArrayModel)
     act(() => {
       mockEnvironment.mock.resolveMostRecentOperation(
         (operation: OperationDescriptor) =>
           MockPayloadGenerator.generate(operation, {
-            RegionSearch: () => ({
+            RegionSearchArrayModel: () => ({
               items: [
                 {
                   code: "999",

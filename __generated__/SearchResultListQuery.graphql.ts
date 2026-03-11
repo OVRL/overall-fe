@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1c9d8dbab24bd32bbe426c87ae3bb414>>
+ * @generated SignedSource<<38a9cde35e55ddc9bc96d44a0d25f071>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ export type SearchResultListQuery$variables = {
   keyword: string;
 };
 export type SearchResultListQuery$data = {
-  readonly region_search: {
+  readonly findManyRegion: {
     readonly hasNextPage: boolean;
     readonly items: ReadonlyArray<{
       readonly code: string;
@@ -48,9 +48,9 @@ v1 = [
         "variableName": "keyword"
       }
     ],
-    "concreteType": "RegionSearch",
+    "concreteType": "RegionSearchArrayModel",
     "kind": "LinkedField",
-    "name": "region_search",
+    "name": "findManyRegion",
     "plural": false,
     "selections": [
       {
@@ -63,7 +63,7 @@ v1 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "RegionSearchItem",
+        "concreteType": "RegionSearchModel",
         "kind": "LinkedField",
         "name": "items",
         "plural": true,
@@ -135,16 +135,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "8322e0836413bb2270596a49c7a561f7",
+    "cacheID": "53b8b328285856b0c76d969fd83df394",
     "id": null,
     "metadata": {},
     "name": "SearchResultListQuery",
     "operationKind": "query",
-    "text": "query SearchResultListQuery(\n  $keyword: String!\n) {\n  region_search(keyword: $keyword) {\n    hasNextPage\n    items {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n}\n"
+    "text": "query SearchResultListQuery(\n  $keyword: String!\n) {\n  findManyRegion(keyword: $keyword) {\n    hasNextPage\n    items {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "78b0b8ecfa11c4e8908629ee83148a01";
+(node as any).hash = "6ab628b1f45c1834808eb5398bd271b8";
 
 export default node;

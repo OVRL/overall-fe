@@ -24,7 +24,12 @@ describe("AdditionalInfoCollect", () => {
   const defaultProps = {
     onNext: mockOnNext,
     onDataChange: mockOnDataChange,
-    data: {},
+    data: {
+      id: 1,
+      profileImageFile: new File(["(⌐□_□)"], "profile.webp", {
+        type: "image/webp",
+      }),
+    },
   };
 
   beforeEach(() => {

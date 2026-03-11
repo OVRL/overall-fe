@@ -23,7 +23,8 @@ const ImageUploader = ({
   const [preview, setPreview] = useState<string | null>(null);
 
   const { openModal } = useModal("DEFAULT_IMAGE_SELECT");
-  const { openModal: openEditModal } = useModal("EDIT_PROFILE_IMAGE");
+  const { openModal: openEditModal, hideModal: hideEditModal } =
+    useModal("EDIT_PROFILE_IMAGE");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileClick = () => {
@@ -37,9 +38,12 @@ const ImageUploader = ({
       // Open edit modal directly instead of setting preview immediately
       openEditModal({
         initialImage: objectUrl,
-        onSave: (savedImage) => {
+        onSave: (savedImage, savedFile) => {
           setPreview(savedImage);
-          onFileSelect?.(file); // Or convert savedImage back to file if handled in modal
+          if (onFileSelect) {
+            onFileSelect(savedFile);
+          }
+          hideEditModal();
         },
       });
       // Reset input to allow selecting same file again

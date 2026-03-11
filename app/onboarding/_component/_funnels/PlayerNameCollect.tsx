@@ -1,6 +1,6 @@
 import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
-import AuthTextField from "@/components/login/AuthTextField";
+import TextField from "@/components/ui/TextField";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -27,12 +27,13 @@ const PlayerNameCollect = ({
           선수 이름을 입력해주세요.
         </OnboardingTitle>
         <div className="mt-20">
-          <AuthTextField
+          <TextField
             label="선수 이름"
             placeholder="선수 이름을 입력해주세요."
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onClear={() => setName("")}
           />
         </div>
       </div>

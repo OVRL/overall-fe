@@ -2,48 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./lib/env";
 import { GUEST_ONLY_ROUTES, PUBLIC_ROUTES } from "./lib/routes";
+import {
+  refreshAccessToken,
+  type TokenPair,
+} from "./lib/auth/refreshToken";
 
 const BACKEND_URL = env.BACKEND_URL;
-
-interface User {
-  accessToken?: string | null;
-  refreshToken?: string | null;
-}
-
-interface RefreshResponse {
-  data?: {
-    refresh: User;
-  };
-  errors?: unknown[];
-}
-
-// 헬퍼 함수: 토큰 갱신
-async function refreshAccessToken(
-  refreshToken: string,
-): Promise<User | undefined | null> {
-  try {
-    const response = await fetch(`${BACKEND_URL}/graphql`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation Refresh($refreshToken: String!) {
-            refresh(refreshToken: $refreshToken) {
-              accessToken
-              refreshToken
-            }
-          }
-        `,
-        variables: { refreshToken },
-      }),
-    });
-    const data: RefreshResponse = await response.json();
-    return data?.data?.refresh;
-  } catch (error) {
-    console.error("Token refresh error:", error);
-    return null;
-  }
-}
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -149,7 +113,7 @@ export async function proxy(request: NextRequest) {
   // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우)
   const checkAuth = async (): Promise<{
     isAuthenticated: boolean;
-    newTokens?: User;
+    newTokens?: TokenPair;
   }> => {
     if (accessToken) return { isAuthenticated: true };
     if (refreshToken) {
@@ -196,9 +160,17 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-is-private-route", "true");
+
+    let response;
     // 갱신된 토큰이 있다면 쿠키 설정 필요
     if (newTokens?.accessToken) {
-      const response = NextResponse.next();
+      response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
       response.cookies.set("accessToken", newTokens.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -214,8 +186,15 @@ export async function proxy(request: NextRequest) {
           maxAge: 60 * 60 * 24 * 7,
           path: "/",
         });
-      return response;
+    } else {
+      response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
+    
+    return response;
   }
 
   // 5. 둘 다 볼 수 있는 페이지 (Public)
@@ -226,6 +205,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // matcher: 정적 파일 및 API 등을 제외하여 성능 최적화
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images).*)"],
+  // matcher: 정적 파일 및 API 등을 제외하여 성능 최적화 (icons: public 폴더 유니폼 등)
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images|videos|icons).*)"],
 };

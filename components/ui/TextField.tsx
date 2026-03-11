@@ -1,0 +1,107 @@
+import { ComponentProps, useState, useId } from "react";
+import type { StaticImageData } from "next/image";
+import { cn } from "@/lib/utils";
+import Icon from "@/components/ui/Icon";
+import coseCircle from "@/public/icons/close-circle.svg";
+
+interface TextFieldProps extends ComponentProps<"input"> {
+  label: string;
+  errorMessage?: string;
+  onClear?: () => void;
+  /** 하단 테두리(border-b) 표시 여부. 기본값: false */
+  showBorderBottom?: boolean;
+  /** input 왼쪽에 표시할 아이콘 (24x24, mr-0.5). 없으면 표시 안 함 */
+  leftIcon?: StaticImageData;
+  /** leftIcon에 적용할 추가 클래스명 (색상 등) */
+  leftIconClassName?: string;
+}
+
+const TextField = ({
+  label,
+  value,
+  onChange,
+  onClear,
+  errorMessage,
+  className,
+  type = "text",
+  showBorderBottom = true,
+  leftIcon,
+  leftIconClassName,
+  ref,
+  ...props
+}: TextFieldProps) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const id = useId();
+  const errorId = `${id}-error`;
+
+  return (
+    <div className={cn("flex flex-col w-full gap-y-1.5 px-3 ", className)}>
+      <label htmlFor={id} className="text-sm font-semibold text-Label-Primary">
+        {label}
+      </label>
+
+      <div
+        className={cn(
+          "relative w-full pt-4.25 pb-3 flex items-center transition-colors",
+          showBorderBottom && "border-b",
+          showBorderBottom && errorMessage
+            ? "border-Fill_Error"
+            : showBorderBottom && isFocused
+              ? "border-white"
+              : showBorderBottom
+                ? "border-Fill_Tertiary"
+                : "border-transparent",
+        )}
+      >
+        {leftIcon && (
+          <Icon
+            src={leftIcon}
+            alt="아이콘"
+            width={24}
+            height={24}
+            className={cn("mr-0.5 shrink-0", leftIconClassName)}
+          />
+        )}
+        <input
+          id={id}
+          ref={ref}
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          aria-invalid={!!errorMessage}
+          aria-describedby={errorMessage ? errorId : undefined}
+          className={cn(
+            "flex-1 w-full bg-transparent text-base text-Label-Primary placeholder:text-Label-Tertiary outline-none",
+            onClear && value ? "pr-8" : "",
+            type === "number" &&
+              "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          )}
+          {...props}
+        />
+        {value && onClear && (
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label="입력 내용 삭제"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-Label-Tertiary hover:text-white transition-colors cursor-pointer"
+          >
+            <Icon src={coseCircle} />
+          </button>
+        )}
+      </div>
+
+      {errorMessage && (
+        <p
+          id={errorId}
+          className="mt-1.5 text-xs font-medium leading-4 text-Fill_Error"
+        >
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default TextField;

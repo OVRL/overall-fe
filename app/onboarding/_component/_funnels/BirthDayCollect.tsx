@@ -33,6 +33,7 @@ const BirthDayCollect = ({
           <BirthDayTextField
             value={birthDay}
             onChange={(e) => setBirthDay(e.target.value)}
+            onClear={() => setBirthDay("")}
           />
         </div>
       </div>

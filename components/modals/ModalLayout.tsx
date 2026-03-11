@@ -1,14 +1,16 @@
 import { PropsWithChildren } from "react";
-import Icon from "@/components/Icon";
+import { cn } from "@/lib/utils";
+import Icon from "@/components/ui/Icon";
 import close from "@/public/icons/close.svg";
 import useModal from "@/hooks/useModal";
 
 type Props = PropsWithChildren<{
   title: string;
   onClose?: () => void;
+  wrapperClassName?: string;
 }>;
 
-const ModalLayout = ({ title, children, onClose }: Props) => {
+const ModalLayout = ({ title, children, onClose, wrapperClassName }: Props) => {
   const { hideModal } = useModal();
   const onCloseModal = () => {
     if (onClose) onClose();
@@ -16,7 +18,10 @@ const ModalLayout = ({ title, children, onClose }: Props) => {
   };
   return (
     <div
-      className="relative max-w-9/10 w-full md:w-100 bg-bg-modal rounded-2xl p-4 flex flex-col gap-y-12 shadow-xl"
+      className={cn(
+        "relative max-w-9/10 w-full md:w-100 bg-surface-card border border-border-card rounded-xl p-4 flex flex-col gap-y-12 shadow-xl",
+        wrapperClassName,
+      )}
       onClick={(e) => e.stopPropagation()}
     >
       <button

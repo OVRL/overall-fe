@@ -1,5 +1,5 @@
 import React from "react";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 
 import kakaoLogo from "@/public/icons/kakao_logo.svg";

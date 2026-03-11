@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4dbf2f35f7197b2ebc09ea647dff7c05>>
+ * @generated SignedSource<<30c28d9725fdb1b1718cf23e9ef6eea2>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,19 +20,19 @@ export type UpdateUserInput = {
   gender?: Gender | null | undefined;
   id: number;
   mainPosition?: Position | null | undefined;
-  name?: string | null | undefined;
+  name: string;
   password?: string | null | undefined;
-  phone?: string | null | undefined;
+  phone: string;
   preferredNumber?: number | null | undefined;
-  profileImage?: string | null | undefined;
   provider?: string | null | undefined;
   subPositions?: ReadonlyArray<Position> | null | undefined;
 };
 export type useModifyUserMutation$variables = {
   input: UpdateUserInput;
+  profileImage: any;
 };
 export type useModifyUserMutation$data = {
-  readonly modifyUser: {
+  readonly updateUser: {
     readonly activityArea: string | null | undefined;
     readonly email: string;
     readonly favoritePlayer: string | null | undefined;
@@ -54,6 +54,11 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "input"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "profileImage"
   }
 ],
 v1 = [
@@ -64,11 +69,16 @@ v1 = [
         "kind": "Variable",
         "name": "input",
         "variableName": "input"
+      },
+      {
+        "kind": "Variable",
+        "name": "profileImage",
+        "variableName": "profileImage"
       }
     ],
-    "concreteType": "User",
+    "concreteType": "UserModel",
     "kind": "LinkedField",
-    "name": "modifyUser",
+    "name": "updateUser",
     "plural": false,
     "selections": [
       {
@@ -149,16 +159,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1ff0e52a7963d2e6fad8fb016f22d552",
+    "cacheID": "260d63d0bd78626097ad43875eb815df",
     "id": null,
     "metadata": {},
     "name": "useModifyUserMutation",
     "operationKind": "mutation",
-    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n) {\n  modifyUser(input: $input) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
+    "text": "mutation useModifyUserMutation(\n  $input: UpdateUserInput!\n  $profileImage: Upload!\n) {\n  updateUser(input: $input, profileImage: $profileImage) {\n    id\n    email\n    name\n    gender\n    foot\n    activityArea\n    preferredNumber\n    favoritePlayer\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d40767ddcceefb0eb7d8430a37a30ea1";
+(node as any).hash = "73a6ad95d9f725875536cc4f94a5456d";
 
 export default node;

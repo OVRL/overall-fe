@@ -5,7 +5,7 @@ import { Position } from "@/types/position";
 import { POSITION_CATEGORY_MAP } from "@/constants/position";
 
 const positionChipVariants = cva(
-  "py-1 px-1.5 inline-flex items-center justify-center rounded-sm text-xs font-semibold border shadow-[0_2px_10px_0_rgba(0,0,0,0.15)] transition-colors",
+  "py-0.5 px-1.5 inline-flex items-center justify-center rounded-sm text-xs font-semibold border shadow-[0_2px_10px_0_rgba(0,0,0,0.15)] transition-colors leading-none",
   {
     variants: {
       intent: {

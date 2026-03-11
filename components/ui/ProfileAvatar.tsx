@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
 
 const avatarVariants = cva(
-  "relative overflow-hidden rounded-[5px] bg-gray-200", // bg-gray-200 for placeholder/fallback visual
+  "relative overflow-hidden rounded-[5px] bg-gray-200 bg-transparent", // bg-gray-200 for placeholder/fallback visual
   {
     variants: {
       size: {
@@ -12,6 +12,7 @@ const avatarVariants = cva(
         36: "w-9 h-9", // 36px (square)
         48: "w-12 h-12", // 48px (square)
         56: "w-14 h-14", // 56px (square)
+        72: "w-18 h-18",
       },
     },
     defaultVariants: {
@@ -27,7 +28,13 @@ interface ProfileAvatarProps extends VariantProps<typeof avatarVariants> {
   onError?: () => void;
 }
 
-const ProfileAvatar = ({ src, alt, size, className, onError }: ProfileAvatarProps) => {
+const ProfileAvatar = ({
+  src,
+  alt,
+  size,
+  className,
+  onError,
+}: ProfileAvatarProps) => {
   return (
     <div className={cn(avatarVariants({ size }), className)}>
       <ImgPlayer
@@ -41,4 +48,3 @@ const ProfileAvatar = ({ src, alt, size, className, onError }: ProfileAvatarProp
 };
 
 export default ProfileAvatar;
-

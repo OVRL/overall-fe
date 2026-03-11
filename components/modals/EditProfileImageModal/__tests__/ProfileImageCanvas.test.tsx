@@ -8,7 +8,7 @@ jest.mock("react-easy-crop", () => ({
 }));
 
 // 아이콘 모킹
-jest.mock("@/components/Icon", () => {
+jest.mock("@/components/ui/Icon", () => {
   const MockIcon = ({ src, alt }: { src: string; alt: string }) => (
     <img src={src} alt={alt} data-testid={`icon-${alt}`} />
   );

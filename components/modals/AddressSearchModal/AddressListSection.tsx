@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import SearchResultList from "./SearchResultList";
 import DefaultAddressList from "./DefaultAddressList";
+import AddressSearchErrorBoundary from "./AddressSearchErrorBoundary";
 
 const AddressListSection = ({
   keyword,
@@ -16,19 +17,21 @@ const AddressListSection = ({
       {keyword ? "검색 결과" : "추천"}
     </span>
     {keyword ? (
-      <Suspense
-        fallback={
-          <div className="py-10 text-center text-Label-Tertiary">
-            검색 중...
-          </div>
-        }
-      >
-        <SearchResultList
-          keyword={keyword}
-          onSelect={onSelect}
-          selectedCode={selectedCode}
-        />
-      </Suspense>
+      <AddressSearchErrorBoundary key={keyword}>
+        <Suspense
+          fallback={
+            <div className="py-10 text-center text-Label-Tertiary">
+              검색 중...
+            </div>
+          }
+        >
+          <SearchResultList
+            keyword={keyword}
+            onSelect={onSelect}
+            selectedCode={selectedCode}
+          />
+        </Suspense>
+      </AddressSearchErrorBoundary>
     ) : (
       <DefaultAddressList onSelect={onSelect} selectedCode={selectedCode} />
     )}

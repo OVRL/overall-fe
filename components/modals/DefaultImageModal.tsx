@@ -20,18 +20,15 @@ const DefaultImageModal = ({
   const selectedImageRef = useRef<HTMLDivElement>(null);
 
   const defaultImages = [
-    "/images/player/img_player-1.png",
-    "/images/player/img_player-2.png",
-    "/images/player/img_player-3.png",
-    "/images/player/img_player-4.png",
-    "/images/player/img_player-5.png",
-    "/images/player/img_player-6.png",
-    "/images/player/img_player-7.png",
-    "/images/player/img_player-8.png",
-    "/images/player/img_player-9.png",
-    "/images/player/img_player-10.png",
-    "/images/player/img_player-11.png",
-    "/images/player/img_player-12.png",
+    "/images/player/img_player_1.webp",
+    "/images/player/img_player_2.webp",
+    "/images/player/img_player_3.webp",
+    "/images/player/img_player_4.webp",
+    "/images/player/img_player_5.webp",
+    "/images/player/img_player_6.webp",
+    "/images/player/img_player_7.webp",
+    "/images/player/img_player_8.webp",
+    "/images/player/img_player_9.webp",
   ];
 
   useEffect(() => {

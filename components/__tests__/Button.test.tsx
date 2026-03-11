@@ -12,7 +12,7 @@ describe("Button 컴포넌트", () => {
   it("ghost 변형(variant)을 렌더링 되어야 한다", () => {
     render(<Button variant="ghost">Ghost</Button>);
     const button = screen.getByRole("button", { name: /ghost/i });
-    expect(button).toHaveClass("bg-fill-quaternary");
+    expect(button).toHaveClass("bg-Fill_Quatiary");
   });
 
   it("line 변형(variant)을 렌더링 되어야 한다", () => {
@@ -28,14 +28,18 @@ describe("Button 컴포넌트", () => {
   });
 
   it("leftIcon을 렌더링하고 gap을 적용되어야 한다", () => {
-    render(<Button leftIcon={<span data-testid="icon">Icon</span>}>With Icon</Button>);
+    render(
+      <Button leftIcon={<span data-testid="icon">Icon</span>}>
+        With Icon
+      </Button>,
+    );
     const button = screen.getByRole("button", { name: /with icon/i });
     const icon = screen.getByTestId("icon");
     expect(button).toContainElement(icon);
     expect(button).toHaveClass("gap-2.5");
   });
 
-  it("ref가 올바르게 전달되어야 한다", () => { 
+  it("ref가 올바르게 전달되어야 한다", () => {
     const ref = { current: null };
     render(<Button ref={ref}>Ref Me</Button>);
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
