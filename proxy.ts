@@ -160,9 +160,17 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-is-private-route", "true");
+
+    let response;
     // 갱신된 토큰이 있다면 쿠키 설정 필요
     if (newTokens?.accessToken) {
-      const response = NextResponse.next();
+      response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
       response.cookies.set("accessToken", newTokens.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -178,8 +186,15 @@ export async function proxy(request: NextRequest) {
           maxAge: 60 * 60 * 24 * 7,
           path: "/",
         });
-      return response;
+    } else {
+      response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
+    
+    return response;
   }
 
   // 5. 둘 다 볼 수 있는 페이지 (Public)

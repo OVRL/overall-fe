@@ -44,6 +44,7 @@ describe("RankingCard 컴포넌트", () => {
       value: "10",
       position: "FW",
       backNumber: 1,
+      ovr: 80,
     },
     {
       id: 2,
@@ -52,6 +53,7 @@ describe("RankingCard 컴포넌트", () => {
       value: "8",
       position: "MF",
       backNumber: 2,
+      ovr: 80,
     },
     {
       id: 3,
@@ -60,6 +62,7 @@ describe("RankingCard 컴포넌트", () => {
       value: "6",
       position: "DF",
       backNumber: 3,
+      ovr: 80,
     },
     {
       id: 4,
@@ -68,6 +71,7 @@ describe("RankingCard 컴포넌트", () => {
       value: "4",
       position: "GK",
       backNumber: 4,
+      ovr: 80,
     },
     {
       id: 5,
@@ -76,6 +80,7 @@ describe("RankingCard 컴포넌트", () => {
       value: "2",
       position: "FW",
       backNumber: 5,
+      ovr: 80,
     },
   ];
 

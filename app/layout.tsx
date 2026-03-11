@@ -21,11 +21,34 @@ export const metadata: Metadata = {
   description: "Overall",
 };
 
-export default function RootLayout({
+import { headers, cookies } from "next/headers";
+import { fetchUserSSR } from "@/utils/fetchUserSSR";
+import { UserInitProvider } from "@/components/providers/UserInitProvider";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // proxy.ts에서 설정한 헤더를 확인하여 private 라우트인지 판별
+  const requestHeaders = await headers();
+  const isPrivateRoute = requestHeaders.get("x-is-private-route") === "true";
+
+  let initialUser = null;
+  if (isPrivateRoute) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const userIdStr = cookieStore.get("userId")?.value;
+    
+    // userId 및 accessToken이 모두 있을 때만 fetch
+    if (accessToken && userIdStr) {
+      const userId = Number(userIdStr);
+      if (!isNaN(userId)) {
+        initialUser = await fetchUserSSR(userId, accessToken);
+      }
+    }
+  }
+
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
@@ -38,10 +61,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <RelayProvider>
-            {children}
-            <GlobalPortalProvider>
-              <Modals />
-            </GlobalPortalProvider>
+            <UserInitProvider initialUser={initialUser}>
+              {children}
+              <GlobalPortalProvider>
+                <Modals />
+              </GlobalPortalProvider>
+            </UserInitProvider>
           </RelayProvider>
         </ThemeProvider>
         <Analytics />

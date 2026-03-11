@@ -30,6 +30,7 @@ describe("RankCardRow 컴포넌트", () => {
     value: "20골",
     position: "FW",
     backNumber: 7,
+    ovr: 80,
   };
 
   const mockOnPlayerClick = jest.fn();
