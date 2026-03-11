@@ -15,12 +15,12 @@ const LandingStartForm = () => {
         // TODO: 팀 코드 제출 로직 추가
       }}
     >
-      <h1 className="text-[2.5rem] font-bold text-white leading-tight font-paperlogy">
+      <h1 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold text-white leading-tight font-paperlogy">
         완전히 새로워질
         <br />
         <span className="text-Fill_AccentPrimary">축구 관리 플랫폼</span>
       </h1>
-      <p className="text-[oklch(0.7_0_0)] text-base leading-6 font-pretendard">
+      <p className="text-[oklch(0.7_0_0)] text-sm sm:text-base leading-6 font-pretendard">
         팀 코드를 입력하여 시작하세요
       </p>
       <div className="w-full flex flex-col gap-4 font-pretendard">

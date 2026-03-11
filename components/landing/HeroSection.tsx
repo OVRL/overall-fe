@@ -22,7 +22,7 @@ const HeroSection = () => {
             "radial-gradient(118.28% 50% at 50% 50%, rgba(0, 0, 0, 0.00) 0%, #000 100%)",
         }}
       />
-      <div className="relative flex flex-col gap-12 justify-center w-md h-153 px-4">
+      <div className="relative flex flex-col gap-12 justify-center w-full max-w-md h-153 px-4 sm:px-6">
         <LandingStartForm />
 
         {/* Videos - Positioned Relative to Card */}
@@ -30,7 +30,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 1.2 }}
-          className="absolute top-0 right-full mr-8 w-48 md:w-80 hidden md:block mix-blend-screen pointer-events-none"
+          className="absolute top-0 right-full mr-8 w-48 lg:w-80 hidden lg:block mix-blend-screen pointer-events-none"
         >
           <video
             autoPlay
@@ -47,7 +47,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 1.4 }}
-          className="absolute bottom-20 left-full ml-8 w-48 md:w-80 hidden md:block mix-blend-screen pointer-events-none"
+          className="absolute bottom-20 left-full w-48 lg:w-70 hidden lg:block mix-blend-screen pointer-events-none"
         >
           <video
             autoPlay
