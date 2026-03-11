@@ -126,7 +126,7 @@ export default function FormationBuilderDesktopWithDnd(
         {activePlayer ? (
           <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
             <ProfileAvatar
-              src={activePlayer.image || "/images/player/img_player.png"}
+              src={activePlayer.image || "/images/player/img_player_2.webp"}
               alt={activePlayer.name}
               size={48}
             />

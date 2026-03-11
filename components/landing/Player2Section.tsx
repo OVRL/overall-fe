@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "motion/react";
-import imgPlayer2 from "@/public/images/player/img_player-2.svg";
+import imgPlayer2 from "@/public/images/player/img_player_2.webp";
 import Icon from "../ui/Icon";
 
 const Player2Section = () => {

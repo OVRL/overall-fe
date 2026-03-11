@@ -30,7 +30,7 @@ const RankingCard = ({
         <div className="relative">
           <ProfileAvatar
             size={72}
-            src="/images/player/img_player-10.png"
+            src="/images/player/img_player_1.webp"
             alt="ovr"
           />
           <Icon

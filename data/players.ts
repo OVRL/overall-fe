@@ -15,7 +15,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 50,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-1.png",
+    image: "/images/player/img_player_1.webp",
   },
   {
     id: 2,
@@ -31,7 +31,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 85,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-2.png",
+    image: "/images/player/img_player_2.webp",
   },
   {
     id: 3,
@@ -47,7 +47,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 65,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-3.png",
+    image: "/images/player/img_player_3.webp",
   },
   {
     id: 4,
@@ -63,7 +63,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 68,
     season: "3M",
     seasonType: "worldBest",
-    image: "/images/player/img_player-4.png",
+    image: "/images/player/img_player_4.webp",
   },
   {
     id: 5,
@@ -79,7 +79,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 82,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-5.png",
+    image: "/images/player/img_player_5.webp",
   },
   {
     id: 6,
@@ -95,7 +95,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 78,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-6.png",
+    image: "/images/player/img_player_6.webp",
   },
   {
     id: 7,
@@ -111,7 +111,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 80,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-7.png",
+    image: "/images/player/img_player_7.webp",
   },
   {
     id: 8,
@@ -127,7 +127,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 82,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-8.png",
+    image: "/images/player/img_player_8.webp",
   },
   {
     id: 9,
@@ -143,7 +143,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 90,
     season: "3M",
     seasonType: "worldBest",
-    image: "/images/player/img_player-9.png",
+    image: "/images/player/img_player_9.webp",
   },
   {
     id: 10,
@@ -159,7 +159,7 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 95,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-10.png",
+    image: "/images/player/img_player_1.webp",
   },
   {
     id: 11,
@@ -175,6 +175,6 @@ export const INITIAL_PLAYERS: Player[] = [
     pace: 92,
     season: "26",
     seasonType: "general",
-    image: "/images/player/img_player-11.png",
+    image: "/images/player/img_player_4.webp",
   },
 ];

@@ -11,10 +11,16 @@ interface ImgPlayerProps {
 const ImgPlayer = ({ src, alt, className, onError }: ImgPlayerProps) => {
   return (
     <div className={cn("relative aspect-square overflow-hidden", className)}>
-      <Image src={src} alt={alt} fill className="object-cover" onError={onError} />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+        quality={100}
+        onError={onError}
+      />
     </div>
   );
 };
 
 export default ImgPlayer;
-

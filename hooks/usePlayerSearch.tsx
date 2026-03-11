@@ -18,7 +18,7 @@ const mockSearchPlayers = async (keyword: string): Promise<Player[]> => {
           position: "ST",
           number: 9,
           overall: 90,
-          image: "/images/player/img_player.png",
+          image: "/images/player/img_player_2.webp",
           season: "23-24",
         },
         {
@@ -27,7 +27,7 @@ const mockSearchPlayers = async (keyword: string): Promise<Player[]> => {
           position: "LW",
           number: 11,
           overall: 85,
-          image: "/images/player/img_player.png",
+          image: "/images/player/img_player_2.webp",
           season: "22-23",
         },
       ]);
@@ -97,7 +97,7 @@ export const usePlayerSearch = ({ onComplete }: UsePlayerSearchProps) => {
         position: "용병",
         number: 0,
         overall: 0,
-        image: "/images/player/img_player.png",
+        image: "/images/player/img_player_2.webp",
       }
     : null;
 

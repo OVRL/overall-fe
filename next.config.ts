@@ -9,6 +9,9 @@ const nextConfig = {
       artifactDirectory: "./__generated__",
     },
   },
+  images: {
+    qualities: [50, 75, 100],
+  },
   turbopack: {
     rules: {
       "*.svg": {

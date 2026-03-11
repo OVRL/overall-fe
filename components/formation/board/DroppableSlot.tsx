@@ -69,7 +69,7 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
           className={cn("touch-none", isDragging ? "opacity-50" : "")}
         >
           <FormationPlayerImageThumbnail
-            imgUrl={player.image || "/images/player/img_player.png"}
+            imgUrl={player.image || "/images/player/img_player_2.webp"}
             playerName={player.name}
             playerSeason={player.season}
             isSelected={isSelected}

@@ -23,6 +23,7 @@ const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
           alt="captain"
           width={24}
           height={24}
+          quality={100}
           className="absolute bottom-4 right-2 z-20"
         />
       )}
