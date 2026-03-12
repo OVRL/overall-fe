@@ -15,12 +15,20 @@ const TeamInfo = ({
 }: TeamInfoProps) => {
   return (
     <div
-      className={`flex items-center gap-3 ${reverse ? "flex-row-reverse text-right" : "flex-row"}`}
+      className={`flex items-center gap-3 ${
+        reverse ? "flex-row-reverse text-right" : "flex-row"
+      }`}
     >
       <div
         className={`w-9 h-9 ${logoColor} rounded-full relative overflow-hidden shrink-0`}
       >
-        <Image src={logo} alt={name} fill className="object-cover" />
+        <Image
+          src={logo}
+          alt={name}
+          fill
+          sizes="2.25rem"
+          className="object-cover"
+        />
       </div>
 
       <span

@@ -42,6 +42,7 @@ const ManagerInfo = () => (
           src="/images/player/img_player_1.webp"
           alt="Manager"
           fill
+          sizes="4rem"
           className="object-cover"
         />
       </div>

@@ -13,9 +13,11 @@ const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
 interface PlayerListItemProps {
   player: Player;
   onClick?: () => void;
+  /** LCP 이미지일 때 true (리스트 첫 항목 등) */
+  priority?: boolean;
 }
 
-const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
+const PlayerListItem = ({ player, onClick, priority }: PlayerListItemProps) => {
   const [imageError, setImageError] = useState(false);
   const playerImage =
     imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
@@ -50,6 +52,7 @@ const PlayerListItem = ({ player, onClick }: PlayerListItemProps) => {
             alt={player.name}
             size={36}
             onError={() => setImageError(true)}
+            priority={priority}
           />
         </div>
 

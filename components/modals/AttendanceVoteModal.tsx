@@ -25,6 +25,7 @@ const AttendanceVoteModal = () => {
                 src="/images/logo_OVR_head.png" // 일단 기본 로고 사용
                 alt="opponent logo"
                 fill
+                sizes="1.875rem"
                 className="object-contain p-1"
               />
             </div>
@@ -69,6 +70,7 @@ const AttendanceVoteModal = () => {
                 src={getUniformImagePath("SOLID_RED")}
                 alt="유니폼"
                 fill
+                sizes="1.875rem"
                 quality={100}
                 className="object-contain"
                 aria-hidden

@@ -30,6 +30,7 @@ const RosterDetail = ({ player }: PlayerCardProps) => {
           alt=""
           role="presentation"
           fill
+          sizes="(max-width: 768px) 100vw, min(50vw, 28rem)"
           priority
           className="object-cover"
         />
