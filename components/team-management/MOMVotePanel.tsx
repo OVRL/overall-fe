@@ -398,9 +398,9 @@ function OngoingCard({ match }: { match: MatchCard }) {
       {/* 카드 헤더 */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full px-4 md:px-5 py-3 md:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 hover:bg-white/3 transition-colors text-left md:text-center"
+        className="w-full px-4 md:px-5 py-3 md:py-4 flex items-center justify-between gap-3 hover:bg-white/3 transition-colors text-left"
       >
-        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 flex-1">
           <span className="text-xs text-gray-500 shrink-0">{match.date}</span>
           <span className="text-sm font-semibold text-white">
             vs {match.opponent}
@@ -408,8 +408,8 @@ function OngoingCard({ match }: { match: MatchCard }) {
           <span className="text-sm text-gray-300 font-mono">{match.score}</span>
           <StatusBadge status="ongoing" />
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="hidden md:block text-right">
             <p className="text-xs font-bold text-white">{match.totalVotes}표</p>
             <p className="text-[10px] text-gray-500">{match.deadline}</p>
           </div>
@@ -428,7 +428,11 @@ function OngoingCard({ match }: { match: MatchCard }) {
       {/* 확장 - 투표 현황 */}
       {expanded && (
         <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-white/8">
-          <p className="text-xs font-semibold text-white mt-4 mb-3">투표 현황</p>
+          <div className="md:hidden pt-4 pb-2 border-b border-white/5 mb-4">
+            <p className="text-sm font-bold text-white mb-1">{match.totalVotes}표</p>
+            <p className="text-xs text-gray-500">{match.deadline}</p>
+          </div>
+          <p className="text-xs font-semibold text-white mb-3">투표 현황</p>
           <div className="space-y-3">
             {match.liveVotes?.map((lv, i) => (
               <div key={i}>
