@@ -16,8 +16,8 @@ interface StartingXIProps {
  */
 const StartingXI = ({ players }: StartingXIProps) => {
   return (
-    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-4 md:mb-5">
+    <div className="bg-surface-card rounded-[1.25rem] p-4 sm:px-0 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-4 md:mb-5 sm:px-4">
         <Icon src={bestXI} alt="Best XI" width={95} height={34} nofill />
       </div>
 
@@ -27,17 +27,17 @@ const StartingXI = ({ players }: StartingXIProps) => {
             imageUrl="/images/logo_OVR_head.png"
             linkUrl="#"
             altText="OVR Ad Banner"
-            className="w-31 absolute left-1/5"
+            className="w-31 absolute left-3 sm:left-2 md:left-1/6 lg:left-1/5"
           />
           <AdBoard
             linkUrl="#"
             altText="OVR Ad Banner"
-            className="w-31 absolute left-3/5"
+            className="w-31 absolute right-3 sm:right-2 md:right-1/6 lg:right-1/5"
           />
         </div>
         <FormationField
           players={players}
-          className="aspect-3/4 md:aspect-video"
+          className="relative md:aspect-video"
         />
       </div>
       <ManagerInfo />

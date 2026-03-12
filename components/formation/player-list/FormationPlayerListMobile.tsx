@@ -119,7 +119,9 @@ const FormationPlayerListMobile = ({
             aria-hidden
             className="shrink-0"
           />
-          <h3 className="text-[#f7f7f8] font-semibold leading-6">선수 명단</h3>
+          <h3 className="text-[#f7f7f8] font-semibold leading-6">
+            참석 선수 명단
+          </h3>
         </div>
         <div>
           <Button

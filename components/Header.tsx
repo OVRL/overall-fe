@@ -3,7 +3,7 @@
 import { ReactNode, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { type StaticImageData } from "next/image";
-import Link from "next/link";
+import Link from "@/components/Link";
 import logoOvr from "@/public/icons/logo_OVR.svg";
 import Icon from "@/components/ui/Icon";
 import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
