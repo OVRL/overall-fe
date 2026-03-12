@@ -287,8 +287,8 @@ export default function PlayerManagementPanel() {
     <div className={`flex flex-col ${hasUnsaved ? "pb-16" : ""}`}>
 
       {/* ── 헤더 ── */}
-      <div className="px-6 pt-6 pb-5">
-        <h1 className="text-lg font-bold text-white mb-5">선수 관리</h1>
+      <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5">
+        <h1 className="text-lg font-bold text-white mb-4 md:mb-5">선수 관리</h1>
 
         {/* 검색 바 — input과 버튼 분리, 약간의 gap */}
         <div className="flex items-center gap-2 max-w-[380px]">
@@ -311,16 +311,16 @@ export default function PlayerManagementPanel() {
       </div>
 
       {/* ── 테이블 ── */}
-      <div className="px-6 pb-20">
+      <div className="px-4 md:px-6 pb-20">
         <div className="overflow-x-auto bg-[#1a1a1a] rounded-2xl border border-white/8">
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-[#161616] border-b border-white/8 text-gray-500">
-              <th className="py-2.5 px-3 text-left font-medium w-[64px]">등번호</th>
-              <th className="py-2.5 px-2 text-left font-medium w-[140px]">이름</th>
-              <th className="py-2.5 px-2 text-center font-medium w-[56px]">포지션</th>
+              <th className="py-2.5 px-2 md:px-3 text-left font-medium w-[48px] md:w-[64px]">등번호</th>
+              <th className="py-2.5 px-1 md:px-2 text-left font-medium w-[100px] md:w-[140px]">이름</th>
+              <th className="py-2.5 px-1 md:px-2 text-center font-medium w-[48px] md:w-[56px]">포지션</th>
               {COLUMNS.map((c) => (
-                <th key={c.key} className="py-2.5 px-2 text-center font-medium whitespace-nowrap">
+                <th key={c.key} className="py-2.5 px-1 md:px-2 text-center font-medium whitespace-nowrap text-[10px] md:text-xs">
                   {c.label}
                 </th>
               ))}
@@ -340,9 +340,9 @@ export default function PlayerManagementPanel() {
                   }`}
                 >
                   {/* 등번호 */}
-                  <td className="py-2.5 px-3 text-gray-400 font-mono">
+                  <td className="py-2.5 px-2 md:px-3 text-gray-400 font-mono">
                     {isEditing ? (
-                      <span className="border border-white/20 rounded px-2 py-1 text-white inline-block">
+                      <span className="border border-white/20 rounded px-1.5 md:px-2 py-1 text-white inline-block">
                         {player.backNumber}
                       </span>
                     ) : (
@@ -351,31 +351,31 @@ export default function PlayerManagementPanel() {
                   </td>
 
                   {/* 이름 + 프로필 */}
-                  <td className="py-2.5 px-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
+                  <td className="py-2.5 px-1 md:px-2">
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                      <div className="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
                         <Image
                           src={player.profileImage}
                           alt={player.name}
                           width={28}
                           height={28}
-                          className="object-cover"
+                          className="object-cover h-full w-full"
                         />
                       </div>
-                      <span className="text-white font-medium truncate max-w-[80px] text-xs">
+                      <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs">
                         {player.name}
                       </span>
                     </div>
                   </td>
 
                   {/* 포지션 */}
-                  <td className="py-2.5 px-2 text-center">
+                  <td className="py-2.5 px-1 md:px-2 text-center">
                     <PosBadge label={player.position} />
                   </td>
 
                   {/* 통계 컬럼 */}
                   {COLUMNS.map((col) => (
-                    <td key={col.key} className="py-2.5 px-2 text-center">
+                    <td key={col.key} className="py-2.5 px-1 md:px-2 text-center">
                       {isEditing ? (
                         <EditCell
                           value={(buf[col.key] as number) ?? 0}
@@ -398,14 +398,14 @@ export default function PlayerManagementPanel() {
 
       {/* ── 고정 저장 바 ── */}
       {hasUnsaved && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between bg-[#0f0f0f] border-t border-white/10 px-6 py-3">
-          <span className="text-xs text-gray-500">
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between bg-[#0f0f0f] border-t border-white/10 px-4 md:px-6 py-3">
+          <span className="text-[10px] md:text-xs text-gray-500">
             변경사항이 있습니다. 저장하지 않으면 사라집니다.
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 md:gap-2">
             <button
               onClick={handleReset}
-              className="px-5 py-2 rounded-xl bg-[#2a2a2a] border border-white/15 text-gray-300 text-xs hover:bg-[#333] transition-colors"
+              className="px-4 md:px-5 py-1.5 md:py-2 rounded-xl bg-[#2a2a2a] border border-white/15 text-gray-300 text-xs hover:bg-[#333] transition-colors"
             >
               초기화
             </button>
