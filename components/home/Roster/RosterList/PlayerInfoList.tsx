@@ -21,11 +21,12 @@ const PlayerInfoList = ({
   return (
     <div id={id} className="w-full flex flex-col rounded-tl-xl overflow-hidden">
       {showHeader && <PlayerListHeader />}
-      {players.map((player) => (
+      {players.map((player, index) => (
         <PlayerListItem
           key={player.id}
           player={player}
           onClick={() => onPlayerSelect && onPlayerSelect(player)}
+          priority={index === 0}
         />
       ))}
     </div>

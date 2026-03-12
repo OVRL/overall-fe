@@ -21,10 +21,9 @@ const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
         <Image
           src={captain}
           alt="captain"
-          width={24}
           height={24}
           quality={100}
-          className="absolute bottom-4 right-2 z-20"
+          className="absolute bottom-4 right-0 z-20"
         />
       )}
       {(

@@ -15,6 +15,8 @@ interface MainProfileCardProps {
   nameClassName?: string;
   numberClassName?: string;
   positionClassName?: string;
+  /** LCP 이미지일 때 true (above the fold) */
+  imagePriority?: boolean;
 }
 
 const MainProfileCard = ({
@@ -27,8 +29,10 @@ const MainProfileCard = ({
   nameClassName,
   numberClassName,
   positionClassName,
+  imagePriority,
 }: MainProfileCardProps) => {
   const theme = CARD_THEME_MAP[grade];
+  const cardSizes = "(max-width: 768px) 33vw, 128px";
   return (
     <div
       className={cn(
@@ -40,7 +44,8 @@ const MainProfileCard = ({
         src={theme.bgUrl}
         alt={`${playerName} background card`}
         fill
-        priority
+        sizes={cardSizes}
+        priority={imagePriority}
         className="object-cover"
       />
       <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
@@ -49,7 +54,9 @@ const MainProfileCard = ({
             src={imgUrl}
             alt={playerName}
             fill
+            sizes={cardSizes}
             className="object-contain object-bottom z-10"
+            {...(imagePriority && { loading: "eager" as const })}
           />
         </div>
       </div>
