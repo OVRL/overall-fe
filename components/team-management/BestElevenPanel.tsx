@@ -121,8 +121,8 @@ export default function BestElevenPanel() {
   };
 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-5 shrink-0 px-2 lg:px-6">
+    <div className="p-4 md:p-6 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 md:mb-5 shrink-0 px-0 md:px-2 lg:px-6">
         <h3 className="text-xl font-bold text-white">베스트 11 관리</h3>
         <Button variant="primary" className="text-xs px-3 py-1.5 font-bold bg-[#B8FF12] text-black">
           저장하기
@@ -136,7 +136,7 @@ export default function BestElevenPanel() {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 w-full max-w-screen-xl mx-auto lg:items-stretch lg:px-6 pb-20 overflow-visible">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 w-full max-w-screen-xl mx-auto lg:items-stretch px-0 md:px-2 lg:px-6 pb-20 overflow-visible">
           <div className="w-full lg:flex-1 shrink-0 flex flex-col gap-4">
             <FormationBoardList
               quarters={quarters}

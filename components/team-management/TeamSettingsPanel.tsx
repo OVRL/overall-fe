@@ -590,13 +590,13 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
 
   return (
     <>
-      <div className="p-6 space-y-6 max-w-4xl mx-auto w-full">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-4xl mx-auto w-full">
         {/* 페이지 제목 */}
         <h1 className="text-xl font-bold text-white">팀 설정</h1>
 
         {/* ──── 팀 정보 카드 ──── */}
         <section className="bg-[#1a1a1a] rounded-2xl border border-white/8 overflow-hidden">
-          <div className="flex items-center justify-between px-6 pt-5 pb-3">
+          <div className="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5 pb-3">
             <h2 className="text-sm font-semibold text-white">팀 정보</h2>
             {isManager && (
               <button
@@ -617,7 +617,7 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
             )}
           </div>
 
-          <div className="px-6 pb-6 flex gap-5 items-start">
+          <div className="px-4 md:px-6 pb-4 md:pb-6 flex sm:flex-row flex-col gap-4 md:gap-5 items-start">
             {/* 팀 엠블럼 */}
             <div className="w-16 h-16 rounded-full overflow-hidden bg-[#2a2a2a] border-2 border-white/15 shrink-0">
               <Image
@@ -661,8 +661,8 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
           </div>
 
           {/* 초대 링크 */}
-          <div className="mx-6 mb-6 bg-[#111] rounded-xl border border-white/8 p-4">
-            <p className="text-xs font-semibold text-gray-400 mb-3">초대 링크</p>
+          <div className="mx-4 md:mx-6 mb-4 md:mb-6 bg-[#111] rounded-xl border border-white/8 p-3 md:p-4">
+            <p className="text-xs font-semibold text-gray-400 mb-2 md:mb-3">초대 링크</p>
             <div className="flex gap-2">
               <div className="flex-1 bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-500 truncate">
                 {inviteLink}
@@ -679,7 +679,7 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
 
         {/* ──── 선수단 테이블 ──── */}
         <section className="bg-[#1a1a1a] rounded-2xl border border-white/8 overflow-hidden">
-          <div className="px-6 pt-5 pb-3">
+          <div className="px-4 md:px-6 pt-4 md:pt-5 pb-3">
             <h2 className="text-sm font-semibold text-white">선수단</h2>
           </div>
 
@@ -687,30 +687,30 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-t border-b border-white/8 text-gray-500">
-                  <th className="px-4 py-3 text-left font-medium w-[180px]">이름</th>
-                  <th className="px-3 py-3 text-center font-medium">등번호</th>
-                  <th className="px-3 py-3 text-center font-medium">포지션</th>
-                  <th className="px-3 py-3 text-center font-medium">나이</th>
-                  <th className="px-3 py-3 text-center font-medium">가입일</th>
-                  <th className="px-3 py-3 text-center font-medium">역할</th>
-                  <th className="px-3 py-3 text-center font-medium">관리</th>
+                  <th className="px-3 md:px-4 py-3 text-left font-medium w-[160px] md:w-[180px]">이름</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium">등번호</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium">포지션</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium">나이</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium min-w-[80px]">가입일</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium">역할</th>
+                  <th className="px-2 md:px-3 py-3 text-center font-medium">관리</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {members.map((member) => (
                   <tr key={member.id} className="hover:bg-white/3 transition-colors">
-                    <td className="px-4 py-3">
+                    <td className="px-3 md:px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-[#2a2a2a] flex-shrink-0">
+                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
                           <Image
                             src={member.profileImage}
                             alt={member.name}
                             width={32}
                             height={32}
-                            className="object-cover"
+                            className="object-cover h-full w-full"
                           />
                         </div>
-                        <span className="text-white font-medium truncate max-w-[100px]">
+                        <span className="text-white font-medium truncate max-w-[80px] md:max-w-[100px] text-xs md:text-sm">
                           {member.name}
                         </span>
                       </div>

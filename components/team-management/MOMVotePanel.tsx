@@ -369,8 +369,8 @@ function NoVoteCard({
   onCreateClick: () => void;
 }) {
   return (
-    <div className="bg-[#1a1a1a] rounded-2xl border border-white/8 px-5 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <div className="bg-[#1a1a1a] rounded-2xl border border-white/8 px-4 md:px-5 py-3 md:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3">
         <span className="text-xs text-gray-500 shrink-0">{match.date}</span>
         <span className="text-sm font-semibold text-white">
           vs {match.opponent}
@@ -379,7 +379,7 @@ function NoVoteCard({
       </div>
       <button
         onClick={onCreateClick}
-        className="bg-primary text-black text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
+        className="w-full md:w-auto bg-primary text-black text-xs font-bold px-4 py-2 flex items-center justify-center rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
       >
         MOM 투표 만들기
       </button>
@@ -398,9 +398,9 @@ function OngoingCard({ match }: { match: MatchCard }) {
       {/* 카드 헤더 */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/3 transition-colors"
+        className="w-full px-4 md:px-5 py-3 md:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0 hover:bg-white/3 transition-colors text-left md:text-center"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <span className="text-xs text-gray-500 shrink-0">{match.date}</span>
           <span className="text-sm font-semibold text-white">
             vs {match.opponent}
@@ -427,7 +427,7 @@ function OngoingCard({ match }: { match: MatchCard }) {
 
       {/* 확장 - 투표 현황 */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-white/8">
+        <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-white/8">
           <p className="text-xs font-semibold text-white mt-4 mb-3">투표 현황</p>
           <div className="space-y-3">
             {match.liveVotes?.map((lv, i) => (
@@ -459,8 +459,8 @@ function OngoingCard({ match }: { match: MatchCard }) {
 // ──────────────────────────────────────────────
 function CompletedCard({ match, onClick }: { match: MatchCard; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="w-full bg-[#1a1a1a] rounded-2xl border border-white/8 px-5 py-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer">
-      <div className="flex items-center gap-3">
+    <button type="button" onClick={onClick} className="w-full bg-[#1a1a1a] rounded-2xl border border-white/8 px-4 md:px-5 py-3 md:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 hover:bg-white/5 transition-colors cursor-pointer">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3">
         <span className="text-xs text-gray-500 shrink-0">{match.date}</span>
         <span className="text-sm font-semibold text-white">
           vs {match.opponent}
@@ -470,7 +470,7 @@ function CompletedCard({ match, onClick }: { match: MatchCard; onClick: () => vo
       </div>
 
       {/* Top 3 */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
         {match.top3?.map((player, i) => (
           <div
             key={i}
@@ -574,8 +574,8 @@ export default function MOMVotePanel() {
   };
 
   return (
-    <div className="px-6 pt-6 pb-10 max-w-4xl mx-auto w-full space-y-3">
-      <h1 className="text-lg font-bold text-white mb-5">MOM 투표 설정</h1>
+    <div className="px-4 md:px-6 pt-4 md:pt-6 pb-10 max-w-4xl mx-auto w-full space-y-3">
+      <h1 className="text-lg font-bold text-white mb-4 md:mb-5">MOM 투표 설정</h1>
 
       {matches.map((match) => {
         if (match.status === "no-vote") {
