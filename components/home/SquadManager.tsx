@@ -53,7 +53,7 @@ export default function SquadManager({
           players={players}
           selectedPlayer={selectedPlayer}
           onPlayerSelect={handlePlayerSelect}
-          className="md:w-92 lg:w-84 xl:w-90 2xl:w-98.2"
+          className="w-92 md:w-92 lg:w-84 xl:w-90 2xl:w-98.2"
         />
       </div>
     </div>

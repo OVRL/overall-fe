@@ -91,12 +91,6 @@ export default function LogoAnimator({
               strokeWidth="1.22577"
             />
             <path
-              d="M75.4766 57.7777V61.9008H71.3535V57.7777H75.4766Z"
-              fill="black"
-              stroke="black"
-              strokeWidth="1.22577"
-            />
-            <path
               d="M33.0886 52.4299H33.3103V42.6809H33.0886V52.4299ZM40.3289 56.1936L37.074 59.4485H29.324L26.0691 56.1936V38.9163L26.2488 38.7375L29.325 35.6614H37.074L37.2537 35.8411L40.1492 38.7375L40.3289 38.9163V56.1936Z"
               fill="#C2F44C"
               stroke="black"
@@ -113,19 +107,6 @@ export default function LogoAnimator({
               fill="#C2F44C"
               stroke="black"
               strokeWidth="1.22577"
-            />
-            <path
-              d="M74.8191 53.865V59.3298H69.3542V53.865H74.8191Z"
-              fill="white"
-              stroke="black"
-              strokeWidth="1.22577"
-            />
-            <rect
-              x="71.3804"
-              y="55.8912"
-              width="1.41304"
-              height="1.41304"
-              fill="black"
             />
           </g>
         </m.g>

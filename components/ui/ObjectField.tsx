@@ -134,7 +134,7 @@ const ObjectField = ({
 
   return (
     <div
-      className={cn("relative w-full", className)}
+      className={cn("relative w-full overflow-hidden", className)}
       style={{
         ...style,
         ...(autoAspect ? { aspectRatio: `${aspectRatio}` } : {}),

@@ -177,7 +177,8 @@ type Query {
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findTeam(id: Int!): TeamModel!
   findTeamMember(id: Int!): TeamMemberModel
-  findUser(id: Float!): UserModel!
+  findUser(email: String!): UserModel!
+  findUserById(id: Int!): UserModel!
 }
 
 type RegionSearchArrayModel {
