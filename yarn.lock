@@ -1983,7 +1983,7 @@
 
 "@ssgoi/react@^4.2.1":
   version "4.2.1"
-  resolved "https://registry.npmjs.org/@ssgoi/react/-/react-4.2.1.tgz"
+  resolved "https://registry.yarnpkg.com/@ssgoi/react/-/react-4.2.1.tgz#772f6185a4990040e53eca7f76c04b8de5219e54"
   integrity sha512-hKhZXPif93TI1Ab9TvC8zUmn7pGDbVhqk3iEOq+AnNANWJcGSTtwDVtqiuAe2evK2T3rtc9vkzkQ4GEnvdx3tw==
   dependencies:
     "@babel/core" "^7.26.10"
