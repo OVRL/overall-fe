@@ -457,9 +457,9 @@ function OngoingCard({ match }: { match: MatchCard }) {
 // ──────────────────────────────────────────────
 // 경기 카드 (completed) — Top 3 표시
 // ──────────────────────────────────────────────
-function CompletedCard({ match }: { match: MatchCard }) {
+function CompletedCard({ match, onClick }: { match: MatchCard; onClick: () => void }) {
   return (
-    <div className="bg-[#1a1a1a] rounded-2xl border border-white/8 px-5 py-4 flex items-center justify-between">
+    <button type="button" onClick={onClick} className="w-full bg-[#1a1a1a] rounded-2xl border border-white/8 px-5 py-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
         <span className="text-xs text-gray-500 shrink-0">{match.date}</span>
         <span className="text-sm font-semibold text-white">
@@ -477,7 +477,7 @@ function CompletedCard({ match }: { match: MatchCard }) {
             className="flex items-center gap-1.5 bg-[#242424] border border-white/8 rounded-xl px-3 py-2"
           >
             <TrophyIcon />
-            <div className="text-right">
+            <div className="text-left">
               <p className="text-[11px] font-semibold text-white leading-none">
                 {player.backNumber}. {player.name}
               </p>
@@ -485,6 +485,64 @@ function CompletedCard({ match }: { match: MatchCard }) {
             </div>
           </div>
         ))}
+      </div>
+    </button>
+  );
+}
+
+// ──────────────────────────────────────────────
+// 전체 투표 결과 모달
+// ──────────────────────────────────────────────
+function CompletedVoteModal({ match, onClose }: { match: MatchCard; onClose: () => void }) {
+  // 모의 데이터에서 전체가 없을 경우 top3를 활용
+  const votes = match.liveVotes && match.liveVotes.length > 0 
+    ? match.liveVotes 
+    : match.top3?.map(t => ({ name: t.name, position: "MF", votes: t.votes, maxVotes: match.top3![0].votes })) || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm bg-[#1e1e1e] rounded-2xl border border-white/10 shadow-2xl">
+        <div className="relative flex items-center justify-center px-6 py-5 border-b border-white/10">
+          <h2 className="text-sm font-bold text-white">투표 결과</h2>
+          <button onClick={onClose} className="absolute right-5 text-gray-500 hover:text-white transition-colors text-xl leading-none">
+            ×
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          <div className="bg-[#2a2a2a] rounded-xl px-4 py-3 flex items-center gap-3">
+            <span className="text-xs text-gray-500">{match.date}</span>
+            <span className="text-sm font-semibold text-white">vs {match.opponent}</span>
+            <span className="text-sm text-gray-300 font-mono">{match.score}</span>
+          </div>
+
+          <p className="text-xs font-semibold text-white">전체 투표 현황</p>
+          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+            {votes.map((lv, i) => (
+              <div key={i}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white font-medium">{lv.name}</span>
+                    <span className="text-[10px] text-gray-500">{lv.position}</span>
+                  </div>
+                  <span className="text-xs text-secondary font-mono text-primary">{lv.votes}표</span>
+                </div>
+                <div className="h-1 rounded-full bg-white/8 overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all"
+                    style={{ width: `${Math.round((lv.votes / (lv.maxVotes || 1)) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-5 border-t border-white/10">
+          <button onClick={onClose} className="w-full py-3 text-sm font-bold text-black bg-primary rounded-xl hover:bg-primary/90 transition-colors">
+            확인
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -496,6 +554,7 @@ function CompletedCard({ match }: { match: MatchCard }) {
 export default function MOMVotePanel() {
   const [matches, setMatches] = useState<MatchCard[]>(MOCK_MATCHES);
   const [createTarget, setCreateTarget] = useState<MatchCard | null>(null);
+  const [selectedCompletedMatch, setSelectedCompletedMatch] = useState<MatchCard | null>(null);
 
   const handleCreate = (matchId: string) => {
     setMatches((prev) =>
@@ -531,7 +590,7 @@ export default function MOMVotePanel() {
         if (match.status === "ongoing") {
           return <OngoingCard key={match.id} match={match} />;
         }
-        return <CompletedCard key={match.id} match={match} />;
+        return <CompletedCard key={match.id} match={match} onClick={() => setSelectedCompletedMatch(match)} />;
       })}
 
       {/* MOM 투표 만들기 모달 */}
@@ -540,6 +599,14 @@ export default function MOMVotePanel() {
           noVoteMatches={matches.filter((m) => m.status === "no-vote")}
           onClose={() => setCreateTarget(null)}
           onCreate={handleCreate}
+        />
+      )}
+
+      {/* 전체 투표 결과 모달 */}
+      {selectedCompletedMatch && (
+        <CompletedVoteModal
+          match={selectedCompletedMatch}
+          onClose={() => setSelectedCompletedMatch(null)}
         />
       )}
     </div>

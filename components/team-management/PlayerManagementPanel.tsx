@@ -55,8 +55,8 @@ const COLUMNS: { key: keyof PlayerStat; label: string }[] = [
   { key: "attendance", label: "출석" },
   { key: "goals", label: "득점" },
   { key: "assists", label: "도움" },
-  { key: "gaPoints", label: "가점" },
-  { key: "yellowCards", label: "경고시트" },
+  { key: "gaPoints", label: "기점" },
+  { key: "yellowCards", label: "클린시트" },
   { key: "wins", label: "승" },
   { key: "draws", label: "무" },
   { key: "losses", label: "패" },
@@ -311,15 +311,16 @@ export default function PlayerManagementPanel() {
       </div>
 
       {/* ── 테이블 ── */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs border-collapse">
-          <thead>
-            <tr className="bg-[#161616] border-y border-white/8 text-gray-500">
-              <th className="py-2.5 px-4 text-left font-medium w-[72px]">등번호</th>
-              <th className="py-2.5 px-3 text-left font-medium w-[160px]">이름</th>
-              <th className="py-2.5 px-3 text-center font-medium w-[64px]">포지션</th>
+      <div className="px-6 pb-20">
+        <div className="overflow-x-auto bg-[#1a1a1a] rounded-2xl border border-white/8">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-[#161616] border-b border-white/8 text-gray-500">
+              <th className="py-2.5 px-3 text-left font-medium w-[64px]">등번호</th>
+              <th className="py-2.5 px-2 text-left font-medium w-[140px]">이름</th>
+              <th className="py-2.5 px-2 text-center font-medium w-[56px]">포지션</th>
               {COLUMNS.map((c) => (
-                <th key={c.key} className="py-2.5 px-3 text-center font-medium">
+                <th key={c.key} className="py-2.5 px-2 text-center font-medium whitespace-nowrap">
                   {c.label}
                 </th>
               ))}
@@ -339,7 +340,7 @@ export default function PlayerManagementPanel() {
                   }`}
                 >
                   {/* 등번호 */}
-                  <td className="py-3 px-4 text-gray-400 font-mono">
+                  <td className="py-2.5 px-3 text-gray-400 font-mono">
                     {isEditing ? (
                       <span className="border border-white/20 rounded px-2 py-1 text-white inline-block">
                         {player.backNumber}
@@ -350,31 +351,31 @@ export default function PlayerManagementPanel() {
                   </td>
 
                   {/* 이름 + 프로필 */}
-                  <td className="py-3 px-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
+                  <td className="py-2.5 px-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
                         <Image
                           src={player.profileImage}
                           alt={player.name}
-                          width={32}
-                          height={32}
+                          width={28}
+                          height={28}
                           className="object-cover"
                         />
                       </div>
-                      <span className="text-white font-medium truncate max-w-[90px]">
+                      <span className="text-white font-medium truncate max-w-[80px] text-xs">
                         {player.name}
                       </span>
                     </div>
                   </td>
 
                   {/* 포지션 */}
-                  <td className="py-3 px-3 text-center">
+                  <td className="py-2.5 px-2 text-center">
                     <PosBadge label={player.position} />
                   </td>
 
                   {/* 통계 컬럼 */}
                   {COLUMNS.map((col) => (
-                    <td key={col.key} className="py-3 px-3 text-center">
+                    <td key={col.key} className="py-2.5 px-2 text-center">
                       {isEditing ? (
                         <EditCell
                           value={(buf[col.key] as number) ?? 0}
@@ -392,6 +393,7 @@ export default function PlayerManagementPanel() {
             })}
           </tbody>
         </table>
+      </div>
       </div>
 
       {/* ── 고정 저장 바 ── */}
