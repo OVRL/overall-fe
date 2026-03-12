@@ -590,7 +590,7 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
 
   return (
     <>
-      <div className="p-6 space-y-6 max-w-4xl">
+      <div className="p-6 space-y-6 max-w-4xl mx-auto w-full">
         {/* 페이지 제목 */}
         <h1 className="text-xl font-bold text-white">팀 설정</h1>
 
