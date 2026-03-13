@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const FALLBACK_DELAY_MS = 200;
 
@@ -49,11 +50,7 @@ const ModalLoadingFallback = () => {
       aria-live="polite"
       role="status"
     >
-      <span className="sr-only">모달을 불러오는 중입니다.</span>
-      <div
-        className="size-8 animate-spin rounded-full border-2 border-Fill_Quatiary border-t-Fill_AccentPrimary"
-        aria-hidden
-      />
+      <LoadingSpinner label="모달을 불러오는 중입니다." size="md" />
     </div>
   );
 };

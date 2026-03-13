@@ -20,14 +20,14 @@ const OnboardingCompletion = () => {
         angle: 60,
         spread: 55,
         origin: { x: 0, y: 0.45 },
-        colors: ["#FFD700", "#FF4500", "#008080"], // Example festive colors
+        colors: ["#B8FF12", "#76AD00", "#F1F1F1"], // Example festive colors
       });
       confetti({
         particleCount: 2,
         angle: 120,
         spread: 55,
         origin: { x: 1, y: 0.45 }, // Top right
-        colors: ["#FFD700", "#FF4500", "#008080"],
+        colors: ["#B8FF12", "#76AD00", "#F1F1F1"],
       });
 
       if (Date.now() < end) {

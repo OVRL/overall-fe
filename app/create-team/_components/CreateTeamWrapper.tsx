@@ -6,6 +6,7 @@ import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
 import TextField from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import useModal from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 import { Controller } from "react-hook-form";
@@ -219,13 +220,7 @@ const CreateTeamWrapper = () => {
             )}
           >
             {isInFlight ? (
-              <>
-                <span className="sr-only">만들기 중입니다.</span>
-                <div
-                  className="size-6 animate-spin rounded-full border-2 border-Fill_Quatiary border-t-Fill_AccentPrimary"
-                  aria-hidden
-                />
-              </>
+              <LoadingSpinner label="만들기 중입니다." size="sm" />
             ) : (
               "클럽 생성하기"
             )}
