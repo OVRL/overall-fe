@@ -218,7 +218,17 @@ const CreateTeamWrapper = () => {
               !canSubmit && "bg-gray-900 text-Label-Tertiary",
             )}
           >
-            {isInFlight ? "만들기 중..." : "만들기"}
+            {isInFlight ? (
+              <>
+                <span className="sr-only">만들기 중입니다.</span>
+                <div
+                  className="size-6 animate-spin rounded-full border-2 border-Fill_Quatiary border-t-Fill_AccentPrimary"
+                  aria-hidden
+                />
+              </>
+            ) : (
+              "클럽 생성하기"
+            )}
           </Button>
         </div>
       </section>
