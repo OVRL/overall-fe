@@ -77,7 +77,7 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
       variables: {
         input: {
           name: data.clubName,
-          activityArea: data.activityArea,
+          activityArea: data.activityAreaCode,
           historyStartDate,
           homeUniform,
           awayUniform,
