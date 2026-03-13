@@ -17,16 +17,16 @@ import { DatePicker } from "@/components/ui/date/DatePicker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import locationIcon from "@/public/icons/location.svg";
-import { useRouter } from "next/navigation";
+import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
+import { useUserStore } from "@/contexts/UserContext";
 
-interface CreateTeamWrapperProps {
-  userId: number;
-}
-
-const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
+const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
-  const router = useRouter();
-  const { form, onSubmit } = useCreateTeamForm(userId);
+  const router = useBridgeRouter();
+  const user = useUserStore((state) => state.user);
+  const { form, onSubmit, isInFlight } = useCreateTeamForm({
+    onSuccess: () => router.replace("/home"),
+  });
   const {
     control,
     handleSubmit,
@@ -65,14 +65,15 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
     [router],
   );
 
-  // Mutation은 추후 연동. 제출 후 /home으로 이동
+  // createTeam 뮤테이션 실행. 성공 시 onSuccess에서 /home으로 이동
   const handleFormSubmit = useCallback(
     (data: Parameters<typeof onSubmit>[0]) => {
       onSubmit(data);
-      router.replace("/home");
     },
-    [onSubmit, router],
+    [onSubmit],
   );
+
+  const canSubmit = Boolean(user) && isValid && !isInFlight;
 
   return (
     <form
@@ -97,6 +98,14 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
                   errorMessage={error?.message}
                   onChange={(e) => {
                     const value = e.target.value;
+                    // IME 조합 중(한글 등)에는 필터 적용하지 않음 — 자모가 지워지지 않도록
+                    const isComposing =
+                      "isComposing" in e.nativeEvent &&
+                      e.nativeEvent.isComposing;
+                    if (isComposing) {
+                      field.onChange(value.slice(0, 15));
+                      return;
+                    }
                     const filteredValue = value
                       .replace(/[^a-zA-Z0-9가-힣\s]/g, "")
                       .slice(0, 15);
@@ -203,13 +212,13 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
             type="submit"
             variant="primary"
             size="xl"
-            disabled={!isValid}
+            disabled={!canSubmit}
             className={cn(
               "w-full transition-colors",
-              !isValid && "bg-gray-900 text-Label-Tertiary",
+              !canSubmit && "bg-gray-900 text-Label-Tertiary",
             )}
           >
-            만들기
+            {isInFlight ? "만들기 중..." : "만들기"}
           </Button>
         </div>
       </section>

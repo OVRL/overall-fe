@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dc677989780fa158cac3cfad31290c2a>>
+ * @generated SignedSource<<1b7e03a20ba53abf6d642c9656a1864c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -21,7 +21,7 @@ export type CreateTeamInput = {
   userId: number;
 };
 export type useCreateTeamMutation$variables = {
-  emblem?: any | null | undefined;
+  emblem: any;
   input: CreateTeamInput;
 };
 export type useCreateTeamMutation$data = {
@@ -156,16 +156,16 @@ return {
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "8fe627c7e03c83a011555e08a2dedef7",
+    "cacheID": "f57e5e378562c932dedf976040024fca",
     "id": null,
     "metadata": {},
     "name": "useCreateTeamMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateTeamMutation(\n  $input: CreateTeamInput!\n  $emblem: Upload\n) {\n  createTeam(input: $input, emblem: $emblem) {\n    id\n    name\n    emblem\n    activityArea\n    homeUniform\n    awayUniform\n    historyStartDate\n    description\n  }\n}\n"
+    "text": "mutation useCreateTeamMutation(\n  $input: CreateTeamInput!\n  $emblem: Upload!\n) {\n  createTeam(input: $input, emblem: $emblem) {\n    id\n    name\n    emblem\n    activityArea\n    homeUniform\n    awayUniform\n    historyStartDate\n    description\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "1d21e7b5cd50a9cb16277119e8972771";
+(node as any).hash = "047b8fb43e120c064d5fa66325bd933c";
 
 export default node;
