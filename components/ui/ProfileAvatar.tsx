@@ -43,7 +43,6 @@ const ProfileAvatar = ({
       <ImgPlayer
         src={src}
         alt={alt}
-        sizes="2.25rem"
         className="scale-[2] origin-top bg-transparent"
         onError={onError}
         priority={priority}

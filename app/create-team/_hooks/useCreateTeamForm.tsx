@@ -6,26 +6,28 @@ import { useCreateTeamMutation } from "./useCreateTeamMutation";
 import { UniformDesign } from "../../../__generated__/useCreateTeamMutation.graphql";
 import { useUserStore } from "@/contexts/UserContext";
 
-export const createTeamSchema = z.object({
-  clubName: z
-    .string()
-    .min(1, "클럽 이름을 입력해주세요.")
-    .max(15, "최대 15자까지만 입력 가능합니다.")
-    .regex(/^[a-zA-Z0-9가-힣\s]*$/, "특수문자는 입력할 수 없습니다."),
-  activityArea: z.string().min(1, "지역을 선택해주세요."),
-  activityAreaCode: z.string(),
-  foundingDate: z.string().min(1, "창단일을 입력해주세요."),
-  homeUniform: z.enum(UNIFORM_DESIGN_VALUES, {
-    message: "홈 유니폼을 꼭 선택해주세요",
-  }),
-  awayUniform: z.enum(UNIFORM_DESIGN_VALUES, {
-    message: "어웨이 유니폼을 꼭 선택해주세요",
-  }),
-  emblemFile: z.instanceof(File).optional(),
-}).refine((data) => data.emblemFile != null, {
-  message: "엠블럼 이미지를 선택해주세요.",
-  path: ["emblemFile"],
-});
+export const createTeamSchema = z
+  .object({
+    clubName: z
+      .string()
+      .min(1, "클럽 이름을 입력해주세요.")
+      .max(15, "최대 15자까지만 입력 가능합니다.")
+      .regex(/^[a-zA-Z0-9가-힣\s]*$/, "특수문자는 입력할 수 없습니다."),
+    activityArea: z.string().min(1, "지역을 선택해주세요."),
+    activityAreaCode: z.string(),
+    foundingDate: z.string().min(1, "창단일을 입력해주세요."),
+    homeUniform: z.enum(UNIFORM_DESIGN_VALUES, {
+      message: "홈 유니폼을 꼭 선택해주세요",
+    }),
+    awayUniform: z.enum(UNIFORM_DESIGN_VALUES, {
+      message: "어웨이 유니폼을 꼭 선택해주세요",
+    }),
+    emblemFile: z.instanceof(File).optional(),
+  })
+  .refine((data) => data.emblemFile != null, {
+    message: "엠블럼 이미지를 선택해주세요.",
+    path: ["emblemFile"],
+  });
 
 export type CreateTeamValues = z.infer<typeof createTeamSchema>;
 
