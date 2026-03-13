@@ -1,6 +1,7 @@
 import { useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import TextField from "@/components/ui/TextField";
 import SelectMainFoot from "../SelectMainFoot";
@@ -217,7 +218,11 @@ const AdditionalInfoCollect = ({
             !isFormFilled && "bg-gray-900 text-Label-Tertiary",
           )}
         >
-          완료하기
+          {isMutationInFlight ? (
+            <LoadingSpinner label="저장 중입니다." size="sm" />
+          ) : (
+            "완료하기"
+          )}
         </Button>
         <Button
           variant="line"
