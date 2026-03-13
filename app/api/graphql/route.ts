@@ -10,8 +10,12 @@ const BACKEND_URL = env.BACKEND_URL;
  * Relay fetchGraphQL이 이 경로로 요청하면 인증이 적용됩니다.
  */
 export async function POST(request: NextRequest) {
-  const accessToken = request.cookies.get("accessToken")?.value;
-  const refreshToken = request.cookies.get("refreshToken")?.value;
+  const accessToken =
+    request.cookies.get("accessToken")?.value ??
+    (process.env.NODE_ENV === "development" ? env.DEV_ACCESS_TOKEN : undefined);
+  const refreshToken =
+    request.cookies.get("refreshToken")?.value ??
+    (process.env.NODE_ENV === "development" ? env.DEV_REFRESH_TOKEN : undefined);
 
   let token = accessToken;
   if (!token && refreshToken) {

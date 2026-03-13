@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { env } from "./lib/env";
 import { GUEST_ONLY_ROUTES, PUBLIC_ROUTES } from "./lib/routes";
-import {
-  refreshAccessToken,
-  type TokenPair,
-} from "./lib/auth/refreshToken";
+import { refreshAccessToken, type TokenPair } from "./lib/auth/refreshToken";
 
 const BACKEND_URL = env.BACKEND_URL;
 
@@ -193,7 +190,7 @@ export async function proxy(request: NextRequest) {
         },
       });
     }
-    
+
     return response;
   }
 
@@ -206,5 +203,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // matcher: 정적 파일 및 API 등을 제외하여 성능 최적화 (icons: public 폴더 유니폼 등)
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images|videos|icons).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|images|videos|icons).*)",
+  ],
 };

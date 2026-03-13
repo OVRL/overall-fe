@@ -5,7 +5,25 @@ import {
   type UploadableMap,
   type Variables,
 } from "relay-runtime";
-import { env } from "@/lib/env";
+
+/**
+ * Relay는 Global Object Identification 때문에 모든 id를 문자열로 기대합니다.
+ * 백엔드가 TeamMemberModel 등에서 id를 Int로 반환할 경우 응답을 정규화합니다.
+ */
+function ensureIdStrings(value: unknown): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(ensureIdStrings);
+  const obj = value as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (key === "id" && typeof val === "number") {
+      result[key] = String(val);
+    } else {
+      result[key] = ensureIdStrings(val);
+    }
+  }
+  return result;
+}
 
 export const fetchQuery = async (
   params: RequestParameters,
@@ -55,15 +73,9 @@ export const fetchQuery = async (
     });
   }
 
-  // 개발: 백엔드 URL로 직접 호출(rewrite/프록시 우회). CORS 허용 필요.
-  // 프로덕션: 같은 오리진 /api/graphql → API 라우트에서 쿠키로 Authorization 부여 후 백엔드 호출.
-  // NODE_ENV는 클라이언트에서 process.env로만 사용 (t3-env는 NEXT_PUBLIC_만 클라이언트 노출).
-  const graphqlUrl =
-    process.env.NODE_ENV === "development"
-      ? `${env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/graphql`
-      : "/api/graphql";
-
-  const response = await fetch(graphqlUrl, {
+  // 개발/프로덕션 모두 같은 오리진 /api/graphql 사용.
+  // API 라우트가 쿠키(또는 개발 시 DEV_ACCESS_TOKEN)로 Authorization 부여 후 백엔드 호출.
+  const response = await fetch("/api/graphql", {
     ...request,
     credentials: "include",
   });
@@ -87,6 +99,9 @@ export const fetchQuery = async (
       : `GraphQL 요청 실패 (${response.status}): 응답이 JSON이 아닙니다.`;
     throw new Error(message);
   }
+
+  // 백엔드가 id를 Int로 주는 타입(TeamMemberModel 등) 대응: Relay는 id를 문자열로 기대함
+  payload = ensureIdStrings(payload);
 
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)
   if (!response.ok) {

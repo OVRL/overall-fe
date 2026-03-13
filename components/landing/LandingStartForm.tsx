@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useUserStore } from "@/contexts/UserContext";
 import { useCreateTeamMemberMutation } from "./_hooks/useCreateTeamMemberMutation";
+import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
 
 const LandingStartForm = () => {
   const router = useBridgeRouter();
@@ -50,7 +51,9 @@ const LandingStartForm = () => {
         }
       },
       onError: (error) => {
-        setSubmitError(error.message ?? "팀 가입에 실패했습니다.");
+        setSubmitError(
+          getGraphQLErrorMessage(error, "팀 가입에 실패했습니다."),
+        );
       },
     });
   };

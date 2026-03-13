@@ -76,6 +76,8 @@ const CreateTeamWrapper = () => {
 
   const canSubmit = Boolean(user) && isValid && !isInFlight;
 
+  console.log(user, isValid, isInFlight);
+
   return (
     <form
       onSubmit={handleSubmit(handleFormSubmit)}
