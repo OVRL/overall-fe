@@ -37,7 +37,17 @@ const LandingStartForm = () => {
         },
       },
       onCompleted: () => {
-        router.push("/home");
+        try {
+          router.replace("/home");
+        } catch (err) {
+          // 프로덕션 빌드에서 Minified exception 대신 실제 에러 확인용
+          console.error("[LandingStartForm] onCompleted 에러:", err);
+          setSubmitError(
+            err instanceof Error
+              ? err.message
+              : "페이지 이동 중 오류가 발생했습니다.",
+          );
+        }
       },
       onError: (error) => {
         setSubmitError(error.message ?? "팀 가입에 실패했습니다.");

@@ -26,7 +26,7 @@ const CreateTeamWrapper = () => {
   const router = useBridgeRouter();
   const user = useUserStore((state) => state.user);
   const { form, onSubmit, isInFlight } = useCreateTeamForm({
-    onSuccess: () => router.replace("/home"),
+    onSuccess: () => router.replace("/create-team/complete"),
   });
   const {
     control,
