@@ -59,16 +59,14 @@ export default async function RootLayout({
         <TransitionProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
             <RelayProvider>
               <UserInitProvider initialUser={initialUser}>
                 <div id="modal-root"></div>
-                <PageTransition>
-                  {children}
-                </PageTransition>
+                <PageTransition>{children}</PageTransition>
                 <GlobalPortalProvider>
                   <Modals />
                 </GlobalPortalProvider>

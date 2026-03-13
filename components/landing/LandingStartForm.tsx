@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import Button, { buttonVariants } from "../ui/Button";
-import Link from "next/link";
+import Link from "../Link";
 import { cn } from "@/lib/utils";
 
 const LandingStartForm = () => {
