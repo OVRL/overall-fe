@@ -3,7 +3,7 @@ import PlayerTableHeader from "../PlayerTableHeader";
 import {
   PLAYER_TABLE_COLUMNS,
   SORTABLE_COLUMN_KEYS,
-} from "../../../_constants/playerTableColumns";
+} from "../../../../_constants/playerTableColumns";
 
 describe("PlayerTableHeader 컴포넌트", () => {
   const mockOnSort = jest.fn();
@@ -27,7 +27,6 @@ describe("PlayerTableHeader 컴포넌트", () => {
       </table>,
     );
 
-    // 정렬 가능한 첫 번째 컬럼 찾기 (예: '선수명' 혹은 'OVR' 등)
     const sortableKey = Array.from(SORTABLE_COLUMN_KEYS)[0];
     const header = screen.getByText(sortableKey);
 

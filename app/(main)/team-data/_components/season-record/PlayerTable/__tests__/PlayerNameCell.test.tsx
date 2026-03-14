@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import PlayerNameCell from "../PlayerNameCell";
 
-// ProfileAvatar 모킹
 jest.mock("@/components/ui/ProfileAvatar", () => ({
   __esModule: true,
   default: ({ src, alt }: any) => (

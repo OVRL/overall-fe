@@ -11,7 +11,7 @@ jest.mock("@/hooks/useModal", () => ({
   }),
 }));
 
-jest.mock("../RankingCarousel", () => ({
+jest.mock("../season-record/RankingCarousel", () => ({
   __esModule: true,
   default: ({ onMoreClick, onPlayerClick }: any) => (
     <div data-testid="ranking-carousel">
@@ -23,7 +23,7 @@ jest.mock("../RankingCarousel", () => ({
   ),
 }));
 
-jest.mock("../PlayerListBoard", () => ({
+jest.mock("../season-record/PlayerListBoard", () => ({
   __esModule: true,
   default: ({ onPlayerClick }: any) => (
     <div data-testid="player-list-board">

@@ -1,8 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import PlayerTableRow from "../PlayerTableRow";
-import { Player } from "../../../_types/player";
+import { Player } from "../../../../_types/player";
 
-// 하위 컴포넌트 모킹
 jest.mock("@/components/PositionChip", () => ({
   __esModule: true,
   default: ({ position }: { position: string }) => (
@@ -68,24 +67,15 @@ describe("PlayerTableRow 컴포넌트", () => {
       </table>,
     );
 
-    // 등수 (index + 1)
     expect(screen.getByText("1")).toBeInTheDocument();
-
-    // 포지션 칩
     expect(screen.getByTestId("position-chip")).toHaveTextContent("FW");
-
-    // 등번호
     expect(screen.getByText("7")).toBeInTheDocument();
-
-    // 이름 셀
     expect(screen.getByTestId("player-name-cell")).toHaveTextContent("손흥민");
 
-    // 통계 셀 (OVR 등)
     const statsCells = screen.getAllByTestId("stats-cell");
-    // OVR 셀 확인
     const ovrCell = statsCells.find((cell) => cell.textContent === "90");
     expect(ovrCell).toBeInTheDocument();
-    expect(ovrCell?.getAttribute("data-highlight")).toBe("true"); // OVR은 highlight 대상
+    expect(ovrCell?.getAttribute("data-highlight")).toBe("true");
   });
 
   it("행 클릭 시 onPlayerClick 콜백이 호출되어야 한다", () => {

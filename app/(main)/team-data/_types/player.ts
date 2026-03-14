@@ -29,4 +29,4 @@ export interface Player {
   cumulativeStats?: PlayerStats;
 }
 
-export type StatTabType = "시즌기록" | "누적기록" | "단일기록";
+export type StatTabType = "시즌기록" | "명예의 전당";

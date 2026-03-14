@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { Player, StatTabType } from "../_types/player";
 import { getPlayerValue } from "../_constants/mockPlayers";
-import RankingCarousel from "./RankingCarousel";
 import useModal from "@/hooks/useModal";
-import PlayerListBoard from "./PlayerListBoard";
 import Dropdown from "@/components/ui/Dropdown";
 import DashboardTabMenu from "./DashboardTabMenu";
+import HallOfFameBoard from "./hall-of-fame/HallOfFameBoard";
+import SeasonRecordSection from "./season-record/SeasonRecordSection";
 
 interface TeamDataDashboardProps {
   allPlayers: Player[];
@@ -43,34 +43,38 @@ const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
 
   return (
     <>
-      {/* 페이지 헤더 */}
-      <div className="flex items-center gap-4 mb-8">
-        <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
-          팀 데이터
-        </h1>
-
-        {/* 시즌 선택 드롭다운 */}
-        <div className="relative z-40">
-          <Dropdown
-            options={[{ label: "2026 시즌", value: "2026 시즌" }]}
-            value={selectedSeason}
-            onChange={setSelectedSeason}
-          />
+      <header className="mb-8">
+        <div className="flex items-center gap-4">
+          <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
+            팀 데이터
+          </h1>
+          <div className="relative z-40" aria-label="시즌 선택">
+            <Dropdown
+              options={[{ label: "2026 시즌", value: "2026 시즌" }]}
+              value={selectedSeason}
+              onChange={setSelectedSeason}
+            />
+          </div>
         </div>
-      </div>
+      </header>
 
       <DashboardTabMenu activeTab={dataTab} onChange={setDataTab} />
 
-      {/* 순위 카드 그리드 - 투명 배경, 스크롤 버튼 */}
-      <RankingCarousel
-        onMoreClick={handleMoreClick}
-        onPlayerClick={handlePlayerClick}
-      />
-
-      <PlayerListBoard
-        initialPlayers={allPlayers}
-        onPlayerClick={handlePlayerClick}
-      />
+      <main
+        role="tabpanel"
+        id="team-data-tabpanel"
+        aria-labelledby="team-data-tabs"
+      >
+        {dataTab === "시즌기록" ? (
+          <SeasonRecordSection
+            onMoreClick={handleMoreClick}
+            onPlayerClick={handlePlayerClick}
+            allPlayers={allPlayers}
+          />
+        ) : (
+          <HallOfFameBoard onPlayerClick={handlePlayerClick} />
+        )}
+      </main>
     </>
   );
 };

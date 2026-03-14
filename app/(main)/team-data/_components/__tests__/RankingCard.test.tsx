@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RankingCard from "../RankingCard";
+import RankingCard from "../season-record/RankingCard";
 import { Player } from "../../_types/player";
 
-// 하위 컴포넌트 모킹
-jest.mock("../RankCardRow", () => ({
+jest.mock("../season-record/RankCardRow", () => ({
   __esModule: true,
   default: ({ player, index }: { player: Player; index: number }) => (
     <div data-testid="rank-card-row">

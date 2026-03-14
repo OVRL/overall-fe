@@ -3,7 +3,7 @@ import {
   SORTABLE_COLUMN_KEYS,
   COLUMN_WIDTH_MAP,
   type PlayerTableColumnConfig,
-} from "../../_constants/playerTableColumns";
+} from "../../../_constants/playerTableColumns";
 import { cn } from "@/lib/utils";
 
 export interface PlayerTableHeaderProps {
@@ -35,10 +35,19 @@ const PlayerTableHeader = ({ sortConfig, onSort }: PlayerTableHeaderProps) => (
             key={col.key}
             className={thClass(col, sortable)}
             onClick={() => sortable && onSort?.(col.key)}
+            scope="col"
+            {...(sortable && {
+              "aria-sort":
+                sortConfig?.key === col.key
+                  ? sortConfig.direction === "asc"
+                    ? "ascending"
+                    : "descending"
+                  : undefined,
+            })}
           >
             {col.key}
             {sortConfig?.key === col.key && (
-              <span className="ml-1 text-2.75 text-primary text-center">
+              <span className="ml-1 text-2.75 text-primary text-center" aria-hidden>
                 {sortConfig.direction === "asc" ? "▲" : "▼"}
               </span>
             )}

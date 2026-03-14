@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RankingCarousel from "../RankingCarousel";
+import RankingCarousel from "../season-record/RankingCarousel";
 import { statsData } from "../../_constants/mockPlayers";
 
-// 하위 컴포넌트 및 훅 모킹
-jest.mock("../RankingCard", () => ({
+jest.mock("../season-record/RankingCard", () => ({
   __esModule: true,
   default: ({ title, onMoreClick }: any) => (
     <div data-testid="ranking-card">
@@ -62,8 +61,8 @@ describe("RankingCarousel 컴포넌트", () => {
       />,
     );
 
-    const leftButton = screen.getByLabelText("Previous");
-    const rightButton = screen.getByLabelText("Next");
+    const leftButton = screen.getByLabelText("이전 순위 카드");
+    const rightButton = screen.getByLabelText("다음 순위 카드");
 
     fireEvent.click(leftButton);
     expect(mockScroll).toHaveBeenCalledWith("left");

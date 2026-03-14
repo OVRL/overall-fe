@@ -1,10 +1,10 @@
 import { memo } from "react";
 import PositionChip from "@/components/PositionChip";
-import type { Player } from "../../_types/player";
+import type { Player } from "../../../_types/player";
 import {
   PLAYER_TABLE_COLUMNS,
   COLUMN_WIDTH_MAP,
-} from "../../_constants/playerTableColumns";
+} from "../../../_constants/playerTableColumns";
 import PlayerNameCell from "./PlayerNameCell";
 import StatsCell from "./StatsCell";
 import { cn } from "@/lib/utils";
@@ -75,7 +75,6 @@ const PlayerTableRow = memo(function PlayerTableRow({
             </td>
           );
         }
-        // OVR 및 통계 컬럼
         const value =
           col.key === "OVR"
             ? player.ovr

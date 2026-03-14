@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import PlayerListBoard from "../PlayerListBoard";
+import PlayerListBoard from "../season-record/PlayerListBoard";
 import { Player } from "../../_types/player";
 
-// PlayerTable 모킹
-jest.mock("../PlayerTable", () => ({
+jest.mock("../season-record/PlayerTable", () => ({
   __esModule: true,
   default: ({ players, onSort, sortConfig }: any) => (
     <div data-testid="mock-player-table">

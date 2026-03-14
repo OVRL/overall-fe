@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import PlayerTable from "../PlayerTable";
-import { Player } from "../../../_types/player";
+import { Player } from "../../../../_types/player";
 
-// 하위 컴포넌트 모킹
 jest.mock("../PlayerTableHeader", () => ({
   __esModule: true,
   default: ({ sortConfig }: { sortConfig: any }) => (
@@ -83,16 +82,13 @@ describe("PlayerTable 컴포넌트", () => {
   });
 
   it("getCellClass 로직이 정렬 상태에 따라 올바른 클래스를 반환해야 한다 (OVR 기본값 등)", () => {
-    // 1. 정렬이 없을 때 OVR 하이라이트 확인
     const { rerender } = render(
       <PlayerTable players={mockPlayers} sortConfig={null} />,
     );
-    // getCellClass 내 로직: !sortConfig && colKey === "OVR" => "text-primary font-bold"
     expect(screen.getAllByTestId("cell-class")[0]).toHaveTextContent(
       "text-primary font-bold",
     );
 
-    // 2. 다른 키로 정렬 중일 때 확인
     rerender(
       <PlayerTable
         players={mockPlayers}

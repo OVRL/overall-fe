@@ -20,7 +20,7 @@ jest.mock("@/components/ui/MainProfileCard", () => ({
   ),
 }));
 
-jest.mock("@/app/(main)/team-data/_components/FootIcon", () => ({
+jest.mock("@/app/(main)/team-data/_components/season-record/FootIcon", () => ({
   __esModule: true,
   default: ({ foot }: any) => <div data-testid="foot-icon">{foot}</div>,
 }));

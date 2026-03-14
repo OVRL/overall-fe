@@ -9,7 +9,7 @@ interface StatTabMenuProps {
 }
 
 const StatTabMenu = ({ activeTab, onChange }: StatTabMenuProps) => {
-  const tabs: StatTabType[] = ["시즌기록", "누적기록", "단일기록"];
+  const tabs: StatTabType[] = ["시즌기록", "명예의 전당"];
 
   return (
     <div className="flex items-center justify-between gap-2 px-10.5 py-4">

@@ -1,9 +1,10 @@
 import Button from "@/components/ui/Button";
-import type { Player } from "../_types/player";
+import type { Player } from "../../_types/player";
 import RankCardRow from "./RankCardRow";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import Icon from "@/components/ui/Icon";
 import medal from "@/public/icons/gold_medal.svg";
+
 export interface RankingCardProps {
   title: string;
   players: Player[];
@@ -20,9 +21,14 @@ const RankingCard = ({
   const top4Players = players.slice(0, 4);
 
   return (
-    <div className="flex flex-col w-76 h-100 shrink-0 relative select-none">
-      {/* 헤더 */}
-      <h3 className="text-sm font-semibold text-[#f7f8f8] mt-3.5 ml-3 w-19.5 mb-2 h-4.5">
+    <article
+      className="flex flex-col w-76 h-100 shrink-0 relative select-none"
+      aria-labelledby={`ranking-card-${title.replace(/\s/g, "-")}`}
+    >
+      <h3
+        id={`ranking-card-${title.replace(/\s/g, "-")}`}
+        className="text-sm font-semibold text-[#f7f8f8] mt-3.5 ml-3 w-19.5 mb-2 h-4.5"
+      >
         {title}
       </h3>
 
@@ -31,11 +37,11 @@ const RankingCard = ({
           <ProfileAvatar
             size={72}
             src="/images/player/img_player_1.webp"
-            alt="ovr"
+            alt=""
           />
           <Icon
             src={medal}
-            alt="medal"
+            alt=""
             width={40}
             height={40}
             nofill
@@ -53,8 +59,7 @@ const RankingCard = ({
       </div>
 
       <div className="w-full px-3 pt-30 pb-4 rounded-3xl bg-gray-1200 flex flex-col gap-4">
-        {/* 순위 리스트 */}
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2" aria-label={`${title} 상위 순위`}>
           {top4Players.map((player, index) => (
             <RankCardRow
               key={player.id}
@@ -69,7 +74,7 @@ const RankingCard = ({
           더보기
         </Button>
       </div>
-    </div>
+    </article>
   );
 };
 

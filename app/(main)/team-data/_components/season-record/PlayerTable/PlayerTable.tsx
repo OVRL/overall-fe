@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { Player } from "../../_types/player";
+import type { Player } from "../../../_types/player";
 import PlayerTableHeader from "./PlayerTableHeader";
 import PlayerTableRow from "./PlayerTableRow";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,7 @@ const PlayerTable = ({
   );
 
   return (
-    <div className={cn("mt-12 overflow-x-auto select-none")}>
+    <div className={cn("mt-12 overflow-x-auto select-none")} role="region" aria-label="선수 통계 테이블">
       <table className={cn("block w-full text-sm")}>
         <PlayerTableHeader sortConfig={sortConfig} onSort={onSort} />
         <tbody className={cn("block w-full")}>

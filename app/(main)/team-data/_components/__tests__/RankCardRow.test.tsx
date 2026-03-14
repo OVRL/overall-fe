@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RankCardRow from "../RankCardRow";
+import RankCardRow from "../season-record/RankCardRow";
 import { Player } from "../../_types/player";
 
 // 모킹
