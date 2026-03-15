@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useEffect, useState } from "react";
+import { useId, useEffect } from "react";
 import { Controller, useWatch, type SubmitHandler } from "react-hook-form";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,7 +55,6 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
   const { control, handleSubmit, setValue } = form;
   const { createdTeamId } = useFindTeamMemberForGame(userId);
   const { executeMutation, isInFlight } = useCreateMatchMutation();
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const currentVenue = useWatch({ control, name: "venue" });
   const currentMatchType = useWatch({ control, name: "matchType" });
@@ -89,10 +88,9 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
 
   const onValid: SubmitHandler<RegisterGameValues> = (data) => {
     if (createdTeamId == null) {
-      setSubmitError("소속된 팀 정보를 불러올 수 없습니다. 다시 시도해주세요.");
+      toast.error("소속된 팀 정보를 불러올 수 없습니다. 다시 시도해주세요.");
       return;
     }
-    setSubmitError(null);
     executeMutation({
       variables: {
         input: {
@@ -118,10 +116,11 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
         },
       },
       onCompleted: () => {
+        toast.success("경기 등록이 완료되었습니다.");
         hideModal();
       },
       onError: (err) => {
-        setSubmitError(err.message ?? "경기 등록에 실패했습니다.");
+        toast.error(err.message ?? "경기 등록에 실패했습니다.");
       },
     });
   };
@@ -210,7 +209,8 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                         onChange={(date) => {
                           const next = date ? format(date, "yyyy-MM-dd") : "";
                           field.onChange(next);
-                          if (next) setValue("endDate", next, { shouldValidate: true });
+                          if (next)
+                            setValue("endDate", next, { shouldValidate: true });
                         }}
                         placeholder="시작 날짜 선택"
                         className="min-w-0 h-12 w-full"
@@ -239,12 +239,16 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                       const startDate = form.getValues("startDate");
                       return (
                         <DatePicker
-                          value={field.value ? new Date(field.value) : undefined}
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onChange={(date) => {
                             const next = date ? format(date, "yyyy-MM-dd") : "";
                             field.onChange(next);
                             if (next && startDate && next < startDate) {
-                              setValue("startDate", next, { shouldValidate: true });
+                              setValue("startDate", next, {
+                                shouldValidate: true,
+                              });
                             }
                           }}
                           placeholder="종료 날짜 선택"
@@ -408,11 +412,6 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
               />
             </FormSection>
 
-            {submitError && (
-              <p className="text-sm text-Fill_AccentNegative" role="alert">
-                {submitError}
-              </p>
-            )}
             <div className="flex gap-3 pt-2 pl-3">
               <Button
                 type="submit"

@@ -6,6 +6,18 @@ import {
   type Variables,
 } from "relay-runtime";
 
+/** SSR 시 fetch에 쓸 오리진 (Node에는 base URL이 없어 상대 URL 사용 불가) */
+function getServerOrigin(): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  const port = process.env.PORT ?? 3000;
+  return `http://localhost:${port}`;
+}
+
 /**
  * Relay는 Global Object Identification 때문에 모든 id를 문자열로 기대합니다.
  * 백엔드가 TeamMemberModel 등에서 id를 Int로 반환할 경우 응답을 정규화합니다.
@@ -73,9 +85,14 @@ export const fetchQuery = async (
     });
   }
 
-  // 개발/프로덕션 모두 같은 오리진 /api/graphql 사용.
-  // API 라우트가 쿠키(또는 개발 시 DEV_ACCESS_TOKEN)로 Authorization 부여 후 백엔드 호출.
-  const response = await fetch("/api/graphql", {
+  // 클라이언트: 상대 URL. 서버(SSR): Node에 base가 없어 상대 URL이 Invalid URL이 되므로 절대 URL 사용.
+  const graphqlPath = "/api/graphql";
+  const graphqlUrl =
+    typeof window !== "undefined"
+      ? graphqlPath
+      : `${getServerOrigin()}${graphqlPath}`;
+
+  const response = await fetch(graphqlUrl, {
     ...request,
     credentials: "include",
   });

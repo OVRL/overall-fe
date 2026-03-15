@@ -51,7 +51,8 @@ const StatGrid = ({ stats, className, itemClassName }: StatGridProps) => {
             <Icon
               src={STAT_ICONS[label]}
               alt={`${label} 아이콘`}
-              className="w-5 h-5"
+              width={20}
+              height={20}
               nofill
             />
             <span className="text-gray-400 text-[0.6875rem]">{label}</span>

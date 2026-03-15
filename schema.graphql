@@ -34,6 +34,9 @@ input CreateMatchAttendanceInput {
   """경기 ID"""
   matchId: Int!
 
+  """팀 ID"""
+  teamId: Int!
+
   """유저 ID"""
   userId: Int!
 }
@@ -152,6 +155,11 @@ input JoinTeamInput {
   role: String! = "player"
 }
 
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
 type LoginResponseModel {
   accessToken: String
   activityArea: String
@@ -173,25 +181,31 @@ type LoginResponseModel {
   subPositions: [Position!]
 }
 
-type MatchArrayModel {
-  hasNextPage: Boolean!
-  items: [MatchModel!]!
-  totalCount: Int!
-}
-
 type MatchAttendanceModel {
   attendanceStatus: AttendanceStatus
   createdAt: GraphQLDateTime!
   id: ID!
   matchId: Int!
+  teamId: Int!
+
+  """팀 멤버 정보"""
+  teamMember: TeamMemberModel
   updatedAt: GraphQLDateTime!
   userId: Int!
   voteDeadlineAt: GraphQLDateTime!
 }
 
+type MatchFormationModel {
+  createdAt: DateTime!
+  id: Int!
+  matchId: Int!
+  quarter: Int!
+  tactics: JSONObject
+  teamId: Int!
+  updatedAt: DateTime!
+}
+
 type MatchModel {
-  """참석 투표 목록"""
-  attendances: [MatchAttendanceModel!]
   createdAt: GraphQLDateTime!
   createdTeam: TeamResponseModel
   createdTeamId: Int!
@@ -213,9 +227,9 @@ type MatchModel {
   voteDeadline: GraphQLDateTime!
 }
 
-"""경기 유형 (match: 외부 경기, interna: 내전)"""
+"""경기 유형 (match: 외부 경기, internal: 내전)"""
 enum MatchType {
-  INTERNA
+  INTERNAL
   MATCH
 }
 
@@ -234,9 +248,57 @@ type Mutation {
   removeBackground(image: Upload!): BackgroundRemovalModel!
   updateMatch(input: UpdateMatchInput!): MatchModel!
   updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
+  updateMatchFormation(input: UpdateMatchFormationInput!): MatchFormationModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
+}
+
+type OverallModel {
+  """출장수"""
+  appearances: Int!
+
+  """도움"""
+  assists: Int!
+
+  """공격 포인트"""
+  attackPoints: Int!
+
+  """클린시트"""
+  cleanSheets: Int!
+
+  """생성일"""
+  createdAt: GraphQLDateTime!
+
+  """득점"""
+  goals: Int!
+
+  """Overall ID"""
+  id: Int!
+
+  """기점"""
+  keyPasses: Int!
+
+  """MOM3"""
+  mom3: Int!
+
+  """MOM8"""
+  mom8: Int!
+
+  """전체 능력치 (OVR)"""
+  ovr: Int!
+
+  """팀 ID"""
+  teamId: Int!
+
+  """수정일"""
+  updatedAt: GraphQLDateTime!
+
+  """유저 ID"""
+  userId: Int!
+
+  """승률"""
+  winRate: Int!
 }
 
 """축구 포지션 목록"""
@@ -280,12 +342,13 @@ type Query {
   findInviteCode(code: String!): InviteCodeModel
   findInviteCodeByTeam(teamId: Int!): InviteCodeModel
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
-  findManyMatch(limit: Int! = 10, offset: Int! = 0): MatchArrayModel!
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
   findManyTeamMember(limit: Int! = 10, offset: Int! = 0): TeamMemberArrayModel!
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findMatch(createdTeamId: Int!): [MatchModel!]!
+  findMatchAttendance(matchId: Int!, teamId: Int!): [MatchAttendanceModel!]!
+  findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
   findTeam(id: Int!): TeamModel!
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
@@ -337,6 +400,9 @@ type TeamMemberModel {
 
   """가입일"""
   joinedAt: GraphQLDateTime!
+
+  """전체 능력치"""
+  overall: OverallModel
 
   """포지션"""
   position: String
@@ -405,6 +471,11 @@ input UpdateMatchAttendanceInput {
 
   """참석 투표 ID"""
   id: Int!
+}
+
+input UpdateMatchFormationInput {
+  id: Int!
+  tactics: JSONObject!
 }
 
 input UpdateMatchInput {

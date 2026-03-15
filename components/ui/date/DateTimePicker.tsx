@@ -11,50 +11,56 @@ interface DateTimePickerProps {
     markedDates?: string[]; // YYYY-MM-DD
 }
 
+/** "HH:mm" 문자열을 휠 피커용 AM/PM, 시, 분으로 파싱 */
+function parseTimeToWheelState(timeStr: string) {
+    const [h, m] = (timeStr || "00:00").split(":").map(Number);
+    const hour = Number.isNaN(h) ? 0 : h;
+    const minute = Number.isNaN(m) ? 0 : m;
+    return {
+        ampm: hour < 12 ? "AM" : "PM",
+        hour: String(hour % 12 || 12).padStart(2, "0"),
+        minute: String(minute).padStart(2, "0"),
+    };
+}
+
 export default function DateTimePicker({ type, initialValue, onClose, onConfirm, markedDates = [] }: DateTimePickerProps) {
     // Date Picker States
     const [currentDate, setCurrentDate] = useState(() => initialValue && type === 'date' ? new Date(initialValue) : new Date());
 
-    // Time Picker States
-    const [ampm, setAmpm] = useState("PM");
-    const [hour, setHour] = useState("08");
-    const [minute, setMinute] = useState("00");
+    // Time Picker States — initialValue 기준으로 초기화 (기본 00:00 = 오전 12시)
+    const [timeState, setTimeState] = useState(() =>
+        type === "time" ? parseTimeToWheelState(initialValue) : { ampm: "AM" as const, hour: "12", minute: "00" }
+    );
+    const { ampm, hour, minute } = timeState;
+    const setAmpm = (v: string) => setTimeState((s) => ({ ...s, ampm: v }));
+    const setHour = (v: string) => setTimeState((s) => ({ ...s, hour: v }));
+    const setMinute = (v: string) => setTimeState((s) => ({ ...s, minute: v }));
 
     const ampmRef = useRef<HTMLDivElement>(null);
     const hourRef = useRef<HTMLDivElement>(null);
     const minuteRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (type === "time" && initialValue) {
-            const [h, m] = initialValue.split(":").map(Number);
-            setAmpm(h < 12 ? "AM" : "PM");
-            setHour(String(h % 12 || 12).padStart(2, "0"));
-            setMinute(String(m).padStart(2, "0"));
-        }
-    }, [type, initialValue]);
-
-    // 스크롤 위치 초기화 (모달 열릴 때)
-    useEffect(() => {
-        if (type === "time") {
-            // 약간의 지연을 주어 렌더링 후 스크롤 되도록 함
-            const timer = setTimeout(() => {
-                scrollToValue(ampmRef, ampm === "AM" ? 0 : 1);
-                scrollToValue(hourRef, parseInt(hour) - 1);
-                scrollToValue(minuteRef, parseInt(minute) / 5);
-            }, 0);
-            return () => clearTimeout(timer);
-        }
-    }, [type]);
-
-    const scrollToValue = (ref: React.RefObject<HTMLDivElement | null>, index: number) => {
+    // 스크롤 위치 초기화 (모달 열릴 때·선택 값 변경 시). instant로 즉시 맞춰 표시가 01이 아닌 실제 값으로 보이게 함.
+    const scrollToValue = (ref: React.RefObject<HTMLDivElement | null>, index: number, instant = true) => {
         if (ref.current) {
             const itemHeight = 40; // h-10
             ref.current.scrollTo({
                 top: index * itemHeight,
-                behavior: "smooth"
+                behavior: instant ? "instant" : "smooth"
             });
         }
     };
+
+    useEffect(() => {
+        if (type === "time") {
+            const id = requestAnimationFrame(() => {
+                scrollToValue(ampmRef, ampm === "AM" ? 0 : 1);
+                scrollToValue(hourRef, parseInt(hour, 10) - 1);
+                scrollToValue(minuteRef, Math.floor(parseInt(minute, 10) / 5));
+            });
+            return () => cancelAnimationFrame(id);
+        }
+    }, [type, ampm, hour, minute]);
 
     // Date Helper Functions
     const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -101,7 +107,7 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm,
         ref: React.RefObject<HTMLDivElement | null>
     ) => {
         setter(val);
-        scrollToValue(ref, idx);
+        scrollToValue(ref, idx, false);
     };
 
     // Render Date Picker
@@ -171,8 +177,8 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm,
         return (
             <div className="w-full flex flex-col items-center">
 
-                {/* Wheel Container */}
-                <div className="relative flex justify-center w-full h-[200px] overflow-hidden bg-surface-tertiary rounded-xl mb-6 mask-gradient select-none">
+                {/* Wheel Container — 각 열 shrink-0으로 너비 고정, 분 컬럼 밀림 방지 */}
+                <div className="relative flex justify-center items-stretch w-full h-[200px] overflow-hidden bg-surface-tertiary rounded-xl mb-6 mask-gradient select-none">
 
                     {/* Highlight Bar */}
                     <div className="absolute top-1/2 -translate-y-1/2 w-full h-10 bg-white/10 border-y border-white/20 pointer-events-none z-10" />
@@ -180,7 +186,7 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm,
                     {/* AM/PM */}
                     <div
                         ref={ampmRef}
-                        className="w-20 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
+                        className="w-20 shrink-0 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
                         onScroll={(e) => handleScroll(e, setAmpm, ampms)}
                     >
                         {ampms.map((val, idx) => (
@@ -198,7 +204,7 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm,
                     {/* Hour */}
                     <div
                         ref={hourRef}
-                        className="w-20 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
+                        className="w-20 shrink-0 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
                         onScroll={(e) => handleScroll(e, setHour, hours)}
                     >
                         {hours.map((val, idx) => (
@@ -213,12 +219,12 @@ export default function DateTimePicker({ type, initialValue, onClose, onConfirm,
                         ))}
                     </div>
 
-                    <div className="pt-[80px] h-full flex items-center pb-[80px] text-white font-bold mb-1">:</div>
+                    <div className="w-6 shrink-0 pt-[80px] h-full flex items-center justify-center pb-[80px] text-white font-bold">:</div>
 
                     {/* Minute */}
                     <div
                         ref={minuteRef}
-                        className="w-20 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
+                        className="w-20 shrink-0 h-full overflow-y-scroll no-scrollbar snap-y snap-mandatory py-[80px]"
                         onScroll={(e) => handleScroll(e, setMinute, minutes)}
                     >
                         {minutes.map((val, idx) => (

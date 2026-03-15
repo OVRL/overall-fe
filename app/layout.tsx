@@ -26,28 +26,63 @@ export const metadata: Metadata = {
 
 import { headers, cookies } from "next/headers";
 import { fetchUserSSR } from "@/utils/fetchUserSSR";
+import { fetchFindTeamMemberSSR } from "@/utils/fetchFindTeamMemberSSR";
 import { UserInitProvider } from "@/components/providers/UserInitProvider";
+import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
+import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // proxy.ts에서 설정한 헤더를 확인하여 private 라우트인지 판별
   const requestHeaders = await headers();
   const isPrivateRoute = requestHeaders.get("x-is-private-route") === "true";
 
+  const cookieStore = await cookies();
+  const selectedTeamIdFromCookie =
+    cookieStore.get(SELECTED_TEAM_ID_COOKIE_KEY)?.value ?? null;
+
   let initialUser = null;
+  let initialSelectedTeamId: string | null = selectedTeamIdFromCookie;
+  let initialSelectedTeamName: string | null = null;
+  let initialSelectedTeamImageUrl: string | null = null;
+  let initialSelectedTeamIdFromSingleTeam = false;
+
   if (isPrivateRoute) {
-    const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken")?.value;
     const userIdStr = cookieStore.get("userId")?.value;
 
-    // userId 및 accessToken이 모두 있을 때만 fetch
     if (accessToken && userIdStr) {
       const userId = Number(userIdStr);
       if (!isNaN(userId)) {
-        initialUser = await fetchUserSSR(userId, accessToken);
+        const [userResult, membersResult] = await Promise.all([
+          fetchUserSSR(userId, accessToken),
+          fetchFindTeamMemberSSR(userId, accessToken),
+        ]);
+        initialUser = userResult;
+
+        const teamsWithInfo = membersResult.filter(
+          (m): m is typeof m & { team: NonNullable<typeof m.team> } => m.team != null,
+        );
+        const teamIds = teamsWithInfo.map((m) => m.team.id);
+
+        if (selectedTeamIdFromCookie != null && teamIds.includes(selectedTeamIdFromCookie)) {
+          initialSelectedTeamId = selectedTeamIdFromCookie;
+        } else if (teamsWithInfo.length === 1) {
+          initialSelectedTeamId = teamsWithInfo[0].team.id;
+          initialSelectedTeamIdFromSingleTeam = true;
+        } else {
+          initialSelectedTeamId = null;
+        }
+
+        if (initialSelectedTeamId != null) {
+          const selectedTeam = teamsWithInfo.find(
+            (m) => m.team.id === initialSelectedTeamId,
+          );
+          initialSelectedTeamName = selectedTeam?.team.name ?? null;
+          initialSelectedTeamImageUrl = null;
+        }
       }
     }
   }
@@ -66,12 +101,19 @@ export default async function RootLayout({
           >
             <RelayProvider>
               <UserInitProvider initialUser={initialUser}>
-                <div id="modal-root"></div>
-                <PageTransition>{children}</PageTransition>
-                <GlobalPortalProvider>
-                  <Modals />
-                </GlobalPortalProvider>
-                <Toaster />
+                <SelectedTeamProvider
+                  initialSelectedTeamId={initialSelectedTeamId}
+                  initialSelectedTeamName={initialSelectedTeamName}
+                  initialSelectedTeamImageUrl={initialSelectedTeamImageUrl}
+                  initialSelectedTeamIdFromSingleTeam={initialSelectedTeamIdFromSingleTeam}
+                >
+                  <div id="modal-root"></div>
+                  <PageTransition>{children}</PageTransition>
+                  <GlobalPortalProvider>
+                    <Modals />
+                  </GlobalPortalProvider>
+                  <Toaster />
+                </SelectedTeamProvider>
               </UserInitProvider>
             </RelayProvider>
           </ThemeProvider>

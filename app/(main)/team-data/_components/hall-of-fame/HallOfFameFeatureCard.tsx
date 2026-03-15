@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import ImgPlayer from "@/components/ui/ImgPlayer";
 import Icon from "@/components/ui/Icon";
 import type { HallOfFameFeatureItem } from "../../_types/hallOfFame";
-import trophyIcon from "@/public/icons/player-infos/new_trophy.svg";
+import ballIcon from "@/public/icons/player-infos/ball.svg";
 import trendingUpIcon from "@/public/icons/trending_up.svg";
 
 interface HallOfFameFeatureCardProps {
@@ -30,7 +30,7 @@ const HallOfFameFeatureCard = ({
     >
       <div className="flex items-center gap-2 p-4">
         <div className="relative size-12 shrink-0 flex items-center justify-center text-Label-Secondary">
-          <Icon src={trophyIcon} alt="" width={48} height={48} nofill />
+          <Icon src={ballIcon} alt="" width={48} height={48} nofill />
         </div>
         <h3 className="text-lg font-bold text-white whitespace-nowrap">
           {categoryLabel}

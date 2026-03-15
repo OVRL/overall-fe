@@ -13,60 +13,37 @@ export type ToastViewType =
   | "info"
   | "loading";
 
-const typeStyles: Record<
-  ToastViewType,
-  { container: string; icon: React.ReactNode }
-> = {
-  default: {
-    container: cn(
-      "rounded-lg border border-[var(--color-border-card)] bg-[var(--color-surface-card)]",
-      "text-[var(--color-Label-Primary)] shadow-[var(--shadow-card)]",
-      "min-w-[280px] max-w-[400px] w-full",
-    ),
-    icon: null,
-  },
-  success: {
-    container: cn(
-      "rounded-2xl border border-[var(--color-toast-success-border)] bg-[var(--color-toast-success-bg)]",
-      "shadow-[var(--shadow-toast-success)]",
-      "min-w-[320px] max-w-[400px] w-full",
-      "text-[var(--color-white)]",
-    ),
-    icon: <Icon src={checkCircle} className="size-5 shrink-0" aria-hidden />,
-  },
-  error: {
-    container: cn(
-      "rounded-lg border border-[var(--color-border-card)] bg-[var(--color-surface-card)]",
-      "text-[var(--color-Label-Primary)] shadow-[var(--shadow-card)]",
-      "min-w-[280px] max-w-[400px] w-full border-l-4 border-l-[var(--color-Fill_Error)]",
-    ),
-    icon: <XCircle className="size-5 shrink-0" aria-hidden />,
-  },
-  warning: {
-    container: cn(
-      "rounded-lg border border-[var(--color-border-card)] bg-[var(--color-surface-card)]",
-      "text-[var(--color-Label-Primary)] shadow-[var(--shadow-card)]",
-      "min-w-[280px] max-w-[400px] w-full border-l-4 border-l-[var(--color-Position-GK-Yellow)]",
-    ),
-    icon: <AlertTriangle className="size-5 shrink-0" aria-hidden />,
-  },
-  info: {
-    container: cn(
-      "rounded-lg border border-[var(--color-border-card)] bg-[var(--color-surface-card)]",
-      "text-[var(--color-Label-Primary)] shadow-[var(--shadow-card)]",
-      "min-w-[280px] max-w-[400px] w-full border-l-4 border-l-[var(--color-blue-400)]",
-    ),
-    icon: <Info className="size-5 shrink-0" aria-hidden />,
-  },
-  loading: {
-    container: cn(
-      "rounded-lg border border-[var(--color-border-card)] bg-[var(--color-surface-card)]",
-      "text-[var(--color-Label-Primary)] shadow-[var(--shadow-card)]",
-      "min-w-[280px] max-w-[400px] w-full",
-    ),
-    icon: <Loader2 className="size-5 shrink-0 animate-spin" aria-hidden />,
-  },
+/** 토스트 공통 컨테이너 스타일 (success 디자인을 기본으로) */
+const TOAST_BASE_CONTAINER = cn(
+  "rounded-2xl border border-[var(--color-toast-success-border)] bg-[var(--color-toast-success-bg)]",
+  "shadow-[var(--shadow-toast-success)]",
+  "min-w-80 max-w-100 w-full",
+  "text-[var(--color-white)]",
+);
+
+const TOAST_ICON_CLASS = "size-5 shrink-0";
+
+const typeIcons: Record<ToastViewType, React.ReactNode | null> = {
+  default: null,
+  success: <Icon src={checkCircle} className={TOAST_ICON_CLASS} aria-hidden />,
+  error: <XCircle className={TOAST_ICON_CLASS} aria-hidden />,
+  warning: <AlertTriangle className={TOAST_ICON_CLASS} aria-hidden />,
+  info: <Info className={TOAST_ICON_CLASS} aria-hidden />,
+  loading: (
+    <Loader2 className={cn(TOAST_ICON_CLASS, "animate-spin")} aria-hidden />
+  ),
 };
+
+const typeStyles = (Object.keys(typeIcons) as ToastViewType[]).reduce(
+  (acc, type) => {
+    acc[type] = { container: TOAST_BASE_CONTAINER, icon: typeIcons[type] };
+    return acc;
+  },
+  {} as Record<
+    ToastViewType,
+    { container: string; icon: React.ReactNode | null }
+  >,
+);
 
 /** 닫기 버튼 위치: 레이아웃에서 순서로 제어 (먼저 오면 왼쪽) */
 const closeButtonClass =
@@ -97,7 +74,6 @@ export function ToastView({
   cancel,
 }: ToastViewProps) {
   const { container, icon } = typeStyles[type];
-  const isSuccess = type === "success";
 
   return (
     <div
@@ -124,21 +100,11 @@ export function ToastView({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p
-            className={cn(
-              "text-sm font-semibold leading-normal w-66 truncate",
-              isSuccess && "text-(--color-white)",
-            )}
-          >
+          <p className="text-sm font-semibold leading-normal w-66 truncate text-(--color-white)">
             {title}
           </p>
           {description != null && description !== "" && (
-            <p
-              className={cn(
-                "mt-1 text-sm leading-normal",
-                isSuccess ? "text-white/80" : "text-(--color-Label-Secondary)",
-              )}
-            >
+            <p className="mt-1 text-sm leading-normal text-white/80">
               {description}
             </p>
           )}
