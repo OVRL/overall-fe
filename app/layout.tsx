@@ -5,6 +5,7 @@ import RelayProvider from "@/components/RelayProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GlobalPortalProvider } from "@/components/GlobalPortal";
 import Modals from "@/components/modals/Modals";
+import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TransitionProvider } from "@/components/providers/TransitionProvider";
 import { PageTransition } from "@/components/providers/PageTransition";
 import Script from "next/script";
@@ -70,6 +71,7 @@ export default async function RootLayout({
                 <GlobalPortalProvider>
                   <Modals />
                 </GlobalPortalProvider>
+                <Toaster />
               </UserInitProvider>
             </RelayProvider>
           </ThemeProvider>
