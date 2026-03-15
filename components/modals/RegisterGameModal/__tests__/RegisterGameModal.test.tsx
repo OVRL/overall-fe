@@ -31,6 +31,23 @@ jest.mock("next/dynamic", () => ({
     },
 }));
 
+jest.mock("@/hooks/useUserId", () => ({
+  useUserId: () => 1,
+}));
+
+jest.mock("../useFindTeamMemberQuery", () => ({
+  useFindTeamMemberForGame: () => ({ createdTeamId: 1 }),
+}));
+
+jest.mock("../useCreateMatchMutation", () => ({
+  useCreateMatchMutation: () => ({
+    executeMutation: jest.fn((config: { onCompleted?: () => void }) => {
+      config.onCompleted?.();
+    }),
+    isInFlight: false,
+  }),
+}));
+
 const defaultFormValues = getRegisterGameDefaultValues();
 
 jest.mock("react-hook-form", () => {

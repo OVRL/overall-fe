@@ -4,23 +4,31 @@ import { z } from "zod";
 /** 한글, 영문, 공백만 허용하는 정규식 (자모음 포함) */
 const RE_KOREAN_ENGLISH_SPACE = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]*$/;
 
-/** 경기 등록 폼 스키마 (zod + react-hook-form) */
+/** 주소용 정규식 — 한글, 영문, 공백, 숫자, 하이픈 허용 (네이버 API 주소 형식) */
+const RE_ADDRESS = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s0-9\-]*$/;
+
+/**
+ * 경기 등록 폼 스키마 (zod + react-hook-form).
+ * 필드명은 GraphQL CreateMatchInput / 스키마와 맞춰 유지합니다.
+ */
 export const registerGameSchema = z
   .object({
     matchType: z.enum(["MATCH", "INTERNAL"], {
       error: "경기 성격을 선택해주세요.",
     }),
     opponentName: z.string().max(30).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
+    /** 경기 시작일 (matchDate로 전송) */
     startDate: z.string().min(1, "시작 날짜를 선택해주세요."),
     startTime: z.string().min(1, "시작 시간을 선택해주세요."),
+    /** 유효성 검사용. API에는 endTime만 전송 */
     endDate: z.string(),
     endTime: z.string().min(1, "종료 시간을 선택해주세요."),
     venue: z.object({
       address: z
         .string()
         .min(1, "경기 장소를 입력해주세요.")
-        .max(30)
-        .regex(RE_KOREAN_ENGLISH_SPACE),
+        .max(100)
+        .regex(RE_ADDRESS, "주소 형식이 올바르지 않습니다."),
       latitude: z.number(),
       longitude: z.number(),
     }),
@@ -39,8 +47,10 @@ export const registerGameSchema = z
       ],
       { error: "투표 마감 일정을 선택해주세요." },
     ),
-    uniform: z.enum(["HOME", "AWAY"]).nullable(),
-    memo: z.string().max(100).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
+    /** CreateMatchInput.uniformType */
+    uniformType: z.enum(["HOME", "AWAY"]).nullable(),
+    /** CreateMatchInput.description */
+    description: z.string().max(100).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.matchType === "MATCH") {
@@ -51,11 +61,11 @@ export const registerGameSchema = z
           path: ["opponentName"],
         });
       }
-      if (!data.uniform) {
+      if (!data.uniformType) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "유니폼을 선택해주세요.",
-          path: ["uniform"],
+          path: ["uniformType"],
         });
       }
     }
@@ -84,7 +94,7 @@ export function getRegisterGameDefaultValues(): RegisterGameValues {
     quarterCount: 4,
     quarterDuration: 25,
     voteDeadline: "1_DAY_BEFORE",
-    uniform: null,
-    memo: "",
+    uniformType: null,
+    description: "",
   };
 }

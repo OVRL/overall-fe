@@ -1,16 +1,19 @@
 "use client";
 
-import { useId, useEffect } from "react";
+import { useId, useEffect, useState } from "react";
 import { Controller, useWatch, type SubmitHandler } from "react-hook-form";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Button from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import Dropdown from "@/components/ui/Dropdown";
 import { DatePicker } from "@/components/ui/date/DatePicker";
 import { TimePicker } from "@/components/ui/date/TimePicker";
 import ModalLayout from "../ModalLayout";
+import ModalLoadingFallback from "../ModalLoadingFallback";
 import useModal from "@/hooks/useModal";
+import { useUserId } from "@/hooks/useUserId";
 import FormSection from "./FormSection";
 import SegmentToggle from "./SegmentToggle";
 import {
@@ -25,6 +28,9 @@ import type { RegisterGameValues } from "./schema";
 import { useRegisterGameForm } from "./useRegisterGameForm";
 import UniformOption from "./UniformOption";
 import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
+import { useFindTeamMemberForGame } from "./useFindTeamMemberQuery";
+import { useCreateMatchMutation } from "./useCreateMatchMutation";
+import { computeVoteDeadlineDateTime } from "./voteDeadline";
 
 const NaverDynamicMap = dynamic(
   () => import("@/components/ui/map/NaverDynamicMap"),
@@ -38,20 +44,17 @@ const NaverDynamicMap = dynamic(
   },
 );
 
-function RegisterGameModal() {
+function RegisterGameFormContent({ userId }: { userId: number }) {
   const { hideModal } = useModal();
   const { openModal: openAddressModal, hideModal: hideAddressModal } = useModal(
     "DETAIL_ADDRESS_SEARCH",
   );
-
   const id = useId();
   const { form, resetToDefaults } = useRegisterGameForm();
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { isValid },
-  } = form;
+  const { control, handleSubmit, setValue } = form;
+  const { createdTeamId } = useFindTeamMemberForGame(userId);
+  const { executeMutation, isInFlight } = useCreateMatchMutation();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const currentVenue = useWatch({ control, name: "venue" });
   const currentMatchType = useWatch({ control, name: "matchType" });
@@ -84,9 +87,42 @@ function RegisterGameModal() {
   };
 
   const onValid: SubmitHandler<RegisterGameValues> = (data) => {
-    // TODO: API 연동 시 payload 전송
-    console.log("Form submitted:", data);
-    hideModal();
+    if (createdTeamId == null) {
+      setSubmitError("소속된 팀 정보를 불러올 수 없습니다. 다시 시도해주세요.");
+      return;
+    }
+    setSubmitError(null);
+    executeMutation({
+      variables: {
+        input: {
+          createdTeamId,
+          description: data.description?.trim() || null,
+          endTime: data.endTime,
+          matchDate: data.startDate,
+          matchType: data.matchType,
+          opponentTeamId: 1,
+          quarterCount: data.quarterCount,
+          quarterDuration: data.quarterDuration,
+          startTime: data.startTime,
+          uniformType: data.uniformType ?? null,
+          venue: {
+            address: data.venue.address,
+            latitude: data.venue.latitude,
+            longitude: data.venue.longitude,
+          },
+          voteDeadline: computeVoteDeadlineDateTime(
+            data.startDate,
+            data.voteDeadline,
+          ),
+        },
+      },
+      onCompleted: () => {
+        hideModal();
+      },
+      onError: (err) => {
+        setSubmitError(err.message ?? "경기 등록에 실패했습니다.");
+      },
+    });
   };
 
   const onClose = () => {
@@ -313,7 +349,7 @@ function RegisterGameModal() {
                 >
                   <FormSection label="유니폼">
                     <Controller
-                      name="uniform"
+                      name="uniformType"
                       control={control}
                       render={({ field }) => (
                         <div className="flex gap-6">
@@ -341,12 +377,12 @@ function RegisterGameModal() {
 
             <FormSection label="메모">
               <Controller
-                name="memo"
+                name="description"
                 control={control}
                 render={({ field }) => (
                   <textarea
                     {...field}
-                    id={`${id}-memo`}
+                    id={`${id}-description`}
                     placeholder="추가 메모사항을 입력하세요."
                     rows={3}
                     maxLength={100}
@@ -363,15 +399,24 @@ function RegisterGameModal() {
               />
             </FormSection>
 
+            {submitError && (
+              <p className="text-sm text-Fill_AccentNegative" role="alert">
+                {submitError}
+              </p>
+            )}
             <div className="flex gap-3 pt-2 pl-3">
               <Button
                 type="submit"
                 variant="primary"
                 size="xl"
                 className="flex-1"
-                disabled={!isValid}
+                disabled={isInFlight}
               >
-                등록
+                {isInFlight ? (
+                  <LoadingSpinner label="등록 중" size="sm" />
+                ) : (
+                  "등록"
+                )}
               </Button>
               <Button
                 type="button"
@@ -390,4 +435,10 @@ function RegisterGameModal() {
   );
 }
 
-export default RegisterGameModal;
+export default function RegisterGameModal() {
+  const userId = useUserId();
+  if (userId === null) {
+    return <ModalLoadingFallback />;
+  }
+  return <RegisterGameFormContent userId={userId} />;
+}

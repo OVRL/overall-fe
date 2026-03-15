@@ -9,16 +9,71 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
+"""참석 여부 (attend: 참석, absent: 불참)"""
+enum AttendanceStatus {
+  ABSENT
+  ATTEND
+}
+
 type BackgroundRemovalModel {
   image: String!
 }
 
 type CreateInviteCodeModel {
   code: String!
-  createdAt: DateTime!
-  expiredAt: DateTime!
+  createdAt: GraphQLDateTime!
+  expiredAt: GraphQLDateTime!
   id: Float!
   teamId: Float!
+}
+
+input CreateMatchAttendanceInput {
+  """참석 여부 (attend: 참석, absent: 불참)"""
+  attendanceStatus: AttendanceStatus
+
+  """경기 ID"""
+  matchId: Int!
+
+  """유저 ID"""
+  userId: Int!
+}
+
+input CreateMatchInput {
+  """매치 생성 팀 ID"""
+  createdTeamId: Int!
+
+  """설명"""
+  description: String
+
+  """매치 종료 시간 (HH:mm:ss)"""
+  endTime: String!
+
+  """매치 날짜"""
+  matchDate: Date!
+
+  """매치 타입"""
+  matchType: MatchType!
+
+  """상대 팀 ID"""
+  opponentTeamId: Int
+
+  """쿼터 수"""
+  quarterCount: Int!
+
+  """쿼터 시간 (분)"""
+  quarterDuration: Int!
+
+  """매치 시작 시간 (HH:mm:ss)"""
+  startTime: String!
+
+  """유니폼 타입"""
+  uniformType: Uniform
+
+  """경기장 정보"""
+  venue: VenueInput!
+
+  """투표 마감 시간"""
+  voteDeadline: GraphQLDateTime!
 }
 
 input CreateTeamInput {
@@ -59,6 +114,9 @@ enum Gender {
   W
 }
 
+"""GraphQLDateTime custom scalar type (Y-m-d H:i:s)"""
+scalar GraphQLDateTime
+
 type InviteCodeArrayModel {
   hasNextPage: Boolean!
   items: [InviteCodeModel!]!
@@ -67,8 +125,8 @@ type InviteCodeArrayModel {
 
 type InviteCodeModel {
   code: String!
-  createdAt: DateTime!
-  expiredAt: DateTime!
+  createdAt: GraphQLDateTime!
+  expiredAt: GraphQLDateTime!
   id: Float!
   team: TeamModel!
   teamId: Float!
@@ -115,16 +173,67 @@ type LoginResponseModel {
   subPositions: [Position!]
 }
 
+type MatchArrayModel {
+  hasNextPage: Boolean!
+  items: [MatchModel!]!
+  totalCount: Int!
+}
+
+type MatchAttendanceModel {
+  attendanceStatus: AttendanceStatus
+  createdAt: GraphQLDateTime!
+  id: ID!
+  matchId: Int!
+  updatedAt: GraphQLDateTime!
+  userId: Int!
+  voteDeadlineAt: GraphQLDateTime!
+}
+
+type MatchModel {
+  """참석 투표 목록"""
+  attendances: [MatchAttendanceModel!]
+  createdAt: GraphQLDateTime!
+  createdTeam: TeamResponseModel
+  createdTeamId: Int!
+  description: String
+  endTime: String!
+  id: ID!
+  matchDate: Date!
+  matchType: MatchType!
+  opponentTeam: TeamResponseModel
+  opponentTeamId: Int
+  quarterCount: Int!
+  quarterDuration: Int!
+  startTime: String!
+  uniformType: Uniform
+  updatedAt: GraphQLDateTime!
+
+  """경기장 정보"""
+  venue: VenueModel!
+  voteDeadline: GraphQLDateTime!
+}
+
+"""경기 유형 (match: 외부 경기, interna: 내전)"""
+enum MatchType {
+  INTERNA
+  MATCH
+}
+
 type Mutation {
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
+  createMatch(input: CreateMatchInput!): MatchModel!
+  createMatchAttendance(input: CreateMatchAttendanceInput!): MatchAttendanceModel!
   createTeam(emblem: Upload!, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
+  deleteMatch(id: Int!): Boolean!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
   login(email: String!, password: String!): LoginResponseModel!
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
   removeBackground(image: Upload!): BackgroundRemovalModel!
+  updateMatch(input: UpdateMatchInput!): MatchModel!
+  updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
@@ -171,12 +280,14 @@ type Query {
   findInviteCode(code: String!): InviteCodeModel
   findInviteCodeByTeam(teamId: Int!): InviteCodeModel
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
+  findManyMatch(limit: Int! = 10, offset: Int! = 0): MatchArrayModel!
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
   findManyTeamMember(limit: Int! = 10, offset: Int! = 0): TeamMemberArrayModel!
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
+  findMatch(createdTeamId: Int!): [MatchModel!]!
   findTeam(id: Int!): TeamModel!
-  findTeamMember(id: Int!): TeamMemberModel
+  findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
 }
@@ -202,6 +313,13 @@ type TeamArrayModel {
   totalCount: Int!
 }
 
+type TeamInfoModel {
+  description: String
+  emblem: String
+  id: ID!
+  name: String
+}
+
 type TeamMemberArrayModel {
   """팀 멤버 목록"""
   members: [TeamMemberModel!]!
@@ -218,7 +336,7 @@ type TeamMemberModel {
   id: Int!
 
   """가입일"""
-  joinedAt: DateTime!
+  joinedAt: GraphQLDateTime!
 
   """포지션"""
   position: String
@@ -229,8 +347,14 @@ type TeamMemberModel {
   """역할"""
   role: String!
 
+  """팀 정보"""
+  team: TeamInfoModel
+
   """팀 ID"""
   teamId: Int!
+
+  """유저 정보"""
+  user: UserInfoModel
 
   """유저 ID"""
   userId: Int!
@@ -248,6 +372,19 @@ type TeamModel {
   region: RegionSearchModel
 }
 
+type TeamResponseModel {
+  description: String
+  emblem: String
+  id: ID!
+  name: String
+}
+
+"""유니폼 유형 (home: 홈, away: 어웨이)"""
+enum Uniform {
+  AWAY
+  HOME
+}
+
 """팀 유니폼 디자인"""
 enum UniformDesign {
   DEFAULT
@@ -260,6 +397,52 @@ enum UniformDesign {
   STRIPE_RED
   STRIPE_WHITE
   STRIPE_YELLOW
+}
+
+input UpdateMatchAttendanceInput {
+  """참석 여부 (attend: 참석, absent: 불참)"""
+  attendanceStatus: AttendanceStatus!
+
+  """참석 투표 ID"""
+  id: Int!
+}
+
+input UpdateMatchInput {
+  """설명"""
+  description: String
+
+  """매치 종료 시간 (HH:mm:ss)"""
+  endTime: String
+
+  """매치 ID"""
+  id: Int!
+
+  """매치 날짜"""
+  matchDate: Date
+
+  """매치 타입"""
+  matchType: MatchType
+
+  """상대 팀 ID"""
+  opponentTeamId: Int
+
+  """쿼터 수"""
+  quarterCount: Int
+
+  """쿼터 시간 (분)"""
+  quarterDuration: Int
+
+  """매치 시작 시간 (HH:mm:ss)"""
+  startTime: String
+
+  """유니폼 타입"""
+  uniformType: Uniform
+
+  """경기장 정보"""
+  venue: VenueInput
+
+  """투표 마감 시간"""
+  voteDeadline: GraphQLDateTime
 }
 
 input UpdateTeamInput {
@@ -314,6 +497,13 @@ type UserArrayModel {
   totalCount: Int!
 }
 
+type UserInfoModel {
+  email: String!
+  id: ID!
+  name: String
+  profileImage: String
+}
+
 type UserModel {
   activityArea: String
   birthDate: String
@@ -335,11 +525,33 @@ type UserModel {
 
 type UserTokenModel {
   accessToken: String
-  createdAt: DateTime!
+  createdAt: GraphQLDateTime!
   deviceInfo: String
   id: ID!
   refreshToken: String
-  updatedAt: DateTime!
+  updatedAt: GraphQLDateTime!
   userId: Float!
+}
+
+input VenueInput {
+  """경기장 주소"""
+  address: String!
+
+  """위도"""
+  latitude: Float!
+
+  """경도"""
+  longitude: Float!
+}
+
+type VenueModel {
+  """경기장 주소"""
+  address: String!
+
+  """위도"""
+  latitude: Float!
+
+  """경도"""
+  longitude: Float!
 }
 

@@ -19,6 +19,9 @@ export function UserInitProvider({ initialUser, children }: UserInitProviderProp
     // SSR 단계 또는 클라이언트의 첫 렌더링 시초에 한 번만 실행합니다.
     useUserStore.setState({ user: initialUser });
     initialized.current = true;
+    // 유저 정보 스토어 적재 확인용 (개발 시 제거)
+    console.log("[UserInitProvider] userStore user:", initialUser);
+    console.log("[UserInitProvider] userStore 전체:", useUserStore.getState());
   }
 
   return <>{children}</>;
