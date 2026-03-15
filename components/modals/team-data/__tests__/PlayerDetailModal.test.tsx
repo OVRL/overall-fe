@@ -61,10 +61,10 @@ describe("PlayerDetailModal 컴포넌트", () => {
     expect(screen.getByText("5")).toBeInTheDocument(); // 골
   });
 
-  it("탭 클릭 시 누적기록으로 전환되어야 한다", () => {
+  it("탭 클릭 시 명예의 전당(통산)으로 전환되어야 한다", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
-    const cumulativeTab = screen.getByText("누적기록");
+    const cumulativeTab = screen.getByText("명예의 전당");
     fireEvent.click(cumulativeTab);
 
     expect(cumulativeTab).toHaveClass("text-Label-AccentPrimary");

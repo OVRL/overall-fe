@@ -10,6 +10,8 @@ import HallOfFameFeatureCard from "./HallOfFameFeatureCard";
 import HallOfFameRecordCard from "./HallOfFameRecordCard";
 
 interface HallOfFameBoardProps {
+  /** 명예의 전당 기간(통산/시즌). API 연동 시 데이터 필터에 사용 */
+  period?: string;
   onPlayerClick?: (player: Player) => void;
 }
 
@@ -87,7 +89,7 @@ function toMinimalPlayer(info: HallOfFamePlayerInfo): Player {
   };
 }
 
-const HallOfFameBoard = ({ onPlayerClick }: HallOfFameBoardProps) => {
+const HallOfFameBoard = ({ period, onPlayerClick }: HallOfFameBoardProps) => {
   return (
     <section
       className="flex flex-col gap-4 pt-12.5 lg:flex-row lg:gap-x-4"
@@ -105,7 +107,7 @@ const HallOfFameBoard = ({ onPlayerClick }: HallOfFameBoardProps) => {
         />
       </div>
 
-      <div className="min-w-0 flex-1 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-2">
+      <div className="min-w-0 flex-1 grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2">
         {MOCK_RECORDS.map((item) => (
           <HallOfFameRecordCard
             key={item.categoryLabel}

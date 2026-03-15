@@ -94,6 +94,10 @@ function createMockForm(overrides = {}) {
     ref: jest.fn(),
   }));
   const setValue = jest.fn();
+  const getValues = jest.fn((name?: string) => {
+    if (name != null) return (defaultFormValues as Record<string, unknown>)[name];
+    return defaultFormValues;
+  });
   const handleSubmit = jest.fn(
     (fn: (data: unknown) => void) => (e: React.FormEvent) => {
       e?.preventDefault();
@@ -105,6 +109,7 @@ function createMockForm(overrides = {}) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { isValid: true },
     ...overrides,
   };
