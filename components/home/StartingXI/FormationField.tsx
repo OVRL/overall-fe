@@ -3,8 +3,10 @@
 import React, { useMemo } from "react";
 import ObjectField from "@/components/ui/ObjectField";
 import PlayerPositionCard from "./PlayerPositionCard";
+import Skeleton from "@/components/ui/Skeleton";
 import { Player } from "@/types/player";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { cn } from "@/lib/utils";
 
 // 홈 화면 Starting XI 전용 크롭 설정
 const HOME_DESKTOP_CROP = { x: 0, y: 0, width: 1.0, height: 1.0 };
@@ -38,11 +40,32 @@ interface FormationFieldProps {
 const FormationField = ({ players, className }: FormationFieldProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  // 크롭 정보 선택
+  // 훅은 항상 동일한 순서로 호출되어야 하므로 early return 이전에 선언
   const currentCrop = useMemo(
-    () => (isDesktop ? HOME_DESKTOP_CROP : HOME_MOBILE_CROP),
+    () =>
+      isDesktop === true
+        ? HOME_DESKTOP_CROP
+        : isDesktop === false
+        ? HOME_MOBILE_CROP
+        : HOME_DESKTOP_CROP, // null일 때는 스켈레톤만 쓰이므로 값 미사용
     [isDesktop],
   );
+
+  // 뷰포트 미결정 시 스켈레톤 표시 (레이아웃 시프트 방지)
+  if (isDesktop === null) {
+    return (
+      <div
+        className={cn(
+          "relative w-full overflow-hidden min-h-96 rounded-xl",
+          className,
+        )}
+        role="img"
+        aria-label="포메이션 로딩 중"
+      >
+        <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
+      </div>
+    );
+  }
 
   // 절대 좌표를 크롭된 영역 내의 상대 좌표로 변환
   const getTransformedPosition = (pos: FormationPosition) => {

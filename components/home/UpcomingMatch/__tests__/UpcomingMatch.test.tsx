@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import UpcomingMatch from "../UpcomingMatch";
+import type { UpcomingMatchDisplay } from "../upcomingMatchDisplay";
 
 // Mock child components to verify conditional rendering
 jest.mock("../UpcomingMatchMobile", () => {
@@ -15,9 +16,15 @@ jest.mock("../UpcomingMatchDesktop", () => {
   };
 });
 
+const mockDisplay: UpcomingMatchDisplay = {
+  formattedDateTime: "03.19 (목) 20:00",
+  homeTeam: { name: "Team A", emblemUrl: "/emblem-a.png" },
+  awayTeam: { name: "Team B", emblemUrl: "/emblem-b.png" },
+};
+
 describe("UpcomingMatch", () => {
-  it("renders both mobile and desktop components hidden/visible by CSS", () => {
-    render(<UpcomingMatch />);
+  it("renders both mobile and desktop components when display is provided", () => {
+    render(<UpcomingMatch display={mockDisplay} />);
 
     const mobileValidator = screen.getByTestId("mobile-match");
     const desktopValidator = screen.getByTestId("desktop-match");
