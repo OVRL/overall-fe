@@ -28,7 +28,7 @@ import type { RegisterGameValues } from "./schema";
 import { useRegisterGameForm } from "./useRegisterGameForm";
 import UniformOption from "./UniformOption";
 import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
-import { useFindTeamMemberForGame } from "./useFindTeamMemberQuery";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useCreateMatchMutation } from "./useCreateMatchMutation";
 import { computeVoteDeadlineDateTime } from "./voteDeadline";
 import { toast } from "@/lib/toast";
@@ -45,7 +45,7 @@ const NaverDynamicMap = dynamic(
   },
 );
 
-function RegisterGameFormContent({ userId }: { userId: number }) {
+function RegisterGameFormContent() {
   const { hideModal } = useModal();
   const { openModal: openAddressModal, hideModal: hideAddressModal } = useModal(
     "DETAIL_ADDRESS_SEARCH",
@@ -53,7 +53,13 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
   const id = useId();
   const { form, resetToDefaults } = useRegisterGameForm();
   const { control, handleSubmit, setValue } = form;
-  const { createdTeamId } = useFindTeamMemberForGame(userId);
+  const { selectedTeamId } = useSelectedTeamId();
+  const createdTeamId =
+    selectedTeamId != null && selectedTeamId !== ""
+      ? Number(selectedTeamId)
+      : null;
+  const createdTeamIdValid =
+    createdTeamId != null && !Number.isNaN(createdTeamId);
   const { executeMutation, isInFlight } = useCreateMatchMutation();
 
   const currentVenue = useWatch({ control, name: "venue" });
@@ -87,14 +93,16 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
   };
 
   const onValid: SubmitHandler<RegisterGameValues> = (data) => {
-    if (createdTeamId == null) {
-      toast.error("소속된 팀 정보를 불러올 수 없습니다. 다시 시도해주세요.");
+    const teamIdForMatch =
+      createdTeamIdValid && createdTeamId != null ? createdTeamId : null;
+    if (teamIdForMatch == null) {
+      toast.error("팀을 선택해 주세요. 헤더에서 소속 팀을 선택한 뒤 다시 시도해 주세요.");
       return;
     }
     executeMutation({
       variables: {
         input: {
-          createdTeamId,
+          createdTeamId: teamIdForMatch,
           description: data.description?.trim() || null,
           endTime: data.endTime,
           matchDate: data.startDate,
@@ -448,5 +456,5 @@ export default function RegisterGameModal() {
   if (userId === null) {
     return <ModalLoadingFallback />;
   }
-  return <RegisterGameFormContent userId={userId} />;
+  return <RegisterGameFormContent />;
 }

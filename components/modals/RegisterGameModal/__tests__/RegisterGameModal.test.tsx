@@ -35,8 +35,8 @@ jest.mock("@/hooks/useUserId", () => ({
   useUserId: () => 1,
 }));
 
-jest.mock("../useFindTeamMemberQuery", () => ({
-  useFindTeamMemberForGame: () => ({ createdTeamId: 1 }),
+jest.mock("@/components/providers/SelectedTeamProvider", () => ({
+  useSelectedTeamId: () => ({ selectedTeamId: "1" }),
 }));
 
 jest.mock("../useCreateMatchMutation", () => ({
