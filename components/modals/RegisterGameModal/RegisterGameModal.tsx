@@ -31,6 +31,7 @@ import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
 import { useFindTeamMemberForGame } from "./useFindTeamMemberQuery";
 import { useCreateMatchMutation } from "./useCreateMatchMutation";
 import { computeVoteDeadlineDateTime } from "./voteDeadline";
+import { toast } from "@/lib/toast";
 
 const NaverDynamicMap = dynamic(
   () => import("@/components/ui/map/NaverDynamicMap"),
@@ -100,7 +101,7 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
           endTime: data.endTime,
           matchDate: data.startDate,
           matchType: data.matchType,
-          opponentTeamId: 1,
+          opponentTeamId: null,
           quarterCount: data.quarterCount,
           quarterDuration: data.quarterDuration,
           startTime: data.startTime,
@@ -151,7 +152,13 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                   <SegmentToggle
                     options={MATCH_TYPE_OPTIONS}
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(value) => {
+                      if (value === "MATCH") {
+                        toast("추후 추가될 예정입니다.");
+                        return;
+                      }
+                      field.onChange(value);
+                    }}
                   />
                 )}
               />
@@ -200,9 +207,11 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                     render={({ field }) => (
                       <DatePicker
                         value={field.value ? new Date(field.value) : undefined}
-                        onChange={(date) =>
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                        }
+                        onChange={(date) => {
+                          const next = date ? format(date, "yyyy-MM-dd") : "";
+                          field.onChange(next);
+                          if (next) setValue("endDate", next, { shouldValidate: true });
+                        }}
                         placeholder="시작 날짜 선택"
                         className="min-w-0 h-12 w-full"
                       />
@@ -226,16 +235,23 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                   <Controller
                     name="endDate"
                     control={control}
-                    render={({ field }) => (
-                      <DatePicker
-                        value={field.value ? new Date(field.value) : undefined}
-                        onChange={(date) =>
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                        }
-                        placeholder="종료 날짜 선택"
-                        className="min-w-0 h-12 w-full"
-                      />
-                    )}
+                    render={({ field }) => {
+                      const startDate = form.getValues("startDate");
+                      return (
+                        <DatePicker
+                          value={field.value ? new Date(field.value) : undefined}
+                          onChange={(date) => {
+                            const next = date ? format(date, "yyyy-MM-dd") : "";
+                            field.onChange(next);
+                            if (next && startDate && next < startDate) {
+                              setValue("startDate", next, { shouldValidate: true });
+                            }
+                          }}
+                          placeholder="종료 날짜 선택"
+                          className="min-w-0 h-12 w-full"
+                        />
+                      );
+                    }}
                   />
                   <Controller
                     name="endTime"
@@ -387,13 +403,6 @@ function RegisterGameFormContent({ userId }: { userId: number }) {
                     rows={3}
                     maxLength={100}
                     className="w-full px-4 py-3 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] text-sm text-Label-Primary placeholder:text-Label-Tertiary outline-none focus:border-Fill_AccentPrimary transition-colors resize-none"
-                    onChange={(e) => {
-                      const filteredValue = e.target.value.replace(
-                        /[^a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]/g,
-                        "",
-                      );
-                      field.onChange(filteredValue);
-                    }}
                   />
                 )}
               />

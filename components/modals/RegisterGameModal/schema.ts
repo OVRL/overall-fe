@@ -49,8 +49,8 @@ export const registerGameSchema = z
     ),
     /** CreateMatchInput.uniformType */
     uniformType: z.enum(["HOME", "AWAY"]).nullable(),
-    /** CreateMatchInput.description */
-    description: z.string().max(100).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
+    /** CreateMatchInput.description (특수문자 허용) */
+    description: z.string().max(100).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.matchType === "MATCH") {
@@ -69,22 +69,28 @@ export const registerGameSchema = z
         });
       }
     }
-    if (data.endDate && data.startDate && data.endDate < data.startDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "종료일은 시작일보다 이전일 수 없습니다.",
-        path: ["endDate"],
-      });
+    // 스키마에는 matchDate, startTime, endTime만 있음. 폼의 startDate/endDate는 유효성·자정 넘김용.
+    // 규칙: 종료 일시가 시작 일시보다 이전이면 안 됨 (submit 전 방어).
+    if (data.startDate && data.startTime && data.endDate && data.endTime) {
+      const startDateTime = `${data.startDate} ${data.startTime}`;
+      const endDateTime = `${data.endDate} ${data.endTime}`;
+      if (endDateTime <= startDateTime) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "종료 일시는 시작 일시보다 이전일 수 없습니다.",
+          path: ["endDate"],
+        });
+      }
     }
   });
 
 export type RegisterGameValues = z.infer<typeof registerGameSchema>;
 
-/** 폼 기본값 (오늘 날짜, 오전 12:00 등) */
+/** 폼 기본값 (오늘 날짜, 오전 12:00 등). 경기 성격 기본값: 내전 */
 export function getRegisterGameDefaultValues(): RegisterGameValues {
   const today = format(new Date(), "yyyy-MM-dd");
   return {
-    matchType: "MATCH",
+    matchType: "INTERNAL",
     opponentName: "",
     startDate: today,
     startTime: "00:00",
