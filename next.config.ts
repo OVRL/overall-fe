@@ -11,6 +11,7 @@ const nextConfig = {
   },
   images: {
     qualities: [50, 75, 100],
+    formats: ["image/webp"],
   },
   turbopack: {
     rules: {

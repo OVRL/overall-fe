@@ -1,7 +1,6 @@
-import http from "node:http";
-import https from "node:https";
-import { env } from "@/lib/env";
 import { UserModel } from "@/contexts/UserContext";
+import { env } from "@/lib/env";
+import { postBackendSSR } from "@/utils/ssrBackendFetch";
 
 const FIND_USER_BY_ID_QUERY = `
   query FindUserById($id: Int!) {
@@ -24,54 +23,6 @@ const FIND_USER_BY_ID_QUERY = `
   }
 `;
 
-/** 개발 시 백엔드가 self-signed 인증서를 쓰면 true (환경변수 또는 NODE_ENV=development) */
-const allowInsecureBackendTLS =
-  process.env.BACKEND_INSECURE_TLS === "1" ||
-  process.env.BACKEND_INSECURE_TLS === "true" ||
-  process.env.NODE_ENV === "development";
-
-/**
- * Node http(s)로 POST 요청 (개발 시 self-signed 인증서 허용)
- */
-function fetchWithOptionalInsecureTLS(
-  url: string,
-  options: { method: string; headers: Record<string, string>; body: string },
-): Promise<{ ok: boolean; status: number; statusText: string; json: () => Promise<unknown> }> {
-  return new Promise((resolve, reject) => {
-    const parsed = new URL(url);
-    const body = options.body;
-    const isHttps = parsed.protocol === "https:";
-    const port = parsed.port || (isHttps ? 443 : 80);
-    const requestOptions = {
-      hostname: parsed.hostname,
-      port: Number(port),
-      path: parsed.pathname + parsed.search,
-      method: options.method,
-      headers: options.headers,
-      ...(isHttps && { rejectUnauthorized: !allowInsecureBackendTLS }),
-    };
-    const req = (isHttps ? https : http).request(
-      requestOptions,
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("data", (chunk) => chunks.push(chunk));
-        res.on("end", () => {
-          const raw = Buffer.concat(chunks).toString("utf8");
-          resolve({
-            ok: res.statusCode !== undefined && res.statusCode >= 200 && res.statusCode < 300,
-            status: res.statusCode ?? 0,
-            statusText: res.statusMessage ?? "",
-            json: () => Promise.resolve(JSON.parse(raw || "{}")),
-          });
-        });
-      },
-    );
-    req.on("error", reject);
-    req.write(body);
-    req.end();
-  });
-}
-
 /**
  * SSR에서 유저 정보를 가져오기 위한 유틸리티 함수입니다.
  * @param userId 쿠키에서 추출한 유저 ID
@@ -93,20 +44,7 @@ export async function fetchUserSSR(
   };
 
   try {
-    // 개발/self-signed 환경에서는 Node https로 인증 검사 완화 후 요청
-    const res = allowInsecureBackendTLS
-      ? await fetchWithOptionalInsecureTLS(url, { method: "POST", headers, body })
-      : await fetch(url, {
-          method: "POST",
-          headers,
-          body,
-          cache: "no-store",
-        }).then((r) => ({
-          ok: r.ok,
-          status: r.status,
-          statusText: r.statusText,
-          json: () => r.json(),
-        }));
+    const res = await postBackendSSR(url, headers, body);
 
     if (!res.ok) {
       if (process.env.NODE_ENV === "development") {
