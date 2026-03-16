@@ -58,9 +58,9 @@ describe("PlayerDetailModal 컴포넌트", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
     expect(screen.getByTestId("profile-card")).toHaveTextContent("손흥민 (90)");
-    // 활성 탭: 시즌 기록 (공백 포함)
+    // 활성 탭: 시즌 기록 (accent 스타일 적용)
     const seasonTab = screen.getByText("시즌 기록");
-    expect(seasonTab).toHaveClass("text-black");
+    expect(seasonTab).toHaveClass("text-Label-AccentPrimary");
 
     // 시즌 기록 값 확인
     expect(screen.getByText("10")).toBeInTheDocument(); // 출장
@@ -73,7 +73,7 @@ describe("PlayerDetailModal 컴포넌트", () => {
     const cumulativeTab = screen.getByText("통산 기록");
     fireEvent.click(cumulativeTab);
 
-    expect(cumulativeTab).toHaveClass("text-black");
+    expect(cumulativeTab).toHaveClass("text-Label-AccentPrimary");
 
     // 통산 기록 값 확인
     expect(screen.getByText("100")).toBeInTheDocument(); // 출장

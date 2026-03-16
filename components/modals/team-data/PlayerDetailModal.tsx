@@ -15,6 +15,7 @@ import signpostIcon from "@/public/icons/player-infos/signpost.svg";
 import whistleIcon from "@/public/icons/player-infos/whistle.svg";
 import shieldIcon from "@/public/icons/player-infos/shield.svg";
 import trophyIcon from "@/public/icons/player-infos/trophy.svg";
+import Button from "@/components/ui/Button";
 
 export interface PlayerDetailModalProps {
   player: Player | null;
@@ -28,6 +29,17 @@ const STAT_ICONS: Record<string, StaticImageData> = {
   승률: trophyIcon,
   출장: whistleIcon,
 };
+
+const STAT_TABS: { value: StatTabType; label: string }[] = [
+  { value: "시즌기록", label: "시즌 기록" },
+  { value: "통산 기록", label: "통산 기록" },
+];
+
+const TAB_BUTTON_BASE =
+  "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors";
+const TAB_BUTTON_ACTIVE =
+  "text-Label-AccentPrimary border border-gray-1000 rounded-[0.625rem] bg-[var(--color-toast-success-bg)]";
+const TAB_BUTTON_INACTIVE = "text-Label-Tertiary hover:text-white";
 
 const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
   const { hideModal } = useModal();
@@ -72,13 +84,13 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
 
   return (
     <div
-      className="bg-surface-card rounded-2xl w-82.5 overflow-hidden px-5 py-6 relative"
+      className="bg-surface-card rounded-2xl w-82.5 overflow-hidden p-4 relative flex flex-col gap-4"
       onClick={(e) => e.stopPropagation()}
     >
       {/* 닫기 버튼 */}
       <button
         onClick={hideModal}
-        className="absolute top-4 right-4 z-50 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+        className="absolute top-0 right-0 p-3 z-50 cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
       >
         <Icon src={closeIcon} alt="close" className="w-5 h-5 text-gray-400" />
       </button>
@@ -90,47 +102,38 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
           playerName={player.name}
           mainPosition={player.position}
           backNumber={player.ovr || 99}
-          className="w-[180px] h-[250px] shadow-lg"
+          className="w-32 h-42 shadow-lg"
           grade="NORMAL_GREEN"
         />
       </div>
 
       {/* 탭 메뉴 */}
-      <div className="flex justify-center mt-6 mb-4">
+      <div className="flex justify-center">
         <div className="flex gap-4">
-          <button
-            onClick={() => setActiveTab("시즌기록")}
-            className={cn(
-              "px-5 py-2 text-[15px] font-bold rounded-lg transition-colors",
-              activeTab === "시즌기록"
-                ? "bg-[#C4FF00] text-black"
-                : "text-gray-400 hover:text-white",
-            )}
-          >
-            시즌 기록
-          </button>
-          <button
-            onClick={() => setActiveTab("통산 기록")}
-            className={cn(
-              "px-5 py-2 text-[15px] font-bold rounded-lg transition-colors",
-              activeTab === "통산 기록"
-                ? "bg-[#C4FF00] text-black"
-                : "text-gray-400 hover:text-white",
-            )}
-          >
-            통산 기록
-          </button>
+          {STAT_TABS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setActiveTab(value)}
+              className={cn(
+                TAB_BUTTON_BASE,
+                activeTab === value ? TAB_BUTTON_ACTIVE : TAB_BUTTON_INACTIVE,
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* 스탯 그리드 (2열) */}
-      <div className="grid grid-cols-2 gap-2 mt-2">
+      <div className="grid grid-cols-2 gap-2">
         {statItems.map(({ label, value }) => (
           <div
             key={label}
-            className="bg-[#222222] rounded-xl p-3 flex flex-col justify-between h-[76px]"
+            className="bg-[#555555]/10 rounded-xl relative flex flex-col justify-between h-14 backdrop-blur-[0.625rem]"
           >
-            <div className="flex items-center gap-1.5 opacity-80">
+            <div className="flex items-center gap-1.5 opacity-80 absolute top-1.5 left-1.5">
               <Icon
                 src={STAT_ICONS[label]}
                 alt={`${label} 아이콘`}
@@ -138,19 +141,17 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
                 height={20}
                 nofill
               />
-              <span className="text-[#A0A0A0] text-[13px] font-medium">
-                {label}
-              </span>
+              <span className="text-[0.6875rem] text-gray-400">{label}</span>
             </div>
-            <div className="text-right text-white text-[22px] font-bold">
+            <strong className="absolute bottom-1.5 right-1.5 text-[#f7f8f8] text-sm font-bold">
               {value}
-            </div>
+            </strong>
           </div>
         ))}
       </div>
 
       {/* 기록 더보기 버튼 */}
-      <button
+      <Button
         onClick={() => {
           closeAllModals(); // hideModal() 대신 모든 모달 닫기 (팀 데이터 구조상 다른 팝업이 겹쳐있을 수 있으므로 확실히 닫기 위함)
           const imgParam = encodeURIComponent(
@@ -158,10 +159,11 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
           );
           router.push(`/player/${player.name}?imgUrl=${imgParam}`);
         }}
-        className="w-full mt-5 py-3.5 rounded-xl border border-[#333333] text-[#CCCCCC] text-[15px] font-medium hover:bg-[#2A2A2A] transition-colors"
+        variant="line"
+        size="m"
       >
         기록 더보기
-      </button>
+      </Button>
     </div>
   );
 };
