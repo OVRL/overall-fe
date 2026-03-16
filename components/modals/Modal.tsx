@@ -39,7 +39,10 @@ const Modal = <T extends object>({ Component, modalProps, hide }: Props<T>) => {
           "px-4",
           "z-50",
         )}
-        onClick={hide}
+        onClick={(e) => {
+          // 배경(백드롭) 클릭 시에만 닫기. 모달 콘텐츠 클릭 시 버블링으로 닫히는 것 방지
+          if (e.target === e.currentTarget) hide();
+        }}
       >
         <Component {...modalProps} />
       </motion.div>

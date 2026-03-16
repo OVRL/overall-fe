@@ -19,6 +19,7 @@ interface UserInitProviderProps {
  * 유저 정보를 Zustand 스토어에 주입하는 프로바이더.
  * userId가 있으면 Relay 스토어(SSR 하이드레이션)에서 FindUserById로 읽어 동기화하고,
  * 없으면 initialUser로 한 번 설정합니다.
+ * SSR에서 내려준 initialUser가 있으면 즉시 스토어에 넣어, Relay 로드 전에도 useUserId()가 동작하도록 합니다.
  */
 export function UserInitProvider({
   userId,
@@ -28,6 +29,9 @@ export function UserInitProvider({
   if (userId != null) {
     return (
       <>
+        {initialUser != null && (
+          <UserStoreHydrate initialUser={initialUser} />
+        )}
         <UserFromRelaySync userId={userId} />
         {children}
       </>
@@ -35,6 +39,14 @@ export function UserInitProvider({
   }
 
   return <UserIdNullSync initialUser={initialUser}>{children}</UserIdNullSync>;
+}
+
+/** SSR에서 내려준 initialUser를 스토어에 즉시 반영. 경기 등록 모달 등에서 Relay 완료 전에도 useUserId() 사용 가능 */
+function UserStoreHydrate({ initialUser }: { initialUser: UserModel }) {
+  useEffect(() => {
+    useUserStore.setState({ user: initialUser });
+  }, [initialUser]);
+  return null;
 }
 
 function UserFromRelaySync({ userId }: { userId: number }) {
