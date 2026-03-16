@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { INITIAL_PLAYERS } from "@/data/players";
-import { Trophy } from "lucide-react";
+import { Trophy, ArrowUp } from "lucide-react";
 
 export default function PlayerPage({ params }: { params: Promise<{ name: string }> }) {
   const router = useRouter();
@@ -105,39 +105,28 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
     };
   }, [playerName]);
 
-  const [newsData, setNewsData] = useState<{ title: string; date: string; tag: string; img: string; }[]>([]);
-
-  // 랜덤 썸네일 이미지 배열
-  const randomThumbnails = [
-    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1518091044184-21f440536480?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1551952237-954a0e68786c?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1579952318531-bad65fc872f2?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560272564-c83d66b1ad12?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=800&auto=format&fit=crop"
-  ];
-
-  const getRandomThumb = () => randomThumbnails[Math.floor(Math.random() * randomThumbnails.length)];
+  const [newsData, setNewsData] = useState<{ title: string; date: string; tag: string; votes: number; }[]>([]);
 
   useEffect(() => {
-    // MOM 데이터가 없을 경우 최근 5경기로 대체
-    const momRecords: any[] = []; // 실제 DB 연동 전까지는 빈 배열로 가정 가능
-    
-    if (momRecords.length > 0) {
-      setNewsData(momRecords.map(rec => ({ ...rec, img: getRandomThumb() })));
-    } else {
-      // 최근 경기 내역 (Mock)
-      const recentMatches = [
-        { title: "vs 레알 마드리드 (1-1 무)", date: "2월 25일", tag: "최근 경기", img: getRandomThumb() },
-        { title: "vs 바르셀로나 (2-1 승)", date: "2월 18일", tag: "최근 경기", img: getRandomThumb() },
-        { title: "vs 맨체스터 시티 (0-3 패)", date: "2월 11일", tag: "최근 경기", img: getRandomThumb() },
-        { title: "vs 바이에른 뮌헨 (2-2 무)", date: "2월 4일", tag: "최근 경기", img: getRandomThumb() },
-        { title: "vs 리버풀 (1-0 승)", date: "1월 28일", tag: "최근 경기", img: getRandomThumb() },
-      ];
-      setNewsData(recentMatches);
-    }
+    // MOM 데이터 (Mock)
+    const recentMOMs = [
+      { title: "MOM 1위 선정", date: "2026년 2월 25일", tag: "MOM AWARD", votes: 14 },
+      { title: "MOM 2위 선정", date: "2026년 2월 18일", tag: "MOM AWARD", votes: 8 },
+      { title: "MOM 1위 선정", date: "2026년 2월 11일", tag: "MOM AWARD", votes: 12 },
+      { title: "MOM 3위 선정", date: "2026년 2월 4일", tag: "MOM AWARD", votes: 5 },
+      { title: "MOM 1위 선정", date: "2026년 1월 28일", tag: "MOM AWARD", votes: 11 },
+    ];
+    setNewsData(recentMOMs);
+  }, []);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   if (!playerName) {
@@ -177,21 +166,33 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
   const colorAccent = "#00e5a0";
 
 
-  // 목업 데이터
+  // 통합 기록 데이터 (player 객체 기반 및 가상 데이터)
+  const totalStats = {
+    attendance: (player as any).attendance || 0,
+    goals: (player as any).goals || 0,
+    assists: (player as any).assists || 0,
+    cleanSheets: (player as any).yellowCards || 0,
+    wins: 15, // 가상 데이터
+    draws: 4,  // 가상 데이터
+    losses: 6, // 가상 데이터
+    points: 49 // 가상 데이터 (15*3 + 4)
+  };
+
   const yearsData = [
     { year: "20/21", goals: 11, ast: 7, shots: 72, dribbles: 118, mins: 2240 },
     { year: "21/22", goals: 22, ast: 20, shots: 88, dribbles: 132, mins: 2860 },
     { year: "22/23", goals: 23, ast: 21, shots: 90, dribbles: 141, mins: 2910 },
     { year: "23/24", goals: 24, ast: 11, shots: 95, dribbles: 138, mins: 2990 },
-    { year: "24/25", goals: parseInt(player.shooting as any) ? Math.floor(parseInt(player.shooting as any)/3) : 28, ast: 11, shots: 98, dribbles: 74, mins: 2310 },
+    { year: "24/25", goals: parseInt(player.shooting as any) ? Math.floor(parseInt(player.shooting as any) / 3) : 28, ast: 11, shots: 98, dribbles: 74, mins: 2310 },
   ];
   const maxG = Math.max(...yearsData.map((y) => y.goals));
 
-  const partners = [
-    { name: "최규빈", pos: "MF", combos: 14 },
-    { name: "이지석", pos: "FW", combos: 11 },
-    { name: "조원빈", pos: "DF", combos: 9 },
-    { name: "박정빈", pos: "MF", combos: 8 },
+  const partnerCategories = [
+    { category: "가장 많이 뛴 동료", name: "최규빈", pos: "MF", value: "32경기" },
+    { category: "나의 도움으로 득점한 선수", name: "이지석", pos: "FW", value: "8득점" },
+    { category: "가장 많은 도움을 준 선수", name: "박정빈", pos: "MF", value: "6도움" },
+    { category: "나와 같이 클린시트를 함께 한 선수", name: "조원빈", pos: "DF", value: "10회" },
+    { category: "나와 뛰었을 때 승률이 높은 선수", name: "이현우", pos: "MF", value: "82%" },
   ];
 
   const trophies = [
@@ -608,88 +609,174 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
         </div>
       </section>
 
-      {/* CAREER RECORDS */}
+      {/* CAREER RECORDS - TOTAL RECORDS */}
       <section className="section">
         <div className="section-label">CAREER RECORDS</div>
-        <div className="section-title">연도별 기록</div>
-        <div style={{ marginBottom: "60px" }}>
-          <div
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--muted)",
-              letterSpacing: "0.15em",
-              marginBottom: "20px",
-              fontWeight: 600,
-            }}
-          >
-            GOALS PER SEASON
+        <div className="section-title">통합 기록</div>
+
+        <div className="total-stats-card animate">
+          <div className="total-stats-grid">
+            {[
+              { label: "전체 출석", val: totalStats.attendance, unit: "회", color: colorAccent },
+              { label: "전체 득점", val: totalStats.goals, unit: "골", color: colorAccent },
+              { label: "전체 도움", val: totalStats.assists, unit: "개", color: "#00b4ff" },
+              { label: "클린시트", val: totalStats.cleanSheets, unit: "회", color: "#ffd166" },
+              { label: "승리", val: totalStats.wins, unit: "승", color: "#00e5a0" },
+              { label: "무승부", val: totalStats.draws, unit: "무", color: "#999" },
+              { label: "패배", val: totalStats.losses, unit: "패", color: "#ff4d4d" },
+              { label: "승점", val: totalStats.points, unit: "pts", color: "#ffd166" },
+            ].map((s) => (
+              <div className="total-stat-item" key={s.label}>
+                <div className="ts-label">{s.label}</div>
+                <div className="ts-value-wrap">
+                  <span className="ts-value" style={{ color: s.color, fontSize: '2rem', fontWeight: 800, fontFamily: "'Bebas Neue', sans-serif" }}>{s.val}</span>
+                  <span className="ts-unit" style={{ fontSize: '0.9rem', color: 'var(--muted)', marginLeft: '4px' }}>{s.unit}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="bar-chart" id="goalBarChart">
-            {yearsData.map((y) => {
-              const pct = Math.round((y.goals / maxG) * 100);
+        </div>
+
+        {/* YEARLY RECORDS TIMELINE */}
+        <div className="yearly-timeline-wrap" style={{ marginTop: '4rem' }}>
+          <div className="timeline-header animate" style={{ marginBottom: '2rem' }}>
+            <div className="th-lbl" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.1em' }}>SEASONAL JOURNEY</div>
+            <div className="th-title" style={{ fontSize: '1.8rem', fontWeight: 800, color: 'white', marginTop: '4px' }}>연도별 기록</div>
+          </div>
+
+          <div className="timeline-v2">
+            {[...yearsData].reverse().map((y, i) => {
+              const hi = y.goals === maxG;
               return (
-                <div className="bar-row" key={y.year}>
-                  <div className="bar-year">{y.year}</div>
-                  <div className="bar-track">
-                    <div className="bar-fill" data-width={`${pct}%`}></div>
+                <div className="t2-item animate" key={y.year}>
+                  <div className="t2-line-wrap">
+                    <div className="t2-node" style={{ borderColor: hi ? 'var(--gold)' : 'var(--accent)' }}></div>
+                    <div className="t2-line"></div>
                   </div>
-                  <div className="bar-val text-white">{y.goals}</div>
+                  <div className="t2-content-wrap">
+                    <div className="t2-year-title">{y.year}년도 기록</div>
+                    <div className="t2-card">
+                      <div className="t2-stats-grid">
+                        <div className="t2-stat">
+                          <div className="t2-val" style={{ color: hi ? 'var(--gold)' : 'white' }}>{y.goals}</div>
+                          <div className="t2-lbl">GOALS</div>
+                        </div>
+                        <div className="t2-stat">
+                          <div className="t2-val">{y.ast}</div>
+                          <div className="t2-lbl">ASSISTS</div>
+                        </div>
+                        <div className="t2-stat">
+                          <div className="t2-val">{y.shots}</div>
+                          <div className="t2-lbl">SHOTS</div>
+                        </div>
+                        <div className="t2-stat">
+                          <div className="t2-val">{Math.floor(y.mins / 90)}</div>
+                          <div className="t2-lbl">GAMES</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
-        <div className="timeline" id="timeline">
-          {[...yearsData].reverse().map((y) => {
-            const hi = y.goals === maxG;
-            return (
-              <div className="timeline-item" key={y.year}>
-                <div className="timeline-year">{y.year}</div>
-                <div className="timeline-card">
-                  <div className="season-badge">{y.year} 시즌</div>
-                  <div className="t-stat">
-                    <div className={`t-stat-val ${hi ? "hi" : "text-white"}`}>{y.goals}</div>
-                    <div className="t-stat-lbl">GOALS</div>
-                  </div>
-                  <div className="t-stat">
-                    <div className="t-stat-val text-white">{y.ast}</div>
-                    <div className="t-stat-lbl">ASSISTS</div>
-                  </div>
-                  <div className="t-stat">
-                    <div className="t-stat-val text-white">{y.shots}</div>
-                    <div className="t-stat-lbl">SHOTS</div>
-                  </div>
-                  <div className="t-stat">
-                    <div className="t-stat-val text-white">{y.dribbles}</div>
-                    <div className="t-stat-lbl">DRIBBLES</div>
-                  </div>
-                  <div className="t-stat">
-                    <div className="t-stat-val text-white">{Math.floor(y.mins / 90)}</div>
-                    <div className="t-stat-lbl">GAMES</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+
+        <style jsx>{`
+          .timeline-v2 { position: relative; padding-top: 1rem; }
+          .t2-item { display: flex; gap: 2rem; margin-bottom: 2rem; }
+          .t2-line-wrap { display: flex; flex-direction: column; align-items: center; }
+          .t2-node { width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--accent); background: var(--bg); z-index: 2; position: relative; }
+          .t2-line { width: 2px; flex: 1; background: var(--border); margin: 4px 0; }
+          .t2-item:last-child .t2-line { display: none; }
+          .t2-content-wrap { flex: 1; padding-bottom: 2rem; }
+          .t2-year-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+          .t2-card { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; transition: transform 0.3s; }
+          .t2-card:hover { transform: translateX(10px); border-color: rgba(0,229,160,0.2); }
+          .t2-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+          .t2-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; line-height: 1; color: white; }
+          .t2-lbl { font-size: 0.65rem; color: var(--muted); font-weight: 700; letter-spacing: 0.05em; margin-top: 4px; }
+          @media (max-width: 600px) {
+            .t2-item { gap: 1rem; }
+            .t2-stats-grid { gap: 0.5rem; }
+            .t2-val { font-size: 1.4rem; }
+          }
+
+          .total-stats-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+          }
+          .total-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+          }
+          .total-stat-item {
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .ts-label { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+          .ts-value-wrap { display: flex; align-items: baseline; }
+          @media (max-width: 768px) {
+            .total-stats-grid { grid-template-columns: repeat(2, 1fr); }
+          }
+        `}</style>
       </section>
 
       {/* CHEMISTRY */}
       <section className="section">
         <div className="section-label">CHEMISTRY</div>
-        <div className="section-title">베스트 파트너</div>
-        <div className="partners-grid">
-          {partners.map((pt) => (
-            <div className="partner-card" key={pt.name}>
-              <div className="partner-avatar">
-                <div className="p-ph">🏃</div>
+        <div className="section-title">베스트 파트너(2026시즌)</div>
+        <div className="partners-grid-new">
+          {partnerCategories.map((p, i) => (
+            <div className="partner-card-new animate" key={p.category}>
+              <div className="pc-head-new">
+                <div className="pc-cat-new" style={{ color: colorAccent }}>{p.category}</div>
+                <div className="pc-rank-new">TOP {i + 1}</div>
               </div>
-              <div className="partner-name text-white">{pt.name}</div>
-              <div className="partner-pos">{pt.pos}</div>
-              <div className="partner-combo">🤝 {pt.combos}번 합작</div>
+              <div className="pc-body-new">
+                <div className="pc-pic-wrap-new">
+                  <div className="pc-pic-new" />
+                </div>
+                <div className="pc-info-new">
+                  <div className="pc-name-new text-white" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{p.name}</div>
+                  <div className="pc-pos-new" style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{p.pos}</div>
+                </div>
+                <div className="pc-stats-new">
+                  <div className="pc-stat-val-new" style={{ color: colorAccent, fontSize: '1.3rem', fontWeight: 800, fontFamily: "'Bebas Neue', sans-serif" }}>{p.value}</div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
+        <style jsx>{`
+          .partners-grid-new {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+          }
+          .partner-card-new {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+          }
+          .pc-head-new { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+          .pc-cat-new { font-size: 0.8rem; font-weight: 700; }
+          .pc-rank-new { font-size: 0.7rem; color: var(--muted); }
+          .pc-body-new { display: flex; align-items: center; gap: 1rem; }
+          .pc-pic-wrap-new { width: 50px; height: 50px; border-radius: 50%; background: #222; overflow: hidden; }
+          .pc-pic-new { width: 100%; height: 100%; background: url('/images/ovr.png') center/cover; opacity: 0.4; }
+          .pc-info-new { flex: 1; }
+        `}</style>
       </section>
 
       {/* HONOURS */}
@@ -715,30 +802,57 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
       <section className="section" style={{ borderTop: "none" }}>
         <div className="section-label">MOM AWARDS</div>
         <div className="section-title">최근 MOM 내역</div>
-        <div className="news-grid">
+        <div className="mom-list">
           {newsData.map((news, i) => (
-            <div className="news-card" key={i}>
-              <div className="news-img">
-                {/* 
-                  사용자가 제공한 레퍼런스 이미지 스타일 
-                  (news.img가 실제로 없거나 깨질 경우를 대비해 object-fit 처리)
-                */}
-                <img src={news.img} alt={news.title} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<span style="opacity:0.6;font-size:32px;">📸</span>'; }} />
-              </div>
-              <div className="news-body">
-                <div>
-                  <div className="news-tag">{news.tag}</div>
-                  <div className="news-title">{news.title}</div>
-                </div>
-                <div className="news-meta">
-                  <span>퍼스트 팀</span>
-                  <span>⏱️ {news.date}</span>
-                </div>
+            <div className="mom-item animate" key={i}>
+              <div className="mom-date">{news.date}</div>
+              <div className="mom-content">
+                <span className="mom-tag">{news.tag}</span>
+                <span className="mom-title text-white">{news.title}</span>
+                <span className="mom-votes" style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--accent)', fontSize: '0.9rem' }}>{news.votes}표</span>
               </div>
             </div>
           ))}
         </div>
+        <style jsx>{`
+          .mom-list { display: flex; flex-direction: column; gap: 1rem; }
+          .mom-item {
+            display: flex; align-items: center; gap: 2rem;
+            padding: 1.5rem 2rem; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); border-radius: 12px;
+            transition: transform 0.2s, border-color 0.2s;
+          }
+          .mom-item:hover { transform: translateX(10px); border-color: var(--accent); }
+          .mom-date { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; min-width: 140px; color: var(--muted); }
+          .mom-content { display: flex; align-items: center; gap: 1rem; flex: 1; }
+          .mom-tag { font-size: 0.75rem; font-weight: 800; color: #ff3355; border: 1px solid rgba(255,51,85,0.2); padding: 2px 8px; border-radius: 4px; }
+          .mom-title { font-size: 1.1rem; font-weight: 700; }
+          @media (max-width: 600px) {
+            .mom-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1rem 1.5rem; }
+            .mom-date { font-size: 1rem; min-width: auto; }
+            .mom-title { font-size: 1rem; }
+          }
+        `}</style>
       </section>
+
+      <button
+        className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        style={{
+          position: 'fixed', bottom: '30px', right: '30px',
+          width: '50px', height: '50px', borderRadius: '50%',
+          background: 'var(--accent)', color: '#000',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: 'none', cursor: 'pointer', zIndex: 100,
+          boxShadow: '0 4px 20px rgba(0,229,160,0.4)',
+          transition: 'transform 0.3s, opacity 0.3s, visibility 0.3s',
+          opacity: showScrollTop ? 1 : 0,
+          visibility: showScrollTop ? 'visible' : 'hidden',
+          transform: showScrollTop ? 'translateY(0)' : 'translateY(20px)'
+        }}
+      >
+        <ArrowUp className="w-6 h-6" />
+      </button>
 
       <div className="detail-footer">
         DATA UPDATED · LIVE SYNC · ⚽ {new Date().getFullYear()} OVR FC STATS
