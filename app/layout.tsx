@@ -11,6 +11,14 @@ import { PageTransition } from "@/components/providers/PageTransition";
 import Script from "next/script";
 import { env } from "@/lib/env";
 import { Analytics } from "@vercel/analytics/next";
+import { headers, cookies } from "next/headers";
+import { UserInitProvider } from "@/components/providers/UserInitProvider";
+import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
+import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
+import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
+import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
+import { TEAM_REQUIRED_ROUTES } from "@/lib/routes";
+import { redirect } from "next/navigation";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -23,13 +31,6 @@ export const metadata: Metadata = {
   title: "Overall",
   description: "Overall",
 };
-
-import { headers, cookies } from "next/headers";
-import { UserInitProvider } from "@/components/providers/UserInitProvider";
-import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
-import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
-import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
-import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
 
 export default async function RootLayout({
   children,
@@ -62,6 +63,26 @@ export default async function RootLayout({
       });
     relayInitialRecords = records;
     layoutState = state;
+  }
+
+  // 리디렉션: 로그인·팀 유무에 따른 접근 제어
+  const pathname = requestHeaders.get("x-pathname") ?? "";
+  const isLoggedIn = layoutState.userId != null;
+  const hasTeam = layoutState.initialSelectedTeamId != null;
+
+  // 로그인 + 팀 없음 → 팀 필수 경로 접근 시 landing으로
+  if (
+    isPrivateRoute &&
+    isLoggedIn &&
+    !hasTeam &&
+    TEAM_REQUIRED_ROUTES.some((pattern) => pattern.test(pathname))
+  ) {
+    redirect("/landing");
+  }
+
+  // 로그인 + 팀 있음 → landing 접근 시 /home으로
+  if (isPrivateRoute && isLoggedIn && hasTeam && pathname === "/landing") {
+    redirect("/home");
   }
 
   return (

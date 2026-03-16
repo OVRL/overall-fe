@@ -159,6 +159,7 @@ export async function proxy(request: NextRequest) {
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-is-private-route", "true");
+    requestHeaders.set("x-pathname", pathname);
 
     let response;
     // 갱신된 토큰이 있다면 쿠키 설정 필요
