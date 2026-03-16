@@ -12,6 +12,8 @@ export const FindMatchQuery = graphql`
       matchDate
       startTime
       matchType
+      description
+      uniformType
       createdTeam {
         __typename
         id
@@ -23,6 +25,11 @@ export const FindMatchQuery = graphql`
         id
         name
         emblem
+      }
+      venue {
+        address
+        latitude
+        longitude
       }
     }
   }

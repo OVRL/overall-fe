@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5546e5b431cda6bbf012e816d23ff8d2>>
+ * @generated SignedSource<<d0a647fddcc60cfb74e57d4efc75bae9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type MatchType = "INTERNAL" | "MATCH" | "%future added value";
+export type Uniform = "AWAY" | "HOME" | "%future added value";
 export type findMatchQuery$variables = {
   createdTeamId: number;
 };
@@ -22,6 +23,7 @@ export type findMatchQuery$data = {
       readonly id: string;
       readonly name: string | null | undefined;
     } | null | undefined;
+    readonly description: string | null | undefined;
     readonly id: string;
     readonly matchDate: any;
     readonly matchType: MatchType;
@@ -32,6 +34,12 @@ export type findMatchQuery$data = {
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly startTime: string;
+    readonly uniformType: Uniform | null | undefined;
+    readonly venue: {
+      readonly address: string;
+      readonly latitude: number;
+      readonly longitude: number;
+    };
   }>;
 };
 export type findMatchQuery = {
@@ -120,6 +128,20 @@ v4 = [
       {
         "alias": null,
         "args": null,
+        "kind": "ScalarField",
+        "name": "description",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "uniformType",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
         "concreteType": "TeamResponseModel",
         "kind": "LinkedField",
         "name": "createdTeam",
@@ -135,6 +157,38 @@ v4 = [
         "name": "opponentTeam",
         "plural": false,
         "selections": (v3/*: any*/),
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "VenueModel",
+        "kind": "LinkedField",
+        "name": "venue",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "address",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "latitude",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "longitude",
+            "storageKey": null
+          }
+        ],
         "storageKey": null
       }
     ],
@@ -159,16 +213,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "ebfe9270dbbcc797965c75a7ab051aa1",
+    "cacheID": "e1f8e3f0afdf01c539048eadd421873f",
     "id": null,
     "metadata": {},
     "name": "findMatchQuery",
     "operationKind": "query",
-    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    matchType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n  }\n}\n"
+    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    matchType\n    description\n    uniformType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7c3a77c048078f87010132ae9e9465f0";
+(node as any).hash = "c8ebdd6d9e341ae655ab77fc87139cc6";
 
 export default node;
