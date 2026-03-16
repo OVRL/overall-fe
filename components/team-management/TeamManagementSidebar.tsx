@@ -10,7 +10,8 @@ export type TeamManagementMenu =
     | "players"
     | "best-eleven"
     | "invitation"
-    | "mom-vote";
+    | "mom-vote"
+    | "match-record";
 
 interface MenuItem {
     id: TeamManagementMenu;
@@ -90,6 +91,11 @@ const menuItems: MenuItem[] = [
         icon: null,
     },
     {
+        id: "match-record",
+        label: "경기 기록 관리",
+        icon: null,
+    },
+    {
         id: "players",
         label: "선수 관리",
         icon: null,
@@ -106,7 +112,7 @@ const menuItems: MenuItem[] = [
     },
     {
         id: "invitation",
-        label: "초대 관리",
+        label: "가입 명단 관리",
         icon: null,
     },
 ];
@@ -114,6 +120,12 @@ const menuItems: MenuItem[] = [
 const getIcon = (id: TeamManagementMenu, active: boolean) => {
     switch (id) {
         case "settings": return <SettingsIcon active={active} />;
+        case "match-record": return (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M15 3H3c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z" stroke={active ? "#000" : "#888"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 3v12M12 3v12M2 9h14" stroke={active ? "#000" : "#888"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+        );
         case "players": return <PlayersIcon active={active} />;
         case "mom-vote": return <MOMIcon active={active} />;
         case "best-eleven": return <BestElevenIcon active={active} />;
