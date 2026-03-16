@@ -105,6 +105,41 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
     };
   }, [playerName]);
 
+  const [newsData, setNewsData] = useState<{ title: string; date: string; tag: string; img: string; }[]>([]);
+
+  // 랜덤 썸네일 이미지 배열
+  const randomThumbnails = [
+    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1518091044184-21f440536480?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551952237-954a0e68786c?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1579952318531-bad65fc872f2?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560272564-c83d66b1ad12?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=800&auto=format&fit=crop"
+  ];
+
+  const getRandomThumb = () => randomThumbnails[Math.floor(Math.random() * randomThumbnails.length)];
+
+  useEffect(() => {
+    // MOM 데이터가 없을 경우 최근 5경기로 대체
+    const momRecords: any[] = []; // 실제 DB 연동 전까지는 빈 배열로 가정 가능
+    
+    if (momRecords.length > 0) {
+      setNewsData(momRecords.map(rec => ({ ...rec, img: getRandomThumb() })));
+    } else {
+      // 최근 경기 내역 (Mock)
+      const recentMatches = [
+        { title: "vs 레알 마드리드 (1-1 무)", date: "2월 25일", tag: "최근 경기", img: getRandomThumb() },
+        { title: "vs 바르셀로나 (2-1 승)", date: "2월 18일", tag: "최근 경기", img: getRandomThumb() },
+        { title: "vs 맨체스터 시티 (0-3 패)", date: "2월 11일", tag: "최근 경기", img: getRandomThumb() },
+        { title: "vs 바이에른 뮌헨 (2-2 무)", date: "2월 4일", tag: "최근 경기", img: getRandomThumb() },
+        { title: "vs 리버풀 (1-0 승)", date: "1월 28일", tag: "최근 경기", img: getRandomThumb() },
+      ];
+      setNewsData(recentMatches);
+    }
+  }, []);
+
   if (!playerName) {
     return (
       <div className="min-h-screen bg-[#080808] flex items-center justify-center">
@@ -127,6 +162,10 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
     dribbling: 94,
     defending: 50,
     physical: 80,
+    attendance: 10,
+    goals: 5,
+    assists: 3,
+    yellowCards: 2, // 클린시트 용도로 쓰임
     season: "26",
     seasonType: "general",
     image: "/images/ovr.png",
@@ -134,8 +173,9 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
 
   const displayImage = queryImgUrl || player.image || "/images/ovr.png";
   const firstName = player.name.split(" ")[0];
-  const lastName = player.name.split(" ").slice(1).join(" ") || player.name;
+  const lastName = player.name.split(" ").slice(1).join(" ");
   const colorAccent = "#00e5a0";
+
 
   // 목업 데이터
   const yearsData = [
@@ -161,12 +201,6 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
     { name: "미드필더 평점", rank: "2위", year: "2025", icon: "⭐" },
   ];
 
-  const newsData = [
-    { title: "2026년 2월 26일 MOM 수상", date: "2월 26일", tag: "MOM 투표", img: "/images/ovr.png" },
-    { title: "2026년 1월 이달의 선수 선정 (퍼스트 팀)", date: "1월 11일", tag: "퍼스트 팀", img: "/images/ovr.png" },
-    { title: "선발 출전하여 MOM을 수상했습니다.", date: "2025년 12월 3일", tag: "퍼스트 팀", img: "/images/ovr.png" },
-    { title: "최근 3경기 연속 공격포인트 달성!", date: "2025년 11월 24일", tag: "퍼스트 팀", img: "/images/ovr.png" },
-  ];
 
   return (
     <div id="player-detail-page">
@@ -385,9 +419,20 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
         .detail-footer { padding:80px 6vw 40px; text-align:center; color:var(--muted); font-size:0.8rem; letter-spacing:0.1em; border-top:1px solid var(--border); margin-top:80px; font-weight:600;}
         
         @media(max-width:600px) {
-          .hero { padding:0 5vw 8vh; }
-          .hero-player-wrap { opacity:0.4; }
-          .hero-stat-row { gap:20px; }
+          .hero { padding:0 5vw 8vh; height:auto; min-height:100vh; justify-content: flex-start; padding-top: 15vh; }
+          .hero-player-wrap { 
+            position: relative; opacity: 1; height: 35vh; width: 100%; 
+            right: auto; bottom: auto; justify-content: center;
+            transform: translateY(0); pointer-events: none;
+            margin-bottom: 20px;
+          }
+          .hero-player-wrap img.player-photo { 
+            max-width: 80vw; height: 100%; object-position: center;
+          }
+          .hero-content { width: 100%; }
+          .hero-name { font-size: clamp(2.5rem, 10vw, 4rem); }
+          .hero-stat-row { gap:15px; flex-wrap: wrap; justify-content: flex-start; margin-top: 24px; }
+          .hero-number { font-size: 10rem; opacity: 0.03; top: 20%; right: 2vw; }
         }
       `,
         }}
@@ -422,21 +467,27 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
             <span>OVR FC</span>
           </div>
           <div className="hero-name" id="heroName">
-            {firstName}
-            <br />
-            <span>{lastName}</span>
+            {lastName ? (
+              <>
+                {firstName}
+                <br />
+                <span>{lastName}</span>
+              </>
+            ) : (
+              <span>{firstName}</span>
+            )}
           </div>
           <div className="hero-pos" id="heroPos">
             {player.position} · #{player.number || 9}
           </div>
           <div className="hero-stat-row" id="heroStats">
             <div>
-              <div className="h-stat-val text-white">{player.shooting || 80}</div>
-              <div className="h-stat-lbl">슈팅 (SHO)</div>
+              <div className="h-stat-val text-white">{(player as any).attendance || 0}</div>
+              <div className="h-stat-lbl">출석</div>
             </div>
             <div>
-              <div className="h-stat-val text-white">{player.passing || 80}</div>
-              <div className="h-stat-lbl">패스 (PAS)</div>
+              <div className="h-stat-val text-white">{(player as any).goals || 0}</div>
+              <div className="h-stat-lbl">득점</div>
             </div>
             <div>
               <div className="h-stat-val">
@@ -445,8 +496,8 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
               <div className="h-stat-lbl">오버롤 (OVR)</div>
             </div>
             <div>
-              <div className="h-stat-val text-white">{player.pace || 80}</div>
-              <div className="h-stat-lbl">스피드 (PAC)</div>
+              <div className="h-stat-val text-white">{(player as any).assists || 0}</div>
+              <div className="h-stat-lbl">도움</div>
             </div>
           </div>
         </div>
@@ -497,26 +548,29 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
               </svg>
               <div className="gauge-stats">
                 {[
-                  { label: "시즌 득점", pct: 90 },
-                  { label: "유효 슈팅률", pct: 85 },
-                  { label: "공간 침투", pct: 95 },
-                ].map((s) => (
-                  <div className="gauge-row" key={s.label}>
-                    <div className="gauge-row-top">
-                      <span className="gr-lbl">{s.label}</span>
-                      <span className="gr-pct" style={{ color: colorAccent }}>
-                        상위 {100 - s.pct}%
-                      </span>
+                  { label: "시즌 득점", val: (player as any).goals || 0, max: 20 },
+                  { label: "시즌 도움", val: (player as any).assists || 0, max: 20 },
+                  { label: "경기 출석", val: (player as any).attendance || 0, max: 30 },
+                ].map((s) => {
+                  const pct = Math.min(100, Math.round((s.val / s.max) * 100));
+                  return (
+                    <div className="gauge-row" key={s.label}>
+                      <div className="gauge-row-top">
+                        <span className="gr-lbl">{s.label}</span>
+                        <span className="gr-pct" style={{ color: colorAccent }}>
+                          {s.val}
+                        </span>
+                      </div>
+                      <div className="mini-bar-track">
+                        <div
+                          className="mini-bar-fill"
+                          data-width={`${pct}%`}
+                          style={{ background: `linear-gradient(90deg, ${colorAccent}, var(--accent2))` }}
+                        />
+                      </div>
                     </div>
-                    <div className="mini-bar-track">
-                      <div
-                        className="mini-bar-fill"
-                        data-width={`${s.pct}%`}
-                        style={{ background: `linear-gradient(90deg, ${colorAccent}, var(--accent2))` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -527,25 +581,28 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
             <div className="pct-title text-white">항목별 팀 내 순위</div>
             <div className="rank-bars">
               {[
-                { label: "시즌 득점", rank: "1위", pct: 98, color: colorAccent },
-                { label: "어시스트", rank: "3위", pct: 85, color: "#00b4ff" },
-                { label: "드리블 성공", rank: "2위", pct: 92, color: "#ffd166" },
-                { label: "출전 시간", rank: "4위", pct: 75, color: colorAccent },
-              ].map((r) => (
-                <div className="rank-bar-row" key={r.label}>
-                  <div className="rank-bar-lbl">{r.label}</div>
-                  <div className="rank-bar-track">
-                    <div
-                      className="rank-bar-fill"
-                      data-width={`${r.pct}%`}
-                      style={{ background: `linear-gradient(90deg, ${r.color}, ${r.color}80)` }}
-                    />
+                { label: "시즌 득점", val: (player as any).goals || 0, max: 20, color: colorAccent },
+                { label: "어시스트", val: (player as any).assists || 0, max: 20, color: "#00b4ff" },
+                { label: "클린시트", val: (player as any).yellowCards || 0, max: 10, color: "#ffd166" },
+                { label: "출석 지수", val: (player as any).attendance || 0, max: 30, color: colorAccent },
+              ].map((r) => {
+                const pct = Math.min(100, Math.round((r.val / r.max) * 100));
+                return (
+                  <div className="rank-bar-row" key={r.label}>
+                    <div className="rank-bar-lbl">{r.label}</div>
+                    <div className="rank-bar-track">
+                      <div
+                        className="rank-bar-fill"
+                        data-width={`${pct}%`}
+                        style={{ background: `linear-gradient(90deg, ${r.color}, ${r.color}80)` }}
+                      />
+                    </div>
+                    <div className="rank-bar-val" style={{ color: r.color }}>
+                      {r.val}
+                    </div>
                   </div>
-                  <div className="rank-bar-val" style={{ color: r.color }}>
-                    {r.rank}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -657,7 +714,7 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
       {/* MOM AWARDS / LATEST NEWS */}
       <section className="section" style={{ borderTop: "none" }}>
         <div className="section-label">MOM AWARDS</div>
-        <div className="section-title">최신 수상 내역</div>
+        <div className="section-title">최근 MOM 내역</div>
         <div className="news-grid">
           {newsData.map((news, i) => (
             <div className="news-card" key={i}>

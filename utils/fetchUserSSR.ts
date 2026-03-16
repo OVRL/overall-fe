@@ -53,7 +53,10 @@ export async function fetchUserSSR(
       return null;
     }
 
-    const payload = (await res.json()) as { data?: { findUserById?: UserModel }; errors?: unknown[] };
+    const payload = (await res.json()) as {
+      data?: { findUserById?: UserModel };
+      errors?: unknown[];
+    };
     if (payload.errors && payload.errors.length > 0) {
       if (process.env.NODE_ENV === "development") {
         console.error("fetchUserSSR GraphQL 에러:", payload.errors);
