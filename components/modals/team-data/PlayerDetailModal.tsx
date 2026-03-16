@@ -104,18 +104,18 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
               "px-5 py-2 text-[15px] font-bold rounded-lg transition-colors",
               activeTab === "시즌기록"
                 ? "bg-[#C4FF00] text-black"
-                : "text-gray-400 hover:text-white"
+                : "text-gray-400 hover:text-white",
             )}
           >
             시즌 기록
           </button>
           <button
-            onClick={() => setActiveTab("누적기록")}
+            onClick={() => setActiveTab("통산 기록")}
             className={cn(
               "px-5 py-2 text-[15px] font-bold rounded-lg transition-colors",
-              activeTab === "누적기록"
+              activeTab === "통산 기록"
                 ? "bg-[#C4FF00] text-black"
-                : "text-gray-400 hover:text-white"
+                : "text-gray-400 hover:text-white",
             )}
           >
             통산 기록
@@ -137,7 +137,9 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
                 className="w-4 h-4"
                 nofill
               />
-              <span className="text-[#A0A0A0] text-[13px] font-medium">{label}</span>
+              <span className="text-[#A0A0A0] text-[13px] font-medium">
+                {label}
+              </span>
             </div>
             <div className="text-right text-white text-[22px] font-bold">
               {value}
@@ -150,7 +152,9 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
       <button
         onClick={() => {
           closeAllModals(); // hideModal() 대신 모든 모달 닫기 (팀 데이터 구조상 다른 팝업이 겹쳐있을 수 있으므로 확실히 닫기 위함)
-          const imgParam = encodeURIComponent(player.image || "/images/ovr.png");
+          const imgParam = encodeURIComponent(
+            player.image || "/images/ovr.png",
+          );
           router.push(`/player/${player.name}?imgUrl=${imgParam}`);
         }}
         className="w-full mt-5 py-3.5 rounded-xl border border-[#333333] text-[#CCCCCC] text-[15px] font-medium hover:bg-[#2A2A2A] transition-colors"
