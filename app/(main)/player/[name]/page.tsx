@@ -179,11 +179,11 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
   };
 
   const yearsData = [
-    { year: "20/21", goals: 11, ast: 7, shots: 72, dribbles: 118, mins: 2240 },
-    { year: "21/22", goals: 22, ast: 20, shots: 88, dribbles: 132, mins: 2860 },
-    { year: "22/23", goals: 23, ast: 21, shots: 90, dribbles: 141, mins: 2910 },
-    { year: "23/24", goals: 24, ast: 11, shots: 95, dribbles: 138, mins: 2990 },
-    { year: "24/25", goals: parseInt(player.shooting as any) ? Math.floor(parseInt(player.shooting as any) / 3) : 28, ast: 11, shots: 98, dribbles: 74, mins: 2310 },
+    { year: "20/21", goals: 11, ast: 7, cleanSheets: 3, mins: 2240 },
+    { year: "21/22", goals: 22, ast: 20, cleanSheets: 5, mins: 2860 },
+    { year: "22/23", goals: 23, ast: 21, cleanSheets: 8, mins: 2910 },
+    { year: "23/24", goals: 24, ast: 11, cleanSheets: 6, mins: 2990 },
+    { year: "24/25", goals: parseInt(player.shooting as any) ? Math.floor(parseInt(player.shooting as any) / 3) : 28, ast: 11, cleanSheets: 9, mins: 2310 },
   ];
   const maxG = Math.max(...yearsData.map((y) => y.goals));
 
@@ -262,6 +262,8 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
           height: 100%; max-width: 50vw;
           object-fit: contain; object-position: bottom right;
           filter: drop-shadow(-30px 0 80px rgba(0,180,255,0.2)); display: block;
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
         }
         
         .hero-number {
@@ -666,8 +668,8 @@ export default function PlayerPage({ params }: { params: Promise<{ name: string 
                           <div className="t2-lbl">ASSISTS</div>
                         </div>
                         <div className="t2-stat">
-                          <div className="t2-val">{y.shots}</div>
-                          <div className="t2-lbl">SHOTS</div>
+                          <div className="t2-val">{y.cleanSheets}</div>
+                          <div className="t2-lbl">클린시트</div>
                         </div>
                         <div className="t2-stat">
                           <div className="t2-val">{Math.floor(y.mins / 90)}</div>
