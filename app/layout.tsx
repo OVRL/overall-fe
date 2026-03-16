@@ -25,11 +25,11 @@ export const metadata: Metadata = {
 };
 
 import { headers, cookies } from "next/headers";
-import { fetchUserSSR } from "@/utils/fetchUserSSR";
-import { fetchFindTeamMemberSSR } from "@/utils/fetchFindTeamMemberSSR";
 import { UserInitProvider } from "@/components/providers/UserInitProvider";
 import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
 import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
+import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
+import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
 
 export default async function RootLayout({
   children,
@@ -43,48 +43,25 @@ export default async function RootLayout({
   const selectedTeamIdFromCookie =
     cookieStore.get(SELECTED_TEAM_ID_COOKIE_KEY)?.value ?? null;
 
-  let initialUser = null;
-  let initialSelectedTeamId: string | null = selectedTeamIdFromCookie;
-  let initialSelectedTeamName: string | null = null;
-  let initialSelectedTeamImageUrl: string | null = null;
-  let initialSelectedTeamIdFromSingleTeam = false;
+  let relayInitialRecords: string | undefined;
+  let layoutState = EMPTY_LAYOUT_STATE;
 
   if (isPrivateRoute) {
-    const accessToken = cookieStore.get("accessToken")?.value;
+    const accessToken = cookieStore.get("accessToken")?.value ?? null;
     const userIdStr = cookieStore.get("userId")?.value;
+    const userId =
+      userIdStr != null && !Number.isNaN(Number(userIdStr))
+        ? Number(userIdStr)
+        : null;
 
-    if (accessToken && userIdStr) {
-      const userId = Number(userIdStr);
-      if (!isNaN(userId)) {
-        const [userResult, membersResult] = await Promise.all([
-          fetchUserSSR(userId, accessToken),
-          fetchFindTeamMemberSSR(userId, accessToken),
-        ]);
-        initialUser = userResult;
-
-        const teamsWithInfo = membersResult.filter(
-          (m): m is typeof m & { team: NonNullable<typeof m.team> } => m.team != null,
-        );
-        const teamIds = teamsWithInfo.map((m) => m.team.id);
-
-        if (selectedTeamIdFromCookie != null && teamIds.includes(selectedTeamIdFromCookie)) {
-          initialSelectedTeamId = selectedTeamIdFromCookie;
-        } else if (teamsWithInfo.length === 1) {
-          initialSelectedTeamId = teamsWithInfo[0].team.id;
-          initialSelectedTeamIdFromSingleTeam = true;
-        } else {
-          initialSelectedTeamId = null;
-        }
-
-        if (initialSelectedTeamId != null) {
-          const selectedTeam = teamsWithInfo.find(
-            (m) => m.team.id === initialSelectedTeamId,
-          );
-          initialSelectedTeamName = selectedTeam?.team.name ?? null;
-          initialSelectedTeamImageUrl = null;
-        }
-      }
-    }
+    const { relayInitialRecords: records, layoutState: state } =
+      await loadLayoutSSR({
+        accessToken,
+        userId,
+        selectedTeamIdFromCookie,
+      });
+    relayInitialRecords = records;
+    layoutState = state;
   }
 
   return (
@@ -99,13 +76,23 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <RelayProvider>
-              <UserInitProvider initialUser={initialUser}>
+            <RelayProvider initialRecords={relayInitialRecords}>
+              <UserInitProvider
+                userId={layoutState.userId}
+                initialUser={layoutState.initialUser}
+              >
                 <SelectedTeamProvider
-                  initialSelectedTeamId={initialSelectedTeamId}
-                  initialSelectedTeamName={initialSelectedTeamName}
-                  initialSelectedTeamImageUrl={initialSelectedTeamImageUrl}
-                  initialSelectedTeamIdFromSingleTeam={initialSelectedTeamIdFromSingleTeam}
+                  initialSelectedTeamId={layoutState.initialSelectedTeamId}
+                  initialSelectedTeamIdNum={
+                    layoutState.initialSelectedTeamIdNum
+                  }
+                  initialSelectedTeamName={layoutState.initialSelectedTeamName}
+                  initialSelectedTeamImageUrl={
+                    layoutState.initialSelectedTeamImageUrl
+                  }
+                  initialSelectedTeamIdFromSingleTeam={
+                    layoutState.initialSelectedTeamIdFromSingleTeam
+                  }
                 >
                   <div id="modal-root"></div>
                   <PageTransition>{children}</PageTransition>

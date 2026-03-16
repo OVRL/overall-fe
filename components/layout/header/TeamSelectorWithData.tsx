@@ -47,7 +47,7 @@ function useTeamSelectorData(userId: number) {
     }
   }, [teams, selectedTeamId, setSelectedTeamId]);
 
-  return { teams, selectedTeamId, setSelectedTeamId };
+  return { teams, members, selectedTeamId, setSelectedTeamId };
 }
 
 function TeamSelectorWithDataInner({
@@ -60,11 +60,12 @@ function TeamSelectorWithDataInner({
   onAfterCreateTeam?: () => void;
 }) {
   const router = useRouter();
-  const { teams, selectedTeamId, setSelectedTeamId } =
+  const { teams, members, selectedTeamId, setSelectedTeamId } =
     useTeamSelectorData(userId);
 
   const handleSelect = (teamId: string) => {
-    setSelectedTeamId(teamId);
+    const member = members.find((m) => m.team?.id === teamId);
+    setSelectedTeamId(teamId, member?.teamId);
     onAfterSelect?.();
   };
 

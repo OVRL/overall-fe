@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
+import { getValidImageSrc } from "@/lib/utils";
 import type { TeamRole } from "./TeamManagementSidebar";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
@@ -703,7 +704,7 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
                       <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
                           <Image
-                            src={member.profileImage}
+                            src={getValidImageSrc(member.profileImage)}
                             alt={member.name}
                             width={32}
                             height={32}

@@ -14,11 +14,13 @@ import { setSelectedTeamIdCookie } from "@/lib/cookie/selectedTeamId";
 
 export type SelectedTeamContextValue = {
   selectedTeamId: string | null;
+  /** FindMatch(createdTeamId) 등 API 변수용 숫자 팀 ID */
+  selectedTeamIdNum: number | null;
   /** 표시용 팀 이름 (SSR에서 전달, 홈 등에서 추가 요청 없이 사용) */
   selectedTeamName: string | null;
   /** 표시용 팀 이미지 URL (SSR에서 전달, 없으면 기본 이미지 사용) */
   selectedTeamImageUrl: string | null;
-  setSelectedTeamId: (teamId: string | null) => void;
+  setSelectedTeamId: (teamId: string | null, teamIdNum?: number | null) => void;
 };
 
 const SelectedTeamContext = createContext<SelectedTeamContextValue | null>(
@@ -28,6 +30,8 @@ const SelectedTeamContext = createContext<SelectedTeamContextValue | null>(
 type SelectedTeamProviderProps = {
   /** 서버에서 findTeamMember + 쿠키 기반으로 계산한 초기값 */
   initialSelectedTeamId: string | null;
+  /** 선택된 팀의 숫자 ID (FindMatch 등 API 변수용) */
+  initialSelectedTeamIdNum?: number | null;
   /** 표시용 팀 이름 (선택된 팀이 있을 때 layout SSR에서 전달) */
   initialSelectedTeamName?: string | null;
   /** 표시용 팀 이미지 URL (선택된 팀이 있을 때 layout SSR에서 전달) */
@@ -44,6 +48,7 @@ type SelectedTeamProviderProps = {
  */
 export function SelectedTeamProvider({
   initialSelectedTeamId,
+  initialSelectedTeamIdNum = null,
   initialSelectedTeamName = null,
   initialSelectedTeamImageUrl = null,
   initialSelectedTeamIdFromSingleTeam = false,
@@ -52,6 +57,9 @@ export function SelectedTeamProvider({
   const [selectedTeamId, setSelectedTeamIdState] = useState<string | null>(
     initialSelectedTeamId,
   );
+  const [selectedTeamIdNum, setSelectedTeamIdNumState] = useState<
+    number | null
+  >(initialSelectedTeamIdNum ?? null);
   const [selectedTeamName, setSelectedTeamNameState] = useState<string | null>(
     initialSelectedTeamName ?? null,
   );
@@ -60,14 +68,18 @@ export function SelectedTeamProvider({
   >(initialSelectedTeamImageUrl ?? null);
   const didPersistSingleTeam = useRef(false);
 
-  const setSelectedTeamId = useCallback((teamId: string | null) => {
-    setSelectedTeamIdState(teamId);
-    setSelectedTeamIdCookie(teamId);
-    if (teamId == null) {
-      setSelectedTeamNameState(null);
-      setSelectedTeamImageUrlState(null);
-    }
-  }, []);
+  const setSelectedTeamId = useCallback(
+    (teamId: string | null, teamIdNum?: number | null) => {
+      setSelectedTeamIdState(teamId);
+      setSelectedTeamIdNumState(teamIdNum ?? null);
+      setSelectedTeamIdCookie(teamId);
+      if (teamId == null) {
+        setSelectedTeamNameState(null);
+        setSelectedTeamImageUrlState(null);
+      }
+    },
+    [],
+  );
 
   // SSR에서 팀 1개로 초기값만 준 경우, 쿠키에 한 번 저장해 두어 다음 접속 시 서버가 읽을 수 있게 함
   useEffect(() => {
@@ -84,12 +96,14 @@ export function SelectedTeamProvider({
   const value = useMemo<SelectedTeamContextValue>(
     () => ({
       selectedTeamId,
+      selectedTeamIdNum,
       selectedTeamName,
       selectedTeamImageUrl,
       setSelectedTeamId,
     }),
     [
       selectedTeamId,
+      selectedTeamIdNum,
       selectedTeamName,
       selectedTeamImageUrl,
       setSelectedTeamId,

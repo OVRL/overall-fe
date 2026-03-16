@@ -72,7 +72,7 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
 
   return (
     <div
-      className="bg-[#1A1A1A] rounded-2xl w-[320px] overflow-hidden px-5 py-6 relative"
+      className="bg-surface-card rounded-2xl w-82.5 overflow-hidden px-5 py-6 relative"
       onClick={(e) => e.stopPropagation()}
     >
       {/* 닫기 버튼 */}
@@ -134,7 +134,8 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
               <Icon
                 src={STAT_ICONS[label]}
                 alt={`${label} 아이콘`}
-                className="w-4 h-4"
+                width={20}
+                height={20}
                 nofill
               />
               <span className="text-[#A0A0A0] text-[13px] font-medium">

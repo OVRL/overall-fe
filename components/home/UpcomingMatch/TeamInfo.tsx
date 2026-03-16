@@ -1,13 +1,5 @@
 import Image from "next/image";
-
-/** 엠블럼 URL이 없거나 잘못된 경우 사용하는 기본 엠블럼 (교체 시 이 경로만 변경) */
-const DEFAULT_EMBLEM_SRC = "/icons/teamemblum_default.svg";
-
-/** 로컬 경로(/ 로 시작)이고 비어 있지 않으면 사용, 아니면 기본 엠블럼 사용 */
-function getEmblemSrc(logo: string): string {
-  if (logo?.trim().startsWith("/")) return logo.trim();
-  return DEFAULT_EMBLEM_SRC;
-}
+import { getValidImageSrc, MOCK_EMBLEM_SRC } from "@/lib/utils";
 
 interface TeamInfoProps {
   name: string;
@@ -16,7 +8,7 @@ interface TeamInfoProps {
 }
 
 const TeamInfo = ({ name, logo, reverse = false }: TeamInfoProps) => {
-  const emblemSrc = getEmblemSrc(logo);
+  const emblemSrc = getValidImageSrc(logo, MOCK_EMBLEM_SRC);
 
   return (
     <div

@@ -21,8 +21,9 @@ function getServerOrigin(): string {
 /**
  * Relay는 Global Object Identification 때문에 모든 id를 문자열로 기대합니다.
  * 백엔드가 TeamMemberModel 등에서 id를 Int로 반환할 경우 응답을 정규화합니다.
+ * (SSR 직렬화/응답 처리에서도 사용)
  */
-function ensureIdStrings(value: unknown): unknown {
+export function ensureIdStrings(value: unknown): unknown {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) return value.map(ensureIdStrings);
   const obj = value as Record<string, unknown>;
@@ -32,6 +33,32 @@ function ensureIdStrings(value: unknown): unknown {
       result[key] = String(val);
     } else {
       result[key] = ensureIdStrings(val);
+    }
+  }
+  return result;
+}
+
+/**
+ * 백엔드가 서로 다른 타입에 같은 숫자 id를 줄 수 있어 Relay 정규화 시 충돌이 납니다.
+ * 모든 노드에 __typename:원본id 형태로 id를 덮어쓰면 타입별로 고유 키가 보장됩니다.
+ * (서버/클라이언트 fetch 공통 적용)
+ */
+export function ensureUniqueDataIds(value: unknown): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(ensureUniqueDataIds);
+  const obj = value as Record<string, unknown>;
+  const typename = obj["__typename"];
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (
+      key === "id" &&
+      typeof typename === "string" &&
+      typename.length > 0 &&
+      (typeof val === "string" || typeof val === "number")
+    ) {
+      result[key] = `${typename}:${val}`;
+    } else {
+      result[key] = ensureUniqueDataIds(val);
     }
   }
   return result;
@@ -119,6 +146,8 @@ export const fetchQuery = async (
 
   // 백엔드가 id를 Int로 주는 타입(TeamMemberModel 등) 대응: Relay는 id를 문자열로 기대함
   payload = ensureIdStrings(payload);
+  // UserInfoModel 등 동일 id가 다른 타입과 충돌하지 않도록 타입 접두사 부여
+  payload = ensureUniqueDataIds(payload);
 
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)
   if (!response.ok) {

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import { getValidImageSrc } from "@/lib/utils";
 
 // ──────────────────────────────────────────────
 // Types
@@ -355,7 +356,7 @@ export default function PlayerManagementPanel() {
                     <div className="flex items-center gap-1.5 md:gap-2">
                       <div className="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
                         <Image
-                          src={player.profileImage}
+                          src={getValidImageSrc(player.profileImage)}
                           alt={player.name}
                           width={28}
                           height={28}

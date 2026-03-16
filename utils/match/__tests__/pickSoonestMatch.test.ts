@@ -1,12 +1,12 @@
-import type { MatchForUpcoming } from "@/utils/fetchFindMatchSSR";
+import type { MatchForUpcomingDisplay } from "@/components/home/UpcomingMatch/upcomingMatchDisplay";
 import { pickSoonestMatch } from "../pickSoonestMatch";
 
-/** 테스트용 경기 객체 생성 (matchDate, startTime만 시각 비교에 사용됨) */
+/** 테스트용 경기 객체 생성 (matchDate, startTime만 시각 비교에 사용됨, id는 어설션용) */
 function 경기(
   matchDate: string,
   startTime: string,
-  id = "1",
-): MatchForUpcoming {
+  id?: string,
+): MatchForUpcomingDisplay {
   return {
     id,
     matchDate,
@@ -81,10 +81,10 @@ describe("pickSoonestMatch", () => {
   describe("동일 시각 엣지 케이스", () => {
     it("가장 빠른 시각이 여러 개면 배열에서 먼저 나온 경기를 반환한다", () => {
       const 첫번째 = 경기("2025-03-20", "15:00:00", "첫번째");
-      const 목록: MatchForUpcoming[] = [
+      const 목록: MatchForUpcomingDisplay[] = [
         첫번째,
-        경기("2025-03-25", "18:00:00", "나중"),
-        경기("2025-03-20", "15:00:00", "같은시각"),
+        경기("2025-03-25", "18:00:00"),
+        경기("2025-03-20", "15:00:00"),
       ];
       const 결과 = pickSoonestMatch(목록);
       expect(결과?.id).toBe("첫번째");

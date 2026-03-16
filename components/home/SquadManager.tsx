@@ -15,24 +15,13 @@ export default function SquadManager({
   upcomingMatchSlot,
 }: SquadManagerProps) {
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  // Initialize selected player
-  React.useEffect(() => {
-    if (!selectedPlayer) {
-      // Default to ID 8 (Alves) or first player
-      const defaultPlayer = players.find((p) => p.id === 8) || players[0];
-      if (defaultPlayer) setSelectedPlayer(defaultPlayer);
-    }
-  }, [players, selectedPlayer]);
-
-  // Memoized handlers to prevent unnecessary re-renders of children
   const handlePlayersChange = useCallback((newPlayers: Player[]) => {
     setPlayers(newPlayers);
   }, []);
 
-  const handlePlayerSelect = useCallback((player: Player) => {
-    setSelectedPlayer(player);
+  const handlePlayerSelect = useCallback((_player: Player) => {
+    // StartingXI 전용 선택 핸들러 (추후 해당 쿼리 연동 시 사용)
   }, []);
 
   return (
@@ -47,14 +36,9 @@ export default function SquadManager({
         />
       </section>
 
-      {/* Right: Player Card + Player List */}
+      {/* Right: Player Card + Player List (자체 쿼리로 데이터 조회) */}
       <div className="relative overflow-hidden max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-card">
-        <PlayerRosterPanel
-          players={players}
-          selectedPlayer={selectedPlayer}
-          onPlayerSelect={handlePlayerSelect}
-          className="w-92 md:w-92 lg:w-84 xl:w-90 2xl:w-98.2"
-        />
+        <PlayerRosterPanel className="w-92 md:w-92 lg:w-84 xl:w-90 2xl:w-98.2" />
       </div>
     </div>
   );

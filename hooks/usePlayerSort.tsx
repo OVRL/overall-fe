@@ -49,7 +49,7 @@ export const usePlayerSort = (players: Player[]) => {
       }
 
       if (key === "number") {
-        return (a.number - b.number) * factor;
+        return ((a.number ?? 0) - (b.number ?? 0)) * factor;
       }
 
       if (key === "name") {

@@ -26,7 +26,7 @@ const UpcomingMatchDesktop = ({ display }: UpcomingMatchDesktopProps) => {
       <Button
         variant="primary"
         size="m"
-        className="absolute right-4 w-25 font-semibold text-Label-Fixed_black text-sm cursor-pointer p-3"
+        className="absolute right-0 w-25 font-semibold text-Label-Fixed_black text-sm cursor-pointer p-3"
         onClick={() => openModal({})}
       >
         참석투표하기

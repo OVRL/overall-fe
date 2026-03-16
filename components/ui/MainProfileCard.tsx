@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, getValidImageSrc } from "@/lib/utils";
 import PositionChip from "../PositionChip";
 import { Position } from "@/types/position";
 import PlayerProfileDim from "./PlayerProfileDim";
@@ -33,6 +33,7 @@ const MainProfileCard = ({
 }: MainProfileCardProps) => {
   const theme = CARD_THEME_MAP[grade];
   const cardSizes = "(max-width: 768px) 33vw, 128px";
+  const validImgUrl = getValidImageSrc(imgUrl);
   return (
     <div
       className={cn(
@@ -51,7 +52,7 @@ const MainProfileCard = ({
       <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
         <div className="relative w-full h-full">
           <Image
-            src={imgUrl}
+            src={validImgUrl}
             alt={playerName}
             fill
             sizes={cardSizes}

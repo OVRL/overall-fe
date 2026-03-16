@@ -1,28 +1,70 @@
 "use client";
 
-import { useRef } from "react";
-import { useUserStore, UserModel } from "@/contexts/UserContext";
+import { useEffect } from "react";
+import { useLazyLoadQuery } from "react-relay";
+import type { findUserByIdQuery } from "@/__generated__/findUserByIdQuery.graphql";
+import { useUserStore, type UserModel } from "@/contexts/UserContext";
+import { FindUserByIdQuery } from "@/lib/relay/queries/findUserByIdQuery";
+import { mapRelayUserToUserModel } from "@/lib/relay/mapRelayUserToUserModel";
 
 interface UserInitProviderProps {
+  /** 클라이언트에서 FindUserById 쿼리 변수로 사용. 있으면 Relay 스토어에서 읽어 Zustand에 동기화 */
+  userId: number | null;
+  /** userId가 없을 때만 사용하는 폴백 (비로그인 등) */
   initialUser: UserModel | null;
   children: React.ReactNode;
 }
 
 /**
- * 서버 컴포넌트에서 가져온 유저 정보를 Client의 Zustand 스토어에 초기화하는 프로바이더.
- * `initialUser` 데이터를 스토어의 `user` 상태에 한 번 주입합니다.
+ * 유저 정보를 Zustand 스토어에 주입하는 프로바이더.
+ * userId가 있으면 Relay 스토어(SSR 하이드레이션)에서 FindUserById로 읽어 동기화하고,
+ * 없으면 initialUser로 한 번 설정합니다.
  */
-export function UserInitProvider({ initialUser, children }: UserInitProviderProps) {
-  const initialized = useRef(false);
-
-  if (!initialized.current) {
-    // SSR 단계 또는 클라이언트의 첫 렌더링 시초에 한 번만 실행합니다.
-    useUserStore.setState({ user: initialUser });
-    initialized.current = true;
-    // 유저 정보 스토어 적재 확인용 (개발 시 제거)
-    console.log("[UserInitProvider] userStore user:", initialUser);
-    console.log("[UserInitProvider] userStore 전체:", useUserStore.getState());
+export function UserInitProvider({
+  userId,
+  initialUser,
+  children,
+}: UserInitProviderProps) {
+  if (userId != null) {
+    return (
+      <>
+        <UserFromRelaySync userId={userId} />
+        {children}
+      </>
+    );
   }
+
+  return <UserIdNullSync initialUser={initialUser}>{children}</UserIdNullSync>;
+}
+
+function UserFromRelaySync({ userId }: { userId: number }) {
+  const data = useLazyLoadQuery<findUserByIdQuery>(
+    FindUserByIdQuery,
+    { id: userId },
+    { fetchPolicy: "store-or-network" },
+  );
+
+  useEffect(() => {
+    if (data?.findUserById) {
+      useUserStore.setState({
+        user: mapRelayUserToUserModel(data.findUserById),
+      });
+    }
+  }, [data]);
+
+  return null;
+}
+
+function UserIdNullSync({
+  initialUser,
+  children,
+}: {
+  initialUser: UserModel | null;
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    useUserStore.setState({ user: initialUser });
+  }, [initialUser]);
 
   return <>{children}</>;
 }

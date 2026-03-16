@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import PositionChip from "@/components/PositionChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { Position } from "@/types/position";
 import PlayerListItemGradation from "./PlayerListItemGradation";
+import type { RosterMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
 
-import { Player } from "@/types/player";
-
-const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
+// 이미지 서버 미구축으로 프로필 미사용 시 대체 이미지
+const MOCK_PLAYER_IMAGE = "/images/ovr.png";
 
 interface PlayerListItemProps {
-  player: Player;
+  member: RosterMember;
   onClick?: () => void;
   /** LCP 이미지일 때 true (리스트 첫 항목 등) */
   priority?: boolean;
 }
 
-const PlayerListItem = ({ player, onClick, priority }: PlayerListItemProps) => {
+const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
   const [imageError, setImageError] = useState(false);
+  const name = member.user?.name ?? "";
+  const profileImg = member.profileImg ?? member.user?.profileImage;
   const playerImage =
-    imageError || !player.image ? DEFAULT_PLAYER_IMAGE : player.image;
+    imageError || !profileImg ? MOCK_PLAYER_IMAGE : profileImg;
 
   return (
     <div
@@ -32,12 +34,12 @@ const PlayerListItem = ({ player, onClick, priority }: PlayerListItemProps) => {
         <div className="flex items-center">
           <div className="w-12.25 flex justify-center">
             <PositionChip
-              position={player.position as Position}
+              position={(member.position ?? "MF") as Position}
               variant="outline"
             />
           </div>
           <span className="w-9.75 text-Label-Primary text-center text-sm md:text-base">
-            {player.number}
+            {member.backNumber ?? "-"}
           </span>
         </div>
       </div>
@@ -49,7 +51,7 @@ const PlayerListItem = ({ player, onClick, priority }: PlayerListItemProps) => {
         <div className="flex-none mr-2 md:mr-3">
           <ProfileAvatar
             src={playerImage}
-            alt={player.name}
+            alt={name}
             size={36}
             onError={() => setImageError(true)}
             priority={priority}
@@ -57,19 +59,21 @@ const PlayerListItem = ({ player, onClick, priority }: PlayerListItemProps) => {
         </div>
 
         <span className="text-white font-medium truncate text-sm w-18.75 text-ellipsis">
-          {player.name}
+          {name}
         </span>
       </div>
 
       <div className="w-12.25 flex justify-end" role="cell">
         <span className="text-Label-AccentPrimary text-sm w-full text-center">
-          {player.overall}
+          {member.overall?.ovr ?? "-"}
         </span>
       </div>
 
       {/* 구분선 */}
       <div className="absolute inset-x-0 bottom-0 h-px z-10 bg-[#252525]" />
-      <PlayerListItemGradation position={player.position as Position} />
+      <PlayerListItemGradation
+        position={(member.position ?? "MF") as Position}
+      />
     </div>
   );
 };

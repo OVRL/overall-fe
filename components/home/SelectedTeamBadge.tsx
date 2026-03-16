@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
-
-const DEFAULT_TEAM_IMAGE = "/images/ovr.png";
+import { getValidImageSrc, MOCK_EMBLEM_SRC } from "@/lib/utils";
 
 /**
  * 선택된 팀을 닫힌 상태 UI로만 표시 (드롭다운·화살표 없음).
@@ -25,7 +24,7 @@ export function SelectedTeamBadge() {
     >
       <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
         <Image
-          src={selectedTeamImageUrl ?? DEFAULT_TEAM_IMAGE}
+          src={getValidImageSrc(selectedTeamImageUrl ?? null, MOCK_EMBLEM_SRC)}
           alt=""
           fill
           className="object-cover"

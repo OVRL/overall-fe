@@ -1,4 +1,4 @@
-import type { MatchForUpcoming } from "@/utils/fetchFindMatchSSR";
+import type { MatchForUpcomingDisplay } from "@/components/home/UpcomingMatch/upcomingMatchDisplay";
 
 /**
  * matchDate (YYYY-MM-DD) + startTime (HH:mm:ss)를 합쳐
@@ -16,7 +16,9 @@ function toTimestamp(matchDate: string, startTime: string): number {
  * 과거 경기도 포함해 "가장 빠른" 경기를 반환합니다.
  * (다가오는 경기만 쓰려면 호출 측에서 now 이전 필터링 후 사용 가능)
  */
-export function pickSoonestMatch(matches: MatchForUpcoming[]): MatchForUpcoming | null {
+export function pickSoonestMatch<T extends MatchForUpcomingDisplay>(
+  matches: T[],
+): T | null {
   if (matches.length === 0) return null;
   if (matches.length === 1) return matches[0]!;
 

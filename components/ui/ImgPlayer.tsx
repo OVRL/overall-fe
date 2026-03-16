@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, getValidImageSrc } from "@/lib/utils";
 
 interface ImgPlayerProps {
   src: string;
@@ -13,10 +13,11 @@ interface ImgPlayerProps {
 }
 
 const ImgPlayer = ({ src, alt, className, onError, sizes = "(max-width: 640px) 80px, (max-width: 1024px) 120px, 160px", priority }: ImgPlayerProps) => {
+  const validSrc = getValidImageSrc(src);
   return (
     <div className={cn("relative aspect-square overflow-hidden", className)}>
       <Image
-        src={src}
+        src={validSrc}
         alt={alt}
         fill
         sizes={sizes}
