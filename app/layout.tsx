@@ -49,20 +49,36 @@ export default async function RootLayout({
 
   if (isPrivateRoute) {
     const accessToken = cookieStore.get("accessToken")?.value ?? null;
+    const refreshToken = cookieStore.get("refreshToken")?.value ?? null;
     const userIdStr = cookieStore.get("userId")?.value;
     const userId =
       userIdStr != null && !Number.isNaN(Number(userIdStr))
         ? Number(userIdStr)
         : null;
 
-    const { relayInitialRecords: records, layoutState: state } =
-      await loadLayoutSSR({
-        accessToken,
-        userId,
-        selectedTeamIdFromCookie,
-      });
-    relayInitialRecords = records;
-    layoutState = state;
+    try {
+      const { relayInitialRecords: records, layoutState: state } =
+        await loadLayoutSSR({
+          accessToken,
+          refreshToken,
+          userId,
+          selectedTeamIdFromCookie,
+        });
+      relayInitialRecords = records;
+      layoutState = state;
+    } catch (e) {
+      // SSR에서 refresh 후에도 Unauthorized(토큰 만료 등)면 세션 삭제 후 로그인 페이지로
+      // (세션 삭제 없이 "/"로만 보내면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+      const message =
+        e instanceof Error ? e.message : String(e);
+      if (
+        message.includes("Unauthorized") ||
+        message.toLowerCase().includes("unauthorized")
+      ) {
+        redirect("/api/auth/clear-session?redirect=/");
+      }
+      throw e;
+    }
   }
 
   // 리디렉션: 로그인·팀 유무에 따른 접근 제어

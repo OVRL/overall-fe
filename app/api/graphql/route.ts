@@ -34,27 +34,52 @@ export async function POST(request: NextRequest) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
-  let backendResponse = await fetch(`${BACKEND_URL}/graphql`, {
+  const backendResponse = await fetch(`${BACKEND_URL}/graphql`, {
     method: "POST",
     headers,
     body,
   });
 
-  if (backendResponse.status === 401 && refreshToken) {
+  const responseText = await backendResponse.text();
+
+  /** GraphQL 응답에 Unauthorized 에러가 포함되어 있는지 확인 (HTTP 200이어도 토큰 만료 시 백엔드가 이렇게 줄 수 있음) */
+  const hasUnauthorizedError = (): boolean => {
+    try {
+      const parsed = JSON.parse(responseText) as {
+        errors?: Array<{ message?: string }>;
+      };
+      return (
+        parsed?.errors?.some(
+          (e) =>
+            e?.message === "Unauthorized" ||
+            String(e?.message ?? "").toLowerCase().includes("unauthorized"),
+        ) ?? false
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  const shouldTryRefresh =
+    refreshToken &&
+    (backendResponse.status === 401 || hasUnauthorizedError());
+
+  if (shouldTryRefresh) {
     const newTokens = await refreshAccessToken(refreshToken);
     if (newTokens?.accessToken) {
       (headers as Record<string, string>)["Authorization"] =
         `Bearer ${newTokens.accessToken}`;
-      backendResponse = await fetch(`${BACKEND_URL}/graphql`, {
+      const retryResponse = await fetch(`${BACKEND_URL}/graphql`, {
         method: "POST",
         headers,
         body,
       });
+      const retryText = await retryResponse.text();
 
-      const response = new NextResponse(backendResponse.body, {
-        status: backendResponse.status,
-        statusText: backendResponse.statusText,
-        headers: new Headers(backendResponse.headers),
+      const response = new NextResponse(retryText, {
+        status: retryResponse.status,
+        statusText: retryResponse.statusText,
+        headers: new Headers(retryResponse.headers),
       });
       response.cookies.set("accessToken", newTokens.accessToken, {
         httpOnly: true,
@@ -76,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return new NextResponse(backendResponse.body, {
+  return new NextResponse(responseText, {
     status: backendResponse.status,
     statusText: backendResponse.statusText,
     headers: new Headers(backendResponse.headers),

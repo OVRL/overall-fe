@@ -60,7 +60,7 @@ const ImageUploader = ({
         accept="image/*"
         onChange={handleFileChange}
       />
-      <div className="size-[200px] shrink-0 bg-bg-modal rounded-lg overflow-hidden relative mx-auto">
+      <div className="size-50 shrink-0 bg-bg-modal rounded-lg overflow-hidden relative mx-auto">
         {(preview || currentImage) && (
           <Image
             src={preview || currentImage || ""}

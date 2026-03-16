@@ -149,9 +149,24 @@ export const fetchQuery = async (
   // UserInfoModel 등 동일 id가 다른 타입과 충돌하지 않도록 타입 접두사 부여
   payload = ensureUniqueDataIds(payload);
 
+  const errorPayload = payload as { errors?: Array<{ message?: string }> };
+  const hasUnauthorizedError =
+    response.status === 401 ||
+    errorPayload?.errors?.some(
+      (e) =>
+        e?.message === "Unauthorized" ||
+        String(e?.message ?? "").toLowerCase().includes("unauthorized"),
+    );
+
+  // 클라이언트: 토큰 만료 등으로 인증 실패 시 세션 삭제 후 로그인 페이지로
+  // (세션 삭제 없이 "/"로만 가면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+  if (typeof window !== "undefined" && hasUnauthorizedError) {
+    window.location.href = "/api/auth/clear-session?redirect=/";
+    throw new Error("Unauthorized"); // Relay에 에러 payload 반환하지 않기 위해
+  }
+
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)
   if (!response.ok) {
-    const errorPayload = payload as { errors?: Array<{ message?: string }> };
     const detail =
       errorPayload?.errors?.[0]?.message ?? response.statusText;
     throw new Error(`GraphQL 요청 실패 (${response.status}): ${detail}`);

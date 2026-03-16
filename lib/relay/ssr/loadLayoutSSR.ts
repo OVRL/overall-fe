@@ -21,6 +21,8 @@ import {
 
 export interface LoadLayoutSSROptions {
   accessToken: string | null;
+  /** 토큰 만료 시 SSR에서 refresh 후 재시도에 사용 */
+  refreshToken: string | null;
   /** 쿠키의 userId. 있으면 FindUserById, FindTeamMember 추가 로드 */
   userId: number | null;
   /** 쿠키의 선택 팀 ID (문자열). 팀 유효성·FindMatch 변수 계산에 사용 */
@@ -42,8 +44,9 @@ export interface LoadLayoutSSRResult {
 export async function loadLayoutSSR(
   options: LoadLayoutSSROptions,
 ): Promise<LoadLayoutSSRResult> {
-  const { accessToken, userId, selectedTeamIdFromCookie } = options;
-  const environment = getServerEnvironment(accessToken);
+  const { accessToken, refreshToken, userId, selectedTeamIdFromCookie } =
+    options;
+  const environment = getServerEnvironment(accessToken, refreshToken);
 
   const hasUser = userId != null && !Number.isNaN(userId) && accessToken != null;
 
