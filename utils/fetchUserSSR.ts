@@ -2,24 +2,14 @@ import { env } from "@/lib/env";
 import { UserModel } from "@/contexts/UserContext";
 
 const FIND_USER_QUERY = `
-  query FindUser($id: Float!) {
-    findUser(id: $id) {
-      id
-      email
-      name
-      profileImage
-      activityArea
-      birthDate
-      favoritePlayer
-      foot
-      gender
-      mainPosition
-      phone
-      preferredNumber
-      provider
-      subPositions
-      role
-      status
+  query FindUser {
+    findManyUser(limit: 100) {
+      items {
+        id
+        email
+        name
+        profileImage
+      }
     }
   }
 `;
@@ -43,7 +33,6 @@ export async function fetchUserSSR(
       },
       body: JSON.stringify({
         query: FIND_USER_QUERY,
-        variables: { id: userId },
       }),
       // 항상 최신 정보를 가져오도록 캐시를 사용하지 않습니다.
       // 추가적인 최적화가 필요하다면 Next.js의 태그 기반 Revalidation을 고려할 수 있습니다.
@@ -60,7 +49,8 @@ export async function fetchUserSSR(
       console.error("fetchUserSSR GraphQL 에러:", errors);
       return null;
     }
-    return data?.findUser || null;
+    const items = data?.findManyUser?.items || [];
+    return items.find((u: any) => Number(u.id) === userId) || null;
   } catch (err) {
     console.error("fetchUserSSR 예외 발생:", err);
     return null;
