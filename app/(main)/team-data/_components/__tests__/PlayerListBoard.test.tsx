@@ -1,6 +1,74 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { mapTeamMembersToPlayers } from "../../_lib/mapTeamMemberToPlayer";
 import PlayerListBoard from "../season-record/PlayerListBoard";
-import { Player } from "../../_types/player";
+import type { Player } from "../../_types/player";
+
+/** findManyTeamMember 쿼리와 동일한 형태의 목 멤버 (mapTeamMembersToPlayers로 Player 변환용) */
+const MOCK_MEMBERS = [
+  {
+    __typename: "TeamMemberModel" as const,
+    id: 1,
+    position: "FW",
+    backNumber: 7,
+    joinedAt: "2023-09-03T00:00:00Z",
+    profileImg: null,
+    user: { __typename: "UserInfoModel" as const, id: "u1", name: "손흥민", profileImage: null },
+    overall: {
+      __typename: "OverallModel" as const,
+      ovr: 90,
+      appearances: 10,
+      goals: 5,
+      assists: 3,
+      keyPasses: 2,
+      attackPoints: 8,
+      cleanSheets: 0,
+      mom3: 1,
+      winRate: 70,
+    },
+  },
+  {
+    __typename: "TeamMemberModel" as const,
+    id: 2,
+    position: "MF",
+    backNumber: 10,
+    joinedAt: "2023-09-03T00:00:00Z",
+    profileImg: null,
+    user: { __typename: "UserInfoModel" as const, id: "u2", name: "이강인", profileImage: null },
+    overall: {
+      __typename: "OverallModel" as const,
+      ovr: 85,
+      appearances: 8,
+      goals: 2,
+      assists: 4,
+      keyPasses: 3,
+      attackPoints: 6,
+      cleanSheets: 0,
+      mom3: 0,
+      winRate: 60,
+    },
+  },
+  {
+    __typename: "TeamMemberModel" as const,
+    id: 3,
+    position: "DF",
+    backNumber: 3,
+    joinedAt: "2023-09-03T00:00:00Z",
+    profileImg: null,
+    user: { __typename: "UserInfoModel" as const, id: "u3", name: "김민재", profileImage: null },
+    overall: {
+      __typename: "OverallModel" as const,
+      ovr: 88,
+      appearances: 12,
+      goals: 0,
+      assists: 0,
+      keyPasses: 1,
+      attackPoints: 1,
+      cleanSheets: 5,
+      mom3: 2,
+      winRate: 75,
+    },
+  },
+];
 
 jest.mock("../season-record/PlayerTable", () => ({
   __esModule: true,
@@ -17,36 +85,7 @@ jest.mock("../season-record/PlayerTable", () => ({
 }));
 
 describe("PlayerListBoard 컴포넌트", () => {
-  const mockPlayers: Player[] = [
-    {
-      id: 1,
-      name: "손흥민",
-      team: "토트넘",
-      value: "100",
-      position: "FW",
-      backNumber: 7,
-      ovr: 90,
-    },
-    {
-      id: 2,
-      name: "이강인",
-      team: "PSG",
-      value: "80",
-      position: "MF",
-      backNumber: 10,
-      ovr: 85,
-    },
-    {
-      id: 3,
-      name: "김민재",
-      team: "뮌헨",
-      value: "90",
-      position: "DF",
-      backNumber: 3,
-      ovr: 88,
-    },
-  ];
-
+  const mockPlayers: Player[] = mapTeamMembersToPlayers(MOCK_MEMBERS);
   const mockOnPlayerClick = jest.fn();
 
   it("초기 선수 리스트가 렌더링되어야 한다", () => {
@@ -84,15 +123,13 @@ describe("PlayerListBoard 컴포넌트", () => {
 
     const sortButton = screen.getByText("정렬 버튼");
 
-    // 1. 첫 클릭 (기본 desc)
     fireEvent.click(sortButton);
     expect(screen.getByTestId("sort-info")).toHaveTextContent("OVR desc");
-    expect(screen.getByTestId("first-player")).toHaveTextContent("손흥민"); // 90이 가장 높음
+    expect(screen.getByTestId("first-player")).toHaveTextContent("손흥민");
 
-    // 2. 두 번째 클릭 (asc)
     fireEvent.click(sortButton);
     expect(screen.getByTestId("sort-info")).toHaveTextContent("OVR asc");
-    expect(screen.getByTestId("first-player")).toHaveTextContent("이강인"); // 85가 가장 낮음
+    expect(screen.getByTestId("first-player")).toHaveTextContent("이강인");
   });
 
   it("검색어 입력 후 엔터 키를 누르면 검색된 선수의 클릭 이벤트가 발생해야 한다", () => {
@@ -107,6 +144,8 @@ describe("PlayerListBoard 컴포넌트", () => {
     fireEvent.change(searchInput, { target: { value: "이강인" } });
     fireEvent.keyDown(searchInput, { key: "Enter", code: "Enter" });
 
-    expect(mockOnPlayerClick).toHaveBeenCalledWith(mockPlayers[1]);
+    expect(mockOnPlayerClick).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 2, name: "이강인" }),
+    );
   });
 });

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<64f57a218b294a0ac274f27d4c09ba03>>
+ * @generated SignedSource<<869ce418cd6977c266fc89c574feea8f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -24,9 +24,11 @@ export type findManyTeamMemberQueryQuery$data = {
         readonly __typename: "OverallModel";
         readonly appearances: number;
         readonly assists: number;
+        readonly attackPoints: number;
         readonly cleanSheets: number;
         readonly goals: number;
         readonly keyPasses: number;
+        readonly mom3: number;
         readonly ovr: number;
         readonly winRate: number;
       } | null | undefined;
@@ -207,7 +209,21 @@ v3 = [
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
+                "name": "attackPoints",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
                 "name": "cleanSheets",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "mom3",
                 "storageKey": null
               },
               {
@@ -252,16 +268,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "3520edf8729c5de80f1687807cb28e01",
+    "cacheID": "6b686188390a701823d9f1e82fdf5b39",
     "id": null,
     "metadata": {},
     "name": "findManyTeamMemberQueryQuery",
     "operationKind": "query",
-    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        cleanSheets\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d6fec8729dc4dd0bbce435d61b47dc8c";
+(node as any).hash = "d8ee2e25b95c7760ca838c1c519dfd3b";
 
 export default node;

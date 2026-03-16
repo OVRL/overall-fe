@@ -44,8 +44,8 @@ describe("RankCardRow 컴포넌트", () => {
       />,
     );
 
-    // 순위 확인 (index + 1)
-    expect(screen.getByText("1")).toBeInTheDocument();
+    // 순위 확인 (컴포넌트: index + 2로 표시)
+    expect(screen.getByText("2")).toBeInTheDocument();
 
     // 선수 이름 확인 (모킹된 아바타와 실제 이름 텍스트 두 군데 존재할 수 있음)
     const nameElements = screen.getAllByText("손흥민");

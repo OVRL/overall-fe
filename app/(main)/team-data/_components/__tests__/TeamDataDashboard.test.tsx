@@ -1,6 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { Player } from "../../_types/player";
 import TeamDataDashboard from "../TeamDataDashboard";
-import { Player } from "../../_types/player";
+
+const mockInitialPlayers: Player[] = [];
 
 // 모킹
 const mockOpenModal = jest.fn();
@@ -52,24 +54,12 @@ jest.mock("@/components/ui/Dropdown", () => ({
 }));
 
 describe("TeamDataDashboard 컴포넌트", () => {
-  const mockPlayers: Player[] = [
-    {
-      id: 1,
-      name: "손흥민",
-      team: "토트넘",
-      value: "100",
-      position: "FW",
-      backNumber: 7,
-      ovr: 90,
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("제목과 하위 컴포넌트들을 정상적으로 렌더링해야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     expect(screen.getByText("팀 데이터")).toBeInTheDocument();
     expect(screen.getByTestId("ranking-carousel")).toBeInTheDocument();
@@ -77,7 +67,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   });
 
   it("명예의 전당 탭 선택 시 기간 드롭다운이 보여야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     fireEvent.click(screen.getByRole("tab", { name: "명예의 전당" }));
 
@@ -85,7 +75,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   });
 
   it("선수 클릭 시 상세 모달이 열려야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     const playerClickBtn = screen.getByText("선수 클릭");
     fireEvent.click(playerClickBtn);
@@ -96,7 +86,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   });
 
   it("더보기 클릭 시 통계 모달이 열려야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     const moreClickBtn = screen.getByText("더보기 클릭");
     fireEvent.click(moreClickBtn);
@@ -111,7 +101,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   });
 
   it("명예의 전당 기간 드롭다운 변경 시 상태가 업데이트되어야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     fireEvent.click(screen.getByRole("tab", { name: "명예의 전당" }));
 

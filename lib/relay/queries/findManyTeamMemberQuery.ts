@@ -27,7 +27,9 @@ export const FindManyTeamMemberQuery = graphql`
           goals
           assists
           keyPasses
+          attackPoints
           cleanSheets
+          mom3
           winRate
         }
       }
@@ -36,4 +38,4 @@ export const FindManyTeamMemberQuery = graphql`
   }
 `;
 
-export const ROSTER_PAGE_SIZE = 100;
+export const ROSTER_PAGE_SIZE = 200;

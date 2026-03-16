@@ -24,63 +24,57 @@ const DashboardTabMenu = ({
   const isMobile = useIsMobile(768);
 
   return (
-    <div
-      className={cn(
-        "flex items-center my-6 gap-4",
-        isMobile && "w-full",
-      )}
-    >
+    <div className={cn("flex items-center my-6 gap-4", isMobile && "w-full")}>
       <div
         role="tablist"
         id="team-data-tabs"
         aria-label="팀 데이터 탭"
-        className={cn(
-          "flex items-center h-10",
-          isMobile && "w-full",
-        )}
+        className={cn("flex items-center h-12", isMobile && "w-full")}
       >
-      {TABS.map(({ type, label }) => {
-        const isActive = activeTab === type;
-        const tabId = `tab-${type === "시즌기록" ? "season" : "hall"}`;
-        return (
-          <div
-            className={cn(
-              "relative h-full flex items-center",
-              isMobile ? "w-1/2 px-1" : "px-1",
-            )}
-            key={type}
-          >
-            <button
-              type="button"
-              role="tab"
-              id={tabId}
-              aria-selected={isActive}
-              aria-controls="team-data-tabpanel"
-              tabIndex={isActive ? 0 : -1}
-              onClick={() => onChange(type)}
+        {TABS.map(({ type, label }) => {
+          const isActive = activeTab === type;
+          const tabId = `tab-${type === "시즌기록" ? "season" : "hall"}`;
+          return (
+            <div
               className={cn(
-                "transition-colors cursor-pointer h-4.75",
-                isMobile ? "w-full" : "w-25",
-                isActive
-                  ? "text-Label-AccentPrimary"
-                  : "text-white hover:text-gray-300",
+                "relative h-full flex items-center",
+                isMobile ? "w-1/2 px-1" : "px-1",
               )}
+              key={type}
             >
-              {label}
-            </button>
-            {isActive && (
-              <motion.div
-                layoutId="dashboardTabActiveIndicator"
+              <button
+                type="button"
+                role="tab"
+                id={tabId}
+                aria-selected={isActive}
+                aria-controls="team-data-tabpanel"
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => onChange(type)}
                 className={cn(
-                  "absolute bottom-0 h-px bg-Fill_AccentPrimary",
-                  isMobile ? "left-1 right-1" : "left-1 w-[calc(100%-0.5rem)]",
+                  "transition-colors cursor-pointer h-4.75",
+                  isMobile ? "w-full" : "w-25",
+                  isActive
+                    ? "text-Label-AccentPrimary"
+                    : "text-white hover:text-gray-300",
                 )}
-                aria-hidden
-              />
-            )}
-          </div>
-        );
-      })}
+              >
+                {label}
+              </button>
+              {isActive && (
+                <motion.div
+                  layoutId="dashboardTabActiveIndicator"
+                  className={cn(
+                    "absolute bottom-0 h-px bg-Fill_AccentPrimary",
+                    isMobile
+                      ? "left-1 right-1"
+                      : "left-1 w-[calc(100%-0.5rem)]",
+                  )}
+                  aria-hidden
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
       {!isMobile && trailingContent != null ? (
         <div className="ml-auto shrink-0">{trailingContent}</div>

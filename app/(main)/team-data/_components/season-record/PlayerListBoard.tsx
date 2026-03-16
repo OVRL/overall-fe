@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { Player } from "../../_types/player";
 import { PLAYER_TABLE_COLUMNS } from "../../_constants/playerTableColumns";
 import PlayerTable from "./PlayerTable";
 
 interface PlayerListBoardProps {
+  /** 서버에서 fetch한 선수 목록 (Page Server Component → props로 주입) */
   initialPlayers: Player[];
   onPlayerClick: (player: Player) => void;
 }

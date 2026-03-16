@@ -3,15 +3,15 @@ import PlayerListBoard from "./PlayerListBoard";
 import type { Player } from "../../_types/player";
 
 interface SeasonRecordSectionProps {
+  allPlayers: Player[];
   onMoreClick: (category: string, players: Player[]) => void;
   onPlayerClick: (player: Player) => void;
-  allPlayers: Player[];
 }
 
 const SeasonRecordSection = ({
+  allPlayers,
   onMoreClick,
   onPlayerClick,
-  allPlayers,
 }: SeasonRecordSectionProps) => {
   return (
     <>

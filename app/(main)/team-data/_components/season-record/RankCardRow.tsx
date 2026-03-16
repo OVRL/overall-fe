@@ -25,7 +25,7 @@ const RankCardRow = ({ player, index, onPlayerClick }: RankCardRowProps) => {
         className={`${racingSansOne.className} text-Label-Primary text-sm text-center shrink-0 w-7.5`}
         aria-hidden
       >
-        {index + 1}
+        {index + 2}
       </span>
       <div className="flex gap-2 items-center">
         <ProfileAvatar

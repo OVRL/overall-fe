@@ -17,10 +17,10 @@ const HALL_PERIOD_OPTIONS = [
 ] as const;
 
 interface TeamDataDashboardProps {
-  allPlayers: Player[];
+  initialPlayers: Player[];
 }
 
-const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
+const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
   const isMobile = useIsMobile(768);
   const [dataTab, setDataTab] = useState<StatTabType>("시즌기록");
   const [hallPeriod, setHallPeriod] = useState<string>(
@@ -94,9 +94,9 @@ const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
       >
         {dataTab === "시즌기록" ? (
           <SeasonRecordSection
+            allPlayers={initialPlayers}
             onMoreClick={handleMoreClick}
             onPlayerClick={handlePlayerClick}
-            allPlayers={allPlayers}
           />
         ) : (
           <HallOfFameBoard
