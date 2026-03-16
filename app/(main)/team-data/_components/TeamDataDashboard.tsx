@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import type { Player, StatTabType } from "../_types/player";
-import { getPlayerValue } from "../_constants/mockPlayers";
-import useModal from "@/hooks/useModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Dropdown from "@/components/ui/Dropdown";
 import DashboardTabMenu from "./DashboardTabMenu";
@@ -26,30 +24,6 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
   const [hallPeriod, setHallPeriod] = useState<string>(
     HALL_PERIOD_OPTIONS[0].value,
   );
-
-  const { openModal: openStatRankingModal } = useModal(
-    "TEAM_DATA_STAT_RANKING",
-  );
-  const { openModal: openPlayerDetailModal } = useModal(
-    "TEAM_DATA_PLAYER_DETAIL",
-  );
-
-  // 더보기 클릭
-  const handleMoreClick = (category: string, players: Player[]) => {
-    openStatRankingModal({
-      category,
-      players: players.map((p) => ({
-        ...p,
-        value: getPlayerValue(p, category),
-      })),
-      onPlayerClick: handlePlayerClick,
-    });
-  };
-
-  // 선수 클릭
-  const handlePlayerClick = (player: Player) => {
-    openPlayerDetailModal({ player });
-  };
 
   return (
     <>
@@ -93,16 +67,9 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
         aria-labelledby="team-data-tabs"
       >
         {dataTab === "시즌기록" ? (
-          <SeasonRecordSection
-            allPlayers={initialPlayers}
-            onMoreClick={handleMoreClick}
-            onPlayerClick={handlePlayerClick}
-          />
+          <SeasonRecordSection allPlayers={initialPlayers} />
         ) : (
-          <HallOfFameBoard
-            period={hallPeriod}
-            onPlayerClick={handlePlayerClick}
-          />
+          <HallOfFameBoard />
         )}
       </main>
     </>

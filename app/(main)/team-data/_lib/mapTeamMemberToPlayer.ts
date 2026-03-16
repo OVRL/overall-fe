@@ -21,8 +21,11 @@ export function mapTeamMemberToPlayer(member: QueryMember): Player {
   const attackPoints = overall?.attackPoints ?? 0;
   const cleanSheets = overall?.cleanSheets ?? 0;
   const mom3 = overall?.mom3 ?? 0;
+  // 쿼리/코드생성 반영 후 overall.mom8 타입 보장 (스키마 OverallModel에 mom8 존재)
+  const mom8 = (overall as { mom8?: number } | null)?.mom8 ?? 0;
   const winRate = overall?.winRate ?? 0;
 
+  // OverallModel 숫자 필드와 PlayerStats 매핑 일치 유지
   const stats: PlayerStats = {
     출장: appearances,
     오버롤: ovr,
@@ -36,6 +39,7 @@ export function mapTeamMemberToPlayer(member: QueryMember): Player {
     도움: assists,
     공격P: attackPoints,
     MOM3: mom3,
+    MOM8: mom8,
   };
 
   return {

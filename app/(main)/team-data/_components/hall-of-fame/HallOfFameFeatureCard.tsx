@@ -7,15 +7,11 @@ import trendingUpIcon from "@/public/icons/trending_up.svg";
 
 interface HallOfFameFeatureCardProps {
   item: HallOfFameFeatureItem;
-  onMoreClick?: () => void;
-  onPlayerClick?: () => void;
   className?: string;
 }
 
 const HallOfFameFeatureCard = ({
   item,
-  onMoreClick,
-  onPlayerClick,
   className,
 }: HallOfFameFeatureCardProps) => {
   const { categoryLabel, player } = item;
@@ -80,15 +76,12 @@ const HallOfFameFeatureCard = ({
         </div>
       </div>
 
-      {onMoreClick && (
-        <button
-          type="button"
-          onClick={onMoreClick}
-          className="absolute bottom-8 right-4 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline"
-        >
-          전체 순위 보기
-        </button>
-      )}
+      <button
+        type="button"
+        className="absolute bottom-6 right-6 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
+      >
+        전체 순위 보기
+      </button>
     </article>
   );
 };

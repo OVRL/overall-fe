@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import RankingCarousel from "../season-record/RankingCarousel";
-import { statsData } from "../../_constants/mockPlayers";
+import { SORTABLE_RANKING_CATEGORY_KEYS } from "../../_lib/getTop5PlayersByCategory";
 
 jest.mock("../season-record/RankingCard", () => ({
   __esModule: true,
@@ -36,19 +36,18 @@ describe("RankingCarousel 컴포넌트", () => {
   const mockOnMoreClick = jest.fn();
   const mockOnPlayerClick = jest.fn();
 
-  it("statsData에 정의된 모든 카테고리에 대해 RankingCard를 렌더링해야 한다", () => {
+  it("정렬 가능 카테고리마다 RankingCard를 렌더링해야 한다", () => {
     render(
       <RankingCarousel
+        allPlayers={[]}
         onMoreClick={mockOnMoreClick}
         onPlayerClick={mockOnPlayerClick}
       />,
     );
 
-    const categories = Object.keys(statsData);
     const cards = screen.getAllByTestId("ranking-card");
-
-    expect(cards).toHaveLength(categories.length);
-    categories.forEach((category) => {
+    expect(cards).toHaveLength(SORTABLE_RANKING_CATEGORY_KEYS.length);
+    SORTABLE_RANKING_CATEGORY_KEYS.forEach((category) => {
       expect(screen.getByText(category)).toBeInTheDocument();
     });
   });
@@ -56,6 +55,7 @@ describe("RankingCarousel 컴포넌트", () => {
   it("스크롤 버튼 클릭 시 scroll 함수가 호출되어야 한다", () => {
     render(
       <RankingCarousel
+        allPlayers={[]}
         onMoreClick={mockOnMoreClick}
         onPlayerClick={mockOnPlayerClick}
       />,
@@ -74,12 +74,13 @@ describe("RankingCarousel 컴포넌트", () => {
   it("RankingCard의 더보기 클릭 시 onMoreClick 콜백이 호출되어야 한다", () => {
     render(
       <RankingCarousel
+        allPlayers={[]}
         onMoreClick={mockOnMoreClick}
         onPlayerClick={mockOnPlayerClick}
       />,
     );
 
-    const firstCategory = Object.keys(statsData)[0];
+    const firstCategory = SORTABLE_RANKING_CATEGORY_KEYS[0];
     const moreButton = screen.getByText(`더보기 ${firstCategory}`);
 
     fireEvent.click(moreButton);

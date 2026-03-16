@@ -1,17 +1,23 @@
+import { useMemo } from "react";
 import type { Player } from "../../_types/player";
-import { statsData, getPlayerValue } from "../../_constants/mockPlayers";
+import { formatPlayerValue } from "../../_constants/playerTableColumns";
+import {
+  SORTABLE_RANKING_CATEGORY_KEYS,
+  getTop5PlayersByCategory,
+  getSortedPlayersByCategory,
+} from "../../_lib/getTop5PlayersByCategory";
 import RankingCard from "./RankingCard";
+import CarouselNavButton from "./CarouselNavButton";
 import { useDraggableScroll } from "@/hooks/useDraggableScroll";
-import arrowBack from "@/public/icons/arrow_back.svg";
-import arrowForward from "@/public/icons/arrow_forward.svg";
-import Icon from "@/components/ui/Icon";
 
 interface RankingCarouselProps {
+  allPlayers: Player[];
   onMoreClick: (category: string, players: Player[]) => void;
   onPlayerClick: (player: Player) => void;
 }
 
 export default function RankingCarousel({
+  allPlayers,
   onMoreClick,
   onPlayerClick,
 }: RankingCarouselProps) {
@@ -27,18 +33,35 @@ export default function RankingCarousel({
     checkScrollButtons,
   } = useDraggableScroll();
 
+  // 카테고리별 상위 5명 + 표시용 value 세팅 (allPlayers 변경 시에만 재계산)
+  const categoryCards = useMemo(() => {
+    return SORTABLE_RANKING_CATEGORY_KEYS.map((categoryKey) => {
+      const top5 = getTop5PlayersByCategory(allPlayers, categoryKey);
+      const top5WithValue = top5.map((p) => ({
+        ...p,
+        value: formatPlayerValue(p, categoryKey),
+      }));
+      const sortedAll = getSortedPlayersByCategory(allPlayers, categoryKey);
+      const sortedAllWithValue = sortedAll.map((p) => ({
+        ...p,
+        value: formatPlayerValue(p, categoryKey),
+      }));
+      return {
+        categoryKey,
+        top5WithValue,
+        sortedAllWithValue,
+      };
+    });
+  }, [allPlayers]);
+
   return (
     <section aria-label="시즌 기록 순위" className="relative group">
-      {showLeftArrow && (
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          className="absolute -left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-Fill_AccentPrimary opacity-0 shadow-lg transition-all duration-300 md:flex cursor-pointer group-hover:opacity-100 hover:bg-Fill_AccentPrimary/80 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          aria-label="이전 순위 카드"
-        >
-          <Icon src={arrowBack} alt="" />
-        </button>
-      )}
+      <CarouselNavButton
+        direction="left"
+        onClick={() => scroll("left")}
+        ariaLabel="이전 순위 카드"
+        visible={showLeftArrow}
+      />
 
       <div
         ref={scrollContainerRef}
@@ -50,30 +73,23 @@ export default function RankingCarousel({
         onMouseMove={onMouseMove}
         onScroll={checkScrollButtons}
       >
-        {Object.entries(statsData).map(([title, players]) => (
+        {categoryCards.map(({ categoryKey, top5WithValue, sortedAllWithValue }) => (
           <RankingCard
-            key={title}
-            title={title}
-            players={players.map((p) => ({
-              ...p,
-              value: getPlayerValue(p, title),
-            }))}
-            onMoreClick={() => onMoreClick(title, players as Player[])}
+            key={categoryKey}
+            title={categoryKey}
+            players={top5WithValue}
+            onMoreClick={() => onMoreClick(categoryKey, sortedAllWithValue)}
             onPlayerClick={onPlayerClick}
           />
         ))}
       </div>
 
-      {showRightArrow && (
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          className="absolute -right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-Fill_AccentPrimary opacity-0 shadow-lg transition-all duration-300 md:flex cursor-pointer group-hover:opacity-100 hover:bg-Fill_AccentPrimary/80 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          aria-label="다음 순위 카드"
-        >
-          <Icon src={arrowForward} alt="" />
-        </button>
-      )}
+      <CarouselNavButton
+        direction="right"
+        onClick={() => scroll("right")}
+        ariaLabel="다음 순위 카드"
+        visible={showRightArrow}
+      />
     </section>
   );
 }

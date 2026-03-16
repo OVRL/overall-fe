@@ -24,15 +24,11 @@ const RECORD_TYPE_ICON: Record<
 
 interface HallOfFameRecordCardProps {
   item: HallOfFameRecordItem;
-  onMoreClick?: () => void;
-  onPlayerClick?: () => void;
   className?: string;
 }
 
 const HallOfFameRecordCard = ({
   item,
-  onMoreClick,
-  onPlayerClick,
   className,
 }: HallOfFameRecordCardProps) => {
   const { categoryLabel, categoryType, player } = item;
@@ -62,18 +58,13 @@ const HallOfFameRecordCard = ({
       </div>
 
       <div className="absolute bottom-7.5 left-7.5 flex items-end gap-5">
-        <button
-          type="button"
-          onClick={onPlayerClick}
-          className="flex h-18 w-18 shrink-0 overflow-hidden rounded-full border border-gray-1000 focus:outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary"
-          aria-label={`${player.name} 선수 상세 보기`}
-        >
+        <div className="flex size-18 shrink-0 overflow-hidden rounded-full border border-gray-1000 focus:outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary">
           <ProfileAvatar
             src={player.image ?? "/images/player/img_player_1.webp"}
             alt={player.name}
             size={72}
           />
-        </button>
+        </div>
         <div className="flex flex-col">
           <p className="font-bold text-white">{player.name}</p>
           <div className="flex items-center gap-2.5">
@@ -87,15 +78,12 @@ const HallOfFameRecordCard = ({
         </div>
       </div>
 
-      {onMoreClick && (
-        <button
-          type="button"
-          onClick={onMoreClick}
-          className="absolute bottom-0 right-4 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline"
-        >
-          전체 순위 보기
-        </button>
-      )}
+      <button
+        type="button"
+        className="absolute bottom-9 right-7.5 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
+      >
+        전체 순위 보기
+      </button>
     </article>
   );
 };

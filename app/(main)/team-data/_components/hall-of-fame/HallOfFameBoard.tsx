@@ -9,12 +9,6 @@ import type {
 import HallOfFameFeatureCard from "./HallOfFameFeatureCard";
 import HallOfFameRecordCard from "./HallOfFameRecordCard";
 
-interface HallOfFameBoardProps {
-  /** 명예의 전당 기간(통산/시즌). API 연동 시 데이터 필터에 사용 */
-  period?: string;
-  onPlayerClick?: (player: Player) => void;
-}
-
 /** 목업: 명예의 전당 피처 1건 + 기록 4건 (API 연동 전) */
 const MOCK_FEATURE: HallOfFameFeatureItem = {
   categoryType: "goal",
@@ -89,36 +83,19 @@ function toMinimalPlayer(info: HallOfFamePlayerInfo): Player {
   };
 }
 
-const HallOfFameBoard = ({ period, onPlayerClick }: HallOfFameBoardProps) => {
+const HallOfFameBoard = () => {
   return (
     <section
       className="flex flex-col gap-4 pt-12.5 lg:flex-row lg:gap-x-4"
       aria-label="명예의 전당"
     >
       <div>
-        <HallOfFameFeatureCard
-          item={MOCK_FEATURE}
-          onMoreClick={undefined}
-          onPlayerClick={
-            onPlayerClick
-              ? () => onPlayerClick(toMinimalPlayer(MOCK_FEATURE.player))
-              : undefined
-          }
-        />
+        <HallOfFameFeatureCard item={MOCK_FEATURE} />
       </div>
 
       <div className="min-w-0 flex-1 grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2">
         {MOCK_RECORDS.map((item) => (
-          <HallOfFameRecordCard
-            key={item.categoryLabel}
-            item={item}
-            onMoreClick={undefined}
-            onPlayerClick={
-              onPlayerClick
-                ? () => onPlayerClick(toMinimalPlayer(item.player))
-                : undefined
-            }
-          />
+          <HallOfFameRecordCard key={item.categoryLabel} item={item} />
         ))}
       </div>
     </section>

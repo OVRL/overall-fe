@@ -30,6 +30,7 @@ export const FindManyTeamMemberQuery = graphql`
           attackPoints
           cleanSheets
           mom3
+          mom8
           winRate
         }
       }
