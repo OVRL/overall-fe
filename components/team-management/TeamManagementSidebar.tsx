@@ -7,6 +7,7 @@ export type TeamRole = "manager" | "coach" | "player";
 
 export type TeamManagementMenu =
     | "settings"
+    | "match-record"
     | "players"
     | "best-eleven"
     | "invitation"
@@ -114,6 +115,7 @@ const menuItems: MenuItem[] = [
 const getIcon = (id: TeamManagementMenu, active: boolean) => {
     switch (id) {
         case "settings": return <SettingsIcon active={active} />;
+        case "match-record": return <SettingsIcon active={active} />;
         case "players": return <PlayersIcon active={active} />;
         case "mom-vote": return <MOMIcon active={active} />;
         case "best-eleven": return <BestElevenIcon active={active} />;
