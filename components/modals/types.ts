@@ -1,6 +1,7 @@
 import { ComponentType } from "react";
 import { Player } from "@/types/formation";
 import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
+import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 
 export interface ModalPropsMap {
   // 예시:
@@ -23,6 +24,9 @@ export interface ModalPropsMap {
   };
   PLAYER_SEARCH: {
     onComplete: (player: Player) => void;
+  };
+  TEAM_SEARCH: {
+    onComplete: (result: TeamSearchResult) => void;
   };
   DETAIL_ADDRESS_SEARCH: {
     onComplete: (result: {

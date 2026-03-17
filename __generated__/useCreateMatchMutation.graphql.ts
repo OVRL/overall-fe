@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<21d5c9c3e58fdb586872f9094c6385b5>>
+ * @generated SignedSource<<064030d616b44f8fd28bbecb835f796c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -21,6 +21,7 @@ export type CreateMatchInput = {
   quarterCount: number;
   quarterDuration: number;
   startTime: string;
+  teamName?: string | null | undefined;
   uniformType?: Uniform | null | undefined;
   venue: VenueInput;
   voteDeadline: any;

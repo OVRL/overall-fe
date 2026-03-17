@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7784ffaa779146b92bfbf6e58338c5ae>>
+ * @generated SignedSource<<b26e7cb6a0dfc88e037dc41a1e06b105>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,9 +10,11 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
+export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type CreateMatchAttendanceInput = {
   attendanceStatus?: AttendanceStatus | null | undefined;
   matchId: number;
+  memberType: MemberType;
   teamId: number;
   userId: number;
 };

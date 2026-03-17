@@ -33,6 +33,7 @@ input CreateMatchAttendanceInput {
 
   """경기 ID"""
   matchId: Int!
+  memberType: MemberType!
 
   """팀 ID"""
   teamId: Int!
@@ -68,6 +69,9 @@ input CreateMatchInput {
 
   """매치 시작 시간 (HH:mm:ss)"""
   startTime: String!
+
+  """팀 이름 (상대 팀이 없는 경우)"""
+  teamName: String
 
   """유니폼 타입"""
   uniformType: Uniform
@@ -186,6 +190,7 @@ type MatchAttendanceModel {
   createdAt: GraphQLDateTime!
   id: ID!
   matchId: Int!
+  memberType: MemberType
   teamId: Int!
 
   """팀 멤버 정보"""
@@ -219,6 +224,7 @@ type MatchModel {
   quarterCount: Int!
   quarterDuration: Int!
   startTime: String!
+  teamName: String
   uniformType: Uniform
   updatedAt: GraphQLDateTime!
 
@@ -233,11 +239,17 @@ enum MatchType {
   MATCH
 }
 
+"""팀 멤버 유형 (member: 팀원, mercenary: 용병)"""
+enum MemberType {
+  MEMBER
+  MERCENARY
+}
+
 type Mutation {
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
   createMatch(input: CreateMatchInput!): MatchModel!
   createMatchAttendance(input: CreateMatchAttendanceInput!): MatchAttendanceModel!
-  createTeam(emblem: Upload!, input: CreateTeamInput!): TeamModel!
+  createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteMatch(id: Int!): Boolean!
   deleteTeam(id: Int!): Boolean!
@@ -350,6 +362,8 @@ type Query {
   findMatchAttendance(matchId: Int!, teamId: Int!): [MatchAttendanceModel!]!
   findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
   findTeam(id: Int!): TeamModel!
+  """팀 이름으로 검색 (name 기준, 추후 백엔드 연동)"""
+  findTeamsByName(name: String!): TeamArrayModel!
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
@@ -471,6 +485,7 @@ input UpdateMatchAttendanceInput {
 
   """참석 투표 ID"""
   id: Int!
+  memberType: MemberType!
 }
 
 input UpdateMatchFormationInput {
@@ -494,9 +509,6 @@ input UpdateMatchInput {
   """매치 타입"""
   matchType: MatchType
 
-  """상대 팀 ID"""
-  opponentTeamId: Int
-
   """쿼터 수"""
   quarterCount: Int
 
@@ -505,9 +517,6 @@ input UpdateMatchInput {
 
   """매치 시작 시간 (HH:mm:ss)"""
   startTime: String
-
-  """유니폼 타입"""
-  uniformType: Uniform
 
   """경기장 정보"""
   venue: VenueInput
@@ -569,10 +578,14 @@ type UserArrayModel {
 }
 
 type UserInfoModel {
+  birthDate: DateTime
   email: String!
+  foot: Foot
   id: ID!
+  mainPosition: Position
   name: String
   profileImage: String
+  subPositions: [Position!]
 }
 
 type UserModel {

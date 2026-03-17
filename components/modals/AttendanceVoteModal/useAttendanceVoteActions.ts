@@ -40,6 +40,7 @@ export function useAttendanceVoteActions(
           teamId: createdTeamId,
           userId,
           attendanceStatus: "ATTEND",
+          memberType: "MEMBER",
         },
       },
       onCompleted: () => {

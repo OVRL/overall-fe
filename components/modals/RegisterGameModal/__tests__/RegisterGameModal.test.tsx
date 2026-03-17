@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 const mockHideModal = jest.fn();
 const mockOpenAddressModal = jest.fn();
 const mockHideAddressModal = jest.fn();
+const mockOpenTeamSearchModal = jest.fn();
 const mockResetToDefaults = jest.fn();
 
 jest.mock("@/hooks/useModal", () => ({
@@ -18,6 +19,9 @@ jest.mock("@/hooks/useModal", () => ({
         openModal: mockOpenAddressModal,
         hideModal: mockHideAddressModal,
       };
+    }
+    if (key === "TEAM_SEARCH") {
+      return { openModal: mockOpenTeamSearchModal };
     }
     return { hideModal: mockHideModal };
   },
@@ -36,10 +40,10 @@ jest.mock("@/hooks/useUserId", () => ({
 }));
 
 jest.mock("@/components/providers/SelectedTeamProvider", () => ({
-  useSelectedTeamId: () => ({ selectedTeamId: "1" }),
+  useSelectedTeamId: () => ({ selectedTeamId: "1", selectedTeamIdNum: 1 }),
 }));
 
-jest.mock("../useCreateMatchMutation", () => ({
+jest.mock("../hooks/useCreateMatchMutation", () => ({
   useCreateMatchMutation: () => ({
     executeMutation: jest.fn((config: { onCompleted?: () => void }) => {
       config.onCompleted?.();
@@ -79,12 +83,12 @@ jest.mock("react-hook-form", () => {
   };
 });
 
-jest.mock("../useRegisterGameForm", () => ({
+jest.mock("../hooks/useRegisterGameForm", () => ({
   useRegisterGameForm: jest.fn(),
 }));
 
 const mockUseRegisterGameForm = jest.requireMock(
-  "../useRegisterGameForm",
+  "../hooks/useRegisterGameForm",
 ).useRegisterGameForm;
 
 function createMockForm(overrides = {}) {
@@ -119,7 +123,7 @@ describe("RegisterGameModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm(),
+      ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
     });
   });
@@ -160,7 +164,7 @@ describe("RegisterGameModal", () => {
       },
     );
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm({ handleSubmit: handleSubmitFn }),
+      ...createMockForm({ handleSubmit: handleSubmitFn }),
       resetToDefaults: mockResetToDefaults,
     });
 
@@ -173,13 +177,13 @@ describe("RegisterGameModal", () => {
 
   it("경기 성격이 매칭일 때 상대팀 입력 필드가 노출된다", () => {
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm(),
+      ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
     });
     render(<RegisterGameModal />);
 
     expect(
-      screen.getByPlaceholderText("상대팀 이름을 입력해주세요."),
+      screen.getByPlaceholderText("상대팀을 검색하세요"),
     ).toBeInTheDocument();
   });
 });

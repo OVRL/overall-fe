@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<869ce418cd6977c266fc89c574feea8f>>
+ * @generated SignedSource<<5975680c282ef1408970e9dc0b90d3c6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type findManyTeamMemberQueryQuery$data = {
         readonly goals: number;
         readonly keyPasses: number;
         readonly mom3: number;
+        readonly mom8: number;
         readonly ovr: number;
         readonly winRate: number;
       } | null | undefined;
@@ -230,6 +231,13 @@ v3 = [
                 "alias": null,
                 "args": null,
                 "kind": "ScalarField",
+                "name": "mom8",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
                 "name": "winRate",
                 "storageKey": null
               }
@@ -268,16 +276,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "6b686188390a701823d9f1e82fdf5b39",
+    "cacheID": "fcd0305ec08b7d8d1592470d35eb7d31",
     "id": null,
     "metadata": {},
     "name": "findManyTeamMemberQueryQuery",
     "operationKind": "query",
-    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d8ee2e25b95c7760ca838c1c519dfd3b";
+(node as any).hash = "21359ee9f57f5fc6527047437e55f472";
 
 export default node;

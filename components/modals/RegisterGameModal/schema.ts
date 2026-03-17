@@ -4,8 +4,8 @@ import { z } from "zod";
 /** 한글, 영문, 공백만 허용하는 정규식 (자모음 포함) */
 const RE_KOREAN_ENGLISH_SPACE = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]*$/;
 
-/** 주소용 정규식 — 한글, 영문, 공백, 숫자, 하이픈 허용 (네이버 API 주소 형식) */
-const RE_ADDRESS = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s0-9\-]*$/;
+/** 주소용 정규식 — 한글, 영문, 공백, 숫자, 하이픈, 마침표, 괄호, 가운데점(·) 등 네이버 API 주소에 포함되는 문자 허용 */
+const RE_ADDRESS = /^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s0-9\-.,·()]*$/;
 
 /**
  * 경기 등록 폼 스키마 (zod + react-hook-form).
@@ -17,6 +17,8 @@ export const registerGameSchema = z
       error: "경기 성격을 선택해주세요.",
     }),
     opponentName: z.string().max(30).regex(RE_KOREAN_ENGLISH_SPACE).optional(),
+    /** 등록된 상대팀 ID (매칭 시 등록 팀 선택한 경우) */
+    opponentTeamId: z.number().int().positive().nullable().optional(),
     /** 경기 시작일 (matchDate로 전송) */
     startDate: z.string().min(1, "시작 날짜를 선택해주세요."),
     startTime: z.string().min(1, "시작 시간을 선택해주세요."),
@@ -92,6 +94,7 @@ export function getRegisterGameDefaultValues(): RegisterGameValues {
   return {
     matchType: "INTERNAL",
     opponentName: "",
+    opponentTeamId: null,
     startDate: today,
     startTime: "00:00",
     endDate: today,

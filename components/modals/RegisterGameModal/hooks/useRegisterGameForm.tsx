@@ -1,10 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getRegisterGameDefaultValues, registerGameSchema } from "./schema";
+import {
+  getRegisterGameDefaultValues,
+  registerGameSchema,
+  type RegisterGameValues,
+} from "../schema";
 
 export function useRegisterGameForm() {
-  const form = useForm({
-    resolver: zodResolver(registerGameSchema),
+  const form = useForm<RegisterGameValues>({
+    resolver: zodResolver(registerGameSchema) as never,
     mode: "onChange",
     defaultValues: getRegisterGameDefaultValues(),
   });
@@ -14,7 +18,9 @@ export function useRegisterGameForm() {
   };
 
   return {
-    form,
+    ...form,
     resetToDefaults,
   };
 }
+
+export type RegisterGameFormReturn = ReturnType<typeof useRegisterGameForm>;
