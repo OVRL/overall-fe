@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Edit2, Trash2, ChevronDown, Plus, X } from "lucide-react";
+import { Edit2, Trash2, ChevronDown, Plus, X, Swords } from "lucide-react";
+import InHouseMatchPanel from "./InHouseMatchPanel";
 
 interface Player {
     id: string;
@@ -260,6 +262,11 @@ export default function MatchRecordManagementPanel() {
     const [matches, setMatches] = useState<MatchRecord[]>(INITIAL_MATCHES);
     const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<"RECORD" | "IN_HOUSE">("RECORD");
+
+    if (viewMode === "IN_HOUSE") {
+        return <InHouseMatchPanel onBack={() => setViewMode("RECORD")} />;
+    }
 
     const toggleExpand = (id: string) => {
         setMatches(matches.map(m => m.id === id ? { ...m, expanded: !m.expanded } : m));
@@ -269,6 +276,15 @@ export default function MatchRecordManagementPanel() {
         <div className="p-4 md:p-8 max-w-5xl mx-auto flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
+                <Button 
+                    variant="primary" 
+                    size="s" 
+                    className="bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 flex items-center gap-2"
+                    onClick={() => setViewMode("IN_HOUSE")}
+                >
+                    <Swords size={16} />
+                    내전에서 확인하기
+                </Button>
             </div>
 
             <div className="flex flex-col gap-3">
