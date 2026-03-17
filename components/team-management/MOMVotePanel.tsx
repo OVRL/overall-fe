@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Check, Clock, Bell, Info, ShieldCheck, Zap, Plus, Minus } from "lucide-react";
+import { Settings, Check, Clock, Bell, Info, ShieldCheck, Zap, Plus, Minus, Hourglass, Layout, Trophy, Star, Medal } from "lucide-react";
+import MOMVoteBoard from "./MOMVoteBoard";
+import { INITIAL_PLAYERS } from "@/data/players";
+
+
 import { cn } from "@/lib/utils";
 
 // ──────────────────────────────────────────────
@@ -116,35 +120,34 @@ const MOCK_MATCHES: MatchCard[] = [
   {
     id: "2",
     date: "2026. 2. 25.",
-    opponent: "바르셀로나",
-    score: "2 - 1",
+    opponent: "레알 마드리드",
+    score: "1 - 1",
     status: "ongoing",
     totalVotes: 25,
-    deadline: "2026. 3. 18. 18:00 (자동 마감 예정)",
+    deadline: "2026. 2. 21. 18:00까지",
     liveVotes: [
       { name: "정수현", position: "MF", votes: 12, maxVotes: 12 },
-      { name: "다리알베스", position: "FW", votes: 10, maxVotes: 12 },
-      { name: "랜디", position: "DF", votes: 8, maxVotes: 12 },
+      { name: "정수현", position: "MF", votes: 12, maxVotes: 12 },
+      { name: "정수현", position: "MF", votes: 12, maxVotes: 12 },
+      { name: "정수현", position: "MF", votes: 12, maxVotes: 12 },
     ],
   },
   {
     id: "3",
     date: "2026. 2. 25.",
-    opponent: "AC 밀란",
-    score: "3 - 0",
+    opponent: "레알 마드리드",
+    score: "3 - 1",
     status: "completed",
     totalVotes: 48,
     top3: [
       { backNumber: 20, name: "김정수", votes: 24 },
-      { backNumber: 1, name: "다리알베스", votes: 14 },
-      { backNumber: 8, name: "랜디", votes: 7 },
+      { backNumber: 10, name: "호날두", votes: 14 },
+      { backNumber: 8, name: "제라드", votes: 7 },
     ],
     liveVotes: [
       { name: "김정수", position: "FW", votes: 24, maxVotes: 24 },
-      { name: "다리알베스", position: "MF", votes: 14, maxVotes: 24 },
-      { name: "랜디", position: "DF", votes: 7, maxVotes: 24 },
-      { name: "정수현", position: "MF", votes: 2, maxVotes: 24 },
-      { name: "이강인", position: "FW", votes: 1, maxVotes: 24 },
+      { name: "호날두", position: "MF", votes: 14, maxVotes: 24 },
+      { name: "제라드", position: "DF", votes: 7, maxVotes: 24 },
     ]
   },
 ];
@@ -203,10 +206,15 @@ function GlobalSettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-lg bg-[#121212] rounded-[48px] border border-white/10 shadow-3xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={() => onClose()}
+      />
+      <div className="relative w-full max-w-lg bg-[#121212] rounded-[48px] border border-white/10 shadow-3xl overflow-hidden flex flex-col">
         {/* 헤더 */}
-        <div className="relative flex items-center justify-between px-10 py-10 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
+        <div className="relative flex items-center justify-between px-10 py-10 border-b border-white/5 bg-linear-to-b from-white/2 to-transparent">
+
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-black text-white tracking-tighter">MOM 투표 정책 설정</h2>
             <div className="flex items-center gap-1.5">
@@ -259,8 +267,9 @@ function GlobalSettingsModal({
                   onClick={() => setReminders(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
                   className={cn(
                     "flex items-center justify-between bg-[#1a1a1a] rounded-[24px] px-8 py-5 border border-white/5 cursor-pointer transition-all",
-                    reminders[item.key as keyof typeof reminders] ? "border-primary/20 bg-primary/[0.02]" : "hover:bg-[#222]"
+                    reminders[item.key as keyof typeof reminders] ? "border-primary/20 bg-primary/2" : "hover:bg-[#222]"
                   )}
+
                 >
                   <div className="flex flex-col">
                     <p className="text-sm text-white font-bold">{item.label}</p>
@@ -298,7 +307,7 @@ function GlobalSettingsModal({
           </button>
           <button
             onClick={handleSave}
-            className="flex-[2] py-5 text-sm font-black text-black bg-primary hover:opacity-90 transition-all rounded-[22px] shadow-2xl shadow-primary/20"
+            className="flex-2 py-5 text-sm font-black text-black bg-primary hover:opacity-90 transition-all rounded-[22px] shadow-2xl shadow-primary/20"
           >
             설정 저장하기
           </button>
@@ -313,25 +322,21 @@ function GlobalSettingsModal({
 // ──────────────────────────────────────────────
 function ScheduledCard({ match }: { match: MatchCard }) {
   return (
-    <div className="bg-[#1a1a1a] rounded-[24px] border border-white/5 px-6 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group hover:bg-white/3 transition-all border-l-4 border-l-gray-700">
+    <div className="bg-[#1a1a1a] rounded-[24px] border border-white/5 px-8 py-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group transition-all group">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-gray-500 font-bold">{match.date}</span>
-          <StatusBadge status="scheduled" />
+          <span className="text-[12px] text-gray-500 font-bold">{match.date}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-base font-bold text-white">vs {match.opponent}</span>
-          <span className="text-sm text-gray-600 font-black tracking-widest">{match.score}</span>
-        </div>
-        <div className="flex items-center gap-1.5 mt-1">
-          <Clock size={10} className="text-gray-600" />
-          <p className="text-[10px] text-gray-600 font-bold tracking-tight">{match.scheduledAt}</p>
+          <span className="text-lg font-bold text-white tracking-tight">vs {match.opponent}</span>
+          <span className="text-lg text-white/50 font-black italic">{match.score}</span>
         </div>
       </div>
-      <div className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-gray-500 font-bold">
-        자동 발송 대기중
-      </div>
+      {/* <button className="px-8 py-3.5 rounded-xl bg-primary text-black text-xs font-black shadow-lg shadow-primary/10 active:scale-95 transition-all">
+        MOM 투표 만들기
+      </button> */}
     </div>
+
   );
 }
 
@@ -340,63 +345,62 @@ function OngoingCard({ match }: { match: MatchCard }) {
 
   return (
     <div className={cn(
-      "bg-[#1a1a1a] rounded-[24px] border overflow-hidden transition-all hover:bg-white/3",
-      expanded ? "border-primary/40 ring-1 ring-primary/10 shadow-lg shadow-primary/5" : "border-white/5 border-l-4 border-l-primary"
+      "bg-[#1a1a1a] rounded-[24px] border border-white/5 overflow-hidden transition-all",
+      expanded && "ring-1 ring-white/10"
     )}>
-      <div className="w-full px-6 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div
+        className="w-full px-8 py-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
         <div className="flex flex-col gap-2 flex-1">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-gray-500 font-bold">{match.date}</span>
+            <span className="text-[12px] text-gray-500 font-bold">{match.date}</span>
+            <span className="text-lg font-bold text-white tracking-tight">vs {match.opponent}</span>
+            <span className="text-lg text-white/50 font-black italic">{match.score}</span>
             <StatusBadge status="ongoing" />
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-base font-bold text-white">vs {match.opponent}</span>
-            <span className="text-sm text-primary font-black tracking-widest">{match.score}</span>
-          </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <Check size={12} className="text-primary font-black animate-pulse" />
-            <p className="text-[10px] text-primary font-bold">{match.totalVotes}명 참여 중</p>
-            <span className="w-1 h-1 rounded-full bg-gray-700 mx-1" />
-            <p className="text-[10px] text-gray-600 font-medium">{match.deadline}</p>
           </div>
         </div>
 
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className={cn(
-            "w-full md:w-auto px-10 py-3 text-[10px] font-black rounded-xl border transition-all flex items-center justify-center gap-2",
-            expanded ? "bg-white text-black border-white" : "bg-primary text-black border-primary shadow-lg shadow-primary/20"
-          )}
-        >
-          {expanded ? "닫기" : "실시간 현황"}
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <span className="text-base font-black text-white">{match.totalVotes}명 참여</span>
+            <span className="text-[10px] text-gray-600 font-bold">{match.deadline}</span>
+          </div>
+          <div className={cn(
+            "w-6 h-6 flex items-center justify-center transition-transform duration-300",
+            expanded ? "rotate-0 text-primary" : "rotate-180 text-gray-600"
+          )}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg>
+          </div>
+        </div>
       </div>
 
+
       {expanded && (
-        <div className="px-8 pb-8 border-t border-white/5 bg-black/20 animate-in slide-in-from-top-4 duration-300">
-          <p className="text-[10px] font-black text-gray-500 mt-8 mb-6 uppercase tracking-widest">Real-time Live Standings</p>
-          <div className="space-y-5">
+        <div className="px-10 pb-10 border-t border-white/5 bg-black/20 animate-in slide-in-from-top-4 duration-300">
+          <p className="text-xs font-black text-white mt-8 mb-6 uppercase tracking-widest">투표 현황</p>
+          <div className="space-y-6">
             {match.liveVotes?.map((lv, i) => (
               <div key={i} className="group">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xs text-white font-bold group-hover:text-primary transition-colors">{lv.name}</span>
-                    <span className="text-[9px] text-gray-600 font-black tracking-widest px-1.5 py-0.5 bg-white/5 rounded-md">{lv.position}</span>
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-white font-bold">{lv.name}</span>
+                    <span className="text-[10px] text-gray-600 font-black tracking-widest px-1.5 py-0.5 bg-white/5 rounded-md">{lv.position}</span>
                   </div>
-                  <span className="text-[10px] text-white font-black">{lv.votes}표</span>
+                  <span className="text-xs text-white font-black">{lv.votes}표</span>
                 </div>
-                <div className="relative h-2 rounded-full bg-white/5 overflow-hidden">
+                <div className="relative h-2.5 rounded-full bg-white/5 overflow-hidden">
                   <div
                     className="absolute inset-y-0 left-0 bg-primary rounded-full transition-all duration-1000 ease-in-out"
                     style={{ width: `${Math.round((lv.votes / lv.maxVotes) * 100)}%` }}
                   />
-                  <div className="absolute inset-y-0 left-0 w-full h-full bg-gradient-to-r from-transparent to-black/20" />
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
     </div>
   );
 }
@@ -406,70 +410,68 @@ function CompletedCard({ match }: { match: MatchCard }) {
 
   return (
     <div className={cn(
-      "bg-[#1a1a1a] rounded-[24px] border overflow-hidden transition-all hover:bg-white/3 flex flex-col",
-      expanded ? "border-white/20 shadow-2xl" : "border-white/5 border-l-4 border-l-gray-800"
+      "bg-[#1a1a1a] rounded-[24px] border border-white/5 overflow-hidden transition-all flex flex-col hover:bg-white/3"
     )}>
-      <div className="w-full px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div
+        className="w-full px-8 py-7 flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
         <div className="flex flex-col gap-2 w-full md:w-auto">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] text-gray-500 font-bold">{match.date}</span>
+          <div className="flex items-center gap-3 text-[12px] text-gray-500 font-bold">
+            <span>{match.date}</span>
+            <span className="text-lg font-bold text-white tracking-tight">vs {match.opponent}</span>
+            <span className="text-lg text-white/50 font-black italic">{match.score}</span>
             <StatusBadge status="completed" />
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-base font-bold text-white">vs {match.opponent}</span>
-            <span className="text-sm text-gray-700 font-black tracking-widest">{match.score}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide flex-1 justify-center md:justify-end">
-          {match.top3?.map((player, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-center gap-3 bg-[#111] border border-white/5 rounded-[22px] px-4 py-3 shadow-inner",
-                i === 0 ? "border-primary/20 bg-primary/5" : ""
-              )}
-            >
-              <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-xs font-black", i === 0 ? "bg-primary text-black" : "bg-white/10 text-white")}>
-                {i + 1}
+
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-hide flex-1 justify-center md:justify-end">
+          {match.top3?.map((player, i) => {
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "flex items-center gap-2.5 bg-black/40 border border-white/5 rounded-xl px-4 py-2 transition-transform hover:scale-105"
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center text-primary bg-primary/10 border border-primary/20 shadow-[0_0_10px_rgba(195,255,33,0.1)]"
+                )}>
+                  <Trophy size={16} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-white leading-none whitespace-nowrap">
+                    {player.backNumber}. {player.name}
+                  </span>
+                  <span className="text-[10px] text-gray-600 font-bold whitespace-nowrap">{player.votes}표</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <p className={cn("text-[11px] font-black leading-none", i === 0 ? "text-primary" : "text-white")}>
-                  {player.name}
-                </p>
-                <p className="text-[10px] text-gray-700 mt-1 font-bold">{player.votes}표</p>
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className={cn(
-              "ml-2 w-10 h-10 rounded-full border flex items-center justify-center transition-all",
-              expanded ? "bg-white border-white text-black rotate-180" : "bg-white/5 border-white/5 text-gray-500 hover:text-white"
-            )}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-          </button>
+            );
+          })}
+          <div className={cn(
+            "ml-2 w-6 h-6 flex items-center justify-center transition-transform duration-300",
+            expanded ? "rotate-0 text-primary" : "rotate-180 text-gray-600"
+          )}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6" /></svg>
+          </div>
         </div>
+
       </div>
 
       {expanded && (
-        <div className="px-8 pb-10 border-t border-white/5 bg-black/30 animate-in slide-in-from-top-4 duration-500">
+        <div className="px-10 pb-10 border-t border-white/5 bg-black/30 animate-in slide-in-from-top-4 duration-500">
           <div className="flex items-center justify-between mt-10 mb-8 px-1">
             <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Final Voting Results</p>
-              <p className="text-xs text-gray-600 font-bold italic">전체 투표 인원: {match.totalVotes}명 참여</p>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-              <Check size={12} className="text-primary" />
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Official Record</span>
+              <p className="text-xs font-black text-white uppercase tracking-[0.2em]">최종 투표 결과</p>
+              <p className="text-[10px] text-gray-600 font-bold italic">전체 참여 인원: {match.totalVotes}명 참여</p>
             </div>
           </div>
 
           <div className="space-y-6">
             {match.liveVotes?.sort((a, b) => b.votes - a.votes).map((lv, i) => (
               <div key={i} className="group">
-                <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex items-center justify-between mb-2.5 px-1">
                   <div className="flex items-center gap-3">
                     <span className={cn(
                       "text-[10px] font-black w-5",
@@ -511,6 +513,8 @@ function CompletedCard({ match }: { match: MatchCard }) {
 export default function MOMVotePanel() {
   const [matches] = useState<MatchCard[]>(MOCK_MATCHES);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isBoardOpen, setIsBoardOpen] = useState(false);
+
 
   // 현재 진행 중인 투표가 있는지 여부
   const hasOngoingVote = matches.some(m => m.status === "ongoing");
@@ -523,19 +527,30 @@ export default function MOMVotePanel() {
     <div className="px-4 md:px-8 pt-8 md:pt-14 pb-24 max-w-4xl mx-auto w-full flex flex-col">
       <header className="flex items-center justify-between mb-12">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-black text-white tracking-tighter leading-none">MOM 관리</h1>
+          <h1 className="text-3xl font-black text-white tracking-tighter leading-none">MOM 투표 설정</h1>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <p className="text-[11px] text-gray-600 font-black uppercase tracking-[0.2em]">Automated Intelligence System</p>
           </div>
         </div>
-        <button
-          onClick={() => setIsSettingsOpen(true)}
-          className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/5 hover:border-primary/20 transition-all group"
-        >
-          <Settings size={22} className="group-hover:rotate-90 transition-transform duration-500" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsBoardOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-black rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-900/20"
+          >
+            <Layout size={14} />
+            <span>MOM 보드 보기</span>
+          </button>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 hover:bg-white/5 rounded-full transition-colors group"
+          >
+            <Settings size={20} className="text-gray-400 group-hover:text-white transition-colors" />
+          </button>
+        </div>
       </header>
+
+      {isBoardOpen && <MOMVoteBoard onClose={() => setIsBoardOpen(false)} />}
 
       {/* 상태별 경기 리스트 */}
       <div className="space-y-5">
@@ -547,7 +562,7 @@ export default function MOMVotePanel() {
       </div>
 
       {/* 정책 요약 카드 (바닥용) */}
-      <div className="mt-14 p-8 bg-gradient-to-br from-[#1a1a1a] to-[#121212] rounded-[40px] border border-white/5 shadow-2xl">
+      <div className="mt-14 p-8 bg-linear-to-br from-[#1a1a1a] to-[#121212] rounded-[40px] border border-white/5 shadow-2xl">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
             <Info size={24} />
