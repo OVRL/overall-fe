@@ -1,129 +1,186 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 
-type InvitationStatus = "pending" | "accepted" | "expired";
+type JoinRequestStatus = "pending" | "approved" | "rejected";
 
-interface Invitation {
+interface JoinRequest {
     id: string;
     name: string;
-    invitedAt: string;
-    status: InvitationStatus;
+    email: string;
+    phone: string;
+    requestedAt: string;
+    status: JoinRequestStatus;
 }
 
-const mockInvitations: Invitation[] = [
-    { id: "1", name: "신규선수1", invitedAt: "2026-01-20", status: "pending" },
-    { id: "2", name: "신규선수2", invitedAt: "2026-01-18", status: "accepted" },
-    { id: "3", name: "탈퇴선수", invitedAt: "2025-12-01", status: "expired" },
+const mockRequests: JoinRequest[] = [
+    { id: "1", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "pending" },
+    { id: "2", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "pending" },
+    { id: "3", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "approved" },
+    { id: "4", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "approved" },
+    { id: "5", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "rejected" },
+    { id: "6", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "approved" },
+    { id: "7", name: "아자르", email: "abcdefg@gmail.com", phone: "010-7777-7777", requestedAt: "2026. 2. 25.", status: "rejected" },
 ];
 
-const statusLabels: Record<InvitationStatus, { label: string; className: string }> = {
-    pending: { label: "대기중", className: "bg-yellow-500/20 text-yellow-400" },
-    accepted: { label: "수락", className: "bg-green-500/20 text-green-400" },
-    expired: { label: "만료", className: "bg-gray-500/20 text-gray-400" },
-};
-
 export default function InvitationPanel() {
-    const [invitations, setInvitations] = useState<Invitation[]>(mockInvitations);
-    const [inviteCode] = useState("TEAM-OVR-2026-ABCD");
-    const [copied, setCopied] = useState(false);
+    const [filter, setFilter] = useState<"all" | JoinRequestStatus>("pending");
+    const [requests, setRequests] = useState<JoinRequest[]>(mockRequests);
+    const [modal, setModal] = useState<{ type: "approve" | "reject"; request: JoinRequest | null }>({
+        type: "approve",
+        request: null,
+    });
 
-    const handleCopyCode = async () => {
-        await navigator.clipboard.writeText(`https://ovr-log.com/invite/${inviteCode}`);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    const filteredRequests = requests.filter(req => filter === "all" || req.status === filter);
+    const pendingCount = requests.filter(req => req.status === "pending").length;
 
-    const handleResend = (id: string) => {
-        alert(`초대를 재전송했습니다: ${id}`);
-    };
-
-    const handleCancel = (id: string) => {
-        setInvitations(prev => prev.filter(inv => inv.id !== id));
+    const handleAction = (id: string, status: JoinRequestStatus) => {
+        setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
+        setModal({ type: "approve", request: null });
     };
 
     return (
-        <div className="p-4">
-            <h3 className="text-lg font-bold text-white mb-4">초대 관리</h3>
+        <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
+            <div className="flex items-center gap-2 mb-6">
+                <h3 className="text-xl font-bold text-white">가입 신청 관리</h3>
+                {pendingCount > 0 && (
+                    <span className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                        {pendingCount}
+                    </span>
+                )}
+            </div>
 
-            {/* 초대 코드 */}
-            <section className="bg-surface-tertiary rounded-lg p-4 mb-4">
-                <h4 className="text-xs font-bold text-gray-400 mb-2">팀 초대 코드</h4>
+            {/* 필터 탭 */}
+            <div className="flex gap-2 mb-6">
+                <button 
+                    onClick={() => setFilter("all")}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        filter === "all" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                    )}
+                >
+                    전체
+                </button>
+                <button 
+                    onClick={() => setFilter("pending")}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        filter === "pending" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                    )}
+                >
+                    대기중
+                </button>
+                <button 
+                    onClick={() => setFilter("approved")}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        filter === "approved" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                    )}
+                >
+                    승인 완료
+                </button>
+                <button 
+                    onClick={() => setFilter("rejected")}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        filter === "rejected" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                    )}
+                >
+                    거절
+                </button>
+            </div>
 
-                <div className="flex items-center gap-2 max-w-md">
-                    <div className="flex-1 bg-black/30 border border-gray-700 rounded-lg px-3 py-3 flex items-center justify-between group cursor-pointer hover:border-primary/50 transition-colors"
-                        onClick={handleCopyCode}>
-                        <code className="text-primary font-mono text-sm tracking-wider">{inviteCode}</code>
-                        <span className={`text-xs transition-colors ${copied ? "text-green-400" : "text-gray-500 group-hover:text-white"}`}>
-                            {copied ? "복사됨! ✓" : "클릭하여 복사"}
-                        </span>
+            {/* 신청 리스트 */}
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/10">
+                {filteredRequests.map((req) => (
+                    <div key={req.id} className="bg-white/5 border border-white/5 rounded-2xl p-6 flex items-center justify-between transition-all hover:bg-white/[0.07]">
+                        <div className="flex items-center gap-6">
+                            <span className="text-xs text-gray-500 font-medium w-20">{req.requestedAt}</span>
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-sm text-white font-bold">{req.name}</span>
+                            </div>
+                            <span className="text-sm text-gray-400 mx-2">{req.email}</span>
+                            <span className="text-sm text-gray-400">{req.phone}</span>
+                        </div>
+
+                        <div>
+                            {req.status === "pending" ? (
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => setModal({ type: "approve", request: req })}
+                                        className="px-6 py-2 bg-primary rounded-lg text-black text-xs font-bold hover:opacity-90 transition-opacity"
+                                    >
+                                        수락
+                                    </button>
+                                    <button 
+                                        onClick={() => setModal({ type: "reject", request: req })}
+                                        className="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs font-bold hover:bg-white/10 transition-colors"
+                                    >
+                                        거절
+                                    </button>
+                                </div>
+                            ) : req.status === "approved" ? (
+                                <div className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-primary text-[10px] font-bold">
+                                    승인완료
+                                </div>
+                            ) : (
+                                <div className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-red-500/80 text-[10px] font-bold">
+                                    거절됨
+                                </div>
+                            )}
+                        </div>
                     </div>
+                ))}
 
-                    {/* 별도 버튼 (옵션) - 입력창 자체 클릭으로 UX 개선했으므로 버튼 크기 축소 */}
-                    <button
-                        onClick={handleCopyCode}
-                        className="w-11 h-11 flex items-center justify-center bg-primary rounded-lg text-black hover:bg-primary-dark transition-colors"
-                        title="링크 복사"
-                    >
-                        {copied ? (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        ) : (
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                        )}
-                    </button>
-                </div>
-                <p className="text-[10px] text-gray-500 mt-2 ml-1">
-                    * 이 코드를 팀원에게 공유하면 팀에 자동으로 가입 신청됩니다.
-                </p>
-            </section>
+                {filteredRequests.length === 0 && (
+                    <div className="h-40 flex items-center justify-center text-gray-500 text-sm italic">
+                        신청 내역이 없습니다.
+                    </div>
+                )}
+            </div>
 
-            {/* 초대 현황 */}
-            <section>
-                <h4 className="text-sm font-bold text-white mb-2">초대 현황</h4>
-                <div className="bg-surface-tertiary rounded-lg overflow-hidden">
-                    <table className="w-full text-xs">
-                        <thead className="bg-surface-secondary">
-                            <tr className="text-gray-400 text-left">
-                                <th className="px-3 py-2">이름</th>
-                                <th className="px-3 py-2">초대 일자</th>
-                                <th className="px-3 py-2">상태</th>
-                                <th className="px-3 py-2">액션</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-800">
-                            {invitations.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-white/5">
-                                    <td className="px-3 py-2 text-white">{inv.name}</td>
-                                    <td className="px-3 py-2 text-gray-400">{inv.invitedAt}</td>
-                                    <td className="px-3 py-2">
-                                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statusLabels[inv.status].className}`}>
-                                            {statusLabels[inv.status].label}
-                                        </span>
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <div className="flex gap-2">
-                                            {inv.status === "pending" && (
-                                                <>
-                                                    <button onClick={() => handleResend(inv.id)} className="text-primary hover:underline">재전송</button>
-                                                    <button onClick={() => handleCancel(inv.id)} className="text-red-400 hover:underline">취소</button>
-                                                </>
-                                            )}
-                                            {inv.status === "expired" && (
-                                                <button onClick={() => handleResend(inv.id)} className="text-primary hover:underline">재발송</button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* 처리 모달 */}
+            {modal.request && (
+                <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="text-center mb-8">
+                            <h4 className="text-xl font-bold text-white mb-4">
+                                {modal.type === "approve" ? "팀 가입 수락" : "팀 가입 거절"}
+                            </h4>
+                            <p className="text-sm text-gray-400 leading-relaxed">
+                                <span className="text-white font-bold">{modal.request.name}</span>님의<br />
+                                팀 가입을 {modal.type === "approve" ? "수락하시겠습니까?" : "거절하시겠습니까?"}
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setModal({ type: "approve", request: null })}
+                                className="flex-1 py-3 bg-white/5 border border-white/5 rounded-xl text-gray-400 text-sm font-bold hover:bg-white/10 transition-colors"
+                            >
+                                취소
+                            </button>
+                            {modal.type === "approve" ? (
+                                <button 
+                                    onClick={() => handleAction(modal.request!.id, "approved")}
+                                    className="flex-1 py-3 bg-primary rounded-xl text-black text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
+                                >
+                                    수락하기
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={() => handleAction(modal.request!.id, "rejected")}
+                                    className="flex-1 py-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-500 text-sm font-bold hover:bg-red-500/30 transition-colors"
+                                >
+                                    거절하기
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </section>
+            )}
         </div>
     );
 }
