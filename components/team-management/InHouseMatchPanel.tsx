@@ -23,6 +23,7 @@ import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import FormationBoardList from "@/components/formation/board/FormationBoardList";
 import FormationPlayerList from "@/components/formation/player-list/FormationPlayerList";
 import { QuarterData, Player } from "@/types/formation";
+import useModal from "@/hooks/useModal";
 
 // --- 상수 및 타입 정의 ---
 type TeamType = "ALL" | "A" | "B" | "C";
@@ -36,6 +37,7 @@ interface InHousePlayer {
     overall: number;
     age: number;
     position: 'FW' | 'MF' | 'DF' | 'GK';
+    subPosition: string; 
     goals: number;
     assists: number;
     cleanSheets: number;
@@ -45,25 +47,42 @@ interface InHousePlayer {
     image?: string;
 }
 
+const POS_MAP: Record<'FW' | 'MF' | 'DF' | 'GK', string[]> = {
+    'FW': ['ST', 'LW', 'RW'],
+    'MF': ['CAM', 'CM', 'CDM'],
+    'DF': ['CB', 'LB', 'RB'],
+    'GK': ['GK']
+};
+
 const POSITIONS: ('FW' | 'MF' | 'DF' | 'GK')[] = ["FW", "MF", "DF", "GK"];
 const POS_ORDER: Record<string, number> = { "FW": 0, "MF": 1, "DF": 2, "GK": 3 };
 
-// 22명의 더미 데이터 생성
+const generateInitialQuarters = (): QuarterData[] => [
+    { id: 1, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
+    { id: 2, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
+    { id: 3, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
+    { id: 4, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
+];
+
 const generateMockPlayers = (): InHousePlayer[] => {
     const players: InHousePlayer[] = [];
     const names = ["김시후", "박정현", "신유찬", "윤기현", "김병문", "이준호", "최민석", "정대만", "강백호", "서태웅", "송태섭", "채치수", "전호장", "이정환", "신준섭", "고민구", "성현준", "김수겸", "황태산", "윤대협", "안영수", "허태환"];
     
     for (let i = 0; i < 22; i++) {
-        const pos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
+        const broadPos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
+        const subPosOptions = POS_MAP[broadPos];
+        const subPos = subPosOptions[Math.floor(Math.random() * subPosOptions.length)];
+        
         players.push({
             id: String(i + 1),
             name: names[i] || `선수 ${i + 1}`,
             overall: Math.floor(Math.random() * (99 - 80 + 1)) + 80,
             age: Math.floor(Math.random() * (35 - 20 + 1)) + 20,
-            position: pos,
-            goals: pos === 'FW' || pos === 'MF' ? Math.floor(Math.random() * 15) : 0,
-            assists: pos === 'FW' || pos === 'MF' ? Math.floor(Math.random() * 15) : 0,
-            cleanSheets: pos === 'DF' || pos === 'GK' ? Math.floor(Math.random() * 12) : 0,
+            position: broadPos,
+            subPosition: subPos,
+            goals: broadPos === 'FW' || broadPos === 'MF' ? Math.floor(Math.random() * 15) : 0,
+            assists: broadPos === 'FW' || broadPos === 'MF' ? Math.floor(Math.random() * 15) : 0,
+            cleanSheets: broadPos === 'DF' || broadPos === 'GK' ? Math.floor(Math.random() * 12) : 0,
             mom: Math.floor(Math.random() * 5),
             team: "ALL",
             isMercenary: false,
@@ -72,8 +91,6 @@ const generateMockPlayers = (): InHousePlayer[] => {
     }
     return players;
 };
-
-// --- 컴포넌트 ---
 
 const VestIcon = ({ color, className }: { color: string, className?: string }) => (
     <div className={cn("relative w-12 h-12 flex items-center justify-center transition-all", className)}>
@@ -90,21 +107,35 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
     const [selectedTeam, setSelectedTeam] = useState<TeamType>("ALL");
     const [matchMode, setMatchMode] = useState<MatchMode>("2WAY");
     const [viewMode, setViewMode] = useState<ViewMode>("LIST");
-    const [sortBy, setSortBy] = useState<SortOption>("OVR");
+    const [sortBy, setSortBy] = useState<SortOption>("POS");
     const [isDirty, setIsDirty] = useState(false);
     const [showTeamMenu, setShowTeamMenu] = useState(false);
 
-    // DnD 관련 상태
+    // 팀별 독립적인 쿼터 데이터 상태 관리
+    const [teamQuarters, setTeamQuarters] = useState<Record<string, QuarterData[]>>({
+        A: generateInitialQuarters(),
+        B: generateInitialQuarters(),
+        C: generateInitialQuarters(),
+    });
+
+    const { openModal } = useModal("PLAYER_SEARCH");
     const dndId = useId();
     const [activePlayer, setActivePlayer] = useState<Player | null>(null);
     const [selectedDndPlayer, setSelectedDndPlayer] = useState<Player | null>(null);
-    const [quarters, setQuarters] = useState<QuarterData[]>([
-      { id: 1, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
-      { id: 2, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
-      { id: 3, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
-      { id: 4, type: "MATCHING", formation: "4-2-3-1", matchup: { home: "OVR" as any, away: "B" as any }, lineup: {} },
-    ]);
     const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
+
+    const activeQuarters = useMemo(() => {
+        const teamKey = selectedTeam === "ALL" ? "A" : (selectedTeam as string);
+        return teamQuarters[teamKey] || teamQuarters.A;
+    }, [teamQuarters, selectedTeam]);
+
+    const setQuartersForSelectedTeam = (newQuarters: QuarterData[] | ((prev: QuarterData[]) => QuarterData[])) => {
+        const teamKey = selectedTeam === "ALL" ? "A" : (selectedTeam as string);
+        setTeamQuarters(prev => ({
+            ...prev,
+            [teamKey]: typeof newQuarters === 'function' ? newQuarters(prev[teamKey]) : newQuarters
+        }));
+    };
 
     const teamStats = useMemo(() => {
         const stats = { ALL: { count: players.length, avgOverall: 0 }, A: { count: 0, avgOverall: 0 }, B: { count: 0, avgOverall: 0 }, C: { count: 0, avgOverall: 0 } };
@@ -122,14 +153,22 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const filteredAndSortedPlayers = useMemo(() => {
         let list = selectedTeam === "ALL" ? [...players] : players.filter(p => p.team === selectedTeam);
-        
         return list.sort((a, b) => {
             if (sortBy === "OVR") return b.overall - a.overall;
-            if (sortBy === "POS") return POS_ORDER[a.position] - POS_ORDER[b.position];
+            if (sortBy === "POS") {
+                if (POS_ORDER[a.position] !== POS_ORDER[b.position]) return POS_ORDER[a.position] - POS_ORDER[b.position];
+                return b.overall - a.overall;
+            }
             if (sortBy === "AGE") return b.age - a.age;
             return 0;
         });
     }, [players, selectedTeam, sortBy]);
+
+    const groupedPlayers = useMemo(() => {
+        const groups: Record<string, InHousePlayer[]> = { "FW": [], "MF": [], "DF": [], "GK": [] };
+        filteredAndSortedPlayers.forEach(p => { groups[p.position].push(p); });
+        return groups;
+    }, [filteredAndSortedPlayers]);
 
     const formationTeamPlayers = useMemo(() => {
         return players.filter(p => p.team === (selectedTeam === "ALL" ? "A" : selectedTeam)).map(p => ({
@@ -139,46 +178,60 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const handleTeamChange = (playerId: string, team: TeamType) => {
         setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, team } : p));
+        
+        // 데이터 무결성: 모든 팀의 포메이션에서 해당 선수 제거 (팀이 바뀌었으므로)
+        setTeamQuarters(prev => {
+            const newTeamQuarters = { ...prev };
+            Object.keys(newTeamQuarters).forEach(tKey => {
+                newTeamQuarters[tKey] = newTeamQuarters[tKey].map(q => {
+                    const newLineup = { ...q.lineup };
+                    Object.keys(newLineup).forEach(k => {
+                        const kid = Number(k);
+                        if (String(newLineup[kid]?.id) === playerId) {
+                            delete newLineup[kid];
+                        }
+                    });
+                    return { ...q, lineup: newLineup };
+                });
+            });
+            return newTeamQuarters;
+        });
+        
         setIsDirty(true);
     };
 
     const handleAddPlayer = () => {
-        const inputName = window.prompt("추가할 선수의 이름을 입력해 주세요", `뉴선수 ${players.length + 1}`);
-        if (inputName === null) return;
-        
-        const name = inputName.trim() || `뉴선수 ${players.length + 1}`;
-        const newId = String(Date.now());
-        const pos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
-        const newPlayer: InHousePlayer = {
-            id: newId,
-            name: name,
-            overall: 80 + Math.floor(Math.random() * 20),
-            age: 20 + Math.floor(Math.random() * 15),
-            position: pos,
-            goals: 0, assists: 0, cleanSheets: 0, mom: 0,
-            team: selectedTeam,
-            isMercenary: true,
-            image: "/images/player/img_player_2.webp"
-        };
-        setPlayers(prev => [...prev, newPlayer]);
-        setIsDirty(true);
+        openModal({
+            onComplete: (playerData) => {
+                if (!playerData) return;
+                const newId = String(Date.now());
+                const broadPos = (playerData.position as any) || POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
+                const subPosOptions = POS_MAP[broadPos as 'FW' | 'MF' | 'DF' | 'GK'] || ['ST'];
+                const subPos = subPosOptions[0];
+                const newPlayer: InHousePlayer = {
+                    id: newId, name: playerData.name || "비공개", overall: (playerData as any).overall || 80 + Math.floor(Math.random() * 20),
+                    age: (playerData as any).age || 20 + Math.floor(Math.random() * 15), position: broadPos, subPosition: subPos,
+                    goals: 0, assists: 0, cleanSheets: 0, mom: 0, team: selectedTeam === "ALL" ? "ALL" : selectedTeam,
+                    isMercenary: true, image: playerData.image || "/images/player/img_player_2.webp"
+                };
+                setPlayers(prev => [...prev, newPlayer]);
+                setIsDirty(true);
+            },
+        });
     };
 
     const handleTeamCardClick = (team: TeamType) => {
         setSelectedTeam(team);
         setViewMode(team === "ALL" ? "LIST" : "FORMATION");
+        setCurrentQuarterId(1); // 팀 전환 시 항상 1쿼터부터 시작하도록 초기화
     };
 
     const handleReassignSelectedPlayer = (toTeam: TeamType) => {
-        if (!selectedDndPlayer) {
-            alert("팀을 변경할 선수를 먼저 선택해 주세요.");
-            return;
-        }
+        if (!selectedDndPlayer) { alert("팀을 변경할 선수를 먼저 선택해 주세요."); return; }
         handleTeamChange(String(selectedDndPlayer.id), toTeam);
         setShowTeamMenu(false);
     };
 
-    // --- DnD 핸들러 ---
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
     const customCollisionDetection: CollisionDetection = (args) => {
       const { pointerCoordinates, droppableContainers, droppableRects } = args;
@@ -208,7 +261,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
         const qId = over.data.current?.quarterId as number;
         const idx = over.data.current?.positionIndex as number;
         if (player && qId != null && idx !== undefined) {
-            setQuarters(prev => prev.map(q => {
+            setQuartersForSelectedTeam(prev => prev.map(q => {
                 if (q.id === qId) {
                     const newLineup = { ...q.lineup };
                     Object.keys(newLineup).forEach(k => { if (newLineup[Number(k)]?.id === player.id) delete newLineup[Number(k)]; });
@@ -224,51 +277,39 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     return (
         <div className="flex flex-col bg-surface-primary min-h-screen relative overflow-hidden">
-            {/* Header */}
             <header className="flex items-center justify-between px-4 py-6 shrink-0 z-20">
                 <button onClick={onBack} className="text-white hover:opacity-70 transition-opacity"><ChevronLeft size={28} /></button>
                 <h1 className="text-xl font-bold text-white tracking-tight">진행 중 매치</h1>
                 <div className="w-10" />
             </header>
 
-            {/* Persistent Team Cards Section */}
             <div className="px-4 mb-4 z-20">
                 <div className="flex items-center justify-between mb-3 min-h-[40px]">
                     <p className="text-[10px] text-gray-500 font-medium opacity-80">팀 카드를 눌러 포메이션을 편집하세요</p>
-                    <button 
-                        className="bg-[#333] text-gray-200 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-lg border border-white/5 active:bg-[#444]"
-                        onClick={() => setMatchMode(prev => prev === "2WAY" ? "3WAY" : "2WAY")}
-                    >
+                    <button className="bg-[#333] text-gray-200 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-lg border border-white/5 active:bg-[#444]" onClick={() => setMatchMode(prev => prev === "2WAY" ? "3WAY" : "2WAY")}>
                         {matchMode === "2WAY" ? "3파전으로 바꾸기" : "2파전으로 바꾸기"}
                     </button>
                 </div>
 
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     {[
-                        { id: "ALL", color: "gray", label: "전체", sub: teamStats.ALL.avgOverall ? `아마추어${Math.floor(teamStats.ALL.avgOverall/20)}` : "준비중" },
-                        { id: "A", color: "red", label: "A팀", sub: "비기너1" },
-                        { id: "B", color: "yellow", label: "B팀", sub: "비기너1" }, 
-                        ...(matchMode === "3WAY" ? [{ id: "C", color: "blue", label: "C팀", sub: "비기너1" }] : [])
+                        { id: "ALL", color: "gray", label: "전체", avg: teamStats.ALL.avgOverall },
+                        { id: "A", color: "red", label: "A팀", avg: teamStats.A.avgOverall },
+                        { id: "B", color: "yellow", label: "B팀", avg: teamStats.B.avgOverall }, 
+                        ...(matchMode === "3WAY" ? [{ id: "C", color: "blue", label: "C팀", avg: teamStats.C.avgOverall }] : [])
                     ].map(t => (
-                        <button 
-                            key={t.id} 
-                            onClick={() => handleTeamCardClick(t.id as TeamType)}
-                            className={cn(
-                                "flex flex-col items-center justify-center min-w-[88px] h-32 rounded-3xl transition-all border-2",
-                                selectedTeam === t.id ? `bg-white/10 border-primary` : "bg-[#1a1a1a] border-transparent hover:bg-white/5"
-                            )}
-                        >
+                        <button key={t.id} onClick={() => handleTeamCardClick(t.id as TeamType)} className={cn("flex flex-col items-center justify-center min-w-[88px] h-32 rounded-3xl transition-all border-2", selectedTeam === t.id ? `bg-white/10 border-primary` : "bg-[#1a1a1a] border-transparent hover:bg-white/5")}>
                             {t.id === "ALL" ? (
                                 <div className="flex flex-col items-center">
                                     <span className="text-[11px] font-bold text-gray-500 mb-2">{t.label}</span>
                                     <span className="text-2xl font-black text-white">{teamStats[t.id as TeamType].count}명</span>
-                                    <span className="text-[10px] text-gray-500 mt-1">{t.sub}</span>
+                                    <span className="text-[10px] text-gray-500 mt-1">평균 OVR {t.avg}</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center">
                                     <VestIcon color={t.id === "A" ? "#ef4444" : t.id === "B" ? "#eab308" : "#3b82f6"} className="mb-1" />
                                     <span className="text-xl font-black text-white">{teamStats[t.id as TeamType].count}명</span>
-                                    <span className="text-[10px] text-gray-500 mt-0.5">{t.sub}</span>
+                                    <span className="text-[10px] text-gray-500 mt-0.5">평균 OVR {t.avg}</span>
                                 </div>
                             )}
                         </button>
@@ -276,26 +317,16 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                 </div>
             </div>
 
-            {/* Main Content Area */}
             <div className="flex-1 overflow-hidden flex flex-col">
                 {viewMode === "FORMATION" ? (
                     <div className="flex-1 overflow-hidden pb-32 relative">
                         <DndContext id={dndId} sensors={sensors} collisionDetection={customCollisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                             <div className="h-full flex flex-col lg:flex-row gap-4 px-4 pb-4">
                                 <div className="flex-1 bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 relative flex flex-col shadow-2xl">
-                                    {/* Sub-Header in Formation View */}
                                     <div className="flex items-center justify-between p-4 bg-black/20 backdrop-blur-md border-b border-white/5 z-30">
-                                      <span className="text-[11px] font-bold text-primary px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
-                                        {selectedTeam}팀 포메이션 편집
-                                      </span>
+                                      <span className="text-[11px] font-bold text-primary px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">{selectedTeam}팀 포메이션 편집</span>
                                       <div className="relative">
-                                        <button 
-                                            onClick={() => setShowTeamMenu(!showTeamMenu)}
-                                            className="p-2 text-gray-400 hover:text-white transition-all bg-white/5 rounded-full"
-                                        >
-                                            <Menu size={20} />
-                                        </button>
-                                        
+                                        <button onClick={() => setShowTeamMenu(!showTeamMenu)} className="p-2 text-gray-400 hover:text-white transition-all bg-white/5 rounded-full"><Menu size={20} /></button>
                                         {showTeamMenu && (
                                             <div className="absolute right-0 top-12 w-48 bg-[#222] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 overflow-hidden">
                                                 <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
@@ -303,33 +334,27 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                                                     <button onClick={() => setShowTeamMenu(false)}><X size={12} className="text-gray-500" /></button>
                                                 </div>
                                                 {(["A", "B", "C"] as TeamType[]).filter(t => t !== selectedTeam && (t !== "C" || matchMode === "3WAY")).map(team => (
-                                                    <button 
-                                                        key={team}
-                                                        onClick={() => handleReassignSelectedPlayer(team)}
-                                                        className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 rounded-xl transition-all flex items-center gap-2"
-                                                    >
-                                                        <span className={cn("w-2 h-2 rounded-full", team === "A" ? "bg-red-500" : team === "B" ? "bg-yellow-500" : "bg-blue-500")} />
-                                                        {team}팀으로 바꾸기
+                                                    <button key={team} onClick={() => handleReassignSelectedPlayer(team)} className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 rounded-xl transition-all flex items-center gap-2">
+                                                        <span className={cn("w-2 h-2 rounded-full", team === "A" ? "bg-red-500" : team === "B" ? "bg-yellow-500" : "bg-blue-500")} />{team}팀으로 바꾸기
                                                     </button>
                                                 ))}
                                             </div>
                                         )}
                                       </div>
                                     </div>
-
                                     <FormationBoardList 
-                                        quarters={quarters} selectedPlayer={selectedDndPlayer} setQuarters={setQuarters} 
-                                        onPositionRemove={(qId, idx) => setQuarters(prev => prev.map(q => q.id === qId ? { ...q, lineup: Object.fromEntries(Object.entries(q.lineup).filter(([k]) => Number(k) !== idx)) } : q))} 
+                                        quarters={activeQuarters} selectedPlayer={selectedDndPlayer} 
+                                        setQuarters={setQuartersForSelectedTeam} 
+                                        onPositionRemove={(qId, idx) => setQuartersForSelectedTeam(prev => prev.map(q => q.id === qId ? { ...q, lineup: Object.fromEntries(Object.entries(q.lineup).filter(([k]) => Number(k) !== idx)) } : q))} 
                                         currentQuarterId={currentQuarterId} setCurrentQuarterId={setCurrentQuarterId} 
                                     />
                                 </div>
                                 <FormationPlayerList 
-                                    players={formationTeamPlayers}
-                                    currentQuarterLineups={quarters.map(q => q.lineup || {})}
-                                    selectedPlayer={selectedDndPlayer}
-                                    onSelectPlayer={setSelectedDndPlayer}
-                                    onAddPlayer={handleAddPlayer}
-                                    className="w-full lg:w-80 h-full"
+                                    players={formationTeamPlayers} 
+                                    currentQuarterLineups={activeQuarters.map(q => q.lineup || {})} 
+                                    selectedPlayer={selectedDndPlayer} 
+                                    onSelectPlayer={setSelectedDndPlayer} 
+                                    onAddPlayer={handleAddPlayer} 
                                 />
                             </div>
                             <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
@@ -342,92 +367,67 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                         </DndContext>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col overflow-y-auto pb-32">
-                        {/* Summary Section */}
+                    <div className="flex-1 flex flex-col overflow-y-auto pb-32 scrollbar-hide">
                         <div className="px-4 mb-4">
                             <div className="bg-[#fef2f2]/5 border border-red-900/20 rounded-2xl p-4 flex gap-3 shadow-sm items-start">
                                 <AlertCircle className="text-yellow-600 shrink-0" size={20} />
-                                <p className="text-[11px] leading-relaxed text-gray-400">
-                                    플래버의 개인정보는 '원활한 매치 진행'을 목적으로 제공됩니다. <span className="text-red-500 font-bold">목적 외 사용</span>할 경우 법적 처벌을 받을 수 있습니다.
-                                </p>
+                                <p className="text-[11px] leading-relaxed text-gray-400">플래버의 개인정보는 '원활한 매치 진행'을 목적으로 제공됩니다. <span className="text-red-500 font-bold">목적 외 사용</span>할 경우 법적 처벌을 받을 수 있습니다.</p>
                             </div>
                         </div>
-
-                        {/* Sorting & Action Bar */}
                         <div className="px-5 mb-4 flex items-center justify-between gap-3">
                             <div className="flex items-center bg-[#1a1a1a] p-1 rounded-xl border border-white/5">
                                 {(["OVR", "POS", "AGE"] as SortOption[]).map(opt => (
-                                    <button 
-                                        key={opt}
-                                        onClick={() => setSortBy(opt)}
-                                        className={cn(
-                                            "px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all",
-                                            sortBy === opt ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300"
-                                        )}
-                                    >
-                                        {opt === "OVR" ? "OVR순" : opt === "POS" ? "포지션" : "나이순"}
-                                    </button>
+                                    <button key={opt} onClick={() => setSortBy(opt)} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all", sortBy === opt ? "bg-primary text-black shadow-lg" : "text-gray-500 hover:text-gray-300")}>{opt === "OVR" ? "OVR순" : opt === "POS" ? "포지션" : "나이순"}</button>
                                 ))}
                             </div>
-                            <button
-                                onClick={handleAddPlayer}
-                                className="bg-[#333] text-gray-100 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-md border border-white/5 flex items-center gap-2"
-                            >
-                                <Plus size={14} /> 선수 추가
-                            </button>
+                            <button onClick={handleAddPlayer} className="bg-[#333] text-gray-100 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-md border border-white/5 flex items-center gap-2"><Plus size={14} /> 선수 추가</button>
                         </div>
-
-                        {/* Player List */}
-                        <div className="flex flex-col divide-y divide-white/5 px-4 bg-[#111] rounded-t-[40px] pt-10 flex-1 shadow-[0_-40px_80px_rgba(0,0,0,0.8)] border-t border-white/5">
-                            {filteredAndSortedPlayers.length > 0 ? (
-                                filteredAndSortedPlayers.map((player) => (
-                                    <div key={player.id} className="py-5 flex items-center justify-between group px-1">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base font-bold text-white tracking-tight">{player.name}</span>
-                                                <span className="bg-[#222] text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/5">루키</span>
-                                                <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">데뷔</span>
-                                                {player.isMercenary && <span className="text-red-400 text-[10px] font-bold ml-1">용병</span>}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
-                                                <span className="text-gray-400">남자 · {player.position === 'FW' ? '공격적' : player.position === 'DF' ? '수비적' : '밸런스'} · {player.position === 'MF' ? '패스' : '슛'}</span>
-                                            </div>
+                        <div className="flex flex-col gap-8 px-4 bg-[#111] rounded-t-[40px] pt-10 flex-1 shadow-[0_-40px_80px_rgba(0,0,0,0.8)] border-t border-white/5 min-h-full">
+                            {POSITIONS.map((pos) => {
+                                const group = groupedPlayers[pos];
+                                if (group.length === 0) return null;
+                                return (
+                                    <div key={pos} className="flex flex-col">
+                                        <div className="flex items-center gap-2 mb-4 px-1">
+                                            <span className="text-sm font-black text-primary/80 tracking-widest">{pos}</span>
+                                            <div className="h-px flex-1 bg-white/5" /><span className="text-[10px] font-bold text-gray-600">{group.length}명</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="relative">
-                                                <select 
-                                                    className={cn(
-                                                        "appearance-none text-[11px] font-bold px-6 py-2.5 rounded-2xl border transition-all cursor-pointer outline-none min-w-[100px]",
-                                                        player.team === "ALL" ? "bg-[#222] text-gray-400 border-transparent" :
-                                                        player.team === "A" ? "bg-red-500 text-white border-red-400" :
-                                                        player.team === "B" ? "bg-yellow-500 text-black border-yellow-400" :
-                                                        "bg-blue-500 text-white border-blue-400"
-                                                    )}
-                                                    value={player.team} onChange={(e) => handleTeamChange(player.id, e.target.value as TeamType)}
-                                                >
-                                                    <option value="ALL">미지정</option><option value="A">팀A</option><option value="B">팀B</option>{matchMode === "3WAY" && <option value="C">팀C</option>}
-                                                </select>
-                                            </div>
-                                            <button className="p-2 text-gray-700 hover:text-white transition-colors"><MoreVertical size={18} /></button>
+                                        <div className="flex flex-col divide-y divide-white/5">
+                                            {group.map((player) => (
+                                                <div key={player.id} className="py-5 flex items-center justify-between group px-1">
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-base font-bold text-white tracking-tight">{player.name}</span>
+                                                            {player.isMercenary ? (<span className="bg-red-500/10 text-red-500 text-[10px] font-bold px-2 py-0.5 rounded-md border border-red-500/20">용병</span>) : (
+                                                                <><span className="bg-white/5 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 tracking-tighter">OVR {player.overall}</span>{Number(player.id) % 8 === 0 && (<span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">데뷔</span>)}</>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-[11px] font-bold">
+                                                            <span className="text-primary/95 brightness-125">{player.subPosition}</span>
+                                                            {(player.position === 'FW' || player.position === 'MF') ? (<span className="text-gray-500 font-medium">{player.overall} &nbsp; {player.goals}골 {player.assists}어시</span>) : (<span className="text-gray-500 font-medium">{player.overall} &nbsp; {player.cleanSheets}클린 {player.mom}MOM</span>)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="relative">
+                                                            <select className={cn("appearance-none text-[11px] font-bold px-6 py-2.5 rounded-2xl border transition-all cursor-pointer outline-none min-w-[100px] text-center", player.team === "ALL" ? "bg-[#222] text-gray-400 border-transparent" : player.team === "A" ? "bg-red-600 text-white border-red-500" : player.team === "B" ? "bg-yellow-600 text-black border-yellow-500" : "bg-blue-600 text-white border-blue-500")} value={player.team} onChange={(e) => handleTeamChange(player.id, e.target.value as TeamType)}>
+                                                                <option value="ALL">미지정</option><option value="A">팀A</option><option value="B">팀B</option>{matchMode === "3WAY" && <option value="C">팀C</option>}
+                                                            </select>
+                                                        </div>
+                                                        <button className="p-2 text-gray-800 hover:text-white transition-colors"><MoreVertical size={18} /></button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="py-32 flex flex-col items-center justify-center text-gray-700 gap-4">
-                                    <AlertCircle size={40} className="opacity-10" />
-                                    <p className="text-sm font-bold opacity-30">선수가 없습니다.</p>
-                                </div>
-                            )}
+                                );
+                            })}
+                            {filteredAndSortedPlayers.length === 0 && (<div className="py-32 flex flex-col items-center justify-center text-gray-700 gap-4"><AlertCircle size={40} className="opacity-10" /><p className="text-sm font-bold opacity-30">선수가 없습니다.</p></div>)}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Smart Save Bar */}
-            <div className={cn(
-                "fixed bottom-0 left-0 right-0 z-[100] bg-black/95 backdrop-blur-3xl border-t border-white/10 p-5 flex items-center justify-between px-8 md:px-16 transition-all duration-700",
-                isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
-            )}>
+            <div className={cn("fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-3xl border-t border-white/10 p-5 flex items-center justify-between px-8 md:px-16 transition-all duration-700", isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none")}>
                 <p className="text-xs font-bold text-white/80">변동사항 있음</p>
                 <div className="flex gap-2">
                     <button onClick={() => setIsDirty(false)} className="px-6 py-2 rounded-2xl border border-white/10 text-white/40 text-xs font-bold hover:text-white transition-all"><RotateCcw size={14} /></button>
