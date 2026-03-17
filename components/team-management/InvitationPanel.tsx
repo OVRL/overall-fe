@@ -26,7 +26,7 @@ const mockRequests: JoinRequest[] = [
 ];
 
 export default function InvitationPanel() {
-    const [filter, setFilter] = useState<"all" | JoinRequestStatus>("all");
+    const [filter, setFilter] = useState<"all" | JoinRequestStatus>("pending");
     const [requests, setRequests] = useState<JoinRequest[]>(mockRequests);
     const [modal, setModal] = useState<{ type: "approve" | "reject"; request: JoinRequest | null }>({
         type: "approve",
