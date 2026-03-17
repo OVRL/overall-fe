@@ -4,15 +4,15 @@ import React, { useState, useMemo, useId } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, MoreVertical, AlertCircle, Plus, Save, RotateCcw, Menu, X, Check } from "lucide-react";
 import {
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  rectIntersection,
-  CollisionDetection,
+    DndContext,
+    DragEndEvent,
+    DragStartEvent,
+    DragOverlay,
+    useSensor,
+    useSensors,
+    PointerSensor,
+    rectIntersection,
+    CollisionDetection,
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 
@@ -37,7 +37,7 @@ interface InHousePlayer {
     overall: number;
     age: number;
     position: 'FW' | 'MF' | 'DF' | 'GK';
-    subPosition: string; 
+    subPosition: string;
     goals: number;
     assists: number;
     cleanSheets: number;
@@ -76,12 +76,12 @@ const generateInitialQuarters = (): QuarterData[] => [
 const generateMockPlayers = (): InHousePlayer[] => {
     const players: InHousePlayer[] = [];
     const names = ["김시후", "박정현", "신유찬", "윤기현", "김병문", "이준호", "최민석", "정대만", "강백호", "서태웅", "송태섭", "채치수", "전호장", "이정환", "신준섭", "고민구", "성현준", "김수겸", "황태산", "윤대협", "안영수", "허태환"];
-    
+
     for (let i = 0; i < 22; i++) {
         const broadPos = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
         const subPosOptions = POS_MAP[broadPos];
         const subPos = subPosOptions[Math.floor(Math.random() * subPosOptions.length)];
-        
+
         players.push({
             id: String(i + 1),
             name: names[i] || `선수 ${i + 1}`,
@@ -114,15 +114,15 @@ const VestIcon = ({ color, className }: { color: string, className?: string }) =
 );
 
 /** 선수 선택 모달 (MOM 투표 설정 UI 참고) */
-const PlayerSelectionModal = ({ 
-    players, 
-    onClose, 
-    onSelect, 
+const PlayerSelectionModal = ({
+    players,
+    onClose,
+    onSelect,
     currentTeam,
     positionName
-}: { 
-    players: InHousePlayer[], 
-    onClose: () => void, 
+}: {
+    players: InHousePlayer[],
+    onClose: () => void,
     onSelect: (player: InHousePlayer) => void,
     currentTeam: string,
     positionName: string
@@ -175,8 +175,8 @@ const PlayerSelectionModal = ({
 
                 {/* 푸터 */}
                 <div className="p-5 bg-black/20 border-t border-white/5">
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         className="w-full py-4 text-sm font-bold text-gray-400 hover:text-white transition-all rounded-2xl border border-white/5"
                     >
                         닫기
@@ -254,10 +254,10 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const groupedPlayers = useMemo(() => {
         const groups: Record<string, InHousePlayer[]> = { "FW": [], "MF": [], "DF": [], "GK": [] };
-        filteredAndSortedPlayers.forEach(p => { 
+        filteredAndSortedPlayers.forEach(p => {
             const broad = getBroadPosition(p.position);
             if (groups[broad]) {
-                groups[broad].push(p); 
+                groups[broad].push(p);
             } else {
                 groups["FW"].push(p); // 안전장치
             }
@@ -273,7 +273,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const handleTeamChange = (playerId: string, team: TeamType) => {
         setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, team } : p));
-        
+
         // 데이터 무결성: 모든 팀의 포메이션에서 해당 선수 제거 (팀이 바뀌었으므로)
         setTeamQuarters(prev => {
             const newTeamQuarters = { ...prev };
@@ -291,7 +291,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
             });
             return newTeamQuarters;
         });
-        
+
         setIsDirty(true);
     };
 
@@ -300,22 +300,22 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
             onComplete: (playerData) => {
                 if (!playerData) return;
                 const newId = String(Date.now());
-                
+
                 // 포지션 정보를 대분류로 변환하여 에러 방지
                 const rawPos = playerData.position || "ST";
                 const broadPos = getBroadPosition(rawPos);
-                
+
                 const subPosOptions = POS_MAP[broadPos] || ['ST'];
                 const subPos = rawPos.length <= 3 ? rawPos.toUpperCase() : subPosOptions[0];
-                
+
                 const newPlayer: InHousePlayer = {
-                    id: newId, 
-                    name: playerData.name || "비공개", 
+                    id: newId,
+                    name: playerData.name || "비공개",
                     overall: (playerData as any).overall || 80 + Math.floor(Math.random() * 20),
-                    age: (playerData as any).age || 20 + Math.floor(Math.random() * 15), 
-                    position: broadPos, 
+                    age: (playerData as any).age || 20 + Math.floor(Math.random() * 15),
+                    position: broadPos,
                     subPosition: subPos,
-                    goals: 0, assists: 0, cleanSheets: 0, mom: 0, 
+                    goals: 0, assists: 0, cleanSheets: 0, mom: 0,
                     team: selectedTeam === "ALL" ? "ALL" : selectedTeam,
                     isMercenary: true, image: playerData.image || "/images/player/img_player_2.webp"
                 };
@@ -339,7 +339,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const handleSelectPlayerFromModal = (p: InHousePlayer) => {
         if (!selectingPos) return;
-        
+
         const formationPlayer: Player = {
             id: Number(p.id),
             name: p.name,
@@ -359,25 +359,25 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
             }
             return q;
         }));
-        
+
         setSelectingPos(null);
         setIsDirty(true);
     };
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
     const customCollisionDetection: CollisionDetection = (args) => {
-      const { pointerCoordinates, droppableContainers, droppableRects } = args;
-      if (!pointerCoordinates) return rectIntersection(args);
-      const collisions = [];
-      for (const container of droppableContainers) {
-        const rect = droppableRects.get(container.id);
-        if (rect) {
-          const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-          const distance = Math.sqrt(Math.pow(pointerCoordinates.x - center.x, 2) + Math.pow(pointerCoordinates.y - center.y, 2));
-          if (distance < 30) collisions.push({ id: container.id, data: { droppableContainer: container, value: distance } });
+        const { pointerCoordinates, droppableContainers, droppableRects } = args;
+        if (!pointerCoordinates) return rectIntersection(args);
+        const collisions = [];
+        for (const container of droppableContainers) {
+            const rect = droppableRects.get(container.id);
+            if (rect) {
+                const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                const distance = Math.sqrt(Math.pow(pointerCoordinates.x - center.x, 2) + Math.pow(pointerCoordinates.y - center.y, 2));
+                if (distance < 30) collisions.push({ id: container.id, data: { droppableContainer: container, value: distance } });
+            }
         }
-      }
-      return collisions.sort((a, b) => (a.data?.value || 0) - (b.data?.value || 0));
+        return collisions.sort((a, b) => (a.data?.value || 0) - (b.data?.value || 0));
     };
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -427,7 +427,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                     {[
                         { id: "ALL", color: "gray", label: "전체", avg: teamStats.ALL.avgOverall },
                         { id: "A", color: "red", label: "A팀", avg: teamStats.A.avgOverall },
-                        { id: "B", color: "yellow", label: "B팀", avg: teamStats.B.avgOverall }, 
+                        { id: "B", color: "yellow", label: "B팀", avg: teamStats.B.avgOverall },
                         ...(matchMode === "3WAY" ? [{ id: "C", color: "blue", label: "C팀", avg: teamStats.C.avgOverall }] : [])
                     ].map(t => (
                         <button key={t.id} onClick={() => handleTeamCardClick(t.id as TeamType)} className={cn("flex flex-col items-center justify-center min-w-[88px] h-32 rounded-3xl transition-all border-2", selectedTeam === t.id ? `bg-white/10 border-primary` : "bg-[#1a1a1a] border-transparent hover:bg-white/5")}>
@@ -456,30 +456,30 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                             <div className="h-full flex flex-col lg:flex-row gap-4 px-4 pb-4">
                                 <div className="flex-1 bg-[#1a1a1a] rounded-3xl overflow-hidden border border-white/5 relative flex flex-col shadow-2xl">
                                     <div className="flex items-center justify-between p-4 bg-black/20 backdrop-blur-md border-b border-white/5 z-30">
-                                      <span className="text-[11px] font-bold text-primary px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">{selectedTeam}팀 포메이션 편집</span>
-                                      <div className="relative">
-                                        <button onClick={() => setShowTeamMenu(!showTeamMenu)} className="p-2 text-gray-400 hover:text-white transition-all bg-white/5 rounded-full"><Menu size={20} /></button>
-                                        {showTeamMenu && (
-                                            <div className="absolute right-0 top-12 w-48 bg-[#222] border border-white/10 rounded-2xl p-2 shadow-2xl z-40 overflow-hidden">
-                                                <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
-                                                    <span className="text-[10px] font-bold text-gray-500">팀 변경 (선택된 선수)</span>
-                                                    <button onClick={() => setShowTeamMenu(false)}><X size={12} className="text-gray-500" /></button>
+                                        <span className="text-[11px] font-bold text-primary px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">{selectedTeam}팀 포메이션 편집</span>
+                                        <div className="relative">
+                                            <button onClick={() => setShowTeamMenu(!showTeamMenu)} className="p-2 text-gray-400 hover:text-white transition-all bg-white/5 rounded-full"><Menu size={20} /></button>
+                                            {showTeamMenu && (
+                                                <div className="absolute right-0 top-12 w-48 bg-[#222] border border-white/10 rounded-2xl p-2 shadow-2xl z-40 overflow-hidden">
+                                                    <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
+                                                        <span className="text-[10px] font-bold text-gray-500">팀 변경 (선택된 선수)</span>
+                                                        <button onClick={() => setShowTeamMenu(false)}><X size={12} className="text-gray-500" /></button>
+                                                    </div>
+                                                    {(["A", "B", "C"] as TeamType[]).filter(t => t !== selectedTeam && (t !== "C" || matchMode === "3WAY")).map(team => (
+                                                        <button key={team} onClick={() => handleReassignSelectedPlayer(team)} className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 rounded-xl transition-all flex items-center gap-2">
+                                                            <span className={cn("w-2 h-2 rounded-full", team === "A" ? "bg-red-500" : team === "B" ? "bg-yellow-500" : "bg-blue-500")} />{team}팀으로 바꾸기
+                                                        </button>
+                                                    ))}
                                                 </div>
-                                                {(["A", "B", "C"] as TeamType[]).filter(t => t !== selectedTeam && (t !== "C" || matchMode === "3WAY")).map(team => (
-                                                    <button key={team} onClick={() => handleReassignSelectedPlayer(team)} className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 rounded-xl transition-all flex items-center gap-2">
-                                                        <span className={cn("w-2 h-2 rounded-full", team === "A" ? "bg-red-500" : team === "B" ? "bg-yellow-500" : "bg-blue-500")} />{team}팀으로 바꾸기
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                      </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <FormationBoardList 
-                                        quarters={activeQuarters} 
-                                        selectedPlayer={selectedDndPlayer} 
-                                        setQuarters={setQuartersForSelectedTeam} 
-                                        onPositionRemove={(qId, idx) => setQuartersForSelectedTeam(prev => prev.map(q => q.id === qId ? { ...q, lineup: Object.fromEntries(Object.entries(q.lineup || {}).filter(([k]) => Number(k) !== idx)) } : q))} 
-                                        currentQuarterId={currentQuarterId} 
+                                    <FormationBoardList
+                                        quarters={activeQuarters}
+                                        selectedPlayer={selectedDndPlayer}
+                                        setQuarters={setQuartersForSelectedTeam}
+                                        onPositionRemove={(qId, idx) => setQuartersForSelectedTeam(prev => prev.map(q => q.id === qId ? { ...q, lineup: Object.fromEntries(Object.entries(q.lineup || {}).filter(([k]) => Number(k) !== idx)) } : q))}
+                                        currentQuarterId={currentQuarterId}
                                         setCurrentQuarterId={(id) => setCurrentQuarterId(id)}
                                         onPositionSelect={(pos) => setSelectingPos(pos)}
                                     />
@@ -491,12 +491,12 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                                         여기서는 FormationBoardList의 린트 에러를 무시하고 onPositionSelect를 추가로 넘김 (동작 여부 확인 필요)
                                     */}
                                 </div>
-                                <FormationPlayerList 
-                                    players={formationTeamPlayers} 
-                                    currentQuarterLineups={activeQuarters.map(q => q.lineup || {})} 
-                                    selectedPlayer={selectedDndPlayer} 
-                                    onSelectPlayer={setSelectedDndPlayer} 
-                                    onAddPlayer={handleAddPlayer} 
+                                <FormationPlayerList
+                                    players={formationTeamPlayers}
+                                    currentQuarterLineups={activeQuarters.map(q => q.lineup || {})}
+                                    selectedPlayer={selectedDndPlayer}
+                                    onSelectPlayer={setSelectedDndPlayer}
+                                    onAddPlayer={handleAddPlayer}
                                 />
                             </div>
                             <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
@@ -511,10 +511,7 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                 ) : (
                     <div className="flex-1 flex flex-col overflow-y-auto pb-32 scrollbar-hide">
                         <div className="px-4 mb-4">
-                            <div className="bg-[#fef2f2]/5 border border-red-900/20 rounded-2xl p-4 flex gap-3 shadow-sm items-start">
-                                <AlertCircle className="text-yellow-600 shrink-0" size={20} />
-                                <p className="text-[11px] leading-relaxed text-gray-400">플래버의 개인정보는 '원활한 매치 진행'을 목적으로 제공됩니다. <span className="text-red-500 font-bold">목적 외 사용</span>할 경우 법적 처벌을 받을 수 있습니다.</p>
-                            </div>
+
                         </div>
                         <div className="px-5 mb-4 flex items-center justify-between gap-3">
                             <div className="flex items-center bg-[#1a1a1a] p-1 rounded-xl border border-white/5">
