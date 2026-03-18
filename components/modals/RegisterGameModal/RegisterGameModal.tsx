@@ -30,7 +30,7 @@ function RegisterGameFormContent() {
   const { control, handleSubmit, setValue, getValues, resetToDefaults } =
     formState;
   const { selectedTeamIdNum } = useSelectedTeamId();
-  const { handleAddressClick, handleOpponentTeamClick } = useRegisterGameModals({
+  const { handleAddressClick } = useRegisterGameModals({
     setValue,
   });
   const { onSubmit, isInFlight } = useRegisterGameSubmit({
@@ -44,6 +44,8 @@ function RegisterGameFormContent() {
   useEffect(() => {
     if (currentMatchType !== "MATCH") {
       setValue("opponentName", "", { shouldValidate: true });
+      setValue("opponentTeamId", null, { shouldValidate: true });
+    } else {
       setValue("opponentTeamId", null, { shouldValidate: true });
     }
   }, [currentMatchType, setValue]);
@@ -71,7 +73,6 @@ function RegisterGameFormContent() {
             <MatchOnlySection
               control={control}
               isMatch={currentMatchType === "MATCH"}
-              onOpponentTeamClick={handleOpponentTeamClick}
             />
 
             <ScheduleSection

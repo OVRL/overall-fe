@@ -8,29 +8,31 @@ interface RosterDetailProps {
   member: Readonly<RosterMember>;
 }
 
+// StatGrid에 전달할 스탯 (overall 없을 때 기본값, 있을 때 서버 값으로 덮어씀)
+const DEFAULT_STAT = {
+  출장: 0,
+  오버롤: 0,
+  골: 0,
+  어시: 0,
+  기점: 0,
+  클린시트: 0,
+  승률: "0%",
+} as const;
+
 const RosterDetail = ({ member }: RosterDetailProps) => {
   const overall = member.overall;
-  const stat = overall
-    ? {
-        출장: overall.appearances,
-        오버롤: overall.ovr,
-        골: overall.goals,
-        어시: overall.assists,
-        기점: overall.keyPasses,
-        클린시트: overall.cleanSheets,
-        주발: "R" as const,
-        승률: `${overall.winRate}%`,
-      }
-    : {
-        출장: 0,
-        오버롤: 0,
-        골: 0,
-        어시: 0,
-        기점: 0,
-        클린시트: 0,
-        주발: "R" as const,
-        승률: "0%",
-      };
+  const stat = {
+    ...DEFAULT_STAT,
+    ...(overall && {
+      출장: overall.appearances,
+      오버롤: overall.ovr,
+      골: overall.goals,
+      어시: overall.assists,
+      기점: overall.keyPasses,
+      클린시트: overall.cleanSheets,
+      승률: `${overall.winRate}%`,
+    }),
+  };
 
   return (
     <article className="-mx-4 -mt-4 h-72.25 rounded-t-2xl">

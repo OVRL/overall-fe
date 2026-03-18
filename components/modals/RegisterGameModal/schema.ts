@@ -92,7 +92,7 @@ export type RegisterGameValues = z.infer<typeof registerGameSchema>;
 export function getRegisterGameDefaultValues(): RegisterGameValues {
   const today = format(new Date(), "yyyy-MM-dd");
   return {
-    matchType: "INTERNAL",
+    matchType: "MATCH",
     opponentName: "",
     opponentTeamId: null,
     startDate: today,

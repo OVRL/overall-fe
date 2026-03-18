@@ -1,9 +1,8 @@
 import PositionChip from "@/components/PositionChip";
 import ImgPlayer from "@/components/ui/ImgPlayer";
+import type { Position } from "@/types/position";
 import type { RosterMember } from "./useFindManyTeamMemberQuery";
 
-// 생년월일 필드 미구축으로 목 데이터 사용
-const MOCK_BIRTH_LABEL = "나이 만 30세";
 const MOCK_PLAYER_IMAGE = "/images/player/img_player_2.webp";
 
 function formatJoinedAt(joinedAt: unknown): string {
@@ -21,6 +20,23 @@ function formatJoinedAt(joinedAt: unknown): string {
   }
 }
 
+/** 생년월일(DateTime)을 한국 만 나이로 변환 */
+function getKoreanAge(birthDate: string | null | undefined): string {
+  if (birthDate == null || birthDate === "") return "-";
+  try {
+    const d = new Date(birthDate);
+    if (Number.isNaN(d.getTime())) return "-";
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const monthDiff = today.getMonth() - d.getMonth();
+    const dayDiff = today.getDate() - d.getDate();
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age -= 1;
+    return `나이 만 ${age}세`;
+  } catch {
+    return "-";
+  }
+}
+
 interface PlayerProfileHeaderProps {
   member: Readonly<RosterMember>;
 }
@@ -29,6 +45,7 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
   const name = member.user?.name ?? "";
   const profileImg =
     member.profileImg ?? member.user?.profileImage ?? MOCK_PLAYER_IMAGE;
+  console.log(member.user);
 
   return (
     <div className="relative w-full h-39.75">
@@ -42,12 +59,14 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
         <h3 className="w-23.5 h-6 truncate font-bold text-lg leading-6 mb-1 text-white">
           {name}
         </h3>
-        <div className="inline-flex gap-1 mb-4">
-          <PositionChip
-            position={
-              (member.position ?? "MF") as import("@/types/position").Position
-            }
-          />
+        <div className="inline-flex flex-wrap gap-1 mb-4">
+          {(member.user?.subPositions ?? []).length > 0 ? (
+            (member.user?.subPositions ?? []).map((pos) => (
+              <PositionChip key={pos} position={pos as Position} />
+            ))
+          ) : (
+            <PositionChip position={(member.position ?? "MF") as Position} />
+          )}
         </div>
         <dl className="flex flex-col gap-1 text-gray-500 text-[0.6875rem]">
           <div className="flex gap-1">
@@ -56,7 +75,7 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
           </div>
           <div className="flex gap-1">
             <dt className="sr-only">나이</dt>
-            <dd>{MOCK_BIRTH_LABEL}</dd>
+            <dd>{getKoreanAge(member.user?.birthDate ?? null)}</dd>
           </div>
         </dl>
       </div>

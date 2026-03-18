@@ -19,6 +19,8 @@ export const FindManyTeamMemberQuery = graphql`
           id
           name
           profileImage
+          birthDate
+          subPositions
         }
         overall {
           __typename

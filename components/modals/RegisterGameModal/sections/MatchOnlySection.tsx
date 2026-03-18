@@ -10,7 +10,6 @@ import type { RegisterGameValues } from "../schema";
 interface MatchOnlySectionProps {
   control: Control<RegisterGameValues>;
   isMatch: boolean;
-  onOpponentTeamClick: () => void;
 }
 
 /**
@@ -20,7 +19,6 @@ interface MatchOnlySectionProps {
 export function MatchOnlySection({
   control,
   isMatch,
-  onOpponentTeamClick,
 }: MatchOnlySectionProps) {
   return (
     <AnimatePresence>
@@ -37,21 +35,16 @@ export function MatchOnlySection({
             name="opponentName"
             control={control}
             render={({ field }) => (
-              <button
-                type="button"
-                onClick={onOpponentTeamClick}
-                className="w-full text-left cursor-pointer"
-              >
-                <TextField
-                  label="상대팀"
-                  placeholder="상대팀을 검색하세요"
-                  className="text-Fill_Primary pointer-events-none"
-                  showBorderBottom={false}
-                  value={field.value}
-                  name={field.name}
-                  readOnly
-                />
-              </button>
+              <TextField
+                label="상대팀"
+                placeholder="상대팀 명을 입력하세요"
+                className="text-Fill_Primary"
+                showBorderBottom={false}
+                value={field.value ?? ""}
+                name={field.name}
+                onChange={(e) => field.onChange(e.target.value)}
+                onBlur={field.onBlur}
+              />
             )}
           />
           <FormSection label="유니폼">
