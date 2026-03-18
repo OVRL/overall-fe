@@ -40,7 +40,7 @@ const getRandomMOM = (): MOMPlayer[] => {
     id: p.id,
     name: p.name,
     position: p.position,
-    number: p.number,
+    number: p.number ?? 0,
     goals: Math.floor(Math.random() * 3),
     assists: Math.floor(Math.random() * 3),
     clean: p.position === "GK" || p.position === "CB" || p.position === "LB" || p.position === "RB" ? (Math.random() > 0.5 ? 1 : 0) : 0,

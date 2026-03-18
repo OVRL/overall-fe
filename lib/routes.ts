@@ -9,6 +9,7 @@ export const PUBLIC_ROUTES = [
   /^\/onboarding(\/.*)?$/,
   /^\/create-team(\/.*)?$/,
   /^\/calculation(\/.*)?$/,
+  /^\/player(\/.*)?$/,
 ];
 
 // 로그인 + 팀이 있어야만 접근 가능한 경로 (팀 없으면 /landing으로 리다이렉트)
