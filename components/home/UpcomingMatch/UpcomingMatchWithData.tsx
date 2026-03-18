@@ -8,33 +8,44 @@ import type { MatchForUpcomingDisplay } from "./upcomingMatchDisplay";
 import { buildUpcomingMatchDisplay } from "./upcomingMatchDisplay";
 import { pickSoonestMatch } from "@/utils/match/pickSoonestMatch";
 import NoUpcomingMatch from "./NoUpcomingMatch";
+import OnboardingUpcomingMatch from "./OnboardingUpcomingMatch";
 import UpcomingMatchDesktop from "./UpcomingMatchDesktop";
 import UpcomingMatchMobile from "./UpcomingMatchMobile";
 
+/** 다가오는 경기 없을 때: 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch */
+function NoMatchContent({ isSoloTeam }: { isSoloTeam: boolean }) {
+  return (
+    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
+      {isSoloTeam ? <OnboardingUpcomingMatch /> : <NoUpcomingMatch />}
+    </div>
+  );
+}
+
 /**
  * Relay 스토어에서 findMatch를 읽어 다가오는 경기 1건을 표시합니다.
- * selectedTeamIdNum이 없으면 "다가오는 경기가 없습니다" UI를 렌더합니다.
+ * 경기 없을 때 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch.
  */
 export default function UpcomingMatchWithData() {
-  const { selectedTeamIdNum } = useSelectedTeamId();
+  const { selectedTeamIdNum, isSoloTeam } = useSelectedTeamId();
 
   if (selectedTeamIdNum == null) {
-    return (
-      <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
-        <NoUpcomingMatch />
-      </div>
-    );
+    return <NoMatchContent isSoloTeam={isSoloTeam} />;
   }
 
   return (
-    <UpcomingMatchWithQuery createdTeamId={selectedTeamIdNum} />
+    <UpcomingMatchWithQuery
+      createdTeamId={selectedTeamIdNum}
+      isSoloTeam={isSoloTeam}
+    />
   );
 }
 
 function UpcomingMatchWithQuery({
   createdTeamId,
+  isSoloTeam,
 }: {
   createdTeamId: number;
+  isSoloTeam: boolean;
 }) {
   const data = useLazyLoadQuery<findMatchQuery>(
     FindMatchQuery,
@@ -47,11 +58,7 @@ function UpcomingMatchWithQuery({
   const display = soonest ? buildUpcomingMatchDisplay(soonest) : null;
 
   if (display == null) {
-    return (
-      <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
-        <NoUpcomingMatch />
-      </div>
-    );
+    return <NoMatchContent isSoloTeam={isSoloTeam} />;
   }
 
   return (

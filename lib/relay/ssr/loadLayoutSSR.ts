@@ -1,4 +1,5 @@
 import type { findUserByIdQuery$data } from "@/__generated__/findUserByIdQuery.graphql";
+import type { findManyTeamMemberQueryQuery$data } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
 import type { findTeamMemberQuery$data } from "@/__generated__/findTeamMemberQuery.graphql";
 import type { UserModel } from "@/contexts/UserContext";
 import { fetchQuery } from "relay-runtime";
@@ -79,17 +80,22 @@ export async function loadLayoutSSR(
       )
     : Promise.resolve<findTeamMemberQuery$data | null>(null);
 
-  const [userData, teamMemberData] = (await Promise.all([
+  const [userData, teamMemberData, rosterData] = (await Promise.all([
     userPromise,
     teamMemberPromise,
     observableToPromise(rosterPromise),
-  ])) as [findUserByIdQuery$data | null, findTeamMemberQuery$data | null, unknown];
+  ])) as [
+    findUserByIdQuery$data | null,
+    findTeamMemberQuery$data | null,
+    findManyTeamMemberQueryQuery$data,
+  ];
 
   const layoutState = deriveLayoutState(
     userData,
     teamMemberData,
     selectedTeamIdFromCookie,
     userId,
+    rosterData,
   );
 
   // 2단계: 선택 팀이 정해졌으면 FindMatch 로드 (createdTeamId는 숫자 teamId)
@@ -114,22 +120,27 @@ export async function loadLayoutSSR(
   return { relayInitialRecords, layoutState: layoutStateWithNum };
 }
 
-/** FindTeamMember 결과 + 쿠키로 LayoutState 파생 (레이아웃 전용 로직) */
+/** FindTeamMember + FindManyTeamMember(로스터) 결과와 쿠키로 LayoutState 파생 (레이아웃 전용 로직) */
 function deriveLayoutState(
   userData: findUserByIdQuery$data | null,
   teamMemberData: findTeamMemberQuery$data | null,
   selectedTeamIdFromCookie: string | null,
   userId: number | null,
+  rosterData: findManyTeamMemberQueryQuery$data,
 ): LayoutState {
   const initialUser = userData?.findUserById
     ? relayUserToUserModel(userData.findUserById)
     : null;
+
+  const rosterTotalCount = rosterData?.findManyTeamMember?.totalCount ?? 0;
+  const initialIsSoloTeam = rosterTotalCount === 1;
 
   if (!teamMemberData?.findTeamMember?.length) {
     return {
       ...EMPTY_LAYOUT_STATE,
       userId,
       initialUser,
+      initialIsSoloTeam,
     };
   }
 
@@ -177,6 +188,7 @@ function deriveLayoutState(
     initialSelectedTeamName,
     initialSelectedTeamImageUrl,
     initialSelectedTeamIdFromSingleTeam,
+    initialIsSoloTeam,
   };
 }
 

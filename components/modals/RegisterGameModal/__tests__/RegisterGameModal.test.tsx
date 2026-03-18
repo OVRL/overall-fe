@@ -183,7 +183,7 @@ describe("RegisterGameModal", () => {
     render(<RegisterGameModal />);
 
     expect(
-      screen.getByPlaceholderText("상대팀을 검색하세요"),
+      screen.getByPlaceholderText("상대팀 명을 입력하세요"),
     ).toBeInTheDocument();
   });
 });

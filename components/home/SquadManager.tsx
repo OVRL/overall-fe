@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import StartingXI from "@/components/home/StartingXI";
 import PlayerRosterPanel from "@/components/home/Roster/PlayerRosterPanel";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { Player } from "@/types/player";
 
 interface SquadManagerProps {
@@ -14,6 +15,7 @@ export default function SquadManager({
   initialPlayers,
   upcomingMatchSlot,
 }: SquadManagerProps) {
+  const { isSoloTeam } = useSelectedTeamId();
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
 
   const handlePlayersChange = useCallback((newPlayers: Player[]) => {
@@ -31,6 +33,7 @@ export default function SquadManager({
         {upcomingMatchSlot}
         <StartingXI
           players={players}
+          isSoloTeam={isSoloTeam}
           onPlayersChange={handlePlayersChange}
           onPlayerSelect={handlePlayerSelect}
         />

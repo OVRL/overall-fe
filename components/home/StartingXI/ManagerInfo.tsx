@@ -1,7 +1,5 @@
-"use client";
-
-import React from "react";
 import Image from "next/image";
+import OnboardingManager from "./OnboardingManager";
 
 /**
  * 감독 스탯 정보
@@ -30,11 +28,8 @@ const ManagerStats = () => (
   </div>
 );
 
-/**
- * 감독 정보 섹션
- */
 const ManagerInfo = () => (
-  <div className="flex items-center justify-center gap-2 md:gap-6 mt-4 md:mt-5 flex-nowrap overflow-x-visible">
+  <div className="flex items-center justify-center gap-2">
     {/* 감독 사진 */}
     <div className="relative shrink-0">
       <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden relative">
@@ -58,5 +53,13 @@ const ManagerInfo = () => (
     <ManagerStats />
   </div>
 );
+/**
+ * 감독 정보 섹션. 팀원 1명이면 온보딩, 2명 이상이면 감독 정보 (추후 감독 쿼리 연동 시 쿼리 유무로 분기 예정)
+ */
+const ManagerInfoWrapper = ({ isSoloTeam }: { isSoloTeam: boolean }) => (
+  <div className="md:gap-6 flex-nowrap overflow-x-visible flex justify-center">
+    {isSoloTeam ? <OnboardingManager /> : <ManagerInfo />}
+  </div>
+);
 
-export default ManagerInfo;
+export default ManagerInfoWrapper;

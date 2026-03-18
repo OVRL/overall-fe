@@ -19,6 +19,8 @@ export interface LayoutState {
   initialSelectedTeamImageUrl: string | null;
   /** 팀이 1개일 때 서버가 초기값으로 넣어준 경우. 클라이언트에서 쿠키 저장용 */
   initialSelectedTeamIdFromSingleTeam: boolean;
+  /** 로스터 팀원이 1명(나 혼자)일 때 true. 홈 온보딩 UI 분기용 (findManyTeamMember totalCount 기반) */
+  initialIsSoloTeam: boolean;
 }
 
 export const EMPTY_LAYOUT_STATE: LayoutState = {
@@ -29,4 +31,5 @@ export const EMPTY_LAYOUT_STATE: LayoutState = {
   initialSelectedTeamName: null,
   initialSelectedTeamImageUrl: null,
   initialSelectedTeamIdFromSingleTeam: false,
+  initialIsSoloTeam: false,
 };

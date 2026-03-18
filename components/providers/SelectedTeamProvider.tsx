@@ -20,6 +20,8 @@ export type SelectedTeamContextValue = {
   selectedTeamName: string | null;
   /** 표시용 팀 이미지 URL (SSR에서 전달, 없으면 기본 이미지 사용) */
   selectedTeamImageUrl: string | null;
+  /** 로스터 팀원 1명(나 혼자) 여부. layout SSR findManyTeamMember totalCount 기반, 홈 온보딩 분기용 */
+  isSoloTeam: boolean;
   setSelectedTeamId: (teamId: string | null, teamIdNum?: number | null) => void;
 };
 
@@ -38,6 +40,8 @@ type SelectedTeamProviderProps = {
   initialSelectedTeamImageUrl?: string | null;
   /** SSR에서 팀이 1개라서 초기값을 넣어준 경우. 클라이언트에서 쿠키에 한 번 저장해 다음 접속 시 서버가 읽을 수 있게 함 */
   initialSelectedTeamIdFromSingleTeam?: boolean;
+  /** layout SSR findManyTeamMember totalCount 기반. 팀원 1명이면 true (홈 온보딩 분기용) */
+  initialIsSoloTeam?: boolean;
   children: ReactNode;
 };
 
@@ -52,6 +56,7 @@ export function SelectedTeamProvider({
   initialSelectedTeamName = null,
   initialSelectedTeamImageUrl = null,
   initialSelectedTeamIdFromSingleTeam = false,
+  initialIsSoloTeam = false,
   children,
 }: SelectedTeamProviderProps) {
   const [selectedTeamId, setSelectedTeamIdState] = useState<string | null>(
@@ -99,6 +104,7 @@ export function SelectedTeamProvider({
       selectedTeamIdNum,
       selectedTeamName,
       selectedTeamImageUrl,
+      isSoloTeam: initialIsSoloTeam,
       setSelectedTeamId,
     }),
     [
@@ -106,6 +112,7 @@ export function SelectedTeamProvider({
       selectedTeamIdNum,
       selectedTeamName,
       selectedTeamImageUrl,
+      initialIsSoloTeam,
       setSelectedTeamId,
     ],
   );
