@@ -45,6 +45,7 @@ export interface ModalPropsMap {
   };
   REGISTER_GAME: Record<string, never>;
   ATTENDANCE_VOTE: Record<string, never>;
+  TEAM_CREATED: Record<string, never>;
 }
 
 export type ModalKey = keyof ModalPropsMap;

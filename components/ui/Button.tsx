@@ -15,7 +15,8 @@ const buttonVariants = cva(
       size: {
         xs: "h-7.5 w-full text-xs rounded-xl",
         s: "h-9.5 w-full text-xs rounded-xl",
-        m: "h-10.5 w-full text-sm rounded-xl",
+        m: "h-10 w-full text-sm rounded-xl",
+        l: "h-12 w-full text-sm rounded-[0.625rem]",
         xl: "h-14 w-full text-lg rounded-sm",
       },
       logo: {
@@ -32,8 +33,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends
-    ButtonHTMLAttributes<HTMLButtonElement>,
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   leftIcon?: ReactNode;
   ref?: Ref<HTMLButtonElement>;

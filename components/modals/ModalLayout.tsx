@@ -19,7 +19,7 @@ const ModalLayout = ({ title, children, onClose, wrapperClassName }: Props) => {
   return (
     <div
       className={cn(
-        "relative max-w-9/10 w-full md:w-100 bg-surface-card border border-border-card rounded-xl p-4 flex flex-col gap-y-12 shadow-xl",
+        "relative max-w-9/10 w-full md:w-100 max-h-[90vh] overflow-y-auto bg-surface-card border border-border-card rounded-xl p-4 flex flex-col gap-y-12 shadow-xl",
         wrapperClassName,
       )}
       onClick={(e) => e.stopPropagation()}
