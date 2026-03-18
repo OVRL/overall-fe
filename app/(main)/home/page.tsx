@@ -3,7 +3,7 @@ import SquadManager from "@/components/home/SquadManager";
 import TeamCreatedModalTrigger from "@/components/home/TeamCreatedModalTrigger";
 import { INITIAL_PLAYERS } from "@/data/players";
 
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <div className="flex-1 flex flex-col">
       <TeamCreatedModalTrigger />

@@ -7,6 +7,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import { Player } from "@/types/player";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
+import OnboardingBestXl from "./OnboardingBestXl";
 
 // 홈 화면 Starting XI 전용 크롭 설정
 const HOME_DESKTOP_CROP = { x: 0, y: 0, width: 1.0, height: 1.0 };
@@ -34,10 +35,16 @@ const FORMATION_POSITIONS: Record<number, FormationPosition> = {
 
 interface FormationFieldProps {
   players: Player[];
+  /** 팀원 1명이면 true. API 없음 동안 온보딩 노출 (추후 베스트 XI 쿼리 값 없을 때로 교체 예정) */
+  isSoloTeam: boolean;
   className?: string;
 }
 
-const FormationField = ({ players, className }: FormationFieldProps) => {
+const FormationField = ({
+  players,
+  isSoloTeam,
+  className,
+}: FormationFieldProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   // 훅은 항상 동일한 순서로 호출되어야 하므로 early return 이전에 선언
@@ -89,24 +96,26 @@ const FormationField = ({ players, className }: FormationFieldProps) => {
 
   return (
     <ObjectField crop={currentCrop} className={className}>
-      {/* 선수 배치 */}
-      {players.slice(0, 11).map((player, index) => {
-        const absPosition = FORMATION_POSITIONS[index + 1];
-        const transformedPos = getTransformedPosition(absPosition);
+      {/* 선수 배치: 팀원 2명 이상이고 베스트 XI 데이터 있을 때만 표시 (현재는 isSoloTeam으로만 분기) */}
+      {!isSoloTeam &&
+        players.slice(0, 11).map((player, index) => {
+          const absPosition = FORMATION_POSITIONS[index + 1];
+          const transformedPos = getTransformedPosition(absPosition);
 
-        return (
-          <div
-            key={player.id}
-            className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-            style={{
-              top: transformedPos.top,
-              left: transformedPos.left,
-            }}
-          >
-            <PlayerPositionCard player={player} />
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={player.id}
+              className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+              style={{
+                top: transformedPos.top,
+                left: transformedPos.left,
+              }}
+            >
+              <PlayerPositionCard player={player} />
+            </div>
+          );
+        })}
+      {isSoloTeam && <OnboardingBestXl />}
     </ObjectField>
   );
 };

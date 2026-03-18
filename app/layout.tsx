@@ -130,6 +130,7 @@ export default async function RootLayout({
                   initialSelectedTeamIdFromSingleTeam={
                     layoutState.initialSelectedTeamIdFromSingleTeam
                   }
+                  initialIsSoloTeam={layoutState.initialIsSoloTeam}
                 >
                   <div id="modal-root"></div>
                   <PageTransition>{children}</PageTransition>
