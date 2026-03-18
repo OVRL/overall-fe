@@ -149,9 +149,8 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
       {/* 기록 더보기 버튼 */}
       <button
         onClick={() => {
-          closeAllModals(); // hideModal() 대신 모든 모달 닫기 (팀 데이터 구조상 다른 팝업이 겹쳐있을 수 있으므로 확실히 닫기 위함)
-          const imgParam = encodeURIComponent(player.image || "/images/ovr.png");
-          router.push(`/player/${player.name}?imgUrl=${imgParam}`);
+          closeAllModals();
+          router.push(`/player/${encodeURIComponent(player.name)}/history`);
         }}
         className="w-full mt-5 py-3.5 rounded-xl border border-[#333333] text-[#CCCCCC] text-[15px] font-medium hover:bg-[#2A2A2A] transition-colors"
       >
