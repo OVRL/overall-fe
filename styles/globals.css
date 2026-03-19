@@ -6,6 +6,10 @@
   --background: var(--color-gray-90);
   --foreground: #171717;
   --label-primary: var(--color-gray-1100);
+  /* 토스트 성공 (Figma OVR 2163-37148) - ToastView success 타입에서 사용 */
+  --color-toast-success-bg: rgba(184, 255, 18, 0.1);
+  --color-toast-success-border: rgba(184, 255, 18, 0.3);
+  --shadow-toast-success: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
 }
 
 .dark {

@@ -7,7 +7,7 @@ export interface PlayerStats {
   어시: number;
   기점: number;
   클린시트: number;
-  주발: "L" | "R" | "B";
+  주발?: "L" | "R" | "B";
   승률: string;
   득점?: number;
   도움?: number;
@@ -29,4 +29,4 @@ export interface Player {
   cumulativeStats?: PlayerStats;
 }
 
-export type StatTabType = "시즌기록" | "누적기록" | "단일기록";
+export type StatTabType = "시즌기록" | "명예의 전당" | "통산 기록";

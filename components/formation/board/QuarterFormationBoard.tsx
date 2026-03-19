@@ -70,7 +70,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
         <ObjectField
           type="full"
           className="w-full"
-          crop={isDesktop ? DESKTOP_CROP : MOBILE_CROP}
+          crop={(isDesktop ?? false) ? DESKTOP_CROP : MOBILE_CROP}
           autoAspect={true}
         >
           <div className="absolute inset-0 pointer-events-none">
@@ -83,7 +83,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
 
               if (!fieldCoords) return null;
 
-              const styleCoords = getRelativePosition(fieldCoords, isDesktop);
+              const styleCoords = getRelativePosition(fieldCoords, isDesktop ?? false);
 
               const player = quarter.lineup?.[index] || null;
               const isActive =

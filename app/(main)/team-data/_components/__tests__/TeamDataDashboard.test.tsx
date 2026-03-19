@@ -1,6 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { Player } from "../../_types/player";
 import TeamDataDashboard from "../TeamDataDashboard";
-import { Player } from "../../_types/player";
+
+const mockInitialPlayers: Player[] = [];
 
 // 모킹
 const mockOpenModal = jest.fn();
@@ -11,7 +13,7 @@ jest.mock("@/hooks/useModal", () => ({
   }),
 }));
 
-jest.mock("../RankingCarousel", () => ({
+jest.mock("../season-record/RankingCarousel", () => ({
   __esModule: true,
   default: ({ onMoreClick, onPlayerClick }: any) => (
     <div data-testid="ranking-carousel">
@@ -23,7 +25,7 @@ jest.mock("../RankingCarousel", () => ({
   ),
 }));
 
-jest.mock("../PlayerListBoard", () => ({
+jest.mock("../season-record/PlayerListBoard", () => ({
   __esModule: true,
   default: ({ onPlayerClick }: any) => (
     <div data-testid="player-list-board">
@@ -52,33 +54,28 @@ jest.mock("@/components/ui/Dropdown", () => ({
 }));
 
 describe("TeamDataDashboard 컴포넌트", () => {
-  const mockPlayers: Player[] = [
-    {
-      id: 1,
-      name: "손흥민",
-      team: "토트넘",
-      value: "100",
-      position: "FW",
-      backNumber: 7,
-      ovr: 90,
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("제목과 하위 컴포넌트들을 정상적으로 렌더링해야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     expect(screen.getByText("팀 데이터")).toBeInTheDocument();
-    expect(screen.getByTestId("dropdown")).toBeInTheDocument();
     expect(screen.getByTestId("ranking-carousel")).toBeInTheDocument();
     expect(screen.getByTestId("player-list-board")).toBeInTheDocument();
   });
 
+  it("명예의 전당 탭 선택 시 기간 드롭다운이 보여야 한다", () => {
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "명예의 전당" }));
+
+    expect(screen.getByTestId("dropdown")).toBeInTheDocument();
+  });
+
   it("선수 클릭 시 상세 모달이 열려야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     const playerClickBtn = screen.getByText("선수 클릭");
     fireEvent.click(playerClickBtn);
@@ -89,7 +86,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   });
 
   it("더보기 클릭 시 통계 모달이 열려야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
     const moreClickBtn = screen.getByText("더보기 클릭");
     fireEvent.click(moreClickBtn);
@@ -103,8 +100,10 @@ describe("TeamDataDashboard 컴포넌트", () => {
     );
   });
 
-  it("시즌 드롭다운 변경 시 상태가 업데이트되어야 한다", () => {
-    render(<TeamDataDashboard allPlayers={mockPlayers} />);
+  it("명예의 전당 기간 드롭다운 변경 시 상태가 업데이트되어야 한다", () => {
+    render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "명예의 전당" }));
 
     const dropdown = screen.getByTestId("dropdown");
     fireEvent.change(dropdown, { target: { value: "2026 시즌" } });

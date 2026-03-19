@@ -37,10 +37,10 @@ export default function TeamManagementPage() {
   };
 
   return (
-    <div className="flex-1 bg-surface-primary">
-      <div className="flex">
-        {/* 좌측 사이드바 (데스크탑) */}
-        <div className="hidden md:block">
+    <div className="flex-1 bg-surface-primary min-h-screen">
+      <div className="flex min-h-screen">
+        {/* 좌측 사이드바 (데스크탑) — self-stretch로 하단까지 배경 연장 */}
+        <div className="hidden md:flex flex-col self-stretch">
           <TeamManagementSidebar
             activeMenu={activeMenu}
             onMenuChange={setActiveMenu}

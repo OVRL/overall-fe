@@ -6,6 +6,7 @@ import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
 import TextField from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import useModal from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 import { Controller } from "react-hook-form";
@@ -17,16 +18,27 @@ import { DatePicker } from "@/components/ui/date/DatePicker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import locationIcon from "@/public/icons/location.svg";
-import { useRouter } from "next/navigation";
+import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
+import { useUserStore } from "@/contexts/UserContext";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
+import { SHOW_TEAM_CREATED_MODAL_KEY } from "@/lib/teamCreatedModalStorage";
 
-interface CreateTeamWrapperProps {
-  userId: number;
-}
-
-const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
+const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
-  const router = useRouter();
-  const { form, onSubmit } = useCreateTeamForm(userId);
+  const router = useBridgeRouter();
+  const user = useUserStore((state) => state.user);
+  const { setSelectedTeamId } = useSelectedTeamId();
+  const { form, onSubmit, isInFlight } = useCreateTeamForm({
+    onSuccess: (createdTeam) => {
+      const teamIdNum = parseNumericIdFromRelayGlobalId(createdTeam.id);
+      setSelectedTeamId(createdTeam.id, teamIdNum ?? undefined);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem(SHOW_TEAM_CREATED_MODAL_KEY, "1");
+      }
+      router.replace("/home");
+    },
+  });
   const {
     control,
     handleSubmit,
@@ -65,14 +77,15 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
     [router],
   );
 
-  // Mutation은 추후 연동. 제출 후 /home으로 이동
+  // createTeam 뮤테이션 실행. 성공 시 onSuccess에서 /home으로 이동
   const handleFormSubmit = useCallback(
     (data: Parameters<typeof onSubmit>[0]) => {
       onSubmit(data);
-      router.replace("/home");
     },
-    [onSubmit, router],
+    [onSubmit],
   );
+
+  const canSubmit = Boolean(user) && isValid && !isInFlight;
 
   return (
     <form
@@ -97,6 +110,14 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
                   errorMessage={error?.message}
                   onChange={(e) => {
                     const value = e.target.value;
+                    // IME 조합 중(한글 등)에는 필터 적용하지 않음 — 자모가 지워지지 않도록
+                    const isComposing =
+                      "isComposing" in e.nativeEvent &&
+                      e.nativeEvent.isComposing;
+                    if (isComposing) {
+                      field.onChange(value.slice(0, 15));
+                      return;
+                    }
                     const filteredValue = value
                       .replace(/[^a-zA-Z0-9가-힣\s]/g, "")
                       .slice(0, 15);
@@ -203,13 +224,17 @@ const CreateTeamWrapper = ({ userId }: CreateTeamWrapperProps) => {
             type="submit"
             variant="primary"
             size="xl"
-            disabled={!isValid}
+            disabled={!canSubmit}
             className={cn(
               "w-full transition-colors",
-              !isValid && "bg-gray-900 text-Label-Tertiary",
+              !canSubmit && "bg-gray-900 text-Label-Tertiary",
             )}
           >
-            만들기
+            {isInFlight ? (
+              <LoadingSpinner label="만들기 중입니다." size="sm" />
+            ) : (
+              "클럽 생성하기"
+            )}
           </Button>
         </div>
       </section>

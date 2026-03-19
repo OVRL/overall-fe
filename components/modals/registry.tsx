@@ -32,6 +32,13 @@ const PlayerSearchModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const TeamSearchModal = dynamic(
+  () => import("./TeamSearchModal/TeamSearchModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
 const RegisterGameModal = dynamic(() => import("./RegisterGameModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
@@ -54,6 +61,10 @@ const AttendanceVoteModal = dynamic(() => import("./AttendanceVoteModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const TeamCreatedModal = dynamic(() => import("./TeamCreatedModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -62,8 +73,10 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   EDIT_PROFILE_IMAGE: EditProfileImageModal,
   EDIT_EMBLEM_IMAGE: EditEmblemImageModal,
   PLAYER_SEARCH: PlayerSearchModal,
+  TEAM_SEARCH: TeamSearchModal,
   REGISTER_GAME: RegisterGameModal,
   TEAM_DATA_PLAYER_DETAIL: TeamDataPlayerDetailModal,
   TEAM_DATA_STAT_RANKING: TeamDataStatRankingModal,
   ATTENDANCE_VOTE: AttendanceVoteModal,
+  TEAM_CREATED: TeamCreatedModal,
 } as ModalComponentMap;

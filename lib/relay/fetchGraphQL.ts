@@ -5,7 +5,64 @@ import {
   type UploadableMap,
   type Variables,
 } from "relay-runtime";
-import { env } from "@/lib/env";
+
+/** SSR 시 fetch에 쓸 오리진 (Node에는 base URL이 없어 상대 URL 사용 불가) */
+function getServerOrigin(): string {
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  const port = process.env.PORT ?? 3000;
+  return `http://localhost:${port}`;
+}
+
+/**
+ * Relay는 Global Object Identification 때문에 모든 id를 문자열로 기대합니다.
+ * 백엔드가 TeamMemberModel 등에서 id를 Int로 반환할 경우 응답을 정규화합니다.
+ * (SSR 직렬화/응답 처리에서도 사용)
+ */
+export function ensureIdStrings(value: unknown): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(ensureIdStrings);
+  const obj = value as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (key === "id" && typeof val === "number") {
+      result[key] = String(val);
+    } else {
+      result[key] = ensureIdStrings(val);
+    }
+  }
+  return result;
+}
+
+/**
+ * 백엔드가 서로 다른 타입에 같은 숫자 id를 줄 수 있어 Relay 정규화 시 충돌이 납니다.
+ * 모든 노드에 __typename:원본id 형태로 id를 덮어쓰면 타입별로 고유 키가 보장됩니다.
+ * (서버/클라이언트 fetch 공통 적용)
+ */
+export function ensureUniqueDataIds(value: unknown): unknown {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(ensureUniqueDataIds);
+  const obj = value as Record<string, unknown>;
+  const typename = obj["__typename"];
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (
+      key === "id" &&
+      typeof typename === "string" &&
+      typename.length > 0 &&
+      (typeof val === "string" || typeof val === "number")
+    ) {
+      result[key] = `${typename}:${val}`;
+    } else {
+      result[key] = ensureUniqueDataIds(val);
+    }
+  }
+  return result;
+}
 
 export const fetchQuery = async (
   params: RequestParameters,
@@ -55,13 +112,12 @@ export const fetchQuery = async (
     });
   }
 
-  // 개발: 백엔드 URL로 직접 호출(rewrite/프록시 우회). CORS 허용 필요.
-  // 프로덕션: 같은 오리진 /api/graphql → API 라우트에서 쿠키로 Authorization 부여 후 백엔드 호출.
-  // NODE_ENV는 클라이언트에서 process.env로만 사용 (t3-env는 NEXT_PUBLIC_만 클라이언트 노출).
+  // 클라이언트: 상대 URL. 서버(SSR): Node에 base가 없어 상대 URL이 Invalid URL이 되므로 절대 URL 사용.
+  const graphqlPath = "/api/graphql";
   const graphqlUrl =
-    process.env.NODE_ENV === "development"
-      ? `${env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")}/graphql`
-      : "/api/graphql";
+    typeof window !== "undefined"
+      ? graphqlPath
+      : `${getServerOrigin()}${graphqlPath}`;
 
   const response = await fetch(graphqlUrl, {
     ...request,
@@ -88,9 +144,29 @@ export const fetchQuery = async (
     throw new Error(message);
   }
 
+  // 백엔드가 id를 Int로 주는 타입(TeamMemberModel 등) 대응: Relay는 id를 문자열로 기대함
+  payload = ensureIdStrings(payload);
+  // UserInfoModel 등 동일 id가 다른 타입과 충돌하지 않도록 타입 접두사 부여
+  payload = ensureUniqueDataIds(payload);
+
+  const errorPayload = payload as { errors?: Array<{ message?: string }> };
+  const hasUnauthorizedError =
+    response.status === 401 ||
+    errorPayload?.errors?.some(
+      (e) =>
+        e?.message === "Unauthorized" ||
+        String(e?.message ?? "").toLowerCase().includes("unauthorized"),
+    );
+
+  // 클라이언트: 토큰 만료 등으로 인증 실패 시 세션 삭제 후 로그인 페이지로
+  // (세션 삭제 없이 "/"로만 가면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+  if (typeof window !== "undefined" && hasUnauthorizedError) {
+    window.location.href = "/api/auth/clear-session?redirect=/";
+    throw new Error("Unauthorized"); // Relay에 에러 payload 반환하지 않기 위해
+  }
+
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)
   if (!response.ok) {
-    const errorPayload = payload as { errors?: Array<{ message?: string }> };
     const detail =
       errorPayload?.errors?.[0]?.message ?? response.statusText;
     throw new Error(`GraphQL 요청 실패 (${response.status}): ${detail}`);

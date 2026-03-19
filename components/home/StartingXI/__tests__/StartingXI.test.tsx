@@ -1,7 +1,26 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import StartingXI from "../StartingXI";
+import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
 import { Player } from "@/types/player";
+
+function renderWithSelectedTeamProvider(
+  ui: React.ReactElement,
+  options?: { initialSelectedTeamId?: string | null; initialSelectedTeamName?: string | null },
+) {
+  const {
+    initialSelectedTeamId = null,
+    initialSelectedTeamName = null,
+  } = options ?? {};
+  return render(
+    <SelectedTeamProvider
+      initialSelectedTeamId={initialSelectedTeamId}
+      initialSelectedTeamName={initialSelectedTeamName}
+    >
+      {ui}
+    </SelectedTeamProvider>,
+  );
+}
 
 // Use a simplified mock for createDataTransfer since jsdom doesn't implement it fully
 const createDataTransfer = () => ({
@@ -48,12 +67,11 @@ const mockPlayers: Player[] = [
 
 describe("StartingXI", () => {
   it("renders formation field", () => {
-    // Need to mock FormationField or ensure it renders identifiable elements
     const handleChange = jest.fn();
-    render(<StartingXI players={mockPlayers} onPlayersChange={handleChange} />);
+    renderWithSelectedTeamProvider(
+      <StartingXI players={mockPlayers} onPlayersChange={handleChange} />,
+    );
 
-    // Check for some text or element that confirms rendering.
-    // ManagerInfo is rendered inside StartingXI
     expect(screen.getByText(/감독/i)).toBeInTheDocument();
   });
 

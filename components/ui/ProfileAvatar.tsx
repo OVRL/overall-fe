@@ -26,6 +26,8 @@ interface ProfileAvatarProps extends VariantProps<typeof avatarVariants> {
   alt: string;
   className?: string;
   onError?: () => void;
+  /** LCP 이미지일 때 true */
+  priority?: boolean;
 }
 
 const ProfileAvatar = ({
@@ -34,6 +36,7 @@ const ProfileAvatar = ({
   size,
   className,
   onError,
+  priority,
 }: ProfileAvatarProps) => {
   return (
     <div className={cn(avatarVariants({ size }), className)}>
@@ -42,6 +45,7 @@ const ProfileAvatar = ({
         alt={alt}
         className="scale-[2] origin-top bg-transparent"
         onError={onError}
+        priority={priority}
       />
     </div>
   );

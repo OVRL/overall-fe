@@ -1,6 +1,6 @@
 "use client";
 import { GlobalPortalConsumer } from "../GlobalPortal";
-import { useModalStore } from "contexts/ModalContext";
+import { useModalStore } from "@/contexts/ModalContext";
 import { AnimatePresence } from "framer-motion";
 import Modal from "./Modal";
 import { MODAL_REGISTRY } from "./registry";

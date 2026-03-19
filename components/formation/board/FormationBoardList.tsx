@@ -2,21 +2,29 @@ import React from "react";
 import QuarterFormationBoard from "./QuarterFormationBoard";
 import { QuarterData, Player, FormationType } from "@/types/formation";
 
+/** 포지션 선택 시 콜백 인자 (QuarterFormationBoard와 동일) */
+export type PositionSelectPayload =
+  | { quarterId: number; index: number; role: string }
+  | null;
+
 interface FormationBoardListProps {
   quarters: QuarterData[];
-  selectedPlayer: Player | null; // Added prop
+  selectedPlayer: Player | null;
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   onPositionRemove: (quarterId: number, index: number) => void;
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
+  /** 포지션 클릭 시 호출 (선택 시 포지션 지정 모달 등에 사용) */
+  onPositionSelect?: (pos: PositionSelectPayload) => void;
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
   quarters,
-  selectedPlayer, // Extracted
+  selectedPlayer,
   setQuarters,
   onPositionRemove,
   currentQuarterId,
+  onPositionSelect,
 }) => {
   return (
     <div className="flex-1 w-full overflow-x-auto">
@@ -31,10 +39,10 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
             key={quarter.id}
             quarter={quarter}
             activePosition={null}
-            selectedPlayer={selectedPlayer} // Passed
+            selectedPlayer={selectedPlayer}
             isSelected={currentQuarterId === quarter.id}
             hasSelection={currentQuarterId !== null}
-            onPositionSelect={() => {}}
+            onPositionSelect={onPositionSelect ?? (() => {})}
             onPositionRemove={onPositionRemove}
             onFormationChange={(fmt) => {
               setQuarters((prev) =>

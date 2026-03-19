@@ -51,7 +51,7 @@ const OnboardingFormationSelector = ({
   multiSelect = false,
 }: OnboardingFormationSelectorProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const currentCrop = isDesktop ? DESKTOP_CROP : MOBILE_CROP;
+  const currentCrop = (isDesktop ?? false) ? DESKTOP_CROP : MOBILE_CROP;
 
   const handlePositionClick = (pos: Position) => {
     if (multiSelect) {
@@ -86,7 +86,7 @@ const OnboardingFormationSelector = ({
         <ObjectField
           crop={currentCrop}
           autoAspect={false}
-          className={cn("w-full", isDesktop ? "h-109" : "h-full")}
+          className={cn("w-full", (isDesktop ?? false) ? "h-109" : "h-full")}
         >
           {" "}
           <div className="absolute inset-0 pointer-events-none  h-9/10 top-0">

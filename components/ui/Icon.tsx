@@ -20,13 +20,18 @@ export default function Icon({
   const iconAlt = alt ?? "icon";
 
   if (nofill) {
+    // width/height가 명시되면 그 크기로 렌더, 없을 때만 auto로 본래 크기 사용
+    const sizeStyle =
+      width != null && height != null
+        ? { width: iconWidth, height: iconHeight }
+        : { width: "auto", height: "auto" };
     return (
       <Image
         src={src}
         width={iconWidth}
         height={iconHeight}
         alt={iconAlt}
-        style={{ objectFit: "contain", ...style }}
+        style={{ objectFit: "contain", ...sizeStyle, ...style }}
         {...props}
       />
     );

@@ -1,31 +1,31 @@
 import PlayerListItem from "./PlayerListItem";
-import { Player } from "@/types/player";
 import PlayerListHeader from "./PlayerListHeader";
-export type { Player };
+import type { RosterMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
 
 export { PlayerListHeader };
 
 interface PlayerInfoListProps {
   id?: string;
-  players: Player[];
+  members: readonly RosterMember[];
   showHeader?: boolean;
-  onPlayerSelect?: (player: Player) => void;
+  onMemberSelect?: (member: RosterMember) => void;
 }
 
 const PlayerInfoList = ({
   id,
-  players,
+  members,
   showHeader = true,
-  onPlayerSelect,
+  onMemberSelect,
 }: PlayerInfoListProps) => {
   return (
     <div id={id} className="w-full flex flex-col rounded-tl-xl overflow-hidden">
       {showHeader && <PlayerListHeader />}
-      {players.map((player) => (
+      {members.map((member, index) => (
         <PlayerListItem
-          key={player.id}
-          player={player}
-          onClick={() => onPlayerSelect && onPlayerSelect(player)}
+          key={member.id}
+          member={member}
+          onClick={() => onMemberSelect?.(member)}
+          priority={index === 0}
         />
       ))}
     </div>

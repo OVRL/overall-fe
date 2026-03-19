@@ -19,13 +19,15 @@ export type BridgeActionType =
   | "VIBRATE"
   | "OPEN_SETTINGS"
   | "GET_LOCATION"
-  | "ROUTE_CHANGE";
+  | "ROUTE_CHANGE"
+  | "OPEN_PHOTO_PICKER";
 
 // 응답 타입 (Native -> Web)
 export type BridgeResponseType =
   | "PUSH_TOKEN_RESULT"
   | "LOCATION_RESULT"
   | "PERMISSIONS_RESULT"
+  | "PHOTO_PICKER_RESULT"
   | "ERROR";
 
 interface BridgeMessage<T = unknown> {
@@ -151,6 +153,14 @@ export const useBridge = () => {
     [requestWithResponse],
   );
 
+  const openPhotoPicker = useCallback(() => {
+    return requestWithResponse<{ base64: string; mimeType: string }>(
+      { type: "OPEN_PHOTO_PICKER" },
+      "PHOTO_PICKER_RESULT",
+      600000, // 10분 (갤러리/카메라 선택 시간 고려)
+    );
+  }, [requestWithResponse]);
+
   return {
     isNativeApp,
     sendToNative,
@@ -158,6 +168,7 @@ export const useBridge = () => {
     getLocation,
     getPushToken,
     requestPermissions,
+    openPhotoPicker,
   };
 };
 

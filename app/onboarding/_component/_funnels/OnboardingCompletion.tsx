@@ -1,42 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
 import Image from "next/image";
-import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import Button from "@/components/ui/Button";
+import { useCelebrationConfetti } from "@/hooks/useCelebrationConfetti";
 
 const OnboardingCompletion = () => {
   const router = useRouter();
 
-  useEffect(() => {
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 2,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.45 },
-        colors: ["#FFD700", "#FF4500", "#008080"], // Example festive colors
-      });
-      confetti({
-        particleCount: 2,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.45 }, // Top right
-        colors: ["#FFD700", "#FF4500", "#008080"],
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-
-    frame();
-  }, []);
+  useCelebrationConfetti();
 
   return (
     <section className="flex flex-col h-full pb-12">

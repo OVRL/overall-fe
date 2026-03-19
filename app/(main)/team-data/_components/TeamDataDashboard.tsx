@@ -2,75 +2,76 @@
 
 import { useState } from "react";
 import type { Player, StatTabType } from "../_types/player";
-import { getPlayerValue } from "../_constants/mockPlayers";
-import RankingCarousel from "./RankingCarousel";
-import useModal from "@/hooks/useModal";
-import PlayerListBoard from "./PlayerListBoard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import Dropdown from "@/components/ui/Dropdown";
 import DashboardTabMenu from "./DashboardTabMenu";
+import HallOfFameBoard from "./hall-of-fame/HallOfFameBoard";
+import SeasonRecordSection from "./season-record/SeasonRecordSection";
+
+/** 명예의 전당 기간 선택 옵션 (API 연동 시 동적 생성 가능) */
+const HALL_PERIOD_OPTIONS = [
+  { label: "통산", value: "통산" },
+  { label: "2026 시즌", value: "2026 시즌" },
+] as const;
 
 interface TeamDataDashboardProps {
-  allPlayers: Player[];
+  initialPlayers: Player[];
 }
 
-const TeamDataDashboard = ({ allPlayers }: TeamDataDashboardProps) => {
-  const [selectedSeason, setSelectedSeason] = useState("2026 시즌");
+const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
+  const isMobile = useIsMobile(768);
   const [dataTab, setDataTab] = useState<StatTabType>("시즌기록");
-
-  const { openModal: openStatRankingModal } = useModal(
-    "TEAM_DATA_STAT_RANKING",
+  const [hallPeriod, setHallPeriod] = useState<string>(
+    HALL_PERIOD_OPTIONS[0].value,
   );
-  const { openModal: openPlayerDetailModal } = useModal(
-    "TEAM_DATA_PLAYER_DETAIL",
-  );
-
-  // 더보기 클릭
-  const handleMoreClick = (category: string, players: Player[]) => {
-    openStatRankingModal({
-      category,
-      players: players.map((p) => ({
-        ...p,
-        value: getPlayerValue(p, category),
-      })),
-      onPlayerClick: handlePlayerClick,
-    });
-  };
-
-  // 선수 클릭
-  const handlePlayerClick = (player: Player) => {
-    openPlayerDetailModal({ player });
-  };
 
   return (
     <>
-      {/* 페이지 헤더 */}
-      <div className="flex items-center gap-4 mb-8">
-        <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
-          팀 데이터
-        </h1>
+      <header className="mb-8">
+        <div className="flex items-center gap-4">
+          <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
+            팀 데이터
+          </h1>
+        </div>
+      </header>
 
-        {/* 시즌 선택 드롭다운 */}
-        <div className="relative z-40">
+      <DashboardTabMenu
+        activeTab={dataTab}
+        onChange={setDataTab}
+        trailingContent={
+          !isMobile && dataTab === "명예의 전당" ? (
+            <Dropdown
+              value={hallPeriod}
+              onChange={setHallPeriod}
+              options={[...HALL_PERIOD_OPTIONS]}
+              className="w-24 min-w-24"
+            />
+          ) : undefined
+        }
+      />
+
+      {isMobile && dataTab === "명예의 전당" ? (
+        <div className="mb-4 w-full">
           <Dropdown
-            options={[{ label: "2026 시즌", value: "2026 시즌" }]}
-            value={selectedSeason}
-            onChange={setSelectedSeason}
+            value={hallPeriod}
+            onChange={setHallPeriod}
+            options={[...HALL_PERIOD_OPTIONS]}
+            triggerClassName="py-1.5 h-10"
           />
         </div>
-      </div>
+      ) : null}
 
-      <DashboardTabMenu activeTab={dataTab} onChange={setDataTab} />
-
-      {/* 순위 카드 그리드 - 투명 배경, 스크롤 버튼 */}
-      <RankingCarousel
-        onMoreClick={handleMoreClick}
-        onPlayerClick={handlePlayerClick}
-      />
-
-      <PlayerListBoard
-        initialPlayers={allPlayers}
-        onPlayerClick={handlePlayerClick}
-      />
+      <main
+        role="tabpanel"
+        id="team-data-tabpanel"
+        aria-labelledby="team-data-tabs"
+      >
+        {dataTab === "시즌기록" ? (
+          <SeasonRecordSection allPlayers={initialPlayers} />
+        ) : (
+          <HallOfFameBoard />
+        )}
+      </main>
     </>
   );
 };

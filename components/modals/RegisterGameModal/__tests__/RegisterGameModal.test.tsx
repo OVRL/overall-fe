@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 const mockHideModal = jest.fn();
 const mockOpenAddressModal = jest.fn();
 const mockHideAddressModal = jest.fn();
+const mockOpenTeamSearchModal = jest.fn();
 const mockResetToDefaults = jest.fn();
 
 jest.mock("@/hooks/useModal", () => ({
@@ -19,6 +20,9 @@ jest.mock("@/hooks/useModal", () => ({
         hideModal: mockHideAddressModal,
       };
     }
+    if (key === "TEAM_SEARCH") {
+      return { openModal: mockOpenTeamSearchModal };
+    }
     return { hideModal: mockHideModal };
   },
 }));
@@ -29,6 +33,23 @@ jest.mock("next/dynamic", () => ({
     function MockNaverMap() {
       return <div data-testid="naver-map" />;
     },
+}));
+
+jest.mock("@/hooks/useUserId", () => ({
+  useUserId: () => 1,
+}));
+
+jest.mock("@/components/providers/SelectedTeamProvider", () => ({
+  useSelectedTeamId: () => ({ selectedTeamId: "1", selectedTeamIdNum: 1 }),
+}));
+
+jest.mock("../hooks/useCreateMatchMutation", () => ({
+  useCreateMatchMutation: () => ({
+    executeMutation: jest.fn((config: { onCompleted?: () => void }) => {
+      config.onCompleted?.();
+    }),
+    isInFlight: false,
+  }),
 }));
 
 const defaultFormValues = getRegisterGameDefaultValues();
@@ -62,12 +83,12 @@ jest.mock("react-hook-form", () => {
   };
 });
 
-jest.mock("../useRegisterGameForm", () => ({
+jest.mock("../hooks/useRegisterGameForm", () => ({
   useRegisterGameForm: jest.fn(),
 }));
 
 const mockUseRegisterGameForm = jest.requireMock(
-  "../useRegisterGameForm",
+  "../hooks/useRegisterGameForm",
 ).useRegisterGameForm;
 
 function createMockForm(overrides = {}) {
@@ -77,6 +98,10 @@ function createMockForm(overrides = {}) {
     ref: jest.fn(),
   }));
   const setValue = jest.fn();
+  const getValues = jest.fn((name?: string) => {
+    if (name != null) return (defaultFormValues as Record<string, unknown>)[name];
+    return defaultFormValues;
+  });
   const handleSubmit = jest.fn(
     (fn: (data: unknown) => void) => (e: React.FormEvent) => {
       e?.preventDefault();
@@ -88,6 +113,7 @@ function createMockForm(overrides = {}) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { isValid: true },
     ...overrides,
   };
@@ -97,7 +123,7 @@ describe("RegisterGameModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm(),
+      ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
     });
   });
@@ -138,7 +164,7 @@ describe("RegisterGameModal", () => {
       },
     );
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm({ handleSubmit: handleSubmitFn }),
+      ...createMockForm({ handleSubmit: handleSubmitFn }),
       resetToDefaults: mockResetToDefaults,
     });
 
@@ -151,13 +177,13 @@ describe("RegisterGameModal", () => {
 
   it("경기 성격이 매칭일 때 상대팀 입력 필드가 노출된다", () => {
     mockUseRegisterGameForm.mockReturnValue({
-      form: createMockForm(),
+      ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
     });
     render(<RegisterGameModal />);
 
     expect(
-      screen.getByPlaceholderText("상대팀 이름을 입력해주세요."),
+      screen.getByPlaceholderText("상대팀 명을 입력하세요"),
     ).toBeInTheDocument();
   });
 });

@@ -33,8 +33,9 @@ const SearchResultList = ({
   <>
     {results.map((item) => (
       <AddressItem
-        key={`${item.latitude}-${item.longitude}-${item.address}`}
+        key={`${item.latitude}-${item.longitude}-${item.address}-${item.title ?? ""}`}
         address={item.address}
+        title={item.title}
         onClick={() => onSelect(item)}
         selected={selectedAddress?.address === item.address}
       />

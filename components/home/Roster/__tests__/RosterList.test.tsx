@@ -1,62 +1,85 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import RosterList from "../RosterList/index";
-import { Player } from "@/types/player";
+import type { RosterMember } from "../useFindManyTeamMemberQuery";
 
-// Mock data
-const mockPlayers: Player[] = [
+const mockMembers: readonly RosterMember[] = [
   {
+    __typename: "TeamMemberModel",
     id: 1,
-    name: "Player A",
     position: "FW",
-    number: 10,
-    overall: 85,
-    season: "24",
-    seasonType: "general",
-    shooting: 80,
-    passing: 75,
-    dribbling: 82,
-    defending: 40,
-    physical: 70,
-    pace: 88,
-    image: "",
+    backNumber: 10,
+    joinedAt: "2023-09-03T00:00:00Z",
+    profileImg: null,
+    user: {
+      __typename: "UserInfoModel",
+      id: "u1",
+      name: "Player A",
+      profileImage: null,
+    },
+    overall: {
+      __typename: "OverallModel",
+      ovr: 85,
+      appearances: 25,
+      goals: 10,
+      assists: 5,
+      keyPasses: 16,
+      attackPoints: 26,
+      cleanSheets: 0,
+      mom3: 1,
+      mom8: 0,
+      winRate: 60,
+    },
   },
   {
+    __typename: "TeamMemberModel",
     id: 2,
-    name: "Player B",
     position: "MF",
-    number: 8,
-    overall: 82,
-    season: "24",
-    seasonType: "general",
-    shooting: 70,
-    passing: 85,
-    dribbling: 78,
-    defending: 60,
-    physical: 65,
-    pace: 75,
-    image: "",
+    backNumber: 8,
+    joinedAt: "2023-09-03T00:00:00Z",
+    profileImg: null,
+    user: {
+      __typename: "UserInfoModel",
+      id: "u2",
+      name: "Player B",
+      profileImage: null,
+    },
+    overall: {
+      __typename: "OverallModel",
+      ovr: 82,
+      appearances: 20,
+      goals: 2,
+      assists: 8,
+      keyPasses: 24,
+      attackPoints: 10,
+      cleanSheets: 0,
+      mom3: 0,
+      mom8: 0,
+      winRate: 55,
+    },
   },
 ];
 
 describe("RosterList", () => {
   it("renders player list correctly", () => {
-    render(<RosterList players={mockPlayers} />);
+    render(<RosterList members={mockMembers} />);
 
     expect(screen.getByText("Player A")).toBeInTheDocument();
     expect(screen.getByText("Player B")).toBeInTheDocument();
   });
 
-  it("calls onPlayerSelect when a player is clicked", () => {
+  it("calls onMemberSelect when a member is clicked", () => {
     const handleSelect = jest.fn();
-    render(<RosterList players={mockPlayers} onPlayerSelect={handleSelect} />);
+    render(
+      <RosterList members={mockMembers} onMemberSelect={handleSelect} />,
+    );
 
     fireEvent.click(screen.getByText("Player A"));
-    expect(handleSelect).toHaveBeenCalledWith(mockPlayers[0]);
+    expect(handleSelect).toHaveBeenCalledWith(mockMembers[0]);
   });
 
-  it("shows empty state when no players provided", () => {
-    render(<RosterList players={[]} />);
+  it("shows empty state when no members provided", () => {
+    render(<RosterList members={[]} />);
     expect(screen.getByText("선수가 없습니다.")).toBeInTheDocument();
   });
 });

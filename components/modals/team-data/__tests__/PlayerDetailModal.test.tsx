@@ -4,6 +4,11 @@ import { Player } from "@/app/(main)/team-data/_types/player";
 
 // 모킹
 const mockHideModal = jest.fn();
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 jest.mock("@/hooks/useModal", () => ({
   __esModule: true,
   default: () => ({
@@ -11,16 +16,17 @@ jest.mock("@/hooks/useModal", () => ({
   }),
 }));
 
+// MainProfileCard는 backNumber 자리에 ovr을 전달함
 jest.mock("@/components/ui/MainProfileCard", () => ({
   __esModule: true,
-  default: ({ playerName, backNumber }: any) => (
+  default: ({ playerName, backNumber }: { playerName?: string; backNumber?: number }) => (
     <div data-testid="profile-card">
       {playerName} ({backNumber})
     </div>
   ),
 }));
 
-jest.mock("@/app/(main)/team-data/_components/FootIcon", () => ({
+jest.mock("@/app/(main)/team-data/_components/season-record/FootIcon", () => ({
   __esModule: true,
   default: ({ foot }: any) => <div data-testid="foot-icon">{foot}</div>,
 }));
@@ -51,20 +57,20 @@ describe("PlayerDetailModal 컴포넌트", () => {
   it("선수 기본 정보와 시즌 기록을 초기에 렌더링해야 한다", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
-    expect(screen.getByTestId("profile-card")).toHaveTextContent("손흥민 (7)");
-    expect(screen.getByText("시즌기록")).toHaveClass(
-      "text-Label-AccentPrimary",
-    ); // 활성 탭
+    expect(screen.getByTestId("profile-card")).toHaveTextContent("손흥민 (90)");
+    // 활성 탭: 시즌 기록 (accent 스타일 적용)
+    const seasonTab = screen.getByText("시즌 기록");
+    expect(seasonTab).toHaveClass("text-Label-AccentPrimary");
 
     // 시즌 기록 값 확인
     expect(screen.getByText("10")).toBeInTheDocument(); // 출장
     expect(screen.getByText("5")).toBeInTheDocument(); // 골
   });
 
-  it("탭 클릭 시 누적기록으로 전환되어야 한다", () => {
+  it("탭 클릭 시 통산 기록으로 전환되어야 한다", () => {
     render(<PlayerDetailModal player={mockPlayer} />);
 
-    const cumulativeTab = screen.getByText("누적기록");
+    const cumulativeTab = screen.getByText("통산 기록");
     fireEvent.click(cumulativeTab);
 
     expect(cumulativeTab).toHaveClass("text-Label-AccentPrimary");

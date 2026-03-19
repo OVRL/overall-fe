@@ -5,11 +5,20 @@ import RelayProvider from "@/components/RelayProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GlobalPortalProvider } from "@/components/GlobalPortal";
 import Modals from "@/components/modals/Modals";
+import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TransitionProvider } from "@/components/providers/TransitionProvider";
 import { PageTransition } from "@/components/providers/PageTransition";
 import Script from "next/script";
 import { env } from "@/lib/env";
 import { Analytics } from "@vercel/analytics/next";
+import { headers, cookies } from "next/headers";
+import { UserInitProvider } from "@/components/providers/UserInitProvider";
+import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
+import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
+import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
+import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
+import { TEAM_REQUIRED_ROUTES } from "@/lib/routes";
+import { redirect } from "next/navigation";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -23,32 +32,73 @@ export const metadata: Metadata = {
   description: "Overall",
 };
 
-import { headers, cookies } from "next/headers";
-import { fetchUserSSR } from "@/utils/fetchUserSSR";
-import { UserInitProvider } from "@/components/providers/UserInitProvider";
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // proxy.ts에서 설정한 헤더를 확인하여 private 라우트인지 판별
   const requestHeaders = await headers();
   const isPrivateRoute = requestHeaders.get("x-is-private-route") === "true";
 
-  let initialUser = null;
-  if (isPrivateRoute) {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const userIdStr = cookieStore.get("userId")?.value;
+  const cookieStore = await cookies();
+  const selectedTeamIdFromCookie =
+    cookieStore.get(SELECTED_TEAM_ID_COOKIE_KEY)?.value ?? null;
 
-    // userId 및 accessToken이 모두 있을 때만 fetch
-    if (accessToken && userIdStr) {
-      const userId = Number(userIdStr);
-      if (!isNaN(userId)) {
-        initialUser = await fetchUserSSR(userId, accessToken);
+  let relayInitialRecords: string | undefined;
+  let layoutState = EMPTY_LAYOUT_STATE;
+
+  if (isPrivateRoute) {
+    const accessToken = cookieStore.get("accessToken")?.value ?? null;
+    const refreshToken = cookieStore.get("refreshToken")?.value ?? null;
+    const userIdStr = cookieStore.get("userId")?.value;
+    const userId =
+      userIdStr != null && !Number.isNaN(Number(userIdStr))
+        ? Number(userIdStr)
+        : null;
+
+    try {
+      const { relayInitialRecords: records, layoutState: state } =
+        await loadLayoutSSR({
+          accessToken,
+          refreshToken,
+          userId,
+          selectedTeamIdFromCookie,
+        });
+      relayInitialRecords = records;
+      layoutState = state;
+    } catch (e) {
+      // SSR에서 refresh 후에도 Unauthorized(토큰 만료 등)면 세션 삭제 후 로그인 페이지로
+      // (세션 삭제 없이 "/"로만 보내면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+      const message =
+        e instanceof Error ? e.message : String(e);
+      if (
+        message.includes("Unauthorized") ||
+        message.toLowerCase().includes("unauthorized")
+      ) {
+        redirect("/api/auth/clear-session?redirect=/");
       }
+      throw e;
     }
+  }
+
+  // 리디렉션: 로그인·팀 유무에 따른 접근 제어
+  const pathname = requestHeaders.get("x-pathname") ?? "";
+  const isLoggedIn = layoutState.userId != null;
+  const hasTeam = layoutState.initialSelectedTeamId != null;
+
+  // 로그인 + 팀 없음 → 팀 필수 경로 접근 시 landing으로
+  if (
+    isPrivateRoute &&
+    isLoggedIn &&
+    !hasTeam &&
+    TEAM_REQUIRED_ROUTES.some((pattern) => pattern.test(pathname))
+  ) {
+    redirect("/landing");
+  }
+
+  // 로그인 + 팀 있음 → landing 접근 시 /home으로
+  if (isPrivateRoute && isLoggedIn && hasTeam && pathname === "/landing") {
+    redirect("/home");
   }
 
   return (
@@ -59,19 +109,35 @@ export default async function RootLayout({
         <TransitionProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
-            <RelayProvider>
-              <UserInitProvider initialUser={initialUser}>
-                <div id="modal-root"></div>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-                <GlobalPortalProvider>
-                  <Modals />
-                </GlobalPortalProvider>
+            <RelayProvider initialRecords={relayInitialRecords}>
+              <UserInitProvider
+                userId={layoutState.userId}
+                initialUser={layoutState.initialUser}
+              >
+                <SelectedTeamProvider
+                  initialSelectedTeamId={layoutState.initialSelectedTeamId}
+                  initialSelectedTeamIdNum={
+                    layoutState.initialSelectedTeamIdNum
+                  }
+                  initialSelectedTeamName={layoutState.initialSelectedTeamName}
+                  initialSelectedTeamImageUrl={
+                    layoutState.initialSelectedTeamImageUrl
+                  }
+                  initialSelectedTeamIdFromSingleTeam={
+                    layoutState.initialSelectedTeamIdFromSingleTeam
+                  }
+                >
+                  <div id="modal-root"></div>
+                  <PageTransition>{children}</PageTransition>
+                  <GlobalPortalProvider>
+                    <Modals />
+                  </GlobalPortalProvider>
+                  <Toaster />
+                </SelectedTeamProvider>
               </UserInitProvider>
             </RelayProvider>
           </ThemeProvider>

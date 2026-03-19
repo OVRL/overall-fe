@@ -1,5 +1,6 @@
 import { Player } from "@/types/player";
 import Icon from "@/components/ui/Icon";
+import { SelectedTeamBadge } from "@/components/home/SelectedTeamBadge";
 import bestXI from "@/public/icons/bestXI.svg";
 import FormationField from "./FormationField";
 import ManagerInfo from "./ManagerInfo";
@@ -19,6 +20,7 @@ const StartingXI = ({ players }: StartingXIProps) => {
     <div className="bg-surface-card rounded-[1.25rem] p-4 sm:px-0 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
       <div className="flex items-center justify-between mb-4 md:mb-5 sm:px-4">
         <Icon src={bestXI} alt="Best XI" width={95} height={34} nofill />
+        <SelectedTeamBadge />
       </div>
 
       <div>

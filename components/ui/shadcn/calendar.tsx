@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { motion, AnimatePresence } from "motion/react";
@@ -61,8 +61,12 @@ function Calendar({
         ),
         week: cn("flex w-full mt-2", defaultClassNames.week),
         day: cn(
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 aria-selected:border aria-selected:border-Fill_AccentPrimary aria-selected:bg-transparent aria-selected:font-medium aria-selected:text-Label-Primary text-center hover:bg-gray-1000 rounded-md transition-colors cursor-pointer text-Label-Primary flex items-center justify-center m-0",
+          "h-9 w-9 p-0 font-normal aria-selected:opacity-100 aria-selected:border aria-selected:border-Fill_AccentPrimary aria-selected:bg-transparent aria-selected:font-medium aria-selected:text-Label-Primary text-center hover:bg-gray-1000 rounded-md transition-colors text-Label-Primary flex items-center justify-center m-0",
           defaultClassNames.day,
+        ),
+        day_button: cn(
+          "cursor-pointer size-full flex items-center justify-center rounded-md",
+          defaultClassNames.day_button,
         ),
         today: cn("font-bold text-Fill_AccentPrimary", defaultClassNames.today),
         outside: cn(
@@ -79,8 +83,19 @@ function Calendar({
         Dropdown: ({ value, onChange, className, options, name, disabled }) => {
           const [isOpen, setIsOpen] = useState(false);
           const containerRef = useRef<HTMLDivElement>(null);
+          const selectedOptionRef = useRef<HTMLButtonElement>(null);
 
           useClickOutside(containerRef, () => setIsOpen(false));
+
+          // MDN: scrollIntoView({ block: "center" }) — 선택된 옵션을 스크롤 영역 세로 중앙에 맞춤
+          useEffect(() => {
+            if (isOpen && selectedOptionRef.current) {
+              selectedOptionRef.current.scrollIntoView({
+                block: "center",
+                behavior: "instant",
+              });
+            }
+          }, [isOpen]);
 
           const isYear =
             name === "years" ||
@@ -156,6 +171,11 @@ function Calendar({
                       {options?.map((option) => (
                         <button
                           key={option.value}
+                          ref={
+                            String(option.value) === String(value)
+                              ? selectedOptionRef
+                              : undefined
+                          }
                           type="button"
                           onClick={() => handleSelect(option.value)}
                           className={cn(

@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import RankingCard from "../RankingCard";
+import RankingCard from "../season-record/RankingCard";
 import { Player } from "../../_types/player";
 
-// 하위 컴포넌트 모킹
-jest.mock("../RankCardRow", () => ({
+jest.mock("../season-record/RankCardRow", () => ({
   __esModule: true,
   default: ({ player, index }: { player: Player; index: number }) => (
     <div data-testid="rank-card-row">
@@ -84,18 +83,19 @@ describe("RankingCard 컴포넌트", () => {
     },
   ];
 
-  it("제목과 상위 4명의 선수 리스트를 렌더링해야 한다", () => {
+  it("제목, 1위(상단), 2~5위 리스트를 렌더링해야 한다", () => {
     render(<RankingCard title="득점 유닛" players={mockPlayers} />);
 
-    expect(screen.getAllByText("득점 유닛")).toHaveLength(2); // 헤더와 아바타 밑 텍스트
+    expect(screen.getByText("득점 유닛")).toBeInTheDocument();
 
+    // 1위는 상단에 이름·값 표시 (아바타 alt + 이름 텍스트)
+    expect(screen.getAllByText("선수1").length).toBeGreaterThanOrEqual(1);
+
+    // 2~5위는 리스트로 4개 행
     const rows = screen.getAllByTestId("rank-card-row");
     expect(rows).toHaveLength(4);
-    expect(rows[0]).toHaveTextContent("1. 선수1");
-    expect(rows[3]).toHaveTextContent("4. 선수4");
-
-    // 5위는 렌더링되지 않아야 함
-    expect(screen.queryByText("5. 선수5")).not.toBeInTheDocument();
+    expect(rows[0]).toHaveTextContent("1. 선수2");
+    expect(rows[3]).toHaveTextContent("4. 선수5");
   });
 
   it("'더보기' 버튼 클릭 시 onMoreClick 콜백이 호출되어야 한다", () => {

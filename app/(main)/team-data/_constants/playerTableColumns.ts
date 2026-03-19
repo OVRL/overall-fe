@@ -78,6 +78,14 @@ export const PLAYER_TABLE_COLUMNS: PlayerTableColumnConfig[] = [
     suffix: "회",
   },
   {
+    key: "MOM8",
+    sortable: true,
+    align: "center",
+    statsKey: "MOM8",
+    defaultValue: 0,
+    suffix: "회",
+  },
+  {
     key: "승률",
     sortable: true,
     align: "center",

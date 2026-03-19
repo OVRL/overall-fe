@@ -16,9 +16,10 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
     { id: "settings", label: "팀 설정", icon: "⚙️" },
+    { id: "match-record", label: "경기기록 관리", icon: "📝" },
     { id: "players", label: "선수 관리", icon: "👥" },
     { id: "best-eleven", label: "베스트 11", icon: "⭐" },
-    { id: "invitation", label: "초대 관리", icon: "📨" },
+    { id: "invitation", label: "가입 명단관리", icon: "📨" },
     { id: "mom-vote", label: "MOM 투표", icon: "🏆" },
 ];
 

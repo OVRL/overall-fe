@@ -13,7 +13,10 @@ interface DropdownProps {
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** 루트 div에 적용 */
   className?: string;
+  /** 트리거 버튼에 적용 (열기/닫기 버튼) */
+  triggerClassName?: string;
 }
 
 const Dropdown = ({
@@ -22,6 +25,7 @@ const Dropdown = ({
   onChange,
   placeholder = "선택해주세요",
   className,
+  triggerClassName,
 }: DropdownProps) => {
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -119,9 +123,10 @@ const Dropdown = ({
         aria-expanded={isOpen}
         aria-label={placeholder}
         className={cn(
-          "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-1.75 py-3 border rounded-[0.625rem] transition-colors duration-200",
+          "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
           "bg-Fill_Quatiary border-transparent",
           isOpen ? "border-Fill_AccentPrimary" : "",
+          triggerClassName,
         )}
       >
         <span

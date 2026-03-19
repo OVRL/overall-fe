@@ -1,6 +1,6 @@
 import logoOvr from "@/public/icons/logo_OVR.svg";
 import Icon from "@/components/ui/Icon";
-import Link from "next/link";
+import Link from "@/components/Link";
 
 const Header = () => {
   return (
@@ -12,13 +12,6 @@ const Header = () => {
           aria-label="홈으로 가기"
         >
           <Icon src={logoOvr} alt="OVR Logo" className="w-23 h-12" nofill />
-        </Link>
-
-        <Link
-          href="/"
-          className="w-23 h-10.5 border border-white/20 rounded-[0.625rem] bg-white/10 flex items-center justify-center text-white font-medium leading-6 text-center"
-        >
-          로그인
         </Link>
       </nav>
     </header>

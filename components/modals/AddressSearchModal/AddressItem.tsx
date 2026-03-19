@@ -3,10 +3,13 @@ import check from "@/public/icons/check.svg";
 import Icon from "@/components/ui/Icon";
 const AddressItem = ({
   address,
+  title,
   onClick,
   selected,
 }: {
   address: string;
+  /** 장소명(있으면 "장소명 (주소)" 형태로 표시) */
+  title?: string;
   onClick: () => void;
   selected?: boolean;
 }) => (
@@ -17,7 +20,7 @@ const AddressItem = ({
     )}
     onClick={onClick}
   >
-    {address}
+    {title ? `${title} (${address})` : address}
     {selected && <Icon src={check} alt="check" width={24} height={24} />}
   </li>
 );

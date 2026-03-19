@@ -4,7 +4,7 @@ export interface Player {
   id: number;
   name: string;
   position: Position;
-  number: number;
+  number?: number;
   overall: number;
   shooting: number;
   passing: number;

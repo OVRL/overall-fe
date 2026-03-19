@@ -1,9 +1,10 @@
-import { env } from "@/lib/env";
 import { UserModel } from "@/contexts/UserContext";
+import { env } from "@/lib/env";
+import { postBackendSSR } from "@/utils/ssrBackendFetch";
 
-const FIND_USER_QUERY = `
-  query FindUser($id: Float!) {
-    findUser(id: $id) {
+const FIND_USER_BY_ID_QUERY = `
+  query FindUserById($id: Int!) {
+    findUserById(id: $id) {
       id
       email
       name
@@ -18,8 +19,6 @@ const FIND_USER_QUERY = `
       preferredNumber
       provider
       subPositions
-      role
-      status
     }
   }
 `;
@@ -34,35 +33,41 @@ export async function fetchUserSSR(
   userId: number,
   accessToken: string,
 ): Promise<UserModel | null> {
+  const url = `${env.BACKEND_URL}/graphql`;
+  const body = JSON.stringify({
+    query: FIND_USER_BY_ID_QUERY,
+    variables: { id: userId },
+  });
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
+  };
+
   try {
-    const res = await fetch(`${env.BACKEND_URL}/graphql`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        query: FIND_USER_QUERY,
-        variables: { id: userId },
-      }),
-      // 항상 최신 정보를 가져오도록 캐시를 사용하지 않습니다.
-      // 추가적인 최적화가 필요하다면 Next.js의 태그 기반 Revalidation을 고려할 수 있습니다.
-      cache: "no-store",
-    });
+    const res = await postBackendSSR(url, headers, body);
 
     if (!res.ok) {
-      console.error("fetchUserSSR HTTP 에러:", res.status, res.statusText);
+      if (process.env.NODE_ENV === "development") {
+        console.error("fetchUserSSR HTTP 에러:", res.status, res.statusText);
+      }
       return null;
     }
 
-    const { data, errors } = await res.json();
-    if (errors && errors.length > 0) {
-      console.error("fetchUserSSR GraphQL 에러:", errors);
+    const payload = (await res.json()) as {
+      data?: { findUserById?: UserModel };
+      errors?: unknown[];
+    };
+    if (payload.errors && payload.errors.length > 0) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("fetchUserSSR GraphQL 에러:", payload.errors);
+      }
       return null;
     }
-    return data?.findUser || null;
+    return payload.data?.findUserById ?? null;
   } catch (err) {
-    console.error("fetchUserSSR 예외 발생:", err);
+    if (process.env.NODE_ENV === "development") {
+      console.error("fetchUserSSR 예외 발생:", err);
+    }
     return null;
   }
 }

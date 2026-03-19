@@ -56,8 +56,10 @@ export function DatePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
+          key={isOpen ? value?.getTime() ?? "no-value" : "closed"}
           mode="single"
           selected={value}
+          defaultMonth={value ?? new Date()}
           onSelect={(date) => {
             onChange?.(date);
             setIsOpen(false);
@@ -65,7 +67,7 @@ export function DatePicker({
           initialFocus
           locale={ko}
           captionLayout="dropdown"
-          fromYear={1950}
+          fromYear={1990}
           toYear={new Date().getFullYear() + 5}
         />
       </PopoverContent>

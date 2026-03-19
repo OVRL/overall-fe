@@ -51,7 +51,7 @@ export const INITIAL_PLAYERS: Player[] = [
   },
   {
     id: 4,
-    name: "다라에밤베스",
+    name: "호날두",
     position: "CB",
     number: 26,
     overall: 90,

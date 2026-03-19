@@ -1,16 +1,16 @@
 import PlayerInfoList from "./PlayerInfoList";
-import { Player } from "@/types/player";
 import PlayerListCategory from "./PlayerListCategory";
-import { usePlayerSort } from "@/hooks/usePlayerSort";
+import { useMemberSort } from "@/hooks/useMemberSort";
+import type { RosterMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
 
 const RosterList = ({
-  players,
-  onPlayerSelect,
+  members,
+  onMemberSelect,
 }: {
-  players: Player[];
-  onPlayerSelect?: (player: Player) => void;
+  members: readonly RosterMember[];
+  onMemberSelect?: (member: RosterMember) => void;
 }) => {
-  const { sortedPlayers, sortConfig, handleSort } = usePlayerSort(players);
+  const { sortedMembers, sortConfig, handleSort } = useMemberSort(members);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 gap-1 overflow-hidden">
@@ -22,13 +22,13 @@ const RosterList = ({
       {/* 스크롤 가능한 리스트 영역 */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-none scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <PlayerInfoList
-          players={sortedPlayers}
-          onPlayerSelect={onPlayerSelect}
+          members={sortedMembers}
+          onMemberSelect={onMemberSelect}
           showHeader={false}
         />
 
         {/* 데이터가 없을 때의 상태 */}
-        {players.length === 0 && (
+        {members.length === 0 && (
           <div className="text-gray-500 text-center py-10">
             선수가 없습니다.
           </div>
