@@ -91,10 +91,15 @@ describe("HamburgerMenuContent", () => {
     expect(screen.getByRole("button", { name: /테스트팀/i })).toBeInTheDocument();
   });
 
-  it("팀 행 클릭 시 setSelectedTeamId, onClose, router.refresh가 호출된다", () => {
+  it("팀 행 클릭 시 setSelectedTeamId(팀 id, 숫자 id, 이름, 이미지), onClose, router.refresh가 호출된다", () => {
     render(<HamburgerMenuContent onClose={mockOnClose} />);
     fireEvent.click(screen.getByRole("button", { name: /테스트팀/i }));
-    expect(mockSetSelectedTeamId).toHaveBeenCalledWith("TeamModel:1", 1);
+    expect(mockSetSelectedTeamId).toHaveBeenCalledWith(
+      "TeamModel:1",
+      1,
+      "테스트팀",
+      "/default.png",
+    );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
     expect(mockRefresh).toHaveBeenCalledTimes(1);
   });

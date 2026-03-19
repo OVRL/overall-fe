@@ -3,7 +3,7 @@ import { useCreateTeamMutation as MutationType } from "../../../__generated__/us
 import { UploadableMap } from "relay-runtime";
 
 const createTeamMutation = graphql`
-  mutation useCreateTeamMutation($input: CreateTeamInput!, $emblem: Upload!) {
+  mutation useCreateTeamMutation($input: CreateTeamInput!, $emblem: Upload) {
     createTeam(input: $input, emblem: $emblem) {
       id
       name

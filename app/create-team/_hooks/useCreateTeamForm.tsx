@@ -6,6 +6,7 @@ import type { useCreateTeamMutation$data } from "../../../__generated__/useCreat
 import { useCreateTeamMutation } from "./useCreateTeamMutation";
 import { UniformDesign } from "../../../__generated__/useCreateTeamMutation.graphql";
 import { useUserStore } from "@/contexts/UserContext";
+import { useUserId } from "@/hooks/useUserId";
 
 export const createTeamSchema = z
   .object({
@@ -13,7 +14,10 @@ export const createTeamSchema = z
       .string()
       .min(1, "클럽 이름을 입력해주세요.")
       .max(15, "최대 15자까지만 입력 가능합니다.")
-      .regex(/^[a-zA-Z0-9가-힣\s]*$/, "특수문자는 입력할 수 없습니다."),
+      .regex(
+      /^[a-zA-Z0-9가-힣\s\u3130-\u318F]*$/,
+      "특수문자는 입력할 수 없습니다.",
+    ),
     activityArea: z.string().min(1, "지역을 선택해주세요."),
     activityAreaCode: z.string(),
     foundingDate: z.string().min(1, "창단일을 입력해주세요."),
@@ -24,10 +28,6 @@ export const createTeamSchema = z
       message: "어웨이 유니폼을 꼭 선택해주세요",
     }),
     emblemFile: z.instanceof(File).optional(),
-  })
-  .refine((data) => data.emblemFile != null, {
-    message: "엠블럼 이미지를 선택해주세요.",
-    path: ["emblemFile"],
   });
 
 export type CreateTeamValues = z.infer<typeof createTeamSchema>;
@@ -43,6 +43,7 @@ export type CreateTeamFormOptions = {
  */
 export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
   const user = useUserStore((state) => state.user);
+  const userId = useUserId(); // Relay 글로벌 ID("UserModel:21") → 숫자로 파싱된 값
   const { executeMutation, isInFlight } = useCreateTeamMutation();
   const onSuccess = options?.onSuccess;
 
@@ -61,11 +62,7 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
   });
 
   const onSubmit = (data: CreateTeamValues) => {
-    if (!data.emblemFile || !user?.email || !user?.id) {
-      return;
-    }
-    const userId = parseInt(user.id, 10);
-    if (Number.isNaN(userId)) {
+    if (!user?.email || userId == null) {
       return;
     }
 
@@ -84,12 +81,12 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
           historyStartDate,
           homeUniform,
           awayUniform,
-          userId,
+          userId, // useUserId()가 Relay 글로벌 ID("UserModel:21")에서 추출한 숫자
           email: user.email,
         },
-        emblem: null, // Upload 타입은 variables에는 null, 실제 파일은 uploadables로 전달
+        emblem: data.emblemFile ?? null, // 선택 사항. 있으면 uploadables로 전달
       },
-      uploadables: { emblem: data.emblemFile },
+      uploadables: data.emblemFile ? { emblem: data.emblemFile } : undefined,
       onCompleted: (response) => {
         onSuccess?.(response.createTeam);
       },

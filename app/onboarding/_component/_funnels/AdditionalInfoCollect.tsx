@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -16,11 +16,16 @@ import {
 } from "@/__generated__/useModifyUserMutation.graphql";
 import useModal from "@/hooks/useModal";
 
+/** 완료하기 클릭 후 최소 이 시간(ms) 동안 로딩 스피너를 보여줌. 스텝 전환이 너무 빨라 리프레시처럼 보이는 현상 방지 */
+const MIN_LOADING_DISPLAY_MS = 500;
+
 const AdditionalInfoCollect = ({
   onNext,
   data,
   onDataChange,
 }: OnboardingStepProps) => {
+  const loadingStartedAtRef = useRef<number | null>(null);
+
   const [info, setInfo] = useState({
     gender: (data.gender as "M" | "W") || "M",
     activityArea: data.activityArea || "",
@@ -39,17 +44,7 @@ const AdditionalInfoCollect = ({
       return;
     }
 
-    onDataChange((prev) => ({
-      ...prev,
-      gender: info.gender,
-      activityArea: info.activityArea,
-      foot: info.foot,
-      preferredNumber: info.preferredNumber
-        ? parseInt(info.preferredNumber, 10)
-        : undefined,
-      favoritePlayer: info.favoritePlayer,
-    }));
-
+    // onDataChange는 onCompleted에서만 호출. 클릭 직후 부모 setState 시 리마운트 등으로 폼 데이터가 비워지는 현상 방지
     const updateInput: UpdateUserInput = {
       id: data.id!, // data.id is checked above
       name: data.name!, // Name should be collected by now
@@ -66,6 +61,7 @@ const AdditionalInfoCollect = ({
       favoritePlayer: info.favoritePlayer,
     };
 
+    loadingStartedAtRef.current = Date.now();
     commit({
       variables: {
         input: updateInput,
@@ -75,9 +71,31 @@ const AdditionalInfoCollect = ({
         profileImage: data.profileImageFile,
       },
       onCompleted: () => {
-        onNext();
+        // 뮤테이션 성공 시점에만 부모 formData 반영 (클릭 직후 onDataChange 시 리마운트로 데이터 소실 방지)
+        onDataChange((prev) => ({
+          ...prev,
+          gender: info.gender,
+          activityArea: info.activityArea,
+          foot: info.foot,
+          preferredNumber: info.preferredNumber
+            ? parseInt(info.preferredNumber, 10)
+            : undefined,
+          favoritePlayer: info.favoritePlayer,
+        }));
+        const elapsed = Date.now() - (loadingStartedAtRef.current ?? 0);
+        const remaining = Math.max(0, MIN_LOADING_DISPLAY_MS - elapsed);
+        if (remaining > 0) {
+          setTimeout(() => {
+            loadingStartedAtRef.current = null;
+            onNext();
+          }, remaining);
+        } else {
+          loadingStartedAtRef.current = null;
+          onNext();
+        }
       },
       onError: (error) => {
+        loadingStartedAtRef.current = null;
         console.error("Mutation failed", error);
       },
     });

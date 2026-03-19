@@ -29,9 +29,10 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
   const { teams } = useFindManyTeamQuery();
   const { selectedTeamId, setSelectedTeamId } = useSelectedTeamId();
 
-  const handleTeamSelect = (teamId: string) => {
+  const handleTeamSelect = (teamId: string, teamName: string, teamImageUrl: string) => {
     const teamIdNum = parseNumericIdFromRelayGlobalId(teamId);
-    setSelectedTeamId(teamId, teamIdNum);
+    // 뱃지 등에서 선택 팀 이름·이미지가 바로 반영되도록 전달 (클럽 생성 플로우와 동일)
+    setSelectedTeamId(teamId, teamIdNum, teamName, teamImageUrl);
     onClose();
     // 쿠키 반영 후 서버 컴포넌트 재요청으로 레이아웃·데이터 갱신 (전체 reload 대신)
     router.refresh();
@@ -70,7 +71,9 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
                 name={team.name}
                 imageUrl={team.imageUrl}
                 isSelected={isSameTeamId(selectedTeamId, team.id)}
-                onSelect={() => handleTeamSelect(team.id)}
+                onSelect={() =>
+                  handleTeamSelect(team.id, team.name, team.imageUrl)
+                }
               />
             ))}
           </div>

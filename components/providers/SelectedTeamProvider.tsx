@@ -20,7 +20,13 @@ export type SelectedTeamContextValue = {
   selectedTeamName: string | null;
   /** 표시용 팀 이미지 URL (SSR에서 전달, 없으면 기본 이미지 사용) */
   selectedTeamImageUrl: string | null;
-  setSelectedTeamId: (teamId: string | null, teamIdNum?: number | null) => void;
+  /** teamName/teamImageUrl은 클럽 생성 직후 등 팀 목록 refetch 전에 뱃지 표시를 위해 선택적으로 전달 */
+  setSelectedTeamId: (
+    teamId: string | null,
+    teamIdNum?: number | null,
+    teamName?: string | null,
+    teamImageUrl?: string | null,
+  ) => void;
 };
 
 const SelectedTeamContext = createContext<SelectedTeamContextValue | null>(
@@ -69,13 +75,22 @@ export function SelectedTeamProvider({
   const didPersistSingleTeam = useRef(false);
 
   const setSelectedTeamId = useCallback(
-    (teamId: string | null, teamIdNum?: number | null) => {
+    (
+      teamId: string | null,
+      teamIdNum?: number | null,
+      teamName?: string | null,
+      teamImageUrl?: string | null,
+    ) => {
       setSelectedTeamIdState(teamId);
       setSelectedTeamIdNumState(teamIdNum ?? null);
       setSelectedTeamIdCookie(teamId);
       if (teamId == null) {
         setSelectedTeamNameState(null);
         setSelectedTeamImageUrlState(null);
+      } else if (teamName !== undefined || teamImageUrl !== undefined) {
+        if (teamName !== undefined) setSelectedTeamNameState(teamName);
+        if (teamImageUrl !== undefined)
+          setSelectedTeamImageUrlState(teamImageUrl);
       }
     },
     [],
