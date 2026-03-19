@@ -107,7 +107,7 @@ export async function proxy(request: NextRequest) {
   const isPublic = PUBLIC_ROUTES.some((pattern) => pattern.test(pathname));
   const isPrivate = !isGuestOnly && !isPublic;
 
-  // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우)
+  // 인증 확인 헬퍼 (accessToken이 있거나, refreshToken으로 갱신 가능한 경우). 실패 시 1회 재시도.
   const checkAuth = async (): Promise<{
     isAuthenticated: boolean;
     newTokens?: TokenPair;
@@ -115,8 +115,13 @@ export async function proxy(request: NextRequest) {
     if (accessToken) return { isAuthenticated: true };
     if (refreshToken) {
       console.log("Checking Auth: No access token, attempting refresh...");
-      const newTokens = await refreshAccessToken(refreshToken);
-      if (newTokens?.accessToken) return { isAuthenticated: true, newTokens };
+      let newTokens = await refreshAccessToken(refreshToken);
+      if (!newTokens?.accessToken) {
+        console.log("Checking Auth: Refresh failed, retrying once...");
+        newTokens = await refreshAccessToken(refreshToken);
+      }
+      if (newTokens?.accessToken)
+        return { isAuthenticated: true, newTokens };
     }
     return { isAuthenticated: false };
   };
@@ -153,8 +158,13 @@ export async function proxy(request: NextRequest) {
   if (isPrivate) {
     const { isAuthenticated, newTokens } = await checkAuth();
     if (!isAuthenticated) {
-      // 비로그인 사용자가 접근 시 -> / (루트 페이지로 리다이렉트)
-      return NextResponse.redirect(new URL("/", request.url));
+      // 비로그인/만료 사용자: 세션 쿠키를 제거한 뒤 로그인 페이지로 리다이렉트 (무효 토큰 잔존 방지)
+      const clearSessionUrl = new URL(
+        "/api/auth/clear-session",
+        request.url,
+      );
+      clearSessionUrl.searchParams.set("redirect", "/");
+      return NextResponse.redirect(clearSessionUrl);
     }
 
     const requestHeaders = new Headers(request.headers);

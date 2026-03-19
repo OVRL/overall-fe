@@ -48,7 +48,11 @@ export async function loadLayoutSSR(
     options;
   const environment = getServerEnvironment(accessToken, refreshToken);
 
-  const hasUser = userId != null && !Number.isNaN(userId) && accessToken != null;
+  // accessToken이 없어도 refreshToken만 있으면 유저·팀 로드 시도 (createServerFetch에서 401 시 refresh 후 재시도)
+  const hasUser =
+    userId != null &&
+    !Number.isNaN(userId) &&
+    (accessToken != null || refreshToken != null);
 
   // 1단계: 유저·팀멤버·로스터 병렬 로드 (유저 있으면 3개, 없으면 로스터만)
   const rosterPromise = fetchQuery(
@@ -100,7 +104,10 @@ export async function loadLayoutSSR(
     ...layoutState,
     initialSelectedTeamIdNum,
   };
-  if (initialSelectedTeamIdNum != null && accessToken != null) {
+  if (
+    initialSelectedTeamIdNum != null &&
+    (accessToken != null || refreshToken != null)
+  ) {
     const matchObs = fetchQuery(
       environment,
       FindMatchQuery,

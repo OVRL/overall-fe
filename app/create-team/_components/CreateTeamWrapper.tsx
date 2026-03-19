@@ -20,13 +20,24 @@ import { ko } from "date-fns/locale";
 import locationIcon from "@/public/icons/location.svg";
 import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
 import { useUserStore } from "@/contexts/UserContext";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
+import { SHOW_TEAM_CREATED_MODAL_KEY } from "@/lib/teamCreatedModalStorage";
 
 const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
   const router = useBridgeRouter();
   const user = useUserStore((state) => state.user);
+  const { setSelectedTeamId } = useSelectedTeamId();
   const { form, onSubmit, isInFlight } = useCreateTeamForm({
-    onSuccess: () => router.replace("/create-team/complete"),
+    onSuccess: (createdTeam) => {
+      const teamIdNum = parseNumericIdFromRelayGlobalId(createdTeam.id);
+      setSelectedTeamId(createdTeam.id, teamIdNum ?? undefined);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem(SHOW_TEAM_CREATED_MODAL_KEY, "1");
+      }
+      router.replace("/home");
+    },
   });
   const {
     control,
@@ -75,8 +86,6 @@ const CreateTeamWrapper = () => {
   );
 
   const canSubmit = Boolean(user) && isValid && !isInFlight;
-
-  console.log(user, isValid, isInFlight);
 
   return (
     <form

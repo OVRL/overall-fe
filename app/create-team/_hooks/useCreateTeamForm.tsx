@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { UNIFORM_DESIGN_VALUES } from "../_lib/uniformDesign";
+import type { useCreateTeamMutation$data } from "../../../__generated__/useCreateTeamMutation.graphql";
 import { useCreateTeamMutation } from "./useCreateTeamMutation";
 import { UniformDesign } from "../../../__generated__/useCreateTeamMutation.graphql";
 import { useUserStore } from "@/contexts/UserContext";
@@ -31,9 +32,9 @@ export const createTeamSchema = z
 
 export type CreateTeamValues = z.infer<typeof createTeamSchema>;
 
-/** 성공 시 콜백 (예: 라우팅) */
+/** 성공 시 콜백. 생성된 팀 정보를 넘겨 선택 팀 갱신·리다이렉트 등에 사용 */
 export type CreateTeamFormOptions = {
-  onSuccess?: () => void;
+  onSuccess?: (createdTeam: useCreateTeamMutation$data["createTeam"]) => void;
 };
 
 /**
@@ -89,8 +90,8 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
         emblem: null, // Upload 타입은 variables에는 null, 실제 파일은 uploadables로 전달
       },
       uploadables: { emblem: data.emblemFile },
-      onCompleted: () => {
-        onSuccess?.();
+      onCompleted: (response) => {
+        onSuccess?.(response.createTeam);
       },
       onError: (error) => {
         console.error("Error creating team:", error);
