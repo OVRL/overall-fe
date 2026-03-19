@@ -7,9 +7,10 @@ import Link from "@/components/Link";
 import logoOvr from "@/public/icons/logo_OVR.svg";
 import Icon from "@/components/ui/Icon";
 import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
+import { HamburgerButton } from "@/components/layout/header/HamburgerButton";
+import { MobileNavDropdown } from "@/components/layout/header/MobileNavDropdown";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useClickOutside } from "@/hooks/useClickOutside";
-
 export interface MenuItem {
   label: string;
   href: string;
@@ -17,10 +18,8 @@ export interface MenuItem {
 
 const defaultMenuItems: MenuItem[] = [
   { label: "팀 관리", href: "/team-management" },
-  { label: "팀 소식", href: "#" },
   { label: "선수 기록", href: "/team-data" },
   { label: "경기 일정", href: "#" },
-  { label: "마이페이지", href: "#" },
 ];
 
 export interface ActionButton {
@@ -143,52 +142,24 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
               })}
             </ul>
 
-            {/* 햄버거 버튼 */}
-            {showHamburger && (
-              <button
-                onClick={toggleMenu}
-                className="lg:hidden text-white hover:text-primary transition-colors text-xl cursor-pointer p-2"
-                aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
-                aria-expanded={isMenuOpen}
-                aria-controls="mobile-dropdown-menu"
-              >
-                ≡
-              </button>
-            )}
+
+            <HamburgerButton
+              isMenuOpen={isMenuOpen}
+              onToggle={toggleMenu}
+              ariaControlsId="mobile-dropdown-menu"
+            />
           </div>
         </nav>
       </div>
 
       {/* 모바일 메뉴 드롭다운 */}
       {isMenuOpen && (
-        <nav
+        <MobileNavDropdown
+          menuItems={menuItems}
+          currentPathname={pathname}
+          onLinkClick={() => setIsMenuOpen(false)}
           id="mobile-dropdown-menu"
-          className="lg:hidden absolute top-full left-0 w-full bg-surface-secondary border-b border-gray-700 shadow-xl overflow-hidden animate-slideDown"
-          aria-label="모바일 네비게이션"
-        >
-          <ul className="flex flex-col p-4 gap-2">
-            <RegisterGameButton />
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block text-sm py-3 px-4 rounded-lg transition-colors ${
-                      isActive
-                        ? "bg-primary text-black font-bold"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        />
       )}
     </header>
   );

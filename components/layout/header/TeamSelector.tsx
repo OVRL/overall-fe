@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import Icon from "@/components/ui/Icon";
+import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
 import { cn } from "@/lib/utils";
 import arrow_down from "@/public/icons/arrow_down.svg";
 import arrow_up from "@/public/icons/arrow_up.svg";
@@ -45,7 +46,7 @@ function TeamSelector({
   const isKeyboardRef = useRef(false);
 
   const selectedTeam = selectedTeamId
-    ? teams.find((t) => t.id === selectedTeamId)
+    ? teams.find((t) => isSameTeamId(selectedTeamId, t.id))
     : null;
   const hasTeams = teams.length > 0;
   const optionCount = teams.length + (onCreateTeam ? 1 : 0);
@@ -76,7 +77,7 @@ function TeamSelector({
         e.preventDefault();
         setIsOpen(true);
         const idx = selectedTeamId
-          ? teams.findIndex((t) => t.id === selectedTeamId)
+          ? teams.findIndex((t) => isSameTeamId(selectedTeamId, t.id))
           : 0;
         setFocusedIndex(idx >= 0 ? idx : 0);
       }
@@ -148,7 +149,7 @@ function TeamSelector({
           setIsOpen((prev) => !prev);
           if (!isOpen) {
             const idx = selectedTeamId
-              ? teams.findIndex((t) => t.id === selectedTeamId)
+              ? teams.findIndex((t) => isSameTeamId(selectedTeamId, t.id))
               : 0;
             setFocusedIndex(idx >= 0 ? idx : 0);
           }
@@ -216,7 +217,7 @@ function TeamSelector({
                   key={team.id}
                   name={team.name}
                   imageUrl={team.imageUrl ?? DEFAULT_TEAM_IMAGE}
-                  isSelected={selectedTeamId === team.id}
+                  isSelected={isSameTeamId(selectedTeamId, team.id)}
                   isFocused={focusedIndex === index}
                   onSelect={() => handleSelect(team.id)}
                   onFocus={() => {

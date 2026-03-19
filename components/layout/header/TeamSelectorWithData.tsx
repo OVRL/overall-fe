@@ -8,6 +8,7 @@ import TeamSelector, {
   type TeamOption,
 } from "@/components/layout/header/TeamSelector";
 import { useFindTeamMemberForHeader } from "@/components/layout/header/useFindTeamMemberForHeaderQuery";
+import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useUserId } from "@/hooks/useUserId";
 
@@ -41,7 +42,7 @@ function useTeamSelectorData(userId: number) {
       return;
     }
     const currentInList =
-      selectedTeamId != null && teams.some((t) => t.id === selectedTeamId);
+      selectedTeamId != null && teams.some((t) => isSameTeamId(selectedTeamId, t.id));
     if (!currentInList && selectedTeamId != null) {
       setSelectedTeamId(null);
     }
