@@ -1,10 +1,16 @@
 import Link from "@/components/Link";
-import { buttonVariants } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { onboardingCtaLinkClassName } from "./onboardingCtaLinkClass";
 
 const OnboardingManager = () => {
   return (
-    <div className="border-2 border-dashed border-gray-700 bg-black/40 rounded-[1.875rem] p-6 flex gap-4 w-102.25 justify-between items-center">
+    <div
+      className={cn(
+        "flex w-102.25 items-center justify-between gap-4 rounded-[1.875rem] border-2 border-dashed border-border-card bg-black/40 p-6",
+        "transition-[border-color] duration-150 ease-in-out hover:border-gray-500",
+        "animate-onboarding-enter motion-reduce:animate-none",
+      )}
+    >
       <h3 className="text-lg font-semibold text-Label-AccentPrimary">감독</h3>
       <p className="text-sm text-gray-400 text-center font-semibold">
         <span className="text-white">
@@ -14,10 +20,7 @@ const OnboardingManager = () => {
       </p>
       <Link
         href="/team-management/best-eleven"
-        className={cn(
-          buttonVariants({ size: "m", variant: "primary" }),
-          "text-xm px-3 py-1.5 font-semibold bg-(--color-toast-success-bg) text-Label-AccentPrimary rounded-[0.625rem] w-fit",
-        )}
+        className={onboardingCtaLinkClassName}
       >
         설정하기
       </Link>

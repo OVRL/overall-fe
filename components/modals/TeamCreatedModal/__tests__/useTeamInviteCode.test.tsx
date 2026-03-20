@@ -88,9 +88,12 @@ describe("useTeamInviteCode", () => {
     });
 
     it("mutation 실패 시 초대 코드 생성 실패 토스트를 띄운다", () => {
-      let capturedOnError: () => void = () => {};
+      let invokeOnError: () => void = () => {};
       mockExecuteMutation.mockImplementation((config: { onError?: (err: unknown) => void }) => {
-        capturedOnError = config.onError ?? (() => {});
+        const onError = config.onError;
+        invokeOnError = () => {
+          onError?.(new Error("mutation failed"));
+        };
       });
 
       const { result } = renderHook(() => useTeamInviteCode(10));
@@ -100,7 +103,7 @@ describe("useTeamInviteCode", () => {
       });
 
       act(() => {
-        capturedOnError();
+        invokeOnError();
       });
 
       expect(mockToastError).toHaveBeenCalledWith("초대 코드 생성에 실패했습니다.");

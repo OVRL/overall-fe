@@ -12,7 +12,14 @@ const MOCK_MEMBERS = [
     backNumber: 7,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
-    user: { __typename: "UserInfoModel" as const, id: "u1", name: "손흥민", profileImage: null },
+    user: {
+      __typename: "UserModel" as const,
+      id: "u1",
+      name: "손흥민",
+      profileImage: null,
+      birthDate: null,
+      subPositions: [],
+    },
     overall: {
       __typename: "OverallModel" as const,
       ovr: 90,
@@ -34,7 +41,14 @@ const MOCK_MEMBERS = [
     backNumber: 10,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
-    user: { __typename: "UserInfoModel" as const, id: "u2", name: "이강인", profileImage: null },
+    user: {
+      __typename: "UserModel" as const,
+      id: "u2",
+      name: "이강인",
+      profileImage: null,
+      birthDate: null,
+      subPositions: [],
+    },
     overall: {
       __typename: "OverallModel" as const,
       ovr: 85,
@@ -56,7 +70,14 @@ const MOCK_MEMBERS = [
     backNumber: 3,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
-    user: { __typename: "UserInfoModel" as const, id: "u3", name: "김민재", profileImage: null },
+    user: {
+      __typename: "UserModel" as const,
+      id: "u3",
+      name: "김민재",
+      profileImage: null,
+      birthDate: null,
+      subPositions: [],
+    },
     overall: {
       __typename: "OverallModel" as const,
       ovr: 88,

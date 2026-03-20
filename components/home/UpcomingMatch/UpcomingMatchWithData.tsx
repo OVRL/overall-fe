@@ -13,10 +13,20 @@ import UpcomingMatchDesktop from "./UpcomingMatchDesktop";
 import UpcomingMatchMobile from "./UpcomingMatchMobile";
 
 /** 다가오는 경기 없을 때: 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch */
-function NoMatchContent({ isSoloTeam }: { isSoloTeam: boolean }) {
+function NoMatchContent({
+  isSoloTeam,
+  teamId,
+}: {
+  isSoloTeam: boolean;
+  teamId: number | null;
+}) {
   return (
     <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
-      {isSoloTeam ? <OnboardingUpcomingMatch /> : <NoUpcomingMatch />}
+      {isSoloTeam ? (
+        <OnboardingUpcomingMatch key={teamId ?? "no-team"} teamId={teamId} />
+      ) : (
+        <NoUpcomingMatch />
+      )}
     </div>
   );
 }
@@ -29,7 +39,9 @@ export default function UpcomingMatchWithData() {
   const { selectedTeamIdNum, isSoloTeam } = useSelectedTeamId();
 
   if (selectedTeamIdNum == null) {
-    return <NoMatchContent isSoloTeam={isSoloTeam} />;
+    return (
+      <NoMatchContent isSoloTeam={isSoloTeam} teamId={null} />
+    );
   }
 
   return (
@@ -58,7 +70,9 @@ function UpcomingMatchWithQuery({
   const display = soonest ? buildUpcomingMatchDisplay(soonest) : null;
 
   if (display == null) {
-    return <NoMatchContent isSoloTeam={isSoloTeam} />;
+    return (
+      <NoMatchContent isSoloTeam={isSoloTeam} teamId={createdTeamId} />
+    );
   }
 
   return (

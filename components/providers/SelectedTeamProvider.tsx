@@ -10,7 +10,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { ReactRelayContext } from "react-relay";
 import { setSelectedTeamIdCookie } from "@/lib/cookie/selectedTeamId";
+import { useFindManyTeamMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
 
 export type SelectedTeamContextValue = {
   selectedTeamId: string | null;
@@ -20,6 +22,8 @@ export type SelectedTeamContextValue = {
   selectedTeamName: string | null;
   /** 표시용 팀 이미지 URL (SSR에서 전달, 없으면 기본 이미지 사용) */
   selectedTeamImageUrl: string | null;
+  /** 선택 팀 로스터가 1명(본인만)일 때 true — 온보딩 UI 분기용 */
+  isSoloTeam: boolean;
   /** teamName/teamImageUrl은 클럽 생성 직후 등 팀 목록 refetch 전에 뱃지 표시를 위해 선택적으로 전달 */
   setSelectedTeamId: (
     teamId: string | null,
@@ -44,6 +48,8 @@ type SelectedTeamProviderProps = {
   initialSelectedTeamImageUrl?: string | null;
   /** SSR에서 팀이 1개라서 초기값을 넣어준 경우. 클라이언트에서 쿠키에 한 번 저장해 다음 접속 시 서버가 읽을 수 있게 함 */
   initialSelectedTeamIdFromSingleTeam?: boolean;
+  /** SSR findManyTeamMember totalCount 기반. Relay 없는 테스트 등에서는 이 값이 isSoloTeam으로 사용됨 */
+  initialIsSoloTeam?: boolean;
   children: ReactNode;
 };
 
@@ -58,6 +64,7 @@ export function SelectedTeamProvider({
   initialSelectedTeamName = null,
   initialSelectedTeamImageUrl = null,
   initialSelectedTeamIdFromSingleTeam = false,
+  initialIsSoloTeam = false,
   children,
 }: SelectedTeamProviderProps) {
   const [selectedTeamId, setSelectedTeamIdState] = useState<string | null>(
@@ -108,7 +115,9 @@ export function SelectedTeamProvider({
     }
   }, [initialSelectedTeamIdFromSingleTeam, initialSelectedTeamId]);
 
-  const value = useMemo<SelectedTeamContextValue>(
+  const contextValueWithoutSolo = useMemo<
+    Omit<SelectedTeamContextValue, "isSoloTeam">
+  >(
     () => ({
       selectedTeamId,
       selectedTeamIdNum,
@@ -123,6 +132,78 @@ export function SelectedTeamProvider({
       selectedTeamImageUrl,
       setSelectedTeamId,
     ],
+  );
+
+  return (
+    <SelectedTeamSoloBranch
+      contextValueWithoutSolo={contextValueWithoutSolo}
+      initialIsSoloTeam={initialIsSoloTeam}
+    >
+      {children}
+    </SelectedTeamSoloBranch>
+  );
+}
+
+/** Relay가 있으면 findManyTeamMember totalCount로 동기화, 없으면 SSR 초기값만 사용 */
+function SelectedTeamSoloBranch({
+  contextValueWithoutSolo,
+  initialIsSoloTeam,
+  children,
+}: {
+  contextValueWithoutSolo: Omit<SelectedTeamContextValue, "isSoloTeam">;
+  initialIsSoloTeam: boolean;
+  children: ReactNode;
+}) {
+  const relayEnv = useContext(ReactRelayContext)?.environment ?? null;
+  const teamId = contextValueWithoutSolo.selectedTeamIdNum;
+
+  if (teamId == null) {
+    return (
+      <SelectedTeamContext.Provider
+        value={{ ...contextValueWithoutSolo, isSoloTeam: false }}
+      >
+        {children}
+      </SelectedTeamContext.Provider>
+    );
+  }
+
+  if (relayEnv == null) {
+    return (
+      <SelectedTeamContext.Provider
+        value={{
+          ...contextValueWithoutSolo,
+          isSoloTeam: initialIsSoloTeam,
+        }}
+      >
+        {children}
+      </SelectedTeamContext.Provider>
+    );
+  }
+
+  return (
+    <SelectedTeamSoloFromRoster
+      contextValueWithoutSolo={contextValueWithoutSolo}
+      teamId={teamId}
+    >
+      {children}
+    </SelectedTeamSoloFromRoster>
+  );
+}
+
+function SelectedTeamSoloFromRoster({
+  contextValueWithoutSolo,
+  teamId,
+  children,
+}: {
+  contextValueWithoutSolo: Omit<SelectedTeamContextValue, "isSoloTeam">;
+  teamId: number;
+  children: ReactNode;
+}) {
+  const { totalCount } = useFindManyTeamMember(teamId);
+  const isSoloTeam = totalCount === 1;
+  const value = useMemo<SelectedTeamContextValue>(
+    () => ({ ...contextValueWithoutSolo, isSoloTeam }),
+    [contextValueWithoutSolo, isSoloTeam],
   );
 
   return (

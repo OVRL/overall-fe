@@ -1,5 +1,6 @@
 import type { findUserByIdQuery$data } from "@/__generated__/findUserByIdQuery.graphql";
 import type { findTeamMemberQuery$data } from "@/__generated__/findTeamMemberQuery.graphql";
+import type { findManyTeamMemberQueryQuery$data } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
 import type { UserModel } from "@/contexts/UserContext";
 import { fetchQuery } from "relay-runtime";
 import { getServerEnvironment } from "../getServerEnvironment";
@@ -92,7 +93,7 @@ export async function loadLayoutSSR(
   const initialSelectedTeamIdNum = layoutState.initialSelectedTeamId
     ? getCreatedTeamIdNum(teamMemberData, layoutState.initialSelectedTeamId)
     : null;
-  const layoutStateWithNum: LayoutState = {
+  let layoutStateWithNum: LayoutState = {
     ...layoutState,
     initialSelectedTeamIdNum,
   };
@@ -108,7 +109,12 @@ export async function loadLayoutSSR(
       },
       { fetchPolicy: "network-only" },
     );
-    await observableToPromise(rosterObs);
+    const rosterData = (await observableToPromise(
+      rosterObs,
+    )) as findManyTeamMemberQueryQuery$data | undefined;
+    const initialIsSoloTeam =
+      rosterData?.findManyTeamMember?.totalCount === 1;
+    layoutStateWithNum = { ...layoutStateWithNum, initialIsSoloTeam };
   }
 
   if (
@@ -191,6 +197,7 @@ function deriveLayoutState(
     initialSelectedTeamName,
     initialSelectedTeamImageUrl,
     initialSelectedTeamIdFromSingleTeam,
+    initialIsSoloTeam: false,
   };
 }
 

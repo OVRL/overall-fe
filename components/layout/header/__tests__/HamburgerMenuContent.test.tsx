@@ -9,6 +9,7 @@ jest.mock("@/components/providers/SelectedTeamProvider", () => ({
   useSelectedTeamId: () => ({
     selectedTeamId: null,
     setSelectedTeamId: mockSetSelectedTeamId,
+    isSoloTeam: false,
   }),
 }));
 
