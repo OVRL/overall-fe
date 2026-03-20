@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { getValidImageSrc, MOCK_EMBLEM_SRC } from "@/lib/utils";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 
 interface TeamInfoProps {
   name: string;
@@ -8,8 +7,6 @@ interface TeamInfoProps {
 }
 
 const TeamInfo = ({ name, logo, reverse = false }: TeamInfoProps) => {
-  const emblemSrc = getValidImageSrc(logo, MOCK_EMBLEM_SRC);
-
   return (
     <div
       className={`flex items-center gap-3 ${
@@ -19,12 +16,10 @@ const TeamInfo = ({ name, logo, reverse = false }: TeamInfoProps) => {
       <div
         className={`border-2 border-surface-card rounded-full relative overflow-hidden shrink-0 size-10`}
       >
-        <Image
-          src={emblemSrc}
+        <EmblemImage
+          src={logo}
           alt={name}
-          fill
-          sizes="2.25rem"
-          className="object-cover"
+          sizes="2.5rem"
           quality={100}
         />
       </div>

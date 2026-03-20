@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
+import { Suspense } from "react";
 import Link from "@/components/Link";
 import Icon from "@/components/ui/Icon";
+import Skeleton from "@/components/ui/Skeleton";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import {
   parseNumericIdFromRelayGlobalId,
@@ -14,6 +15,7 @@ import userIcon from "@/public/icons/user.svg";
 import plusIcon from "@/public/icons/plus.svg";
 import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
 import { LogoutButton } from "@/components/layout/header/LogoutButton";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 
 type HamburgerMenuContentProps = {
   /** 메뉴 닫기 (팀 선택·링크 클릭 후 호출) */
@@ -26,10 +28,13 @@ type HamburgerMenuContentProps = {
  */
 export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
   const router = useBridgeRouter();
-  const { teams } = useFindManyTeamQuery();
   const { selectedTeamId, setSelectedTeamId } = useSelectedTeamId();
 
-  const handleTeamSelect = (teamId: string, teamName: string, teamImageUrl: string) => {
+  const handleTeamSelect = (
+    teamId: string,
+    teamName: string,
+    teamImageUrl: string,
+  ) => {
     const teamIdNum = parseNumericIdFromRelayGlobalId(teamId);
     // 뱃지 등에서 선택 팀 이름·이미지가 바로 반영되도록 전달 (클럽 생성 플로우와 동일)
     setSelectedTeamId(teamId, teamIdNum, teamName, teamImageUrl);
@@ -54,31 +59,13 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
         <span>내 정보</span>
       </Link>
 
-      {/* 구분선 + 팀 목록 */}
-      {teams.length > 0 && (
-        <>
-          <div
-            className="my-1 h-px w-full shrink-0 bg-gray-1000"
-            role="separator"
-          />
-          <span className="h-10 flex items-center text-gray-600 text-xs font-semibold">
-            팀 선택
-          </span>
-          <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
-            {teams.map((team) => (
-              <TeamRow
-                key={team.id}
-                name={team.name}
-                imageUrl={team.imageUrl}
-                isSelected={isSameTeamId(selectedTeamId, team.id)}
-                onSelect={() =>
-                  handleTeamSelect(team.id, team.name, team.imageUrl)
-                }
-              />
-            ))}
-          </div>
-        </>
-      )}
+      {/* Relay useLazyLoadQuery는 캐시 미스 시 suspend → 팀 블록만 분리해 스켈레톤 표시 */}
+      <Suspense fallback={<HamburgerTeamListSkeleton />}>
+        <HamburgerTeamListSection
+          selectedTeamId={selectedTeamId}
+          onTeamSelect={handleTeamSelect}
+        />
+      </Suspense>
       {/* 팀 만들기 */}
       <Link
         href="/create-team"
@@ -100,6 +87,71 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
 
       <LogoutButton onClose={onClose} />
     </div>
+  );
+}
+
+/** 팀 목록 fetch 중 툴팁 레이아웃 유지용 스켈레톤 */
+function HamburgerTeamListSkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-1"
+      aria-busy="true"
+      aria-label="팀 목록 불러오는 중"
+    >
+      <div
+        className="my-1 h-px w-full shrink-0 bg-gray-1000"
+        role="separator"
+      />
+      <span className="h-10 flex items-center text-gray-600 text-xs font-semibold">
+        팀 선택
+      </span>
+      <div className="flex flex-col gap-2 max-h-48 py-0.5">
+        <Skeleton className="h-10 w-full rounded-lg bg-gray-800" shimmer />
+        <Skeleton className="h-10 w-full rounded-lg bg-gray-800" shimmer />
+      </div>
+    </div>
+  );
+}
+
+/** useLazyLoadQuery 호출 분리: suspend 시 상위 메뉴는 그대로, 이 구간만 fallback */
+function HamburgerTeamListSection({
+  selectedTeamId,
+  onTeamSelect,
+}: {
+  selectedTeamId: string | null;
+  onTeamSelect: (
+    teamId: string,
+    teamName: string,
+    teamImageUrl: string,
+  ) => void;
+}) {
+  const { teams } = useFindManyTeamQuery();
+
+  if (teams.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <div
+        className="my-1 h-px w-full shrink-0 bg-gray-1000"
+        role="separator"
+      />
+      <span className="h-10 flex items-center text-gray-600 text-xs font-semibold">
+        팀 선택
+      </span>
+      <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
+        {teams.map((team) => (
+          <TeamRow
+            key={team.id}
+            name={team.name}
+            imageUrl={team.imageUrl}
+            isSelected={isSameTeamId(selectedTeamId, team.id)}
+            onSelect={() => onTeamSelect(team.id, team.name, team.imageUrl)}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -127,7 +179,7 @@ function TeamRow({
       )}
     >
       <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
-        <Image src={imageUrl} alt="" fill className="object-cover" />
+        <EmblemImage src={imageUrl} alt="" sizes="1.5rem" />
       </div>
       <span className="min-w-0 flex-1 truncate">{name}</span>
       {isSelected && (
