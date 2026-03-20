@@ -9,6 +9,7 @@ import { env } from "@/lib/env";
 import { postBackendSSR } from "@/utils/ssrBackendFetch";
 import { ensureIdStrings, ensureUniqueDataIds } from "./fetchGraphQL";
 import { refreshAccessToken } from "@/lib/auth/refreshToken";
+import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
 
 /** GraphQL 응답에 Unauthorized 에러가 포함되어 있는지 확인 */
 function hasUnauthorizedError(raw: unknown): boolean {
@@ -52,7 +53,14 @@ export function createServerFetch(
       variables,
     });
 
-    const token = accessToken;
+    let token = accessToken;
+    if ((!token || isAccessTokenExpired(token)) && refreshToken) {
+      const newTokens = await refreshAccessToken(refreshToken);
+      if (newTokens?.accessToken) {
+        token = newTokens.accessToken;
+      }
+    }
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };

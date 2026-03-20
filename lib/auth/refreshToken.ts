@@ -7,6 +7,7 @@ export interface TokenPair {
 
 interface RefreshResponse {
   data?: { refresh: TokenPair };
+  /** GraphQL 오류 배열(HTTP 200이어도 존재할 수 있음) */
   errors?: unknown[];
 }
 
@@ -35,7 +36,20 @@ export async function refreshAccessToken(
         variables: { refreshToken },
       }),
     });
+    if (!response.ok) {
+      console.error("Token refresh HTTP 오류:", response.status);
+      return null;
+    }
+
     const data: RefreshResponse = await response.json();
+    if (
+      data.errors != null &&
+      Array.isArray(data.errors) &&
+      data.errors.length > 0
+    ) {
+      console.error("Token refresh GraphQL errors:", data.errors);
+      return null;
+    }
     return data?.data?.refresh ?? null;
   } catch (error) {
     console.error("Token refresh error:", error);
