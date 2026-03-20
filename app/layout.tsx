@@ -84,9 +84,10 @@ export default async function RootLayout({
   // 리디렉션: 로그인·팀 유무에 따른 접근 제어
   const pathname = requestHeaders.get("x-pathname") ?? "";
   const isLoggedIn = layoutState.userId != null;
-  const hasTeam = layoutState.initialSelectedTeamId != null;
+  /** 소속 팀 유무(다중 팀 + 쿠키 없음이면 initialSelectedTeamId는 null일 수 있음) */
+  const hasTeam = layoutState.hasAnyTeamMembership;
 
-  // 로그인 + 팀 없음 → 팀 필수 경로 접근 시 landing으로
+  // 로그인 + 소속 팀 없음 → 팀 필수 경로 접근 시 landing으로
   if (
     isPrivateRoute &&
     isLoggedIn &&
@@ -96,7 +97,7 @@ export default async function RootLayout({
     redirect("/landing");
   }
 
-  // 로그인 + 팀 있음 → landing 접근 시 /home으로
+  // 로그인 + 소속 팀 있음 → landing 접근 시 /home으로
   if (isPrivateRoute && isLoggedIn && hasTeam && pathname === "/landing") {
     redirect("/home");
   }
@@ -126,9 +127,6 @@ export default async function RootLayout({
                   initialSelectedTeamName={layoutState.initialSelectedTeamName}
                   initialSelectedTeamImageUrl={
                     layoutState.initialSelectedTeamImageUrl
-                  }
-                  initialSelectedTeamIdFromSingleTeam={
-                    layoutState.initialSelectedTeamIdFromSingleTeam
                   }
                   initialIsSoloTeam={layoutState.initialIsSoloTeam}
                 >

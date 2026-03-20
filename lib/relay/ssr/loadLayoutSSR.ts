@@ -159,6 +159,7 @@ function deriveLayoutState(
     (m): m is typeof m & { team: NonNullable<typeof m.team> } =>
       m.team != null,
   );
+  const hasAnyTeamMembership = teamsWithInfo.length > 0;
   const cookieDecoded =
     selectedTeamIdFromCookie != null
       ? (() => {
@@ -183,9 +184,11 @@ function deriveLayoutState(
   if (cookieMatchedMember?.team != null) {
     // 쿠키가 "7"이어도 Relay team.id(TeamModel:7)와 매칭 후 저장 형식 통일
     initialSelectedTeamId = cookieMatchedMember.team.id;
-  } else if (teamsWithInfo.length === 1) {
+  } else if (teamsWithInfo.length >= 1) {
+    // 쿠키 없음/불일치여도 소속 팀이 있으면 findTeamMember 순서상 첫 팀으로 통일
+    // (클라이언트가 쿠키에 동기화해 다음 SSR에서 복원 가능)
     initialSelectedTeamId = teamsWithInfo[0]!.team.id;
-    initialSelectedTeamIdFromSingleTeam = true;
+    initialSelectedTeamIdFromSingleTeam = teamsWithInfo.length === 1;
   } else {
     initialSelectedTeamId = null;
   }
@@ -207,6 +210,7 @@ function deriveLayoutState(
   return {
     userId,
     initialUser,
+    hasAnyTeamMembership,
     initialSelectedTeamId,
     initialSelectedTeamIdNum,
     initialSelectedTeamName,

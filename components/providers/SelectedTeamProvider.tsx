@@ -47,8 +47,6 @@ type SelectedTeamProviderProps = {
   initialSelectedTeamName?: string | null;
   /** 표시용 팀 이미지 URL (선택된 팀이 있을 때 layout SSR에서 전달) */
   initialSelectedTeamImageUrl?: string | null;
-  /** SSR에서 팀이 1개라서 초기값을 넣어준 경우. 클라이언트에서 쿠키에 한 번 저장해 다음 접속 시 서버가 읽을 수 있게 함 */
-  initialSelectedTeamIdFromSingleTeam?: boolean;
   /** SSR findManyTeamMember totalCount 기반. Relay 없는 테스트 등에서는 이 값이 isSoloTeam으로 사용됨 */
   initialIsSoloTeam?: boolean;
   children: ReactNode;
@@ -64,7 +62,6 @@ export function SelectedTeamProvider({
   initialSelectedTeamIdNum = null,
   initialSelectedTeamName = null,
   initialSelectedTeamImageUrl = null,
-  initialSelectedTeamIdFromSingleTeam = false,
   initialIsSoloTeam = false,
   children,
 }: SelectedTeamProviderProps) {
@@ -80,7 +77,8 @@ export function SelectedTeamProvider({
   const [selectedTeamImageUrl, setSelectedTeamImageUrlState] = useState<
     string | null
   >(initialSelectedTeamImageUrl ?? null);
-  const didPersistSingleTeam = useRef(false);
+  /** SSR이 넘긴 선택 팀을 쿠키에 한 번 반영 (단일/다중 팀 공통, 쿠키 미설정 시 복구) */
+  const didSyncInitialTeamCookie = useRef(false);
 
   const setSelectedTeamId = useCallback(
     (
@@ -105,17 +103,16 @@ export function SelectedTeamProvider({
     [],
   );
 
-  // SSR에서 팀 1개로 초기값만 준 경우, 쿠키에 한 번 저장해 두어 다음 접속 시 서버가 읽을 수 있게 함
+  // SSR이 확정한 선택 팀 ID를 쿠키에 한 번 동기화 (다중 팀·쿠키 없을 때도 첫 팀이 initial로 오면 저장됨)
   useEffect(() => {
-    if (
-      initialSelectedTeamIdFromSingleTeam &&
-      initialSelectedTeamId != null &&
-      !didPersistSingleTeam.current
-    ) {
-      didPersistSingleTeam.current = true;
-      setSelectedTeamIdCookie(initialSelectedTeamId);
+    if (initialSelectedTeamId == null || didSyncInitialTeamCookie.current) {
+      return;
     }
-  }, [initialSelectedTeamIdFromSingleTeam, initialSelectedTeamId]);
+    didSyncInitialTeamCookie.current = true;
+    setSelectedTeamIdCookie(
+      normalizeRelayTeamGlobalId(initialSelectedTeamId),
+    );
+  }, [initialSelectedTeamId]);
 
   const contextValueWithoutSolo = useMemo<
     Omit<SelectedTeamContextValue, "isSoloTeam">
