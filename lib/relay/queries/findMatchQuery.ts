@@ -11,6 +11,7 @@ export const FindMatchQuery = graphql`
       id
       matchDate
       startTime
+      voteDeadline
       matchType
       description
       uniformType
