@@ -54,14 +54,7 @@ export async function loadLayoutSSR(
     !Number.isNaN(userId) &&
     (accessToken != null || refreshToken != null);
 
-  // 1단계: 유저·팀멤버·로스터 병렬 로드 (유저 있으면 3개, 없으면 로스터만)
-  const rosterPromise = fetchQuery(
-    environment,
-    FindManyTeamMemberQuery,
-    { limit: ROSTER_PAGE_SIZE, offset: 0 },
-    { fetchPolicy: "network-only" },
-  );
-
+  // 1단계: 유저·팀멤버 로드 (로스터는 선택 팀 숫자 ID가 정해진 뒤 teamId와 함께 요청)
   const userPromise = hasUser
     ? observableToPromise(
         fetchQuery(
@@ -86,8 +79,7 @@ export async function loadLayoutSSR(
   const [userData, teamMemberData] = (await Promise.all([
     userPromise,
     teamMemberPromise,
-    observableToPromise(rosterPromise),
-  ])) as [findUserByIdQuery$data | null, findTeamMemberQuery$data | null, unknown];
+  ])) as [findUserByIdQuery$data | null, findTeamMemberQuery$data | null];
 
   const layoutState = deriveLayoutState(
     userData,
@@ -96,7 +88,7 @@ export async function loadLayoutSSR(
     userId,
   );
 
-  // 2단계: 선택 팀이 정해졌으면 FindMatch 로드 (createdTeamId는 숫자 teamId)
+  // 2단계: 선택 팀 숫자 ID로 로스터·경기 로드
   const initialSelectedTeamIdNum = layoutState.initialSelectedTeamId
     ? getCreatedTeamIdNum(teamMemberData, layoutState.initialSelectedTeamId)
     : null;
@@ -104,6 +96,21 @@ export async function loadLayoutSSR(
     ...layoutState,
     initialSelectedTeamIdNum,
   };
+
+  if (initialSelectedTeamIdNum != null) {
+    const rosterObs = fetchQuery(
+      environment,
+      FindManyTeamMemberQuery,
+      {
+        limit: ROSTER_PAGE_SIZE,
+        offset: 0,
+        teamId: initialSelectedTeamIdNum,
+      },
+      { fetchPolicy: "network-only" },
+    );
+    await observableToPromise(rosterObs);
+  }
+
   if (
     initialSelectedTeamIdNum != null &&
     (accessToken != null || refreshToken != null)

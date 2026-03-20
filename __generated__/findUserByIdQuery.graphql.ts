@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<cef6a253004aae458b0677b8cb866e2e>>
+ * @generated SignedSource<<f049b4019d56aaafa2d41a0a188789dd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,7 +19,7 @@ export type findUserByIdQuery$data = {
   readonly findUserById: {
     readonly __typename: "UserModel";
     readonly activityArea: string | null | undefined;
-    readonly birthDate: string | null | undefined;
+    readonly birthDate: any | null | undefined;
     readonly email: string;
     readonly favoritePlayer: string | null | undefined;
     readonly foot: Foot | null | undefined;

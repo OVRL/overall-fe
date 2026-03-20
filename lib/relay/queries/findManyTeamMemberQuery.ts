@@ -5,8 +5,8 @@ import { graphql } from "react-relay";
  * useFindManyTeamMemberQuery 훅과 loadFindManyTeamMemberSSR에서 동일한 쿼리를 사용합니다.
  */
 export const FindManyTeamMemberQuery = graphql`
-  query findManyTeamMemberQueryQuery($limit: Int!, $offset: Int!) {
-    findManyTeamMember(limit: $limit, offset: $offset) {
+  query findManyTeamMemberQueryQuery($limit: Int!, $offset: Int!, $teamId: Int!) {
+    findManyTeamMember(limit: $limit, offset: $offset, teamId: $teamId) {
       members {
         __typename
         id

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d0a647fddcc60cfb74e57d4efc75bae9>>
+ * @generated SignedSource<<7f92df25f1080a5c6d1d761c41d7ede0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type findMatchQuery$data = {
   readonly findMatch: ReadonlyArray<{
     readonly __typename: "MatchModel";
     readonly createdTeam: {
-      readonly __typename: "TeamResponseModel";
+      readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
@@ -28,7 +28,7 @@ export type findMatchQuery$data = {
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
-      readonly __typename: "TeamResponseModel";
+      readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
@@ -142,7 +142,7 @@ v4 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamResponseModel",
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
         "name": "createdTeam",
         "plural": false,
@@ -152,7 +152,7 @@ v4 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamResponseModel",
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
         "name": "opponentTeam",
         "plural": false,

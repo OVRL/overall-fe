@@ -66,13 +66,15 @@ const CreateTeamWrapper = () => {
               offset: 0,
             }),
           );
-          // 쿠키에 새 selectedTeamId 반영된 뒤 호출해야 백엔드가 새 팀 로스터를 반환
-          await observableToPromise(
-            fetchQuery(environment, FindManyTeamMemberQuery, {
-              limit: ROSTER_PAGE_SIZE,
-              offset: 0,
-            }),
-          );
+          if (teamIdNum != null) {
+            await observableToPromise(
+              fetchQuery(environment, FindManyTeamMemberQuery, {
+                limit: ROSTER_PAGE_SIZE,
+                offset: 0,
+                teamId: teamIdNum,
+              }),
+            );
+          }
         } catch (e) {
           // refetch 실패해도 쿠키·Provider는 이미 새 팀으로 설정됨. 이동은 진행하고 다음 로드에서 동기화됨.
           console.warn("[CreateTeam] Relay refetch failed, navigating anyway", e);

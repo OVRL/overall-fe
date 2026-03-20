@@ -11,6 +11,7 @@ import {
 } from "@/lib/relay/observableToPromise";
 import { FindTeamsByNameQuery } from "@/lib/relay/queries/findTeamsByNameQuery";
 import type { findTeamsByNameQuery$data } from "@/__generated__/findTeamsByNameQuery.graphql";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 
 /** 팀 검색 결과 한 건 (등록 팀) */
 export interface TeamSearchItem {
@@ -83,12 +84,20 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
 
         if (!isMounted) return;
 
-        const items = data?.findTeamsByName?.items ?? [];
-        const teams: TeamSearchItem[] = items.map((item) => ({
-          id: Number(item.id),
-          name: item.name ?? "",
-          emblem: item.emblem ?? null,
-        }));
+        const team = data?.findTeam;
+        const numId =
+          team?.id != null
+            ? (parseNumericIdFromRelayGlobalId(String(team.id)) ?? 0)
+            : 0;
+        const teams: TeamSearchItem[] = team
+          ? [
+              {
+                id: numId,
+                name: team.name ?? "",
+                emblem: team.emblem ?? null,
+              },
+            ]
+          : [];
         setSearchResults(teams);
       } catch {
         if (isMounted) setSearchResults([]);
