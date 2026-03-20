@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { fetchQuery } from "relay-runtime";
+import { useRelayEnvironment } from "react-relay";
 import { toast } from "@/lib/toast";
 import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
 import type { useCreateMatchAttendanceMutation as CreateMatchAttendanceMutationType } from "@/__generated__/useCreateMatchAttendanceMutation.graphql";
 import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
+import { FindMatchAttendanceQuery } from "@/lib/relay/queries/findMatchAttendanceQuery";
+import { observableToPromise } from "@/lib/relay/observableToPromise";
 import { parseMatchIdForApi } from "@/utils/match/parseMatchIdForApi";
 import { useCreateMatchAttendanceMutation } from "./useCreateMatchAttendanceMutation";
 
@@ -19,6 +23,7 @@ export function useAttendanceVoteActions(
   userId: number | null,
   hideModal: () => void,
 ) {
+  const environment = useRelayEnvironment();
   const { executeMutation, isInFlight } = useCreateMatchAttendanceMutation();
   const [pendingChoice, setPendingChoice] = useState<AttendanceChoice | null>(
     null,
@@ -63,6 +68,17 @@ export function useAttendanceVoteActions(
         if (response.createMatchAttendance == null) return;
         toast.success(successMessage);
         hideModal();
+        /* 참석 요약(findMatchAttendance) 캐시 갱신 — 모달 재진입 시 store-or-network가 최신을 쓰도록 */
+        void observableToPromise(
+          fetchQuery(
+            environment,
+            FindMatchAttendanceQuery,
+            { matchId, teamId: createdTeamId },
+            { fetchPolicy: "network-only" },
+          ),
+        ).catch(() => {
+          /* refetch 실패해도 토스트·닫기는 이미 완료. 다음 진입 시 네트워크로 동기화됨 */
+        });
       },
       onError: (err) => {
         setPendingChoice(null);

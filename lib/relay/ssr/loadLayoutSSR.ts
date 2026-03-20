@@ -1,6 +1,7 @@
 import type { findUserByIdQuery$data } from "@/__generated__/findUserByIdQuery.graphql";
 import type { findTeamMemberQuery$data } from "@/__generated__/findTeamMemberQuery.graphql";
 import type { findManyTeamMemberQueryQuery$data } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
+import type { findMatchQuery$data } from "@/__generated__/findMatchQuery.graphql";
 import type { UserModel } from "@/contexts/UserContext";
 import { fetchQuery } from "relay-runtime";
 import { getServerEnvironment } from "../getServerEnvironment";
@@ -128,7 +129,24 @@ export async function loadLayoutSSR(
       { createdTeamId: initialSelectedTeamIdNum },
       { fetchPolicy: "network-only" },
     );
-    await observableToPromise(matchObs);
+    const matchData = (await observableToPromise(
+      matchObs,
+    )) as findMatchQuery$data | undefined;
+
+    // 개발 환경에서만: GraphQL findMatch 네트워크 응답 원본 (터미널 = next dev 서버 로그)
+    if (process.env.NODE_ENV === "development") {
+      const list = matchData?.findMatch ?? [];
+      console.log("[SSR loadLayoutSSR] findMatch API 응답", {
+        createdTeamId: initialSelectedTeamIdNum,
+        count: list.length,
+        matches: list.map((m) => ({
+          id: m.id,
+          matchDate: m.matchDate,
+          startTime: m.startTime,
+          matchType: m.matchType,
+        })),
+      });
+    }
   }
 
   const relayInitialRecords = serializeRelayStore(environment);

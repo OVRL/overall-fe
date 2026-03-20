@@ -2,7 +2,7 @@ import { useLazyLoadQuery } from "react-relay";
 import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
 import { FindMatchQuery } from "@/lib/relay/queries/findMatchQuery";
 import type { MatchForUpcomingDisplay } from "@/components/home/UpcomingMatch/upcomingMatchDisplay";
-import { pickSoonestMatch } from "@/utils/match/pickSoonestMatch";
+import { pickSoonestUpcomingMatch } from "@/utils/match/pickSoonestMatch";
 
 type MatchNode = findMatchQuery["response"]["findMatch"][number];
 
@@ -21,7 +21,7 @@ export function useAttendanceVoteMatch(createdTeamId: number): {
 
   const list = data?.findMatch ?? [];
   const forPick = list as unknown as MatchForUpcomingDisplay[];
-  const soonestDisplay = pickSoonestMatch(forPick);
+  const soonestDisplay = pickSoonestUpcomingMatch(forPick);
   const match = soonestDisplay
     ? (list.find(
         (m) =>

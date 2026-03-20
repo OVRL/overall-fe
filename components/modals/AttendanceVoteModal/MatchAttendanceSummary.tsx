@@ -210,8 +210,8 @@ function StatusSummaryTrigger({
         sideOffset={6}
         collisionPadding={16}
         className={cn(
-          "w-[min(18rem,calc(100vw-2rem))] border border-gray-300 bg-white p-1 shadow-card",
-          "rounded-lg text-gray-1100",
+          "w-[min(18rem,calc(100vw-2rem))] border border-gray-300 bg-surface-primary p-1 shadow-card",
+          "rounded-lg text-Label-Primary",
         )}
         onMouseEnter={() => {
           if (!prefersHoverOpen) return;
@@ -256,8 +256,10 @@ export function MatchAttendanceSummary({
     { fetchPolicy: "store-or-network" },
   );
 
-  const rows = data.findMatchAttendance ?? [];
-  const { attend, absent } = useMemo(() => partitionByStatus(rows), [rows]);
+  const { attend, absent } = useMemo(() => {
+    const rows = data.findMatchAttendance ?? [];
+    return partitionByStatus(rows);
+  }, [data.findMatchAttendance]);
 
   const prefersHoverRaw = useMediaQuery(HOVER_CAPABILITY_MQ);
   const prefersHoverOpen = prefersHoverRaw === true;
