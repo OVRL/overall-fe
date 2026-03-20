@@ -24,7 +24,8 @@ export interface TeamSearchItem {
 export interface ExternalTeamItem {
   id: null;
   name: string;
-  emblem: string;
+  /** 없으면 UI에서 EmblemImage 기본 엠블럼 사용 */
+  emblem: string | null;
 }
 
 export type TeamSearchResult = TeamSearchItem | ExternalTeamItem;
@@ -34,8 +35,6 @@ export function isExternalTeam(
 ): item is ExternalTeamItem {
   return item.id === null;
 }
-
-const DEFAULT_EMBLEM_PATH = "/icons/teamemblum_default.svg";
 
 interface UseTeamSearchProps {
   onComplete: (result: TeamSearchResult) => void;
@@ -78,16 +77,16 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
           { name: debouncedKeyword },
           { fetchPolicy: "network-only" },
         );
-        const data = await observableToPromise<
-          findTeamsByNameQuery$data
-        >(observable as unknown as RelayObservableLike<findTeamsByNameQuery$data>);
+        const data = await observableToPromise<findTeamsByNameQuery$data>(
+          observable as unknown as RelayObservableLike<findTeamsByNameQuery$data>,
+        );
 
         if (!isMounted) return;
 
         const team = data?.findTeam;
         const numId =
           team?.id != null
-            ? (parseNumericIdFromRelayGlobalId(String(team.id)) ?? 0)
+            ? parseNumericIdFromRelayGlobalId(String(team.id)) ?? 0
             : 0;
         const teams: TeamSearchItem[] = team
           ? [
@@ -128,7 +127,7 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
     ? {
         id: null,
         name: inputValue.trim(),
-        emblem: DEFAULT_EMBLEM_PATH,
+        emblem: null,
       }
     : null;
 

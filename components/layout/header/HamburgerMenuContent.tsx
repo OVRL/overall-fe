@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "@/components/Link";
 import Icon from "@/components/ui/Icon";
 import Skeleton from "@/components/ui/Skeleton";
@@ -10,7 +10,8 @@ import {
   isSameTeamId,
 } from "@/lib/relay/parseRelayGlobalId";
 import { cn } from "@/lib/utils";
-import { useFindManyTeamQuery } from "@/components/layout/header/useFindManyTeamQuery";
+import { useFindTeamMemberForHeader } from "@/components/layout/header/useFindTeamMemberForHeaderQuery";
+import { useUserId } from "@/hooks/useUserId";
 import userIcon from "@/public/icons/user.svg";
 import plusIcon from "@/public/icons/plus.svg";
 import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
@@ -29,11 +30,12 @@ type HamburgerMenuContentProps = {
 export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
   const router = useBridgeRouter();
   const { selectedTeamId, setSelectedTeamId } = useSelectedTeamId();
+  const userId = useUserId();
 
   const handleTeamSelect = (
     teamId: string,
     teamName: string,
-    teamImageUrl: string,
+    teamImageUrl: string | null,
   ) => {
     const teamIdNum = parseNumericIdFromRelayGlobalId(teamId);
     // 뱃지 등에서 선택 팀 이름·이미지가 바로 반영되도록 전달 (클럽 생성 플로우와 동일)
@@ -55,17 +57,20 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
         )}
         aria-label="내 정보"
       >
-        <Icon src={userIcon} alt="" width={20} height={20} nofill />
+        <Icon src={userIcon} alt="" width={24} height={24} nofill />
         <span>내 정보</span>
       </Link>
 
-      {/* Relay useLazyLoadQuery는 캐시 미스 시 suspend → 팀 블록만 분리해 스켈레톤 표시 */}
-      <Suspense fallback={<HamburgerTeamListSkeleton />}>
-        <HamburgerTeamListSection
-          selectedTeamId={selectedTeamId}
-          onTeamSelect={handleTeamSelect}
-        />
-      </Suspense>
+      {/* 로그인 시에만 findTeamMember(userId) — Relay는 캐시 미스 시 suspend */}
+      {userId !== null ? (
+        <Suspense fallback={<HamburgerTeamListSkeleton />}>
+          <HamburgerTeamListSection
+            userId={userId}
+            selectedTeamId={selectedTeamId}
+            onTeamSelect={handleTeamSelect}
+          />
+        </Suspense>
+      ) : null}
       {/* 팀 만들기 */}
       <Link
         href="/create-team"
@@ -115,17 +120,32 @@ function HamburgerTeamListSkeleton() {
 
 /** useLazyLoadQuery 호출 분리: suspend 시 상위 메뉴는 그대로, 이 구간만 fallback */
 function HamburgerTeamListSection({
+  userId,
   selectedTeamId,
   onTeamSelect,
 }: {
+  userId: number;
   selectedTeamId: string | null;
   onTeamSelect: (
     teamId: string,
     teamName: string,
-    teamImageUrl: string,
+    teamImageUrl: string | null,
   ) => void;
 }) {
-  const { teams } = useFindManyTeamQuery();
+  const members = useFindTeamMemberForHeader(userId);
+
+  const teams = useMemo(() => {
+    return members
+      .filter(
+        (m): m is typeof m & { team: NonNullable<typeof m.team> } =>
+          m.team != null,
+      )
+      .map((m) => ({
+        id: m.team.id,
+        name: m.team.name ?? "",
+        imageUrl: m.team.emblem ?? null,
+      }));
+  }, [members]);
 
   if (teams.length === 0) {
     return null;
@@ -163,7 +183,7 @@ function TeamRow({
   onSelect,
 }: {
   name: string;
-  imageUrl: string;
+  imageUrl: string | null;
   isSelected: boolean;
   onSelect: () => void;
 }) {

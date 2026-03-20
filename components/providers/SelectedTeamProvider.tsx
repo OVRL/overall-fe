@@ -13,6 +13,7 @@ import {
 import { ReactRelayContext } from "react-relay";
 import { setSelectedTeamIdCookie } from "@/lib/cookie/selectedTeamId";
 import { useFindManyTeamMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
+import { normalizeRelayTeamGlobalId } from "@/lib/relay/parseRelayGlobalId";
 
 export type SelectedTeamContextValue = {
   selectedTeamId: string | null;
@@ -88,9 +89,10 @@ export function SelectedTeamProvider({
       teamName?: string | null,
       teamImageUrl?: string | null,
     ) => {
-      setSelectedTeamIdState(teamId);
+      const normalizedId = normalizeRelayTeamGlobalId(teamId);
+      setSelectedTeamIdState(normalizedId);
       setSelectedTeamIdNumState(teamIdNum ?? null);
-      setSelectedTeamIdCookie(teamId);
+      setSelectedTeamIdCookie(normalizedId);
       if (teamId == null) {
         setSelectedTeamNameState(null);
         setSelectedTeamImageUrlState(null);

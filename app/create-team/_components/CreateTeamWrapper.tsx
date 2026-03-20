@@ -28,10 +28,6 @@ import { SHOW_TEAM_CREATED_MODAL_KEY } from "@/lib/teamCreatedModalStorage";
 import { useUserId } from "@/hooks/useUserId";
 import { FindTeamMemberQuery } from "@/lib/relay/queries/findTeamMemberQuery";
 import {
-  FindManyTeamQuery,
-  FIND_MANY_TEAM_PAGE_SIZE,
-} from "@/lib/relay/queries/findManyTeamQuery";
-import {
   FindManyTeamMemberQuery,
   ROSTER_PAGE_SIZE,
 } from "@/lib/relay/queries/findManyTeamMemberQuery";
@@ -54,17 +50,11 @@ const CreateTeamWrapper = () => {
         createdTeam.name ?? null,
         createdTeam.emblem ?? null,
       );
-      // Relay 스토어 갱신 후 이동. (팀 목록 + 홈 로스터 findManyTeamMember — PlayerRosterPanel이 store-or-network로 읽음)
+      // Relay 스토어 갱신 후 이동. (헤더·햄버거 findTeamMember + 홈 로스터 findManyTeamMember)
       if (userId != null) {
         try {
           await observableToPromise(
             fetchQuery(environment, FindTeamMemberQuery, { userId }),
-          );
-          await observableToPromise(
-            fetchQuery(environment, FindManyTeamQuery, {
-              limit: FIND_MANY_TEAM_PAGE_SIZE,
-              offset: 0,
-            }),
           );
           if (teamIdNum != null) {
             await observableToPromise(

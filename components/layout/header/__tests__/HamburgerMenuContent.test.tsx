@@ -13,13 +13,22 @@ jest.mock("@/components/providers/SelectedTeamProvider", () => ({
   }),
 }));
 
-jest.mock("../useFindManyTeamQuery", () => ({
-  useFindManyTeamQuery: () => ({
-    teams: [
-      { id: "TeamModel:1", name: "테스트팀", imageUrl: "/default.png" },
-    ],
-    totalCount: 1,
-  }),
+jest.mock("@/hooks/useUserId", () => ({
+  useUserId: () => 1,
+}));
+
+jest.mock("../useFindTeamMemberForHeaderQuery", () => ({
+  useFindTeamMemberForHeader: () => [
+    {
+      id: 10,
+      teamId: 1,
+      team: {
+        id: "TeamModel:1",
+        name: "테스트팀",
+        emblem: "/default.png",
+      },
+    },
+  ],
 }));
 
 jest.mock("@/hooks/bridge/useBridgeRouter", () => ({
@@ -34,10 +43,9 @@ jest.mock("@/components/ui/Icon", () => {
   };
 });
 
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => (
-    <img data-testid="team-emblem" alt={alt} />
+jest.mock("@/components/ui/EmblemImage", () => ({
+  EmblemImage: ({ src, alt }: { src: string; alt: string }) => (
+    <img data-testid="team-emblem" src={src} alt={alt} />
   ),
 }));
 

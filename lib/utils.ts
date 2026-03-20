@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export const MOCK_IMAGE_SRC = "/images/player/img_player_2.webp";
 
 /** 엠블럼/로고 등 기본 이미지 (getValidImageSrc fallback으로 사용) */
-export const MOCK_EMBLEM_SRC = "/icons/teamemblum_default.svg";
+export const MOCK_EMBLEM_SRC = "/images/teamemblum_default.webp";
 
 /**
  * next/image에 넘길 src. 도메인 없는 경로·잘못된 URL·빈 값이면 fallback 반환해 Invalid URL 오류를 방지합니다.

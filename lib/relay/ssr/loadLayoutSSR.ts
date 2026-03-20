@@ -19,6 +19,7 @@ import {
   EMPTY_LAYOUT_STATE,
   type LayoutState,
 } from "./layoutState";
+import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
 
 export interface LoadLayoutSSROptions {
   accessToken: string | null;
@@ -158,16 +159,30 @@ function deriveLayoutState(
     (m): m is typeof m & { team: NonNullable<typeof m.team> } =>
       m.team != null,
   );
-  const teamIds = teamsWithInfo.map((m) => m.team.id);
+  const cookieDecoded =
+    selectedTeamIdFromCookie != null
+      ? (() => {
+          try {
+            return decodeURIComponent(selectedTeamIdFromCookie);
+          } catch {
+            return selectedTeamIdFromCookie;
+          }
+        })()
+      : null;
 
-  let initialSelectedTeamId: string | null = selectedTeamIdFromCookie;
+  const cookieMatchedMember =
+    cookieDecoded != null
+      ? teamsWithInfo.find(
+          (m) => m.team != null && isSameTeamId(cookieDecoded, m.team.id),
+        )
+      : undefined;
+
+  let initialSelectedTeamId: string | null = null;
   let initialSelectedTeamIdFromSingleTeam = false;
 
-  if (
-    selectedTeamIdFromCookie != null &&
-    teamIds.includes(selectedTeamIdFromCookie)
-  ) {
-    initialSelectedTeamId = selectedTeamIdFromCookie;
+  if (cookieMatchedMember?.team != null) {
+    // 쿠키가 "7"이어도 Relay team.id(TeamModel:7)와 매칭 후 저장 형식 통일
+    initialSelectedTeamId = cookieMatchedMember.team.id;
   } else if (teamsWithInfo.length === 1) {
     initialSelectedTeamId = teamsWithInfo[0]!.team.id;
     initialSelectedTeamIdFromSingleTeam = true;

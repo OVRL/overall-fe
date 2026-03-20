@@ -58,7 +58,7 @@ function EmblemImageInner({
 /**
  * 팀 엠블럼 전용 next/image 래퍼.
  * - `getValidImageSrc`로 잘못된 src는 즉시 기본 엠블럼으로 교체
- * - 로드 실패 시 `onError`로 기본 엠블럼(`/icons/teamemblum_default.svg`) 표시
+ * - 로드 실패 시 `onError`로 기본 엠블럼(`/images/teamemblum_default.webp`) 표시
  * - `fill` 기본값 true: 부모에 `relative`와 명시적 크기(h/w 또는 size-*) 필요
  * - `fill` 사용 시 `sizes`를 넘기지 않으면 브라우저가 100vw로 가정할 수 있어 작은 배지에서도 명시 권장
  */

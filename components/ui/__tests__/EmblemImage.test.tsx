@@ -69,6 +69,7 @@ describe("EmblemImage", () => {
   it("무효·빈 src는 기본 엠블럼(MOCK_EMBLEM_SRC)으로 정규화한다", () => {
     const { rerender } = render(<EmblemImage src={null} alt="" sizes="1.5rem" />);
     expect(getImg()).toHaveAttribute("src", MOCK_EMBLEM_SRC);
+    expect(getImg()).toHaveAttribute("data-unoptimized", "false");
 
     rerender(<EmblemImage src="" alt="" sizes="1.5rem" />);
     expect(getImg()).toHaveAttribute("src", MOCK_EMBLEM_SRC);
@@ -81,7 +82,7 @@ describe("EmblemImage", () => {
   });
 
   it("표시 src가 SVG일 때 unoptimized가 true이다", () => {
-    render(<EmblemImage src={null} alt="" sizes="1.5rem" />);
+    render(<EmblemImage src="/icons/emblem.svg" alt="" sizes="1.5rem" />);
     expect(getImg()).toHaveAttribute("data-unoptimized", "true");
   });
 
