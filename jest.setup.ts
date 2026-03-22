@@ -1,4 +1,51 @@
 import "@testing-library/jest-dom";
+import React from "react";
+
+// 전역 컴포넌트/폰트 스텁 (테스트 파일별 중복 jest.mock 제거)
+jest.mock("@/components/ui/ProfileAvatar", () => ({
+  __esModule: true,
+  default: (props: {
+    src?: string;
+    alt: string;
+    className?: string;
+  }) =>
+    React.createElement("div", {
+      "data-testid": "profile-avatar",
+      "aria-label": props.alt,
+      "data-src": props.src ?? "",
+      className: props.className,
+    }),
+}));
+
+// img + alt: getByAltText / getByRole("img", { name })와 호환
+jest.mock("@/components/ui/Icon", () => ({
+  __esModule: true,
+  default: function MockIcon(props: {
+    alt?: string;
+    className?: string;
+    style?: React.CSSProperties;
+    width?: number;
+    height?: number;
+  }) {
+    const alt = props.alt ?? "icon";
+    return React.createElement("img", {
+      "data-testid": "icon",
+      alt,
+      // 실제 Icon(span+role=img)과 같이 getByLabelText로 찾을 수 있도록 함
+      "aria-label": alt,
+      src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+      className: props.className,
+      style: props.style,
+      width: props.width,
+      height: props.height,
+    });
+  },
+}));
+
+jest.mock("next/font/google", () => ({
+  __esModule: true,
+  Racing_Sans_One: () => ({ className: "racing-sans" }),
+}));
 
 // 1. IntersectionObserver Mock
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({

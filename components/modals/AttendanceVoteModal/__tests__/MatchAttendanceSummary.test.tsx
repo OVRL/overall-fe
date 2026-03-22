@@ -16,19 +16,6 @@ jest.mock("@/hooks/useMediaQuery", () => ({
 const mockUseMediaQuery = jest.requireMock("@/hooks/useMediaQuery")
   .useMediaQuery as jest.Mock;
 
-jest.mock("@/components/ui/ProfileAvatar", () => {
-  return function MockProfileAvatar() {
-    /* alt는 접근성용이므로 텍스트 노드로 넣지 않음 (쿼리 중복 방지) */
-    return <div data-testid="profile-avatar" />;
-  };
-});
-
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="chevron-right-mock" />;
-  };
-});
-
 function renderSummary(props: {
   matchId?: number;
   teamId?: number;

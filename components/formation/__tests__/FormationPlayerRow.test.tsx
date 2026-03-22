@@ -3,12 +3,6 @@ import FormationPlayerRow from "../player-list/FormationPlayerRow";
 import { DndContext } from "@dnd-kit/core";
 
 // 하위 컴포넌트 및 훅 모킹
-jest.mock("@/components/ui/ProfileAvatar", () => {
-  return function MockProfileAvatar(props: any) {
-    return <div data-testid="profile-avatar">{props.alt}</div>;
-  };
-});
-
 jest.mock("@/components/PositionChip", () => {
   return function MockPositionChip(props: any) {
     return <div data-testid="position-chip">{props.position}</div>;
@@ -62,7 +56,10 @@ describe("FormationPlayerRow 컴포넌트", () => {
     expect(screen.getAllByText("박지성").length).toBeGreaterThan(0);
     expect(screen.getByText("OVR 88")).toBeInTheDocument();
 
-    expect(screen.getByTestId("profile-avatar")).toHaveTextContent("박지성");
+    expect(screen.getByTestId("profile-avatar")).toHaveAttribute(
+      "aria-label",
+      "박지성",
+    );
     expect(screen.getByTestId("position-chip")).toHaveTextContent("MF");
     expect(screen.getByTestId("quarter-chip")).toHaveTextContent("1,2");
   });

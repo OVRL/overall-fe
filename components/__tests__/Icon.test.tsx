@@ -1,3 +1,6 @@
+// 전역 Icon 스텁 대신 실제 컴포넌트를 검증한다
+jest.unmock("@/components/ui/Icon");
+
 import { render, screen } from "@testing-library/react";
 import Icon from "../ui/Icon";
 import "@testing-library/jest-dom";

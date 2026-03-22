@@ -1,11 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import FormationPlayerImageThumbnail from "../board/FormationPlayerImageThumbnail";
 
-// Icon 모킹
-jest.mock("@/components/ui/Icon", () => ({ alt }: any) => (
-  <span data-testid="mock-icon">{alt}</span>
-));
-
 // PlayerCard 모킹
 jest.mock("@/components/ui/PlayerCard", () => {
   return function MockPlayerCard(props: any) {
@@ -45,9 +40,9 @@ describe("FormationPlayerImageThumbnail 컴포넌트", () => {
       <FormationPlayerImageThumbnail {...defaultProps} isSelected={true} />,
     );
 
-    const icon = screen.getByTestId("mock-icon");
+    const icon = screen.getByTestId("icon");
     expect(icon).toBeInTheDocument();
-    expect(icon).toHaveTextContent("selected circle");
+    expect(icon).toHaveAttribute("alt", "selected circle");
   });
 
   it("isSelected가 false일 때, 활성화 원 요소가 숨김 처리되어야 한다", () => {
@@ -55,7 +50,7 @@ describe("FormationPlayerImageThumbnail 컴포넌트", () => {
       <FormationPlayerImageThumbnail {...defaultProps} isSelected={false} />,
     );
 
-    expect(screen.queryByTestId("mock-icon")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("icon")).not.toBeInTheDocument();
   });
 
   it("onDelete 핸들러를 PlayerCard 내부 이벤트로 전달할 수 있어야 한다", () => {

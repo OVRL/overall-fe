@@ -30,7 +30,6 @@ jest.mock("@/components/ui/Button", () => ({ children, onClick }: any) => (
     {children}
   </button>
 ));
-jest.mock("@/components/ui/Icon", () => () => <span />);
 
 // 선수 추가는 모달(PLAYER_SEARCH) 완료 시 onAddPlayer가 호출되는 방식으로 동작함
 jest.mock("@/hooks/useModal", () => ({

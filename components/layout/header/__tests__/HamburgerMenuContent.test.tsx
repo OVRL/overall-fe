@@ -37,12 +37,6 @@ jest.mock("@/hooks/bridge/useBridgeRouter", () => ({
   }),
 }));
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="icon" />;
-  };
-});
-
 jest.mock("@/components/ui/EmblemImage", () => ({
   EmblemImage: ({ src, alt }: { src: string; alt: string }) => (
     <img data-testid="team-emblem" src={src} alt={alt} />

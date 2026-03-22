@@ -1,12 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { LogoutButton } from "../LogoutButton";
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="exit-icon" />;
-  };
-});
-
 jest.mock("@/components/Link", () => {
   return function MockLink({
     href,

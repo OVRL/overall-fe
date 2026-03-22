@@ -13,12 +13,6 @@ jest.mock("next/image", () => ({
   ),
 }));
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="icon" />;
-  };
-});
-
 jest.mock("motion/react", () => ({
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
