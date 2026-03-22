@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import RelayProvider from "@/components/RelayProvider";
@@ -30,6 +30,19 @@ const pretendard = localFont({
 export const metadata: Metadata = {
   title: "Overall",
   description: "Overall",
+};
+
+/** 모바일·웹뷰: 동적 뷰포트 높이, 노치(safe-area), 가상 키보드 레이아웃 */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "oklch(99.11% 0 89.9)" },
+    { media: "(prefers-color-scheme: dark)", color: "oklch(0.13 0 0)" },
+  ],
+  colorScheme: "dark light",
 };
 
 export default async function RootLayout({
@@ -105,7 +118,7 @@ export default async function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} w-full h-screen antialiased overflow-x-hidden flex flex-col`}
+        className={`${pretendard.variable} w-full min-h-dvh antialiased overflow-x-hidden flex flex-col`}
       >
         <TransitionProvider>
           <ThemeProvider
