@@ -9,16 +9,26 @@ jest.mock("@/components/providers/SelectedTeamProvider", () => ({
   useSelectedTeamId: () => ({
     selectedTeamId: null,
     setSelectedTeamId: mockSetSelectedTeamId,
+    isSoloTeam: false,
   }),
 }));
 
-jest.mock("../useFindManyTeamQuery", () => ({
-  useFindManyTeamQuery: () => ({
-    teams: [
-      { id: "TeamModel:1", name: "테스트팀", imageUrl: "/default.png" },
-    ],
-    totalCount: 1,
-  }),
+jest.mock("@/hooks/useUserId", () => ({
+  useUserId: () => 1,
+}));
+
+jest.mock("../useFindTeamMemberForHeaderQuery", () => ({
+  useFindTeamMemberForHeader: () => [
+    {
+      id: 10,
+      teamId: 1,
+      team: {
+        id: "TeamModel:1",
+        name: "테스트팀",
+        emblem: "/default.png",
+      },
+    },
+  ],
 }));
 
 jest.mock("@/hooks/bridge/useBridgeRouter", () => ({
@@ -27,16 +37,9 @@ jest.mock("@/hooks/bridge/useBridgeRouter", () => ({
   }),
 }));
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="icon" />;
-  };
-});
-
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => (
-    <img data-testid="team-emblem" alt={alt} />
+jest.mock("@/components/ui/EmblemImage", () => ({
+  EmblemImage: ({ src, alt }: { src: string; alt: string }) => (
+    <img data-testid="team-emblem" src={src} alt={alt} />
   ),
 }));
 
@@ -91,10 +94,15 @@ describe("HamburgerMenuContent", () => {
     expect(screen.getByRole("button", { name: /테스트팀/i })).toBeInTheDocument();
   });
 
-  it("팀 행 클릭 시 setSelectedTeamId, onClose, router.refresh가 호출된다", () => {
+  it("팀 행 클릭 시 setSelectedTeamId(팀 id, 숫자 id, 이름, 이미지), onClose, router.refresh가 호출된다", () => {
     render(<HamburgerMenuContent onClose={mockOnClose} />);
     fireEvent.click(screen.getByRole("button", { name: /테스트팀/i }));
-    expect(mockSetSelectedTeamId).toHaveBeenCalledWith("TeamModel:1", 1);
+    expect(mockSetSelectedTeamId).toHaveBeenCalledWith(
+      "TeamModel:1",
+      1,
+      "테스트팀",
+      "/default.png",
+    );
     expect(mockOnClose).toHaveBeenCalledTimes(1);
     expect(mockRefresh).toHaveBeenCalledTimes(1);
   });

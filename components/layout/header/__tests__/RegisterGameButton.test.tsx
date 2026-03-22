@@ -8,12 +8,6 @@ jest.mock("@/hooks/useModal", () => ({
   default: () => ({ openModal: mockOpenModal }),
 }));
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <span data-testid="plus-icon" />;
-  };
-});
-
 describe("RegisterGameButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();

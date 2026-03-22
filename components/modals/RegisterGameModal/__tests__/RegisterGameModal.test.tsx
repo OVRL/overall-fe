@@ -40,7 +40,11 @@ jest.mock("@/hooks/useUserId", () => ({
 }));
 
 jest.mock("@/components/providers/SelectedTeamProvider", () => ({
-  useSelectedTeamId: () => ({ selectedTeamId: "1", selectedTeamIdNum: 1 }),
+  useSelectedTeamId: () => ({
+    selectedTeamId: "1",
+    selectedTeamIdNum: 1,
+    isSoloTeam: false,
+  }),
 }));
 
 jest.mock("../hooks/useCreateMatchMutation", () => ({

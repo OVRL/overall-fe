@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
-import { refreshAccessToken } from "@/lib/auth/refreshToken";
+import {
+  refreshAccessToken,
+  type TokenPair,
+} from "@/lib/auth/refreshToken";
+import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
 
 const BACKEND_URL = env.BACKEND_URL;
 
@@ -18,9 +22,13 @@ export async function POST(request: NextRequest) {
     (process.env.NODE_ENV === "development" ? env.DEV_REFRESH_TOKEN : undefined);
 
   let token = accessToken;
-  if (!token && refreshToken) {
+  let preemptiveRefresh: TokenPair | null = null;
+  if ((!token || isAccessTokenExpired(token)) && refreshToken) {
     const newTokens = await refreshAccessToken(refreshToken);
-    if (newTokens?.accessToken) token = newTokens.accessToken;
+    if (newTokens?.accessToken) {
+      token = newTokens.accessToken;
+      preemptiveRefresh = newTokens;
+    }
   }
 
   const contentType = request.headers.get("content-type") ?? "";
@@ -101,9 +109,30 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return new NextResponse(responseText, {
+  const outgoing = new NextResponse(responseText, {
     status: backendResponse.status,
     statusText: backendResponse.statusText,
     headers: new Headers(backendResponse.headers),
   });
+
+  if (preemptiveRefresh?.accessToken) {
+    outgoing.cookies.set("accessToken", preemptiveRefresh.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60,
+      path: "/",
+    });
+    if (preemptiveRefresh.refreshToken) {
+      outgoing.cookies.set("refreshToken", preemptiveRefresh.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      });
+    }
+  }
+
+  return outgoing;
 }

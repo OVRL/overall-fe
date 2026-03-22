@@ -1,5 +1,7 @@
 import type { findUserByIdQuery$data } from "@/__generated__/findUserByIdQuery.graphql";
 import type { findTeamMemberQuery$data } from "@/__generated__/findTeamMemberQuery.graphql";
+import type { findManyTeamMemberQueryQuery$data } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
+import type { findMatchQuery$data } from "@/__generated__/findMatchQuery.graphql";
 import type { UserModel } from "@/contexts/UserContext";
 import { fetchQuery } from "relay-runtime";
 import { getServerEnvironment } from "../getServerEnvironment";
@@ -18,6 +20,7 @@ import {
   EMPTY_LAYOUT_STATE,
   type LayoutState,
 } from "./layoutState";
+import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
 
 export interface LoadLayoutSSROptions {
   accessToken: string | null;
@@ -54,14 +57,7 @@ export async function loadLayoutSSR(
     !Number.isNaN(userId) &&
     (accessToken != null || refreshToken != null);
 
-  // 1단계: 유저·팀멤버·로스터 병렬 로드 (유저 있으면 3개, 없으면 로스터만)
-  const rosterPromise = fetchQuery(
-    environment,
-    FindManyTeamMemberQuery,
-    { limit: ROSTER_PAGE_SIZE, offset: 0 },
-    { fetchPolicy: "network-only" },
-  );
-
+  // 1단계: 유저·팀멤버 로드 (로스터는 선택 팀 숫자 ID가 정해진 뒤 teamId와 함께 요청)
   const userPromise = hasUser
     ? observableToPromise(
         fetchQuery(
@@ -86,8 +82,7 @@ export async function loadLayoutSSR(
   const [userData, teamMemberData] = (await Promise.all([
     userPromise,
     teamMemberPromise,
-    observableToPromise(rosterPromise),
-  ])) as [findUserByIdQuery$data | null, findTeamMemberQuery$data | null, unknown];
+  ])) as [findUserByIdQuery$data | null, findTeamMemberQuery$data | null];
 
   const layoutState = deriveLayoutState(
     userData,
@@ -96,14 +91,34 @@ export async function loadLayoutSSR(
     userId,
   );
 
-  // 2단계: 선택 팀이 정해졌으면 FindMatch 로드 (createdTeamId는 숫자 teamId)
+  // 2단계: 선택 팀 숫자 ID로 로스터·경기 로드
   const initialSelectedTeamIdNum = layoutState.initialSelectedTeamId
     ? getCreatedTeamIdNum(teamMemberData, layoutState.initialSelectedTeamId)
     : null;
-  const layoutStateWithNum: LayoutState = {
+  let layoutStateWithNum: LayoutState = {
     ...layoutState,
     initialSelectedTeamIdNum,
   };
+
+  if (initialSelectedTeamIdNum != null) {
+    const rosterObs = fetchQuery(
+      environment,
+      FindManyTeamMemberQuery,
+      {
+        limit: ROSTER_PAGE_SIZE,
+        offset: 0,
+        teamId: initialSelectedTeamIdNum,
+      },
+      { fetchPolicy: "network-only" },
+    );
+    const rosterData = (await observableToPromise(
+      rosterObs,
+    )) as findManyTeamMemberQueryQuery$data | undefined;
+    const initialIsSoloTeam =
+      rosterData?.findManyTeamMember?.totalCount === 1;
+    layoutStateWithNum = { ...layoutStateWithNum, initialIsSoloTeam };
+  }
+
   if (
     initialSelectedTeamIdNum != null &&
     (accessToken != null || refreshToken != null)
@@ -114,7 +129,24 @@ export async function loadLayoutSSR(
       { createdTeamId: initialSelectedTeamIdNum },
       { fetchPolicy: "network-only" },
     );
-    await observableToPromise(matchObs);
+    const matchData = (await observableToPromise(
+      matchObs,
+    )) as findMatchQuery$data | undefined;
+
+    // 개발 환경에서만: GraphQL findMatch 네트워크 응답 원본 (터미널 = next dev 서버 로그)
+    if (process.env.NODE_ENV === "development") {
+      const list = matchData?.findMatch ?? [];
+      console.log("[SSR loadLayoutSSR] findMatch API 응답", {
+        createdTeamId: initialSelectedTeamIdNum,
+        count: list.length,
+        matches: list.map((m) => ({
+          id: m.id,
+          matchDate: m.matchDate,
+          startTime: m.startTime,
+          matchType: m.matchType,
+        })),
+      });
+    }
   }
 
   const relayInitialRecords = serializeRelayStore(environment);
@@ -145,19 +177,36 @@ function deriveLayoutState(
     (m): m is typeof m & { team: NonNullable<typeof m.team> } =>
       m.team != null,
   );
-  const teamIds = teamsWithInfo.map((m) => m.team.id);
+  const hasAnyTeamMembership = teamsWithInfo.length > 0;
+  const cookieDecoded =
+    selectedTeamIdFromCookie != null
+      ? (() => {
+          try {
+            return decodeURIComponent(selectedTeamIdFromCookie);
+          } catch {
+            return selectedTeamIdFromCookie;
+          }
+        })()
+      : null;
 
-  let initialSelectedTeamId: string | null = selectedTeamIdFromCookie;
+  const cookieMatchedMember =
+    cookieDecoded != null
+      ? teamsWithInfo.find(
+          (m) => m.team != null && isSameTeamId(cookieDecoded, m.team.id),
+        )
+      : undefined;
+
+  let initialSelectedTeamId: string | null = null;
   let initialSelectedTeamIdFromSingleTeam = false;
 
-  if (
-    selectedTeamIdFromCookie != null &&
-    teamIds.includes(selectedTeamIdFromCookie)
-  ) {
-    initialSelectedTeamId = selectedTeamIdFromCookie;
-  } else if (teamsWithInfo.length === 1) {
+  if (cookieMatchedMember?.team != null) {
+    // 쿠키가 "7"이어도 Relay team.id(TeamModel:7)와 매칭 후 저장 형식 통일
+    initialSelectedTeamId = cookieMatchedMember.team.id;
+  } else if (teamsWithInfo.length >= 1) {
+    // 쿠키 없음/불일치여도 소속 팀이 있으면 findTeamMember 순서상 첫 팀으로 통일
+    // (클라이언트가 쿠키에 동기화해 다음 SSR에서 복원 가능)
     initialSelectedTeamId = teamsWithInfo[0]!.team.id;
-    initialSelectedTeamIdFromSingleTeam = true;
+    initialSelectedTeamIdFromSingleTeam = teamsWithInfo.length === 1;
   } else {
     initialSelectedTeamId = null;
   }
@@ -179,11 +228,13 @@ function deriveLayoutState(
   return {
     userId,
     initialUser,
+    hasAnyTeamMembership,
     initialSelectedTeamId,
     initialSelectedTeamIdNum,
     initialSelectedTeamName,
     initialSelectedTeamImageUrl,
     initialSelectedTeamIdFromSingleTeam,
+    initialIsSoloTeam: false,
   };
 }
 

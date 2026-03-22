@@ -69,7 +69,11 @@ describe("StartingXI", () => {
   it("renders formation field", () => {
     const handleChange = jest.fn();
     renderWithSelectedTeamProvider(
-      <StartingXI players={mockPlayers} onPlayersChange={handleChange} />,
+      <StartingXI
+        players={mockPlayers}
+        isSoloTeam={false}
+        onPlayersChange={handleChange}
+      />,
     );
 
     expect(screen.getByText(/감독/i)).toBeInTheDocument();

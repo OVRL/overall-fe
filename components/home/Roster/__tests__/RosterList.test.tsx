@@ -12,10 +12,12 @@ const mockMembers: readonly RosterMember[] = [
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {
-      __typename: "UserInfoModel",
+      __typename: "UserModel",
       id: "u1",
       name: "Player A",
       profileImage: null,
+      birthDate: null,
+      subPositions: [],
     },
     overall: {
       __typename: "OverallModel",
@@ -39,10 +41,12 @@ const mockMembers: readonly RosterMember[] = [
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {
-      __typename: "UserInfoModel",
+      __typename: "UserModel",
       id: "u2",
       name: "Player B",
       profileImage: null,
+      birthDate: null,
+      subPositions: [],
     },
     overall: {
       __typename: "OverallModel",

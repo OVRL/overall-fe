@@ -11,6 +11,7 @@ import {
 } from "@/lib/relay/observableToPromise";
 import { FindTeamsByNameQuery } from "@/lib/relay/queries/findTeamsByNameQuery";
 import type { findTeamsByNameQuery$data } from "@/__generated__/findTeamsByNameQuery.graphql";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 
 /** 팀 검색 결과 한 건 (등록 팀) */
 export interface TeamSearchItem {
@@ -23,7 +24,8 @@ export interface TeamSearchItem {
 export interface ExternalTeamItem {
   id: null;
   name: string;
-  emblem: string;
+  /** 없으면 UI에서 EmblemImage 기본 엠블럼 사용 */
+  emblem: string | null;
 }
 
 export type TeamSearchResult = TeamSearchItem | ExternalTeamItem;
@@ -33,8 +35,6 @@ export function isExternalTeam(
 ): item is ExternalTeamItem {
   return item.id === null;
 }
-
-const DEFAULT_EMBLEM_PATH = "/icons/teamemblum_default.svg";
 
 interface UseTeamSearchProps {
   onComplete: (result: TeamSearchResult) => void;
@@ -77,18 +77,26 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
           { name: debouncedKeyword },
           { fetchPolicy: "network-only" },
         );
-        const data = await observableToPromise<
-          findTeamsByNameQuery$data
-        >(observable as unknown as RelayObservableLike<findTeamsByNameQuery$data>);
+        const data = await observableToPromise<findTeamsByNameQuery$data>(
+          observable as unknown as RelayObservableLike<findTeamsByNameQuery$data>,
+        );
 
         if (!isMounted) return;
 
-        const items = data?.findTeamsByName?.items ?? [];
-        const teams: TeamSearchItem[] = items.map((item) => ({
-          id: Number(item.id),
-          name: item.name ?? "",
-          emblem: item.emblem ?? null,
-        }));
+        const team = data?.findTeam;
+        const numId =
+          team?.id != null
+            ? parseNumericIdFromRelayGlobalId(String(team.id)) ?? 0
+            : 0;
+        const teams: TeamSearchItem[] = team
+          ? [
+              {
+                id: numId,
+                name: team.name ?? "",
+                emblem: team.emblem ?? null,
+              },
+            ]
+          : [];
         setSearchResults(teams);
       } catch {
         if (isMounted) setSearchResults([]);
@@ -119,7 +127,7 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
     ? {
         id: null,
         name: inputValue.trim(),
-        emblem: DEFAULT_EMBLEM_PATH,
+        emblem: null,
       }
     : null;
 

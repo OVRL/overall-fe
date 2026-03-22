@@ -1,13 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import QuarterSelector from "../quarter/QuarterSelector";
 
-// Icon 컴포넌트 모킹 (next/image 프로퍼티 에러 방지)
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon(props: any) {
-    return <span data-testid="mock-icon">{props.alt}</span>;
-  };
-});
-
 // QuarterButton은 내부 내용을 렌더링하기만 하도록 모킹할 수도 있으나,
 // 여기서는 실제 onClick이벤트를 검증하기 위해 원래 컴포넌트를 사용하거나 DOM을 통해 테스트합니다.
 // button 요소를 쉽게 찾기 위해 RTL 메서드를 사용합니다.

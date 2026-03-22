@@ -18,9 +18,15 @@ export function getGraphQLErrorMessage(
     return firstMessage.trim();
   }
 
-  // Relay 포맷: "No data returned for operation ..., got error(s):\n\n실제메시지\n\nSee the error..."
-  const match = e.message.match(/got error\(s\):\s*\n+\s*([^\n]+)/);
-  if (match?.[1]) return match[1].trim();
+  // Relay 포맷: 줄바꿈 뒤 메시지
+  const multiline = e.message.match(/got error\(s\):\s*\n+\s*([^\n]+)/);
+  if (multiline?.[1]) return multiline[1].trim();
+
+  // 한 줄: "... got error(s): 투표 마감... See the error ..."
+  const inline = e.message.match(
+    /got error\(s\):\s*([\s\S]+?)(?=\s+See the error|$)/i,
+  );
+  if (inline?.[1]) return inline[1].trim();
 
   return e.message || fallback;
 }

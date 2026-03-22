@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import RelayProvider from "@/components/RelayProvider";
@@ -30,6 +30,19 @@ const pretendard = localFont({
 export const metadata: Metadata = {
   title: "Overall",
   description: "Overall",
+};
+
+/** 모바일·웹뷰: 동적 뷰포트 높이, 노치(safe-area), 가상 키보드 레이아웃 */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "oklch(99.11% 0 89.9)" },
+    { media: "(prefers-color-scheme: dark)", color: "oklch(0.13 0 0)" },
+  ],
+  colorScheme: "dark light",
 };
 
 export default async function RootLayout({
@@ -84,9 +97,10 @@ export default async function RootLayout({
   // 리디렉션: 로그인·팀 유무에 따른 접근 제어
   const pathname = requestHeaders.get("x-pathname") ?? "";
   const isLoggedIn = layoutState.userId != null;
-  const hasTeam = layoutState.initialSelectedTeamId != null;
+  /** 소속 팀 유무(다중 팀 + 쿠키 없음이면 initialSelectedTeamId는 null일 수 있음) */
+  const hasTeam = layoutState.hasAnyTeamMembership;
 
-  // 로그인 + 팀 없음 → 팀 필수 경로 접근 시 landing으로
+  // 로그인 + 소속 팀 없음 → 팀 필수 경로 접근 시 landing으로
   if (
     isPrivateRoute &&
     isLoggedIn &&
@@ -96,7 +110,7 @@ export default async function RootLayout({
     redirect("/landing");
   }
 
-  // 로그인 + 팀 있음 → landing 접근 시 /home으로
+  // 로그인 + 소속 팀 있음 → landing 접근 시 /home으로
   if (isPrivateRoute && isLoggedIn && hasTeam && pathname === "/landing") {
     redirect("/home");
   }
@@ -104,7 +118,7 @@ export default async function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} w-full h-screen antialiased overflow-x-hidden flex flex-col`}
+        className={`${pretendard.variable} w-full min-h-dvh antialiased overflow-x-hidden flex flex-col`}
       >
         <TransitionProvider>
           <ThemeProvider
@@ -127,9 +141,7 @@ export default async function RootLayout({
                   initialSelectedTeamImageUrl={
                     layoutState.initialSelectedTeamImageUrl
                   }
-                  initialSelectedTeamIdFromSingleTeam={
-                    layoutState.initialSelectedTeamIdFromSingleTeam
-                  }
+                  initialIsSoloTeam={layoutState.initialIsSoloTeam}
                 >
                   <div id="modal-root"></div>
                   <PageTransition>{children}</PageTransition>

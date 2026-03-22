@@ -5,11 +5,12 @@ import { useUserId } from "@/hooks/useUserId";
 import useModal from "@/hooks/useModal";
 import ModalLayout from "./ModalLayout";
 import Button from "../ui/Button";
-import Icon from "../ui/Icon";
-import chevronRight from "@/public/icons/chevron_right.svg";
 import { useAttendanceVoteMatch } from "./AttendanceVoteModal/useAttendanceVoteMatch";
 import { useAttendanceVoteActions } from "./AttendanceVoteModal/useAttendanceVoteActions";
+import { AttendanceVoteChoiceButtons } from "./AttendanceVoteModal/AttendanceVoteChoiceButtons";
 import { getMatchDisplay } from "./AttendanceVoteModal/getMatchDisplay";
+import { MatchAttendanceSummarySlot } from "./AttendanceVoteModal/MatchAttendanceSummarySlot";
+import { isVoteDeadlinePassed } from "@/utils/match/isVoteDeadlinePassed";
 import {
   MatchOpponentSection,
   MatchScheduleSection,
@@ -62,14 +63,20 @@ function AttendanceVoteModalWithData({
   const { hideModal } = useModal();
   const userId = useUserId();
   const { match } = useAttendanceVoteMatch(createdTeamId);
-  const { handleCopyAddress, handleAttend, isInFlight } =
-    useAttendanceVoteActions(match, createdTeamId, userId, hideModal);
+  const {
+    handleCopyAddress,
+    handleAttend,
+    handleAbsent,
+    isInFlight,
+    pendingVoteChoice,
+  } = useAttendanceVoteActions(match, createdTeamId, userId, hideModal);
 
   if (match == null) {
     return <AttendanceVoteModalNoMatch />;
   }
 
   const display = getMatchDisplay(match);
+  const voteClosed = isVoteDeadlinePassed(match.voteDeadline);
 
   return (
     <ModalLayout title={MODAL_TITLE} wrapperClassName={WRAPPER_CLASS_SCROLL}>
@@ -92,29 +99,19 @@ function AttendanceVoteModalWithData({
         <MatchMemoSection description={display.description} />
       </div>
       <div className="flex flex-col shrink-0 pt-2">
-        <div className="flex gap-3 h-14 mb-3">
-          <Button
-            variant="ghost"
-            size="xl"
-            className="flex-1"
-            onClick={hideModal}
-          >
-            닫기
-          </Button>
-          <Button
-            variant="primary"
-            size="xl"
-            className="flex-1 bg-red-500 text-Label-Primary"
-            onClick={handleAttend}
-            disabled={isInFlight}
-          >
-            {isInFlight ? "처리 중..." : "참석"}
-          </Button>
-        </div>
+        <AttendanceVoteChoiceButtons
+          voteClosed={voteClosed}
+          isInFlight={isInFlight}
+          pendingVoteChoice={pendingVoteChoice}
+          onAbsent={handleAbsent}
+          onAttend={handleAttend}
+        />
         <div className="flex justify-end">
-          <span className="text-[#F7F8F8] text-sm font-semibold flex items-center">
-            10명 참석, 6명 불참 <Icon src={chevronRight} />
-          </span>
+          <MatchAttendanceSummarySlot
+            matchGraphqlId={match.id}
+            teamId={createdTeamId}
+            currentUserId={userId}
+          />
         </div>
       </div>
     </ModalLayout>

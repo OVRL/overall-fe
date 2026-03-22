@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d0a647fddcc60cfb74e57d4efc75bae9>>
+ * @generated SignedSource<<84c1235344ab567f81330b0449a589a3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type findMatchQuery$data = {
   readonly findMatch: ReadonlyArray<{
     readonly __typename: "MatchModel";
     readonly createdTeam: {
-      readonly __typename: "TeamResponseModel";
+      readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
@@ -28,7 +28,7 @@ export type findMatchQuery$data = {
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
-      readonly __typename: "TeamResponseModel";
+      readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
@@ -40,6 +40,7 @@ export type findMatchQuery$data = {
       readonly latitude: number;
       readonly longitude: number;
     };
+    readonly voteDeadline: any;
   }>;
 };
 export type findMatchQuery = {
@@ -122,6 +123,13 @@ v4 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
+        "name": "voteDeadline",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
         "name": "matchType",
         "storageKey": null
       },
@@ -142,7 +150,7 @@ v4 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamResponseModel",
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
         "name": "createdTeam",
         "plural": false,
@@ -152,7 +160,7 @@ v4 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamResponseModel",
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
         "name": "opponentTeam",
         "plural": false,
@@ -213,16 +221,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "e1f8e3f0afdf01c539048eadd421873f",
+    "cacheID": "2dca49eccdf9f6dc894c917a0327dfcf",
     "id": null,
     "metadata": {},
     "name": "findMatchQuery",
     "operationKind": "query",
-    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    matchType\n    description\n    uniformType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
+    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    voteDeadline\n    matchType\n    description\n    uniformType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c8ebdd6d9e341ae655ab77fc87139cc6";
+(node as any).hash = "cda57569044bf576337433e65216120a";
 
 export default node;

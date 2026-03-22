@@ -35,3 +35,19 @@ export function pickSoonestMatch<T extends MatchForUpcomingDisplay>(
   }
   return soonest;
 }
+
+/**
+ * 현재 시각(now) 이후에 시작하는 경기만 남기고, 그중 시작 시각이 가장 이른 경기 1건을 반환합니다.
+ * (홈 "다가오는 경기"·출석 투표 대상 경기 등에 사용)
+ *
+ * @param nowMs 기준 시각(ms). 테스트용 주입 가능. 생략 시 `Date.now()`
+ */
+export function pickSoonestUpcomingMatch<T extends MatchForUpcomingDisplay>(
+  matches: T[],
+  nowMs: number = Date.now(),
+): T | null {
+  const upcoming = matches.filter(
+    (m) => toTimestamp(m.matchDate, m.startTime) >= nowMs,
+  );
+  return pickSoonestMatch(upcoming);
+}

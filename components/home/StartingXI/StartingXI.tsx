@@ -8,6 +8,8 @@ import AdBoard from "./AdBoard";
 
 interface StartingXIProps {
   players: Player[];
+  /** layout SSR findManyTeamMember 기반. 팀원 1명이면 true (온보딩 분기용) */
+  isSoloTeam: boolean;
   onPlayersChange: (players: Player[]) => void;
   onPlayerSelect?: (player: Player) => void;
 }
@@ -15,7 +17,7 @@ interface StartingXIProps {
 /**
  * 포메이션 컴포넌트
  */
-const StartingXI = ({ players }: StartingXIProps) => {
+const StartingXI = ({ players, isSoloTeam }: StartingXIProps) => {
   return (
     <div className="bg-surface-card rounded-[1.25rem] p-4 sm:px-0 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
       <div className="flex items-center justify-between mb-4 md:mb-5 sm:px-4">
@@ -39,10 +41,11 @@ const StartingXI = ({ players }: StartingXIProps) => {
         </div>
         <FormationField
           players={players}
+          isSoloTeam={isSoloTeam}
           className="relative md:aspect-video"
         />
       </div>
-      <ManagerInfo />
+      <ManagerInfo isSoloTeam={isSoloTeam} />
     </div>
   );
 };

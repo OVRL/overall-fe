@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { env } from "./lib/env";
 import { GUEST_ONLY_ROUTES, PUBLIC_ROUTES } from "./lib/routes";
 import { refreshAccessToken, type TokenPair } from "./lib/auth/refreshToken";
+import { isAccessTokenExpired } from "./lib/auth/jwtAccess";
 
 const BACKEND_URL = env.BACKEND_URL;
 
@@ -15,12 +16,14 @@ export async function proxy(request: NextRequest) {
   // 1. API 요청 처리 (기존 로직 유지)
   if (pathname.startsWith("/api/")) {
     let token = accessToken;
+    let preemptiveRefresh: TokenPair | null = null;
 
-    if (!token && refreshToken) {
-      console.log("API Proxy: No valid access token.");
+    if ((!token || isAccessTokenExpired(token)) && refreshToken) {
+      console.log("API Proxy: access 없음 또는 만료, refresh 시도.");
       const newTokens = await refreshAccessToken(refreshToken);
       if (newTokens?.accessToken) {
         token = newTokens.accessToken;
+        preemptiveRefresh = newTokens;
       }
     }
 
@@ -86,15 +89,28 @@ export async function proxy(request: NextRequest) {
       headers: backendResponse.headers,
     });
 
-    // 선제적 갱신 시 쿠키 저장
-    if (!accessToken && token && token !== accessToken) {
-      responseProxy.cookies.set("accessToken", token, {
+    // 선제적 refresh로 새 액세스를 받은 경우 Set-Cookie (만료 JWT가 쿠키에 남는 문제 완화)
+    if (preemptiveRefresh?.accessToken) {
+      responseProxy.cookies.set("accessToken", preemptiveRefresh.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 60 * 60,
         path: "/",
       });
+      if (preemptiveRefresh.refreshToken) {
+        responseProxy.cookies.set(
+          "refreshToken",
+          preemptiveRefresh.refreshToken,
+          {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7,
+            path: "/",
+          },
+        );
+      }
     }
     return responseProxy;
   }
@@ -112,12 +128,18 @@ export async function proxy(request: NextRequest) {
     isAuthenticated: boolean;
     newTokens?: TokenPair;
   }> => {
-    if (accessToken) return { isAuthenticated: true };
+    const accessUsable =
+      accessToken != null && !isAccessTokenExpired(accessToken);
+    if (accessUsable) {
+      return { isAuthenticated: true };
+    }
     if (refreshToken) {
-      console.log("Checking Auth: No access token, attempting refresh...");
+      console.log(
+        "Checking Auth: access 없음 또는 만료, refresh 시도...",
+      );
       let newTokens = await refreshAccessToken(refreshToken);
       if (!newTokens?.accessToken) {
-        console.log("Checking Auth: Refresh failed, retrying once...");
+        console.log("Checking Auth: Refresh 실패, 1회 재시도...");
         newTokens = await refreshAccessToken(refreshToken);
       }
       if (newTokens?.accessToken)

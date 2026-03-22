@@ -1,8 +1,8 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import plus from "@/public/icons/plus.svg";
 import check from "@/public/icons/check.svg";
 import Icon from "@/components/ui/Icon";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 
 interface TeamItemProps {
@@ -10,8 +10,6 @@ interface TeamItemProps {
   isSelected: boolean;
   onSelect: (team: TeamSearchResult) => void;
 }
-
-const DEFAULT_EMBLEM = "/icons/teamemblum_default.svg";
 
 /**
  * 팀 검색 결과/외부팀 한 건 표시 (엠블럼 + 이름, 선택 아이콘)
@@ -26,13 +24,15 @@ const TeamItem = ({ team, isSelected, onSelect }: TeamItemProps) => (
   >
     <div className="flex items-center gap-3 min-w-0">
       <div className="relative w-7.5 h-7.5 shrink-0 rounded-full overflow-hidden bg-border-card">
-        <Image
-          src={team.emblem ?? DEFAULT_EMBLEM}
+        <EmblemImage
+          src={team.emblem}
           alt=""
-          fill
           sizes="30px"
-          className="object-cover"
-          unoptimized={!(team.emblem ?? DEFAULT_EMBLEM).startsWith("/")}
+          unoptimized={
+            team.emblem != null &&
+            team.emblem.trim() !== "" &&
+            !team.emblem.trim().startsWith("/")
+          }
         />
       </div>
       <span className="text-Label-Primary truncate">{team.name}</span>

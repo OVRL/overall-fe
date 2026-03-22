@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<902ad2760bd473072f861e5f80b2b5be>>
+ * @generated SignedSource<<3d60de8856fee1fb9f998eb7e9843feb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" |
 export type findManyTeamMemberQueryQuery$variables = {
   limit: number;
   offset: number;
+  teamId: number;
 };
 export type findManyTeamMemberQueryQuery$data = {
   readonly findManyTeamMember: {
@@ -37,7 +38,7 @@ export type findManyTeamMemberQueryQuery$data = {
       readonly position: string | null | undefined;
       readonly profileImg: string | null | undefined;
       readonly user: {
-        readonly __typename: "UserInfoModel";
+        readonly __typename: "UserModel";
         readonly birthDate: any | null | undefined;
         readonly id: string;
         readonly name: string | null | undefined;
@@ -64,6 +65,11 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "offset"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "teamId"
   }
 ],
 v1 = {
@@ -93,6 +99,11 @@ v3 = [
         "kind": "Variable",
         "name": "offset",
         "variableName": "offset"
+      },
+      {
+        "kind": "Variable",
+        "name": "teamId",
+        "variableName": "teamId"
       }
     ],
     "concreteType": "TeamMemberArrayModel",
@@ -141,7 +152,7 @@ v3 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "UserInfoModel",
+            "concreteType": "UserModel",
             "kind": "LinkedField",
             "name": "user",
             "plural": false,
@@ -293,16 +304,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "86720dc1520e9e6b2450575bcbf7b4fe",
+    "cacheID": "200e97dd22c5c7b04633076298208272",
     "id": null,
     "metadata": {},
     "name": "findManyTeamMemberQueryQuery",
     "operationKind": "query",
-    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n        subPositions\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query findManyTeamMemberQueryQuery(\n  $limit: Int!\n  $offset: Int!\n  $teamId: Int!\n) {\n  findManyTeamMember(limit: $limit, offset: $offset, teamId: $teamId) {\n    members {\n      __typename\n      id\n      position\n      backNumber\n      joinedAt\n      profileImg\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n        subPositions\n      }\n      overall {\n        __typename\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2cd7980c7d12d226d22da197cc84632b";
+(node as any).hash = "f17e4bf7e92ae2930513e3e6fd1d3bae";
 
 export default node;

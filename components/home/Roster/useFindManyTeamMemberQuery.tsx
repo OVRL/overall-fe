@@ -8,17 +8,18 @@ import {
 } from "@/lib/relay/queries/findManyTeamMemberQuery";
 
 /**
- * 로스터 패널용: 팀 멤버 목록을 페이지네이션 없이 최대 100명까지 조회합니다.
+ * 로스터 패널용: 선택된 팀(teamId) 멤버 목록을 페이지네이션 없이 조회합니다.
  * 리스트·상세(출장/골/도움/기점/클린시트/승률/OVR/입단일)에 필요한 필드만 요청합니다.
  */
 /** 로스터 리스트/상세에서 사용하는 멤버 한 건 타입 */
 export type RosterMember =
   QueryType["response"]["findManyTeamMember"]["members"][number];
 
-export function useFindManyTeamMember() {
+/** teamId는 선택 팀 숫자 ID(SelectedTeamProvider의 selectedTeamIdNum). */
+export function useFindManyTeamMember(teamId: number) {
   const data = useLazyLoadQuery<QueryType>(
     FindManyTeamMemberQuery,
-    { limit: ROSTER_PAGE_SIZE, offset: 0 },
+    { limit: ROSTER_PAGE_SIZE, offset: 0, teamId },
     { fetchPolicy: "store-or-network" },
   );
 

@@ -9,12 +9,6 @@ jest.mock("@/hooks/useClickOutside", () => ({
   useClickOutside: jest.fn(),
 }));
 
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon({ alt }: { alt?: string }) {
-    return <span data-testid="icon">{alt ?? "icon"}</span>;
-  };
-});
-
 jest.mock("../HamburgerMenuContent", () => ({
   HamburgerMenuContent: ({ onClose }: { onClose: () => void }) => (
     <div data-testid="hamburger-menu-content">

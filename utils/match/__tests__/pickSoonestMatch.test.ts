@@ -1,5 +1,8 @@
 import type { MatchForUpcomingDisplay } from "@/components/home/UpcomingMatch/upcomingMatchDisplay";
-import { pickSoonestMatch } from "../pickSoonestMatch";
+import {
+  pickSoonestMatch,
+  pickSoonestUpcomingMatch,
+} from "../pickSoonestMatch";
 
 /** 테스트용 경기 객체 생성 (matchDate, startTime만 시각 비교에 사용됨, id는 어설션용) */
 function 경기(
@@ -121,5 +124,41 @@ describe("pickSoonestMatch", () => {
       const 결과 = pickSoonestMatch(목록);
       expect(결과?.id).toBe("연초");
     });
+  });
+});
+
+describe("pickSoonestUpcomingMatch", () => {
+  /** 고정 기준 시각: 2025-03-20 12:00:00 (로컬) */
+  const 기준시각 = new Date(2025, 2, 20, 12, 0, 0, 0).getTime();
+
+  it("과거·미래가 섞이면 가장 가까운 미래 경기만 반환한다", () => {
+    const 목록 = [
+      경기("2025-03-19", "10:00:00", "어제"),
+      경기("2025-03-25", "18:00:00", "일주일뒤"),
+      경기("2025-03-21", "09:00:00", "내일아침"),
+    ];
+    const 결과 = pickSoonestUpcomingMatch(목록, 기준시각);
+    expect(결과?.id).toBe("내일아침");
+  });
+
+  it("모두 과거면 null을 반환한다", () => {
+    const 목록 = [
+      경기("2025-03-18", "10:00:00"),
+      경기("2025-03-19", "23:59:00"),
+    ];
+    expect(pickSoonestUpcomingMatch(목록, 기준시각)).toBeNull();
+  });
+
+  it("기준 시각과 동일한 시작 시각이면 포함한다 (>=)", () => {
+    const 목록 = [
+      경기("2025-03-20", "11:59:00", "직전"),
+      경기("2025-03-20", "12:00:00", "정오"),
+    ];
+    const 결과 = pickSoonestUpcomingMatch(목록, 기준시각);
+    expect(결과?.id).toBe("정오");
+  });
+
+  it("빈 배열이면 null을 반환한다", () => {
+    expect(pickSoonestUpcomingMatch([], 기준시각)).toBeNull();
   });
 });

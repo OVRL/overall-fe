@@ -12,10 +12,6 @@ jest.mock("@/hooks/useModal", () => ({
 
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 jest.mock("@/public/icons/close.svg", () => "close.svg");
-jest.mock("@/components/ui/Icon", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt?: string }) => <span role="img" aria-label={alt ?? "icon"} />,
-}));
 
 // Mock hook
 jest.mock("@/hooks/useNaverAddressSearch");

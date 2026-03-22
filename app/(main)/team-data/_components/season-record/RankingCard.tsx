@@ -60,7 +60,7 @@ const RankingCard = ({
             nofill
             className="absolute top-1/2 -translate-y-1/2 right-0 translate-x-1/2"
           />
-          <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full mt-3">
             <span className="text-sm font-semibold text-center text-[#f7f8f8]">
               {firstPlace ? firstPlace.name : "-"}
             </span>

@@ -14,7 +14,7 @@ export default function PlayerRedirectPage() {
   }, [params.name, router]);
 
   return (
-    <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+    <div className="min-h-dvh bg-[#080808] flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5a0]"></div>
     </div>
   );

@@ -75,7 +75,7 @@ export default function PlayerHistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#080808] flex flex-col items-center justify-center gap-6">
+      <div className="min-h-dvh bg-[#080808] flex flex-col items-center justify-center gap-6">
         <div className="relative w-24 h-24">
           <div className="absolute inset-0 border-4 border-[#00e5a0]/10 rounded-full"></div>
           <div className="absolute inset-0 border-4 border-[#00e5a0] border-t-transparent rounded-full animate-spin"></div>
@@ -92,7 +92,7 @@ export default function PlayerHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white font-['Noto_Sans_KR'] selection:bg-[#00e5a0]/30 selection:text-[#00e5a0] overflow-x-hidden">
+    <div className="min-h-dvh bg-[#080808] text-white font-['Noto_Sans_KR'] selection:bg-[#00e5a0]/30 selection:text-[#00e5a0] overflow-x-hidden">
       {/* Background Blurs */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[10%] -left-[5%] w-[40%] h-[40%] bg-[#00e5a0]/5 blur-[120px] rounded-full"></div>

@@ -2,12 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import SearchInputSection from "../SearchInputSection";
 import "@testing-library/jest-dom";
 
-// Mock the Icon component and SVG import
-jest.mock("@/components/ui/Icon", () => {
-  return function MockIcon() {
-    return <div data-testid="mock-icon" />;
-  };
-});
 jest.mock("@/public/icons/search.svg", () => "search.svg");
 
 describe("SearchInputSection 컴포넌트", () => {
@@ -27,7 +21,7 @@ describe("SearchInputSection 컴포넌트", () => {
     const input = screen.getByPlaceholderText("지역이나 동네로 검색하기");
     expect(input).toBeInTheDocument();
     expect(input).toHaveValue("");
-    expect(screen.getByTestId("mock-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("icon")).toBeInTheDocument();
   });
 
   it("입력 변경 시 onChange 핸들러가 호출되어야 한다", () => {

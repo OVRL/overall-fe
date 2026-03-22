@@ -1,6 +1,5 @@
-import Image from "next/image";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
-import { getValidImageSrc, MOCK_EMBLEM_SRC } from "@/lib/utils";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 
 /**
  * 선택된 팀을 닫힌 상태 UI로만 표시 (드롭다운·화살표 없음).
@@ -23,11 +22,10 @@ export function SelectedTeamBadge() {
       aria-label={`선택된 팀: ${selectedTeamName}`}
     >
       <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
-        <Image
-          src={getValidImageSrc(selectedTeamImageUrl ?? null, MOCK_EMBLEM_SRC)}
+        <EmblemImage
+          src={selectedTeamImageUrl ?? null}
           alt=""
-          fill
-          className="object-cover"
+          sizes="1.5rem"
         />
       </div>
       <span className="truncate text-sm font-semibold text-white leading-normal">

@@ -27,7 +27,11 @@ const PlayerTable = ({
   );
 
   return (
-    <div className={cn("mt-12 overflow-x-auto select-none")} role="region" aria-label="선수 통계 테이블">
+    <div
+      className={cn("mt-6 overflow-x-auto select-none")}
+      role="region"
+      aria-label="선수 통계 테이블"
+    >
       <table className={cn("block w-full text-sm")}>
         <PlayerTableHeader sortConfig={sortConfig} onSort={onSort} />
         <tbody className={cn("block w-full")}>

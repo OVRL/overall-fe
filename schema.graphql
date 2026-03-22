@@ -135,7 +135,7 @@ type InviteCodeModel {
   createdAt: GraphQLDateTime!
   expiredAt: GraphQLDateTime!
   id: Float!
-  team: TeamModel!
+  team: TeamModel
   teamId: Float!
 }
 
@@ -189,6 +189,9 @@ type MatchAttendanceModel {
   attendanceStatus: AttendanceStatus
   createdAt: GraphQLDateTime!
   id: ID!
+
+  """경기 정보"""
+  match: MatchModel
   matchId: Int!
   memberType: MemberType
   teamId: Int!
@@ -196,6 +199,9 @@ type MatchAttendanceModel {
   """팀 멤버 정보"""
   teamMember: TeamMemberModel
   updatedAt: GraphQLDateTime!
+
+  """유저 정보"""
+  user: UserModel
   userId: Int!
   voteDeadlineAt: GraphQLDateTime!
 }
@@ -203,23 +209,29 @@ type MatchAttendanceModel {
 type MatchFormationModel {
   createdAt: DateTime!
   id: Int!
+
+  """경기 정보"""
+  match: MatchModel
   matchId: Int!
   quarter: Int!
   tactics: JSONObject
+
+  """팀 정보"""
+  team: TeamModel
   teamId: Int!
   updatedAt: DateTime!
 }
 
 type MatchModel {
   createdAt: GraphQLDateTime!
-  createdTeam: TeamResponseModel
+  createdTeam: TeamModel
   createdTeamId: Int!
   description: String
   endTime: String!
   id: ID!
   matchDate: Date!
   matchType: MatchType!
-  opponentTeam: TeamResponseModel
+  opponentTeam: TeamModel
   opponentTeamId: Int
   quarterCount: Int!
   quarterDuration: Int!
@@ -254,6 +266,7 @@ type Mutation {
   deleteMatch(id: Int!): Boolean!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
+  deleteUser(id: Int!): Boolean!
   login(email: String!, password: String!): LoginResponseModel!
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
@@ -356,14 +369,12 @@ type Query {
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
-  findManyTeamMember(limit: Int! = 10, offset: Int! = 0): TeamMemberArrayModel!
+  findManyTeamMember(limit: Int! = 10, offset: Int! = 0, teamId: Int!): TeamMemberArrayModel!
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findMatch(createdTeamId: Int!): [MatchModel!]!
   findMatchAttendance(matchId: Int!, teamId: Int!): [MatchAttendanceModel!]!
   findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
-  findTeam(id: Int!): TeamModel!
-  """팀 이름으로 검색 (name 기준, 추후 백엔드 연동)"""
-  findTeamsByName(name: String!): TeamArrayModel!
+  findTeam(name: String!): TeamModel
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
@@ -390,13 +401,6 @@ type TeamArrayModel {
   totalCount: Int!
 }
 
-type TeamInfoModel {
-  description: String
-  emblem: String
-  id: ID!
-  name: String
-}
-
 type TeamMemberArrayModel {
   """팀 멤버 목록"""
   members: [TeamMemberModel!]!
@@ -414,8 +418,6 @@ type TeamMemberModel {
 
   """가입일"""
   joinedAt: GraphQLDateTime!
-
-  """전체 능력치"""
   overall: OverallModel
 
   """포지션"""
@@ -426,15 +428,11 @@ type TeamMemberModel {
 
   """역할"""
   role: String!
-
-  """팀 정보"""
-  team: TeamInfoModel
+  team: TeamModel
 
   """팀 ID"""
   teamId: Int!
-
-  """유저 정보"""
-  user: UserInfoModel
+  user: UserModel
 
   """유저 ID"""
   userId: Int!
@@ -448,15 +446,9 @@ type TeamModel {
   historyStartDate: Date
   homeUniform: UniformDesign
   id: ID!
+  members: [TeamMemberModel!]
   name: String
   region: RegionSearchModel
-}
-
-type TeamResponseModel {
-  description: String
-  emblem: String
-  id: ID!
-  name: String
 }
 
 """유니폼 유형 (home: 홈, away: 어웨이)"""
@@ -577,20 +569,9 @@ type UserArrayModel {
   totalCount: Int!
 }
 
-type UserInfoModel {
-  birthDate: DateTime
-  email: String!
-  foot: Foot
-  id: ID!
-  mainPosition: Position
-  name: String
-  profileImage: String
-  subPositions: [Position!]
-}
-
 type UserModel {
   activityArea: String
-  birthDate: String
+  birthDate: Date
   email: String!
   favoritePlayer: String
   foot: Foot

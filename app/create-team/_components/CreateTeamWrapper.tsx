@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { fetchQuery } from "relay-runtime";
+import { useRelayEnvironment } from "react-relay";
 import Header from "@/components/Header";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
@@ -23,16 +25,51 @@ import { useUserStore } from "@/contexts/UserContext";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { SHOW_TEAM_CREATED_MODAL_KEY } from "@/lib/teamCreatedModalStorage";
+import { useUserId } from "@/hooks/useUserId";
+import { FindTeamMemberQuery } from "@/lib/relay/queries/findTeamMemberQuery";
+import {
+  FindManyTeamMemberQuery,
+  ROSTER_PAGE_SIZE,
+} from "@/lib/relay/queries/findManyTeamMemberQuery";
+import { observableToPromise } from "@/lib/relay/observableToPromise";
 
 const CreateTeamWrapper = () => {
   const { openModal } = useModal("ADDRESS_SEARCH");
   const router = useBridgeRouter();
   const user = useUserStore((state) => state.user);
+  const userId = useUserId();
+  const environment = useRelayEnvironment();
   const { setSelectedTeamId } = useSelectedTeamId();
   const { form, onSubmit, isInFlight } = useCreateTeamForm({
-    onSuccess: (createdTeam) => {
+    onSuccess: async (createdTeam) => {
       const teamIdNum = parseNumericIdFromRelayGlobalId(createdTeam.id);
-      setSelectedTeamId(createdTeam.id, teamIdNum ?? undefined);
+      // 뱃지 등에서 새 팀 이름·이미지가 바로 보이도록 name/emblem 전달
+      setSelectedTeamId(
+        createdTeam.id,
+        teamIdNum ?? undefined,
+        createdTeam.name ?? null,
+        createdTeam.emblem ?? null,
+      );
+      // Relay 스토어 갱신 후 이동. (헤더·햄버거 findTeamMember + 홈 로스터 findManyTeamMember)
+      if (userId != null) {
+        try {
+          await observableToPromise(
+            fetchQuery(environment, FindTeamMemberQuery, { userId }),
+          );
+          if (teamIdNum != null) {
+            await observableToPromise(
+              fetchQuery(environment, FindManyTeamMemberQuery, {
+                limit: ROSTER_PAGE_SIZE,
+                offset: 0,
+                teamId: teamIdNum,
+              }),
+            );
+          }
+        } catch (e) {
+          // refetch 실패해도 쿠키·Provider는 이미 새 팀으로 설정됨. 이동은 진행하고 다음 로드에서 동기화됨.
+          console.warn("[CreateTeam] Relay refetch failed, navigating anyway", e);
+        }
+      }
       if (typeof sessionStorage !== "undefined") {
         sessionStorage.setItem(SHOW_TEAM_CREATED_MODAL_KEY, "1");
       }
@@ -77,7 +114,6 @@ const CreateTeamWrapper = () => {
     [router],
   );
 
-  // createTeam 뮤테이션 실행. 성공 시 onSuccess에서 /home으로 이동
   const handleFormSubmit = useCallback(
     (data: Parameters<typeof onSubmit>[0]) => {
       onSubmit(data);

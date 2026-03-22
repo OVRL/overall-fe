@@ -35,9 +35,6 @@ const RankCardRow = ({ player, index, onPlayerClick }: RankCardRowProps) => {
           className="object-cover"
         />
         <div className="flex items-center gap-1 flex-1">
-          <div className="w-10.5">
-            <PositionChip position={player.position} variant="outline" />
-          </div>
           <span className="text-sm text-Label-Primary truncate w-18.75">
             {player.name}
           </span>

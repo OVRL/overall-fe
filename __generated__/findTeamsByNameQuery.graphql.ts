@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1edcd96906bddf0b78ad5188bd37ee1f>>
+ * @generated SignedSource<<ee99822a6146a9accf76ba6a4cc9f62b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,16 +13,12 @@ export type findTeamsByNameQuery$variables = {
   name: string;
 };
 export type findTeamsByNameQuery$data = {
-  readonly findTeamsByName: {
-    readonly hasNextPage: boolean;
-    readonly items: ReadonlyArray<{
-      readonly __typename: "TeamModel";
-      readonly emblem: string | null | undefined;
-      readonly id: string;
-      readonly name: string | null | undefined;
-    }>;
-    readonly totalCount: number;
-  };
+  readonly findTeam: {
+    readonly __typename: "TeamModel";
+    readonly emblem: string | null | undefined;
+    readonly id: string;
+    readonly name: string | null | undefined;
+  } | null | undefined;
 };
 export type findTeamsByNameQuery = {
   response: findTeamsByNameQuery$data;
@@ -47,62 +43,37 @@ v1 = [
         "variableName": "name"
       }
     ],
-    "concreteType": "TeamArrayModel",
+    "concreteType": "TeamModel",
     "kind": "LinkedField",
-    "name": "findTeamsByName",
+    "name": "findTeam",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamModel",
-        "kind": "LinkedField",
-        "name": "items",
-        "plural": true,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "__typename",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "id",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "name",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "emblem",
-            "storageKey": null
-          }
-        ],
+        "kind": "ScalarField",
+        "name": "__typename",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "hasNextPage",
+        "name": "id",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "totalCount",
+        "name": "name",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "emblem",
         "storageKey": null
       }
     ],
@@ -127,16 +98,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "c740520f170499a93f6c18e2d9b41707",
+    "cacheID": "748443a8c892b4cdd38d6e24f7d909c1",
     "id": null,
     "metadata": {},
     "name": "findTeamsByNameQuery",
     "operationKind": "query",
-    "text": "query findTeamsByNameQuery(\n  $name: String!\n) {\n  findTeamsByName(name: $name) {\n    items {\n      __typename\n      id\n      name\n      emblem\n    }\n    hasNextPage\n    totalCount\n  }\n}\n"
+    "text": "query findTeamsByNameQuery(\n  $name: String!\n) {\n  findTeam(name: $name) {\n    __typename\n    id\n    name\n    emblem\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "84445884280b301d5bfacc1f67d1d5b5";
+(node as any).hash = "988c3050a1fe290cd166eefac8c4efe4";
 
 export default node;

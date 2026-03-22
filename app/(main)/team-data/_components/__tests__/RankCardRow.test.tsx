@@ -2,26 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import RankCardRow from "../season-record/RankCardRow";
 import { Player } from "../../_types/player";
 
-// 모킹
-jest.mock("@/components/ui/ProfileAvatar", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => (
-    <div data-testid="profile-avatar">{alt}</div>
-  ),
-}));
-
-jest.mock("@/components/PositionChip", () => ({
-  __esModule: true,
-  default: ({ position }: { position: string }) => (
-    <div data-testid="position-chip">{position}</div>
-  ),
-}));
-
-// next/font/google 모킹
-jest.mock("next/font/google", () => ({
-  Racing_Sans_One: () => ({ className: "racing-sans" }),
-}));
-
 describe("RankCardRow 컴포넌트", () => {
   const mockPlayer: Player = {
     id: 1,
@@ -55,9 +35,11 @@ describe("RankCardRow 컴포넌트", () => {
     // 컴포넌트 로직: String(player.value).replace(/[^0-9%]/g, "")
     expect(screen.getByText("20")).toBeInTheDocument();
 
-    // 모킹된 컴포넌트 확인
-    expect(screen.getByTestId("profile-avatar")).toHaveTextContent("손흥민");
-    expect(screen.getByTestId("position-chip")).toHaveTextContent("FW");
+    // 전역 ProfileAvatar 스텁: 가시 텍스트 대신 aria-label로 alt 전달 (쿼리 중복 방지)
+    expect(screen.getByTestId("profile-avatar")).toHaveAttribute(
+      "aria-label",
+      "손흥민",
+    );
   });
 
   it("클릭 시 onPlayerClick 콜백이 호출되어야 한다", () => {

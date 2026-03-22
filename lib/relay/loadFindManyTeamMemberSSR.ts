@@ -16,12 +16,13 @@ import type { SerializedRelayRecords } from "./serialization";
  */
 export async function loadFindManyTeamMemberSSR(
   accessToken: string | null,
+  teamId: number,
 ): Promise<SerializedRelayRecords> {
   const environment = getServerEnvironment(accessToken);
   const observable = fetchQuery(
     environment,
     FindManyTeamMemberQuery,
-    { limit: ROSTER_PAGE_SIZE, offset: 0 },
+    { limit: ROSTER_PAGE_SIZE, offset: 0, teamId },
     { fetchPolicy: "network-only" },
   );
   await observableToPromise(observable);

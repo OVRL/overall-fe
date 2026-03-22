@@ -57,7 +57,7 @@ const paperlogy = localFont({
 export default function LandingPage() {
   return (
     <main
-      className={`bg-black min-h-screen font-sans ${paperlogy.variable} ${paperlogy.className} flex flex-col w-full overflow-x-hidden`}
+      className={`bg-black min-h-dvh pt-safe font-sans ${paperlogy.variable} ${paperlogy.className} flex flex-col w-full overflow-x-hidden`}
     >
       <Header />
       <HeroSection />

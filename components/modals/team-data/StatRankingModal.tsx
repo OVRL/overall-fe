@@ -23,9 +23,13 @@ const StatRankingModal = ({
     .slice(0, 10);
 
   return (
-    <ModalLayout title={category}>
+    <ModalLayout
+      title={category}
+      wrapperClassName="gap-y-6"
+      closeButtonClassName="text-gray-600"
+    >
       {/* 선수 목록 */}
-      <div className="overflow-y-auto max-h-[70vh] px-6 py-4">
+      <div className="overflow-y-auto max-h-[70vh] px-2">
         <ul className="flex flex-col gap-4">
           {top10Players.map((player, index) => (
             <StatsPlayerRow

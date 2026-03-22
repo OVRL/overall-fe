@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 import MatchInfoRow from "@/components/formation/MatchScheduleCard/MatchInfoRow";
 import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
 import type { MatchDisplay } from "./getMatchDisplay";
@@ -46,10 +47,9 @@ export function MatchOpponentSection({
     <MatchInfoRow title="매칭 상대" direction="column">
       <div className="flex items-center gap-1">
         <div className="relative w-7.5 h-7.5 rounded-full overflow-hidden bg-border-card">
-          <Image
+          <EmblemImage
             src={display.emblemSrc}
             alt={display.isInternal ? "내전 팀 엠블럼" : "상대팀 로고"}
-            fill
             sizes="1.875rem"
             className="object-contain"
           />

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a2a55885b0a5ddf771e420029a1bc6b0>>
+ * @generated SignedSource<<7eff94e19c40b7575c3e5ca7c64a9d8f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type findTeamMemberQuery$data = {
     readonly __typename: "TeamMemberModel";
     readonly id: number;
     readonly team: {
-      readonly __typename: "TeamInfoModel";
+      readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
@@ -79,7 +79,7 @@ v3 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "TeamInfoModel",
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
         "name": "team",
         "plural": false,

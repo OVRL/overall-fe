@@ -160,6 +160,8 @@
 
   --color-background: var(--background);
   --animate-shimmer: shimmer 1.5s infinite;
+  /* 온보딩 카드 1회 등장 (opacity + translateY, GPU 친화) */
+  --animate-onboarding-enter: onboarding-enter 200ms ease-out both;
 
   --shadow-card: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
 
@@ -169,6 +171,17 @@
     }
     100% {
       transform: translate(100%, 100%);
+    }
+  }
+
+  @keyframes onboarding-enter {
+    from {
+      opacity: 0;
+      transform: translateY(0.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -201,6 +214,24 @@
   &::-webkit-scrollbar-button {
     display: none;
   }
+}
+
+/* 인앱 웹뷰·노치: viewport-fit=cover와 함께 env(safe-area-inset-*) 사용 */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+@utility pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+@utility px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 html,

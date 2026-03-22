@@ -16,7 +16,7 @@ const thClass = (col: PlayerTableColumnConfig, sortable: boolean) =>
     col.align === "left"
       ? "text-left overflow-hidden text-ellipsis"
       : "text-center",
-    "text-gray-500 font-medium whitespace-nowrap text-xs flex items-center justify-center",
+    "text-gray-800 font-medium whitespace-nowrap text-[0.6875rem] flex items-center justify-center",
     sortable && "cursor-pointer hover:text-white transition-colors",
     COLUMN_WIDTH_MAP[col.key] || COLUMN_WIDTH_MAP.default,
   );
@@ -47,7 +47,10 @@ const PlayerTableHeader = ({ sortConfig, onSort }: PlayerTableHeaderProps) => (
           >
             {col.key}
             {sortConfig?.key === col.key && (
-              <span className="ml-1 text-2.75 text-primary text-center" aria-hidden>
+              <span
+                className="ml-1 text-2.75 text-primary text-center"
+                aria-hidden
+              >
                 {sortConfig.direction === "asc" ? "▲" : "▼"}
               </span>
             )}

@@ -4,7 +4,7 @@ import LoginLogo from "@/components/login/LoginLogo";
 
 const LoginLanding = () => {
   return (
-    <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden">
+    <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
       <div className="absolute inset-0 z-0 flex items-end justify-center">
         <div className="relative w-full h-[60%] opacity-50">
           <Image
