@@ -18,7 +18,7 @@ export interface PlayerTableRowProps {
 
 const ROW_BASE_CLASS = "transition-colors cursor-pointer group";
 const CELL_BASE_CLASS =
-  "text-Label-Tertiary text-center flex items-center justify-center";
+  "text-Label-Tertiary text-center flex items-center justify-center text-sm";
 const CELL_LEFT_CLASS = "flex items-center overflow-hidden";
 
 const PlayerTableRow = memo(function PlayerTableRow({
@@ -78,7 +78,7 @@ const PlayerTableRow = memo(function PlayerTableRow({
         const value =
           col.key === "OVR"
             ? player.ovr
-            : (player.stats?.[col.statsKey!] ?? col.defaultValue ?? "-");
+            : player.stats?.[col.statsKey!] ?? col.defaultValue ?? "-";
         const highlight = getCellClass(col.key).includes("primary");
         return (
           <StatsCell

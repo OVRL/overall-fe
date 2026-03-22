@@ -93,7 +93,7 @@ const PlayerListBoard = ({
         선수 목록 및 검색
       </h2>
 
-      <div className="hidden md:flex justify-start gap-2 mb-4 mt-8">
+      <div className="hidden md:flex justify-start gap-2 mt-6">
         <label htmlFor="playerSearch" className="sr-only">
           선수명 검색
         </label>

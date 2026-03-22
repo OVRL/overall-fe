@@ -26,7 +26,9 @@ const StatsPlayerRow = ({
     >
       {/* 순위 - 1등은 primary, 나머지는 흰색 */}
       <span
-        className={`${racingSansOne.className} text-sm w-7.5 text-center ${index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"}`}
+        className={`${racingSansOne.className} text-sm w-7.5 text-center ${
+          index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
+        }`}
       >
         {index + 1}
       </span>
@@ -37,22 +39,17 @@ const StatsPlayerRow = ({
 
         {/* 포지션 칩 + 이름 */}
         <div className="flex items-center gap-1 flex-1 min-w-0">
-          <div className="w-10.5 flex justify-center">
-            <PositionChip
-              position={player.position}
-              variant="outline"
-              className="text-[10px] px-1.5 py-0.5"
-            />
-          </div>
           <span
-            className={`w-18.75 text-sm truncate ${index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"}`}
+            className={`w-18.75 text-sm truncate ${
+              index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
+            }`}
           >
             {player.name}
           </span>
         </div>
       </div>
       {/* 능력치 값 (숫자만 추출) */}
-      <span className="text-Label-AccentPrimary w-12.25 font-bold text-sm shrink-0">
+      <span className="text-Label-AccentPrimary w-12.25 font-bold text-sm shrink-0 text-center">
         {String(player.value).replace(/[^0-9]/g, "")}
       </span>
     </li>

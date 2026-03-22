@@ -12,24 +12,15 @@ jest.mock("../season-record/RankingCard", () => ({
   ),
 }));
 
-const mockScroll = jest.fn();
 jest.mock("@/hooks/useDraggableScroll", () => ({
   useDraggableScroll: () => ({
     scrollContainerRef: { current: null },
-    showLeftArrow: true,
-    showRightArrow: true,
-    scroll: mockScroll,
     onMouseDown: jest.fn(),
     onMouseLeave: jest.fn(),
     onMouseUp: jest.fn(),
     onMouseMove: jest.fn(),
     checkScrollButtons: jest.fn(),
   }),
-}));
-
-jest.mock("@/components/ui/Icon", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => <div data-testid="icon">{alt}</div>,
 }));
 
 describe("RankingCarousel 컴포넌트", () => {
@@ -52,7 +43,7 @@ describe("RankingCarousel 컴포넌트", () => {
     });
   });
 
-  it("스크롤 버튼 클릭 시 scroll 함수가 호출되어야 한다", () => {
+  it("순위 섹션에 접근 가능한 이름(aria-label)이 있어야 한다", () => {
     render(
       <RankingCarousel
         allPlayers={[]}
@@ -61,14 +52,9 @@ describe("RankingCarousel 컴포넌트", () => {
       />,
     );
 
-    const leftButton = screen.getByLabelText("이전 순위 카드");
-    const rightButton = screen.getByLabelText("다음 순위 카드");
-
-    fireEvent.click(leftButton);
-    expect(mockScroll).toHaveBeenCalledWith("left");
-
-    fireEvent.click(rightButton);
-    expect(mockScroll).toHaveBeenCalledWith("right");
+    expect(
+      screen.getByRole("region", { name: "시즌 기록 순위" }),
+    ).toBeInTheDocument();
   });
 
   it("RankingCard의 더보기 클릭 시 onMoreClick 콜백이 호출되어야 한다", () => {

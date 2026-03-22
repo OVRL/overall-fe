@@ -6,7 +6,7 @@ export interface StatsCellProps {
   className?: string;
 }
 
-const BASE_CLASS = "text-center text-base";
+const BASE_CLASS = "text-center text-sm";
 
 const StatsCell = ({ value, highlight, className = "" }: StatsCellProps) => (
   <td

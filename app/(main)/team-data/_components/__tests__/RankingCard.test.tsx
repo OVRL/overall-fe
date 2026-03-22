@@ -22,18 +22,6 @@ jest.mock("@/components/ui/Button", () => ({
   }) => <button onClick={onClick}>{children}</button>,
 }));
 
-jest.mock("@/components/ui/ProfileAvatar", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => (
-    <div data-testid="profile-avatar">{alt}</div>
-  ),
-}));
-
-jest.mock("@/components/ui/Icon", () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => <div data-testid="icon">{alt}</div>,
-}));
-
 describe("RankingCard 컴포넌트", () => {
   const mockPlayers: Player[] = [
     {

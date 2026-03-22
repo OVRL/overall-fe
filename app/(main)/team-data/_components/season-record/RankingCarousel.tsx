@@ -7,7 +7,6 @@ import {
   getSortedPlayersByCategory,
 } from "../../_lib/getTop5PlayersByCategory";
 import RankingCard from "./RankingCard";
-import CarouselNavButton from "./CarouselNavButton";
 import { useDraggableScroll } from "@/hooks/useDraggableScroll";
 
 interface RankingCarouselProps {
@@ -23,9 +22,6 @@ export default function RankingCarousel({
 }: RankingCarouselProps) {
   const {
     scrollContainerRef,
-    showLeftArrow,
-    showRightArrow,
-    scroll,
     onMouseDown,
     onMouseLeave,
     onMouseUp,
@@ -56,13 +52,6 @@ export default function RankingCarousel({
 
   return (
     <section aria-label="시즌 기록 순위" className="relative group">
-      <CarouselNavButton
-        direction="left"
-        onClick={() => scroll("left")}
-        ariaLabel="이전 순위 카드"
-        visible={showLeftArrow}
-      />
-
       <div
         ref={scrollContainerRef}
         className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide md:mx-0 md:pl-0 md:pr-40 cursor-grab active:cursor-grabbing"
@@ -73,23 +62,18 @@ export default function RankingCarousel({
         onMouseMove={onMouseMove}
         onScroll={checkScrollButtons}
       >
-        {categoryCards.map(({ categoryKey, top5WithValue, sortedAllWithValue }) => (
-          <RankingCard
-            key={categoryKey}
-            title={categoryKey}
-            players={top5WithValue}
-            onMoreClick={() => onMoreClick(categoryKey, sortedAllWithValue)}
-            onPlayerClick={onPlayerClick}
-          />
-        ))}
+        {categoryCards.map(
+          ({ categoryKey, top5WithValue, sortedAllWithValue }) => (
+            <RankingCard
+              key={categoryKey}
+              title={categoryKey}
+              players={top5WithValue}
+              onMoreClick={() => onMoreClick(categoryKey, sortedAllWithValue)}
+              onPlayerClick={onPlayerClick}
+            />
+          ),
+        )}
       </div>
-
-      <CarouselNavButton
-        direction="right"
-        onClick={() => scroll("right")}
-        ariaLabel="다음 순위 카드"
-        visible={showRightArrow}
-      />
     </section>
   );
 }

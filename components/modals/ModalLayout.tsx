@@ -8,9 +8,16 @@ type Props = PropsWithChildren<{
   title: string;
   onClose?: () => void;
   wrapperClassName?: string;
+  closeButtonClassName?: string;
 }>;
 
-const ModalLayout = ({ title, children, onClose, wrapperClassName }: Props) => {
+const ModalLayout = ({
+  title,
+  children,
+  onClose,
+  wrapperClassName,
+  closeButtonClassName,
+}: Props) => {
   const { hideModal } = useModal();
   const onCloseModal = () => {
     if (onClose) onClose();
@@ -25,7 +32,10 @@ const ModalLayout = ({ title, children, onClose, wrapperClassName }: Props) => {
       onClick={(e) => e.stopPropagation()}
     >
       <button
-        className="absolute top-4 right-4 text-white p-3 z-10 cursor-pointer"
+        className={cn(
+          "absolute top-1 right-1 text-Fill_Primary p-3 z-10 cursor-pointer",
+          closeButtonClassName,
+        )}
         onClick={onCloseModal}
       >
         <Icon src={close} alt="close" />
