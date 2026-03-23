@@ -1,6 +1,6 @@
-import Link from "@/components/Link";
 import { cn } from "@/lib/utils";
 import { onboardingCtaLinkClassName } from "./onboardingCtaLinkClass";
+import { TeamManagementOnboardingCtaLink } from "./TeamManagementOnboardingCtaLink";
 
 const OnboardingManager = () => {
   return (
@@ -18,12 +18,12 @@ const OnboardingManager = () => {
         </span>
         에서 <br /> 설정할 수 있습니다.
       </p>
-      <Link
+      <TeamManagementOnboardingCtaLink
         href="/team-management/best-eleven"
         className={onboardingCtaLinkClassName}
       >
         설정하기
-      </Link>
+      </TeamManagementOnboardingCtaLink>
     </div>
   );
 };

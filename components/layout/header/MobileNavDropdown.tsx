@@ -17,6 +17,8 @@ type MobileNavDropdownProps = {
   onLinkClick: () => void;
   /** nav 요소 id (aria-controls와 매칭) */
   id: string;
+  /** player 등 일반 멤버는 경기 등록 버튼 미표시 */
+  showRegisterGame?: boolean;
 };
 
 /**
@@ -28,6 +30,7 @@ export function MobileNavDropdown({
   currentPathname,
   onLinkClick,
   id,
+  showRegisterGame = true,
 }: MobileNavDropdownProps) {
   return (
     <nav
@@ -36,7 +39,7 @@ export function MobileNavDropdown({
       aria-label="모바일 네비게이션"
     >
       <ul className="flex flex-col p-4 gap-2">
-        <RegisterGameButton />
+        {showRegisterGame ? <RegisterGameButton /> : null}
         {menuItems.map((item) => {
           const isActive = currentPathname === item.href;
           return (

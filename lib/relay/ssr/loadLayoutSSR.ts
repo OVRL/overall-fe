@@ -21,6 +21,10 @@ import {
   type LayoutState,
 } from "./layoutState";
 import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
+import {
+  parseTeamMemberRole,
+  type TeamMemberRole,
+} from "@/lib/permissions/teamMemberRole";
 
 export interface LoadLayoutSSROptions {
   accessToken: string | null;
@@ -213,12 +217,16 @@ function deriveLayoutState(
 
   let initialSelectedTeamName: string | null = null;
   let initialSelectedTeamImageUrl: string | null = null;
+  let initialSelectedTeamMemberRole: TeamMemberRole | null = null;
   if (initialSelectedTeamId != null) {
     const selected = teamsWithInfo.find(
       (m) => m.team.id === initialSelectedTeamId,
     );
     initialSelectedTeamName = selected?.team.name ?? null;
     initialSelectedTeamImageUrl = selected?.team.emblem ?? null;
+    initialSelectedTeamMemberRole = selected
+      ? parseTeamMemberRole(selected.role)
+      : null;
   }
 
   const initialSelectedTeamIdNum = initialSelectedTeamId
@@ -235,6 +243,7 @@ function deriveLayoutState(
     initialSelectedTeamImageUrl,
     initialSelectedTeamIdFromSingleTeam,
     initialIsSoloTeam: false,
+    initialSelectedTeamMemberRole,
   };
 }
 

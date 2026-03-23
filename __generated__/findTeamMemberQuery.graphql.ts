@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7eff94e19c40b7575c3e5ca7c64a9d8f>>
+ * @generated SignedSource<<1ea386ef25de9eb78a9486a4a8d6fbbf>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,6 +16,7 @@ export type findTeamMemberQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
     readonly id: number;
+    readonly role: string;
     readonly team: {
       readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
@@ -102,6 +103,13 @@ v3 = [
           }
         ],
         "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "role",
+        "storageKey": null
       }
     ],
     "storageKey": null
@@ -125,16 +133,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "86b0c0d70a66b2f704d9a393180da7b2",
+    "cacheID": "01a35b828472a370b4f770dfec6f5680",
     "id": null,
     "metadata": {},
     "name": "findTeamMemberQuery",
     "operationKind": "query",
-    "text": "query findTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n  }\n}\n"
+    "text": "query findTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    role\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "665807aacdb20cb88468cc8a0de6ce7b";
+(node as any).hash = "74bfb8a2bb01e01f148b3db0e1af3c49";
 
 export default node;

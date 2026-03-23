@@ -1,23 +1,25 @@
 "use client";
 
-import { ReactNode, useState, useRef } from "react";
+import { ReactNode, Suspense, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { type StaticImageData } from "next/image";
 import Link from "@/components/Link";
 import logoOvr from "@/public/icons/logo_OVR.svg";
 import Icon from "@/components/ui/Icon";
-import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
 import { HamburgerButton } from "@/components/layout/header/HamburgerButton";
-import { MobileNavDropdown } from "@/components/layout/header/MobileNavDropdown";
+import { GlobalHeaderNavGuest } from "@/components/layout/header/GlobalHeaderNavGuest";
+import { GlobalHeaderNavWithCapabilities } from "@/components/layout/header/GlobalHeaderNavWithCapabilities";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useUserId } from "@/hooks/useUserId";
+import { TEAM_MANAGEMENT_MENU_HREF } from "@/lib/navigation/filterMenuItemsByTeamRole";
 export interface MenuItem {
   label: string;
   href: string;
 }
 
 const defaultMenuItems: MenuItem[] = [
-  { label: "팀 관리", href: "/team-management" },
+  { label: "팀 관리", href: TEAM_MANAGEMENT_MENU_HREF },
   { label: "선수 기록", href: "/team-data" },
   { label: "경기 일정", href: "#" },
 ];
@@ -84,10 +86,20 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
     className = "",
   } = props;
   const pathname = usePathname();
+  const userId = useUserId();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const closeMobileMenu = () => setIsMenuOpen(false);
+
+  const hamburger = showHamburger ? (
+    <HamburgerButton
+      isMenuOpen={isMenuOpen}
+      onToggle={toggleMenu}
+      ariaControlsId="mobile-dropdown-menu"
+    />
+  ) : null;
 
   // 모바일 메뉴 오픈 시 바디 스크롤 방지
   useScrollLock(isMenuOpen);
@@ -116,51 +128,43 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
           </Link>
         </div>
 
-        {/* 네비게이션 */}
+        {/* 네비게이션 — Relay 권한 분기는 단일 Suspense·단일 useLazyLoadQuery */}
         <nav aria-label="메인 네비게이션">
-          <div className="flex items-center gap-6 lg:gap-10">
-            {/* 데스크톱 메뉴 */}
-            <ul className="hidden lg:flex items-center gap-8 text-[0.9375rem]">
-              <RegisterGameButton />
-              {menuItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      className={`transition-colors px-4 py-2.5 rounded-xl ${
-                        isActive
-                          ? "bg-surface-card text-Label-AccentPrimary border border-border-card"
-                          : "text-white hover:text-gray-500"
-                      }`}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-
-            <HamburgerButton
+          {userId != null ? (
+            <Suspense
+              fallback={
+                <GlobalHeaderNavGuest
+                  pathname={pathname}
+                  menuItems={menuItems}
+                  isMenuOpen={isMenuOpen}
+                  onMobileMenuClose={closeMobileMenu}
+                  mobileMenuId="mobile-dropdown-menu"
+                  hamburger={hamburger}
+                />
+              }
+            >
+              <GlobalHeaderNavWithCapabilities
+                userId={userId}
+                pathname={pathname}
+                menuItems={menuItems}
+                isMenuOpen={isMenuOpen}
+                onMobileMenuClose={closeMobileMenu}
+                mobileMenuId="mobile-dropdown-menu"
+                hamburger={hamburger}
+              />
+            </Suspense>
+          ) : (
+            <GlobalHeaderNavGuest
+              pathname={pathname}
+              menuItems={menuItems}
               isMenuOpen={isMenuOpen}
-              onToggle={toggleMenu}
-              ariaControlsId="mobile-dropdown-menu"
+              onMobileMenuClose={closeMobileMenu}
+              mobileMenuId="mobile-dropdown-menu"
+              hamburger={hamburger}
             />
-          </div>
+          )}
         </nav>
       </div>
-
-      {/* 모바일 메뉴 드롭다운 */}
-      {isMenuOpen && (
-        <MobileNavDropdown
-          menuItems={menuItems}
-          currentPathname={pathname}
-          onLinkClick={() => setIsMenuOpen(false)}
-          id="mobile-dropdown-menu"
-        />
-      )}
     </header>
   );
 };

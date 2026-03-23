@@ -1,4 +1,5 @@
 import type { UserModel } from "@/contexts/UserContext";
+import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 
 /**
  * Layout SSR 로더가 파생해 클라이언트 Provider에 전달하는 상태.
@@ -23,6 +24,8 @@ export interface LayoutState {
   initialSelectedTeamIdFromSingleTeam: boolean;
   /** 로스터 팀원이 1명(나 혼자)일 때 true. 홈 온보딩 UI 분기용 (findManyTeamMember totalCount 기반) */
   initialIsSoloTeam: boolean;
+  /** 선택 팀에 대한 findTeamMember.role (팀 관리 RBAC·SSR 리다이렉트용) */
+  initialSelectedTeamMemberRole: TeamMemberRole | null;
 }
 
 export const EMPTY_LAYOUT_STATE: LayoutState = {
@@ -35,4 +38,5 @@ export const EMPTY_LAYOUT_STATE: LayoutState = {
   initialSelectedTeamImageUrl: null,
   initialSelectedTeamIdFromSingleTeam: false,
   initialIsSoloTeam: false,
+  initialSelectedTeamMemberRole: null,
 };

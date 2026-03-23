@@ -1,6 +1,6 @@
-import Link from "@/components/Link";
 import { cn } from "@/lib/utils";
 import { onboardingCtaLinkClassName } from "./onboardingCtaLinkClass";
+import { TeamManagementOnboardingCtaLink } from "./TeamManagementOnboardingCtaLink";
 
 const OnboardingBestXl = () => {
   return (
@@ -19,12 +19,12 @@ const OnboardingBestXl = () => {
         <p className="text-sm text-white text-center font-semibold">
           팀 관리 {">"} 베스트 11 관리에서 <br /> 설정할 수 있습니다.
         </p>
-        <Link
+        <TeamManagementOnboardingCtaLink
           href="/team-management/best-eleven"
           className={onboardingCtaLinkClassName}
         >
           설정하기
-        </Link>
+        </TeamManagementOnboardingCtaLink>
       </div>
     </div>
   );
