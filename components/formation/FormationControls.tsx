@@ -9,6 +9,8 @@ interface FormationControlsProps {
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
   quarters: QuarterData[];
+  /** 경기 API quarterDuration(분). 라벨 `쿼터 / N분 경기`에 사용 */
+  quarterDurationMinutes?: number;
   matchType?: "MATCH" | "INTERNAL";
   selectedSubTeam?: "A" | "B";
   onSubTeamChange?: (team: "A" | "B") => void;
@@ -18,6 +20,7 @@ const FormationControls: React.FC<FormationControlsProps> = ({
   currentQuarterId,
   setCurrentQuarterId,
   quarters,
+  quarterDurationMinutes = 25,
   matchType = "MATCH",
   selectedSubTeam,
   onSubTeamChange,
@@ -38,6 +41,7 @@ const FormationControls: React.FC<FormationControlsProps> = ({
           quarters={quarters}
           currentQuarterId={currentQuarterId}
           setCurrentQuarterId={setCurrentQuarterId}
+          quarterDurationMinutes={quarterDurationMinutes}
         />
       </div>
     </section>

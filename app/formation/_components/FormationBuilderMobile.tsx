@@ -27,6 +27,8 @@ export interface FormationBuilderMobileProps {
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
+  /** 데스크톱 라벨용 — 모바일 레이아웃에서는 미사용 */
+  quarterDurationMinutes?: number;
   selectedPlayer: Player | null;
   setSelectedPlayer: (player: Player | null) => void;
   onPositionRemove: (quarterId: number, index: number) => void;

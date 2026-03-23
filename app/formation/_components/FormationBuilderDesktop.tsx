@@ -13,6 +13,7 @@ export interface FormationBuilderDesktopProps {
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
   matchType?: "MATCH" | "INTERNAL";
+  quarterDurationMinutes?: number;
   selectedSubTeam?: "A" | "B";
   onSubTeamChange?: (team: "A" | "B") => void;
   selectedPlayer: Player | null;
@@ -37,6 +38,7 @@ export default function FormationBuilderDesktop({
   currentQuarterId,
   setCurrentQuarterId,
   matchType,
+  quarterDurationMinutes = 25,
   selectedSubTeam,
   onSubTeamChange,
   selectedPlayer,
@@ -53,6 +55,7 @@ export default function FormationBuilderDesktop({
           currentQuarterId={currentQuarterId}
           setCurrentQuarterId={setCurrentQuarterId}
           quarters={quarters}
+          quarterDurationMinutes={quarterDurationMinutes}
           matchType={matchType}
           selectedSubTeam={selectedSubTeam}
           onSubTeamChange={onSubTeamChange}
