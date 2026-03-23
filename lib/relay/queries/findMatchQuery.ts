@@ -11,8 +11,11 @@ export const FindMatchQuery = graphql`
       id
       matchDate
       startTime
+      endTime
       voteDeadline
       matchType
+      quarterCount
+      quarterDuration
       description
       uniformType
       createdTeam {
@@ -20,6 +23,8 @@ export const FindMatchQuery = graphql`
         id
         name
         emblem
+        homeUniform
+        awayUniform
       }
       opponentTeam {
         __typename
