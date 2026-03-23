@@ -7,6 +7,8 @@ interface QuarterSelectorProps {
   quarters: QuarterData[];
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
+  /** 경기 설정 1쿼터 시간(분) — 라벨 표기용 */
+  quarterDurationMinutes?: number;
 }
 
 /** 데스크톱용: 쿼터/25분 라벨 + QuarterSelectorTabs + 스쿼드 추천 버튼 */
@@ -14,6 +16,7 @@ const QuarterSelector = ({
   quarters,
   currentQuarterId,
   setCurrentQuarterId,
+  quarterDurationMinutes = 25,
 }: QuarterSelectorProps) => {
   const handleQuarterSelect = (id: number | null) => {
     setCurrentQuarterId(id);
@@ -30,7 +33,7 @@ const QuarterSelector = ({
         <div className="flex items-center gap-2 text-Fill_Primary shrink-0">
           <Icon src={clock} alt="clock" />{" "}
           <span className="text-[#f7f8f8] font-semibold leading-6 whitespace-nowrap">
-            쿼터 / 25분 경기
+            쿼터 / {quarterDurationMinutes}분 경기
           </span>
         </div>
         <QuarterSelectorTabs

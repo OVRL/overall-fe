@@ -25,6 +25,7 @@ export interface FormationBuilderDesktopWithDndProps {
   currentQuarterId: number | null;
   setCurrentQuarterId: (id: number | null) => void;
   matchType?: "MATCH" | "INTERNAL";
+  quarterDurationMinutes?: number;
   selectedSubTeam?: "A" | "B";
   onSubTeamChange?: (team: "A" | "B") => void;
   selectedPlayer: Player | null;
@@ -113,6 +114,7 @@ export default function FormationBuilderDesktopWithDnd(
         currentQuarterId={props.currentQuarterId}
         setCurrentQuarterId={props.setCurrentQuarterId}
         matchType={props.matchType}
+        quarterDurationMinutes={props.quarterDurationMinutes}
         selectedSubTeam={props.selectedSubTeam}
         onSubTeamChange={props.onSubTeamChange}
         selectedPlayer={props.selectedPlayer}

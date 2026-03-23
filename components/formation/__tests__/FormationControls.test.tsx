@@ -16,7 +16,13 @@ describe("FormationControls 컴포넌트", () => {
     currentQuarterId: null,
     setCurrentQuarterId: jest.fn(),
     quarters: [
-      { id: 1, formation: "4-3-3", lineup: {}, type: "match", matchup: "home" },
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        lineup: {},
+        matchup: { home: "A", away: "B" },
+      },
     ],
     addQuarter: jest.fn(),
   };

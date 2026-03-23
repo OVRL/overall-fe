@@ -7,6 +7,7 @@ import { useFormationManager } from "@/hooks/formation/useFormationManager";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import FormationBuilderMobile from "./FormationBuilderMobile";
 import Skeleton from "@/components/ui/Skeleton";
+import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import { Player } from "@/types/formation";
 
 /** 데스크톱 레이아웃과 비슷한 스켈레톤 (매치 카드 + 쿼터/컨트롤 + 보드 + 선수 명단) */
@@ -40,9 +41,17 @@ const FormationBuilderDesktopWithDnd = dynamic(
   },
 );
 
+/** 경기(findMatch) 기준 쿼터 수·시간 — 전달 시 탭·보드가 API와 동기화됩니다. */
+export type MatchQuarterSpec = {
+  quarterCount: number;
+  quarterDurationMinutes: number;
+  matchType: "MATCH" | "INTERNAL";
+};
+
 interface FormationBuilderProps {
   scheduleCard: React.ReactNode;
   initialPlayers: Player[];
+  matchQuarterSpec?: MatchQuarterSpec | null;
 }
 
 /**
@@ -52,16 +61,26 @@ interface FormationBuilderProps {
 export default function FormationBuilder({
   scheduleCard,
   initialPlayers,
+  matchQuarterSpec = null,
 }: FormationBuilderProps) {
+  const initialQuarters =
+    matchQuarterSpec == null
+      ? undefined
+      : buildQuartersFromMatch(
+          matchQuarterSpec.quarterCount,
+          matchQuarterSpec.matchType,
+        );
+
   const { quarters, setQuarters, assignPlayer, removePlayer } =
-    useFormationManager();
+    useFormationManager(initialQuarters);
   const isLgOrBelow = useIsMobile(1023);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(null);
   const [selectedListPlayer, setSelectedListPlayer] = useState<Player | null>(
     null,
   );
-  // 임시 테스트용 상태
-  const [matchType] = useState<"MATCH" | "INTERNAL">("INTERNAL");
+  const matchType = matchQuarterSpec?.matchType ?? "INTERNAL";
+  const quarterDurationMinutes =
+    matchQuarterSpec?.quarterDurationMinutes ?? 25;
   const [selectedSubTeam, setSelectedSubTeam] = useState<"A" | "B">("A");
 
   const commonProps = {
@@ -70,6 +89,7 @@ export default function FormationBuilder({
     currentQuarterId,
     setCurrentQuarterId,
     matchType,
+    quarterDurationMinutes,
     selectedSubTeam,
     onSubTeamChange: setSelectedSubTeam,
     selectedPlayer: selectedListPlayer,
