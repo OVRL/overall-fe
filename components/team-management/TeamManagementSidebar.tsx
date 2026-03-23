@@ -83,6 +83,13 @@ const InvitationIcon = ({ active }: { active: boolean }) => (
     </svg>
 );
 
+const MatchRecordIcon = ({ active }: { active: boolean }) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="3" y="2" width="12" height="14" rx="1.5" stroke={active ? "#000" : "#888"} strokeWidth="1.4" />
+        <path d="M6 6h6M6 9h6M6 12h4" stroke={active ? "#000" : "#888"} strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+);
+
 const menuItems: MenuItem[] = [
     {
         id: "settings",
@@ -90,8 +97,18 @@ const menuItems: MenuItem[] = [
         icon: null,
     },
     {
+        id: "match-record",
+        label: "경기 기록 관리",
+        icon: null,
+    },
+    {
         id: "players",
         label: "선수 관리",
+        icon: null,
+    },
+    {
+        id: "invitation",
+        label: "가입 신청 관리",
         icon: null,
     },
     {
@@ -104,17 +121,12 @@ const menuItems: MenuItem[] = [
         label: "베스트11 관리",
         icon: null,
     },
-    {
-        id: "invitation",
-        label: "초대 관리",
-        icon: null,
-    },
 ];
 
 const getIcon = (id: TeamManagementMenu, active: boolean) => {
     switch (id) {
         case "settings": return <SettingsIcon active={active} />;
-        case "match-record": return <SettingsIcon active={active} />;
+        case "match-record": return <MatchRecordIcon active={active} />;
         case "players": return <PlayersIcon active={active} />;
         case "mom-vote": return <MOMIcon active={active} />;
         case "best-eleven": return <BestElevenIcon active={active} />;

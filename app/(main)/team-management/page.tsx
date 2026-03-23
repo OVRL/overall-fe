@@ -11,6 +11,7 @@ import PlayerManagementPanel from "@/components/team-management/PlayerManagement
 import BestElevenPanel from "@/components/team-management/BestElevenPanel";
 import InvitationPanel from "@/components/team-management/InvitationPanel";
 import MOMVotePanel from "@/components/team-management/MOMVotePanel";
+import MatchRecordManagementPanel from "@/components/team-management/MatchRecordManagementPanel";
 import TeamManagementFooter from "@/components/team-management/TeamManagementFooter";
 
 export default function TeamManagementPage() {
@@ -23,12 +24,14 @@ export default function TeamManagementPage() {
     switch (activeMenu) {
       case "settings":
         return <TeamSettingsPanel userRole={userRole} />;
+      case "match-record":
+        return <MatchRecordManagementPanel />;
       case "players":
         return <PlayerManagementPanel />;
-      case "best-eleven":
-        return <BestElevenPanel />;
       case "invitation":
         return <InvitationPanel />;
+      case "best-eleven":
+        return <BestElevenPanel />;
       case "mom-vote":
         return <MOMVotePanel />;
       default:
