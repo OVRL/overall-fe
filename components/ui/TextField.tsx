@@ -66,7 +66,7 @@ const TextField = ({
           id={id}
           ref={ref}
           type={type}
-          value={value}
+          value={value ?? ""}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
