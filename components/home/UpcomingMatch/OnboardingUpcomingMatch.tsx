@@ -13,7 +13,7 @@ type OnboardingUpcomingMatchProps = {
 
 /** 오른쪽 CTA 슬롯 공통 위치·패딩 */
 const INVITE_ACTION_BUTTON_CLASS =
-  "absolute right-0 top-1/2 size-fit min-h-11 min-w-11 -translate-y-1/2 p-3";
+  "md:absolute right-0 top-1/2 md:size-fit min-h-11 min-w-11 md:-translate-y-1/2 p-3";
 
 /**
  * 팀 ID·조회 상태·코드 유무를 바탕으로 단일 액션 상태를 계산합니다.
@@ -44,7 +44,11 @@ function resolveInviteCodeAction(
 }
 
 /** 온보딩 카드 우측: 초대 코드 관련 단일 버튼/로딩 슬롯 */
-function OnboardingInviteCodeActionSlot({ action }: { action: InviteCodeAction }) {
+function OnboardingInviteCodeActionSlot({
+  action,
+}: {
+  action: InviteCodeAction;
+}) {
   switch (action.kind) {
     case "no_team":
       return (
@@ -119,7 +123,7 @@ const OnboardingUpcomingMatch = ({ teamId }: OnboardingUpcomingMatchProps) => {
   );
 
   return (
-    <div className="relative flex items-center justify-center gap-2">
+    <div className="relative flex flex-col md:flex-row items-center justify-center gap-2">
       <div className="relative flex flex-col gap-1">
         <p className="text-center text-xs font-medium text-gray-500">
           팀원에게 초대 코드를 공유하세요
@@ -130,7 +134,7 @@ const OnboardingUpcomingMatch = ({ teamId }: OnboardingUpcomingMatchProps) => {
         <Image
           src={directorImage}
           height={66}
-          className="absolute -right-17 top-1/2 -translate-y-1/2"
+          className="absolute -right-17 top-1/2 -translate-y-1/2 hidden md:block"
           alt="팔장끼고 눈 감고 있는 감독 이미지"
         />
       </div>
