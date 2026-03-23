@@ -19,7 +19,7 @@ const menuItems: MenuItem[] = [
     { id: "match-record", label: "경기기록 관리", icon: "📝" },
     { id: "players", label: "선수 관리", icon: "👥" },
     { id: "best-eleven", label: "베스트 11", icon: "⭐" },
-    { id: "invitation", label: "가입 명단관리", icon: "📨" },
+    { id: "invitation", label: "가입 신청 관리", icon: "📨" },
     { id: "mom-vote", label: "MOM 투표", icon: "🏆" },
 ];
 
