@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import { getValidImageSrc } from "@/lib/utils";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { useTeamSettingsQuery } from "./hooks/useTeamSettingsQuery";
+import { useUpdateTeamMutation } from "./hooks/useUpdateTeamMutation";
+import useModal from "@/hooks/useModal";
+import locationIcon from "@/public/icons/location.svg";
+import TextField from "@/components/ui/TextField";
 
 // ──────────────────────────────────────────────
 // Types
@@ -24,21 +30,6 @@ interface TeamMember {
   role: MemberRole;
   profileImage: string;
 }
-
-// ──────────────────────────────────────────────
-// Mock 데이터
-// ──────────────────────────────────────────────
-const MOCK_MEMBERS: TeamMember[] = Array.from({ length: 13 }, (_, i) => ({
-  id: String(i + 1),
-  name: "이름최다여섯",
-  number: 99,
-  mainPos: "SS",
-  subPos: "CM",
-  age: 30,
-  joinedAt: "2026.03.08",
-  role: i === 0 ? "감독" : "선수",
-  profileImage: "/images/ovr.png",
-}));
 
 // ──────────────────────────────────────────────
 // Sub-components
@@ -151,125 +142,12 @@ const UniformGrid = ({
 );
 
 // ──────────────────────────────────────────────
-// 인라인 장소 검색 컴포넌트
-// ──────────────────────────────────────────────
-const LocationSearchField = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (address: string) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-
-  const {
-    inputValue,
-    setInputValue,
-    searchResults,
-    selectedAddress,
-    isLoading,
-    handleSelect,
-  } = useNaverAddressSearch({
-    onComplete: (result) => {
-      onChange(result.address);
-      setOpen(false);
-    },
-  });
-
-  const handleClickResult = (item: typeof searchResults[number]) => {
-    handleSelect(item);
-    onChange(item.address);
-    setOpen(false);
-  };
-
-  return (
-    <div className="relative">
-      {/* 현재 선택된 값 표시 입력창 */}
-      <div className="relative">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">📍</span>
-        <input
-          readOnly
-          value={value}
-          placeholder="경기 장소를 검색하세요"
-          onClick={() => setOpen(true)}
-          className="w-full bg-[#2a2a2a] border border-white/10 rounded-xl pl-9 pr-4 py-3 text-sm text-white outline-none cursor-pointer hover:border-white/30 transition-colors placeholder:text-gray-600 focus:border-primary/60"
-        />
-        {value && (
-          <button
-            type="button"
-            onClick={() => { onChange(""); }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg leading-none"
-          >
-            ×
-          </button>
-        )}
-      </div>
-
-      {/* 검색 드롭다운 */}
-      {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-[#1e1e1e] border border-white/15 rounded-xl shadow-2xl overflow-hidden">
-          {/* 검색 입력창 */}
-          <div className="p-3 border-b border-white/10">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
-              <input
-                autoFocus
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="지역이나 동네로 검색하기"
-                className="w-full bg-[#2a2a2a] border border-white/10 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white outline-none focus:border-primary/60 transition-colors placeholder:text-gray-600"
-              />
-            </div>
-          </div>
-
-          {/* 검색 결과 */}
-          <div className="max-h-48 overflow-y-auto scrollbar-thin">
-            {isLoading ? (
-              <div className="px-4 py-3 text-xs text-gray-500 text-center">검색 중...</div>
-            ) : searchResults.length > 0 ? (
-              searchResults.map((item) => (
-                <button
-                  key={`${item.latitude}-${item.longitude}`}
-                  type="button"
-                  onClick={() => handleClickResult(item)}
-                  className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-white/8 border-b border-white/5 last:border-none ${selectedAddress?.address === item.address
-                      ? "text-primary bg-primary/10"
-                      : "text-gray-300"
-                    }`}
-                >
-                  <span className="text-gray-500 mr-2 text-xs">📍</span>
-                  {item.address}
-                </button>
-              ))
-            ) : inputValue ? (
-              <div className="px-4 py-4 text-xs text-gray-500 text-center">일치하는 주소가 없습니다.</div>
-            ) : (
-              <div className="px-4 py-4 text-xs text-gray-500 text-center">지역명을 입력해 검색하세요</div>
-            )}
-          </div>
-
-          {/* 닫기 */}
-          <div className="p-2 border-t border-white/10 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="text-xs text-gray-500 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ──────────────────────────────────────────────
 // 팀 정보 설정 모달
 // ──────────────────────────────────────────────
 interface TeamInfoModalProps {
   teamName: string;
-  location: string;
+  locationName: string;
+  locationCode: string;
   foundedDate: string;
   description: string;
   emblemSrc: string;
@@ -278,7 +156,8 @@ interface TeamInfoModalProps {
   onClose: () => void;
   onSave: (data: {
     teamName: string;
-    location: string;
+    locationCode: string;
+    locationName: string;
     description: string;
     emblemSrc: string;
     homeDesign: UniformDesign;
@@ -288,7 +167,8 @@ interface TeamInfoModalProps {
 
 function TeamInfoModal({
   teamName: initTeamName,
-  location: initLocation,
+  locationName: initLocationName,
+  locationCode: initLocationCode,
   foundedDate,
   description: initDesc,
   emblemSrc: initEmblem,
@@ -297,8 +177,10 @@ function TeamInfoModal({
   onClose,
   onSave,
 }: TeamInfoModalProps) {
+  const { openModal } = useModal("ADDRESS_SEARCH");
   const [teamName, setTeamName] = useState(initTeamName);
-  const [location, setLocation] = useState(initLocation);
+  const [locationName, setLocationName] = useState(initLocationName);
+  const [locationCode, setLocationCode] = useState(initLocationCode);
   const [description, setDescription] = useState(initDesc);
   const [emblemSrc, setEmblemSrc] = useState(initEmblem);
   const [homeDesign, setHomeDesign] = useState<UniformDesign>(initHome);
@@ -327,21 +209,44 @@ function TeamInfoModal({
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* 클럽 이름 */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-gray-400">클럽 이름</label>
             <input
               value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              className="w-full bg-[#2a2a2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/60 transition-colors"
+              readOnly
+              className="w-full bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-500 outline-none cursor-not-allowed"
             />
           </div>
 
-          {/* 주요 활동 지역 - 네이버 주소 검색 */}
+          {/* 주요 활동 지역 - ADDRESS_SEARCH 모달 */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400">주요 활동 지역</label>
-            <LocationSearchField value={location} onChange={setLocation} />
+            <button
+              type="button"
+              className="w-full cursor-pointer text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+              onClick={() =>
+                openModal({
+                  onComplete: ({ address, code }) => {
+                    setLocationName(address);
+                    setLocationCode(code);
+                  },
+                })
+              }
+            >
+              <TextField
+                label="주요 활동지역"
+                placeholder="클릭해서 주요 활동 장소를 찾아보세요"
+                type="text"
+                showBorderBottom={false}
+                leftIcon={locationIcon}
+                leftIconClassName="text-white/50"
+                value={locationName}
+                readOnly
+                className="pointer-events-none"
+                onChange={() => {}}
+              />
+            </button>
           </div>
 
           {/* 클럽 창단일 */}
@@ -414,7 +319,7 @@ function TeamInfoModal({
             variant="primary"
             size="m"
             onClick={() =>
-              onSave({ teamName, location, description, emblemSrc, homeDesign, awayDesign })
+              onSave({ teamName, locationCode, locationName, description, emblemSrc, homeDesign, awayDesign })
             }
             className="rounded-xl font-bold"
           >
@@ -512,29 +417,77 @@ function KickModal({
 }
 
 // ──────────────────────────────────────────────
-// Main Panel
+// Main Panel Wrapper
 // ──────────────────────────────────────────────
 interface TeamSettingsPanelProps {
   userRole: TeamMemberRole;
 }
 
 export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) {
+  const { selectedTeamIdNum } = useSelectedTeamId();
+
+  if (!selectedTeamIdNum) return <div className="p-6 text-white">팀 데이터를 불러오는 중...</div>;
+
+  return (
+    <Suspense fallback={<div className="p-6 text-white text-sm">설정 불러오는 중...</div>}>
+      <TeamSettingsPanelInner userRole={userRole} teamId={selectedTeamIdNum} />
+    </Suspense>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Inner Panel
+// ──────────────────────────────────────────────
+function TeamSettingsPanelInner({
+  userRole,
+  teamId,
+}: {
+  userRole: TeamMemberRole;
+  teamId: number;
+}) {
   const isManager = userRole === "MANAGER";
+  
+  // Query
+  const data = useTeamSettingsQuery(teamId);
+  const teamMemberConnection = data.findManyTeamMember;
+  
+  // 팀 정보 (첫 번째 멤버의 team 정보를 통해 가져옴)
+  const teamData = teamMemberConnection.members[0]?.team;
+  
+  // 뮤테이션 훅
+  const { executeMutation: updateTeam } = useUpdateTeamMutation();
 
-  // 팀 정보 상태
-  const [teamName, setTeamName] = useState("바르셀로나 FC");
-  const [location, setLocation] = useState("서울 강남구");
-  const [foundedDate] = useState("2026. 2. 10.");
-  const [description, setDescription] = useState("열정과 실력을 겸비한 아마추어 축구팀입니다.");
-  const [homeDesign, setHomeDesign] = useState<UniformDesign>("SOLID_RED");
-  const [awayDesign, setAwayDesign] = useState<UniformDesign>("STRIPE_BLUE");
-  const [emblemSrc, setEmblemSrc] = useState("/images/ovr.png");
-  const [inviteLink] = useState("https://ovr-log.com/invite/abc123xyz");
+  // 선수단 매핑
+  const calculateAge = (birthDate?: string | null) => {
+    if (!birthDate) return 0;
+    const year = new Date(birthDate).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return currentYear - year;
+  };
 
-  // 선수단 상태
-  const [members, setMembers] = useState<TeamMember[]>(MOCK_MEMBERS);
+  const members: TeamMember[] = teamMemberConnection.members.map((m) => {
+    const roleMapping: Record<string, MemberRole> = {
+      MANAGER: "감독",
+      COACH: "코치",
+      PLAYER: "선수"
+    };
 
-  // 모달 상태
+    return {
+      id: String(m.id),
+      name: m.user?.name ?? "알 수 없음",
+      number: m.backNumber ?? 0,
+      mainPos: m.position ?? "-",
+      subPos: "",
+      age: calculateAge(m.user?.birthDate),
+      joinedAt: new Date(m.joinedAt).toLocaleDateString(),
+      role: roleMapping[m.role] ?? "선수",
+      profileImage: m.user?.profileImage ?? "/images/ovr.png",
+    };
+  });
+
+  // 상태는 뮤테이션 처리를 위한 임시 상태로만 존재 (UI 표시는 Relay Store 데이터 기반)
+  const inviteLink = "https://ovr-log.com/invite/abc123xyz"; // 백업용 (차후 구현 여부에 따라 변경)
+  
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [roleModal, setRoleModal] = useState<{
     memberId: string;
@@ -554,36 +507,79 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
 
   const handleRoleConfirm = () => {
     if (!roleModal) return;
-    setMembers((prev) =>
-      prev.map((m) =>
-        m.id === roleModal.memberId ? { ...m, role: roleModal.newRole } : m
-      )
-    );
+    // 추후 Role 변경 Mutation
+    alert("권한 변경은 준비 중입니다.");
     setRoleModal(null);
   };
 
   const handleKickConfirm = () => {
     if (!kickModal) return;
-    setMembers((prev) => prev.filter((m) => m.id !== kickModal.memberId));
+    // 추후 선수 방출 Mutation
+    alert("선수 방출은 준비 중입니다.");
     setKickModal(null);
   };
 
-  const handleInfoSave = (data: {
+  const handleInfoSave = (newData: {
     teamName: string;
-    location: string;
+    locationCode: string;
+    locationName: string;
     description: string;
     emblemSrc: string;
     homeDesign: UniformDesign;
     awayDesign: UniformDesign;
   }) => {
-    setTeamName(data.teamName);
-    setLocation(data.location);
-    setDescription(data.description);
-    setEmblemSrc(data.emblemSrc);
-    setHomeDesign(data.homeDesign);
-    setAwayDesign(data.awayDesign);
-    setShowInfoModal(false);
+    if (!teamData) {
+      alert("팀 정보를 불러올 수 없어 수정할 수 없습니다.");
+      return;
+    }
+  
+    const input = {
+      id: Number(teamData.id),
+      name: newData.teamName,
+      activityArea: newData.locationCode,
+      description: newData.description,
+      homeUniform: newData.homeDesign,
+      awayUniform: newData.awayDesign,
+    };
+
+    // 백엔드 mutation 응답에서 region 객체를 제대로 채워주지 않을 경우를 대비해 스토어를 직접 변경
+    updateTeam({
+      variables: { input },
+      updater: (store) => {
+        const payload = store.getRootField("updateTeam");
+        if (!payload) return;
+        
+        // 새로 저장한 region 객체 레코드를 생성 (client-side only)
+        const regionRecord = store.create(`client:region:${newData.locationCode}`, "RegionSearchModel");
+        regionRecord.setValue(newData.locationCode, "code");
+        regionRecord.setValue(newData.locationName, "name");
+        
+        payload.setLinkedRecord(regionRecord, "region");
+      },
+      onCompleted: () => {
+        setShowInfoModal(false);
+      },
+      onError: (err) => {
+        console.error(err);
+        alert("팀 정보 수정에 실패했습니다.");
+      }
+    });
   };
+
+  if (!teamData) {
+    return <div className="p-6 text-white text-sm">소속 팀 정보를 가져올 수 없습니다.</div>;
+  }
+
+  const teamName = teamData.name ?? "";
+  const locationName = teamData.region?.name || teamData.activityArea || "";
+  const locationCode = teamData.region?.code || teamData.activityArea || "";
+  const foundedDate = teamData.historyStartDate  
+    ? new Date(teamData.historyStartDate).toLocaleDateString()
+    : "";
+  const description = teamData.description ?? "";
+  const emblemSrc = teamData.emblem ?? "/images/ovr.png";
+  const homeDesign = (teamData.homeUniform as UniformDesign) ?? "SOLID_RED";
+  const awayDesign = (teamData.awayUniform as UniformDesign) ?? "STRIPE_BLUE";
 
   // 현재 선택된 유니폼 이미지 경로
   const homeImagePath = UNIFORM_DESIGNS.find((d) => d.design === homeDesign)?.imagePath ?? "";
@@ -591,6 +587,20 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
 
   return (
     <>
+        {showInfoModal && (
+          <TeamInfoModal
+            teamName={teamName}
+            locationName={locationName}
+            locationCode={locationCode}
+            foundedDate={foundedDate}
+            description={description}
+            emblemSrc={emblemSrc}
+            homeDesign={homeDesign as UniformDesign}
+            awayDesign={awayDesign as UniformDesign}
+            onClose={() => setShowInfoModal(false)}
+            onSave={handleInfoSave}
+          />
+        )}
       <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-4xl mx-auto w-full">
         {/* 페이지 제목 */}
         <h1 className="text-xl font-bold text-white">팀 설정</h1>
@@ -638,7 +648,7 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
               <div className="space-y-1.5">
                 <div>
                   <p className="text-[10px] text-gray-600 mb-0.5">주요 활동 지역</p>
-                  <p className="text-sm font-semibold text-white">{location}</p>
+                  <p className="text-sm font-semibold text-white">{locationName}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-gray-600 mb-0.5">창단일</p>
@@ -684,10 +694,10 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
             <h2 className="text-sm font-semibold text-white">선수단</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full min-w-max text-xs">
               <thead>
-                <tr className="border-t border-b border-white/8 text-gray-500">
+                <tr className="border-t border-b border-white/8 text-gray-500 whitespace-nowrap">
                   <th className="px-3 md:px-4 py-3 text-left font-medium w-[160px] md:w-[180px]">이름</th>
                   <th className="px-2 md:px-3 py-3 text-center font-medium">등번호</th>
                   <th className="px-2 md:px-3 py-3 text-center font-medium">포지션</th>
@@ -699,16 +709,16 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
               </thead>
               <tbody className="divide-y divide-white/5">
                 {members.map((member) => (
-                  <tr key={member.id} className="hover:bg-white/3 transition-colors">
+                  <tr key={member.id} className="hover:bg-white/3 transition-colors whitespace-nowrap">
                     <td className="px-3 md:px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
+                        <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 relative flex items-center justify-center">
                           <Image
                             src={getValidImageSrc(member.profileImage)}
                             alt={member.name}
                             width={32}
                             height={32}
-                            className="object-cover h-full w-full"
+                            className="object-contain h-full w-full"
                           />
                         </div>
                         <span className="text-white font-medium truncate max-w-[80px] md:max-w-[100px] text-xs md:text-sm">
@@ -772,21 +782,6 @@ export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) 
           </div>
         </section>
       </div>
-
-      {/* ──── 팀 정보 설정 모달 ──── */}
-      {showInfoModal && (
-        <TeamInfoModal
-          teamName={teamName}
-          location={location}
-          foundedDate={foundedDate}
-          description={description}
-          emblemSrc={emblemSrc}
-          homeDesign={homeDesign}
-          awayDesign={awayDesign}
-          onClose={() => setShowInfoModal(false)}
-          onSave={handleInfoSave}
-        />
-      )}
 
       {/* ──── 권한 변경 모달 ──── */}
       {roleModal && (
