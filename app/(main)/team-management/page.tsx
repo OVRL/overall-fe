@@ -4,8 +4,8 @@ import { useState } from "react";
 
 import TeamManagementSidebar, {
   TeamManagementMenu,
-  TeamRole,
 } from "@/components/team-management/TeamManagementSidebar";
+import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import TeamSettingsPanel from "@/components/team-management/TeamSettingsPanel";
 import PlayerManagementPanel from "@/components/team-management/PlayerManagementPanel";
 import BestElevenPanel from "@/components/team-management/BestElevenPanel";
@@ -17,7 +17,7 @@ export default function TeamManagementPage() {
   const [activeMenu, setActiveMenu] = useState<TeamManagementMenu>("settings");
 
   // Mock: 현재 사용자 역할 (실제로는 인증 상태에서 가져옴)
-  const userRole: TeamRole = "manager";
+  const userRole: TeamMemberRole = "MANAGER";
 
   const renderPanel = () => {
     switch (activeMenu) {

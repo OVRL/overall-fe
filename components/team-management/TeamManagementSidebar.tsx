@@ -2,8 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-
-export type TeamRole = "manager" | "coach" | "player";
+import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 
 export type TeamManagementMenu =
     | "settings"
@@ -126,7 +125,7 @@ const getIcon = (id: TeamManagementMenu, active: boolean) => {
 interface TeamManagementSidebarProps {
     activeMenu: TeamManagementMenu;
     onMenuChange: (menu: TeamManagementMenu) => void;
-    userRole: TeamRole;
+    userRole: TeamMemberRole;
 }
 
 export default function TeamManagementSidebar({
@@ -134,7 +133,8 @@ export default function TeamManagementSidebar({
     onMenuChange,
     userRole,
 }: TeamManagementSidebarProps) {
-    const isManagerOrCoach = userRole === "manager" || userRole === "coach";
+    const isManagerOrCoach =
+        userRole === "MANAGER" || userRole === "COACH";
 
     if (!isManagerOrCoach) {
         return (

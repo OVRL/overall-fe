@@ -1,7 +1,7 @@
 import type { findTeamMemberQuery$data } from "@/__generated__/findTeamMemberQuery.graphql";
 import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
 import {
-  parseTeamMemberRole,
+  teamMemberRoleFromGraphQL,
   type TeamMemberRole,
 } from "@/lib/permissions/teamMemberRole";
 
@@ -20,5 +20,5 @@ export function resolveTeamMemberRoleForSelectedTeam(
     (m) => m.team != null && isSameTeamId(selectedTeamId, m.team.id),
   );
   if (row == null) return null;
-  return parseTeamMemberRole(row.role);
+  return teamMemberRoleFromGraphQL(row.role);
 }

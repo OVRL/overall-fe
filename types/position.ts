@@ -1,3 +1,4 @@
+/** GraphQL `Position` enum과 동일한 리터럴 집합 (스키마 변경 시 여기·Relay 생성 타입 함께 확인) */
 export type Position =
   | "FW"
   | "MF"

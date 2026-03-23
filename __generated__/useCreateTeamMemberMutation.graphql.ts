@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bd6c007e0ca9e001fc78a628af052bee>>
+ * @generated SignedSource<<34065cc265db8366a30a8b2e2b0c0e9e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,13 +9,15 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
+export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type JoinTeamInput = {
   backNumber?: number | null | undefined;
   email: string;
   inviteCode: string;
-  position?: string | null | undefined;
+  position?: Position | null | undefined;
   profileImg?: string | null | undefined;
-  role?: string;
+  role?: Role;
 };
 export type useCreateTeamMemberMutation$variables = {
   input: JoinTeamInput;
@@ -24,7 +26,7 @@ export type useCreateTeamMemberMutation$data = {
   readonly createTeamMember: {
     readonly id: number;
     readonly joinedAt: any;
-    readonly role: string;
+    readonly role: Role;
     readonly teamId: number;
     readonly userId: number;
   };

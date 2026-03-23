@@ -33,7 +33,7 @@ const LandingStartForm = () => {
         input: {
           email: user.email,
           inviteCode: code,
-          role: "player",
+          role: "PLAYER",
           profileImg: user.profileImage ?? undefined,
         },
       },

@@ -1,10 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { findManyTeamMemberQueryQuery$data } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
 import { mapTeamMembersToPlayers } from "../../_lib/mapTeamMemberToPlayer";
 import PlayerListBoard from "../season-record/PlayerListBoard";
 import type { Player } from "../../_types/player";
 
+type RosterMember =
+  findManyTeamMemberQueryQuery$data["findManyTeamMember"]["members"][number];
+
 /** findManyTeamMember 쿼리와 동일한 형태의 목 멤버 (mapTeamMembersToPlayers로 Player 변환용) */
-const MOCK_MEMBERS = [
+const MOCK_MEMBERS: RosterMember[] = [
   {
     __typename: "TeamMemberModel" as const,
     id: 1,

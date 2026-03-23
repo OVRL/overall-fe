@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1ea386ef25de9eb78a9486a4a8d6fbbf>>
+ * @generated SignedSource<<4e0e7ef138ad878c849e01855c62fb27>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type findTeamMemberQuery$variables = {
   userId: number;
 };
@@ -16,7 +17,7 @@ export type findTeamMemberQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
     readonly id: number;
-    readonly role: string;
+    readonly role: Role;
     readonly team: {
       readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
