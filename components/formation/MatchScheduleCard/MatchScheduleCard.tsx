@@ -1,24 +1,35 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import MatchScheduleCardDesktop from "./MatchScheduleCardDesktop";
+import type { UniformDesign } from "@/app/create-team/_lib/uniformDesign";
+import type { MatchScheduleVenueInput } from "@/lib/formation/matchToScheduleCardProps";
 
 interface MatchScheduleCardProps {
-  matchDate?: string;
-  matchTime?: string;
-  stadium?: string;
+  matchScheduleLine?: string;
+  venue?: MatchScheduleVenueInput;
   opponent?: string;
+  /** 추후 상대 전적 — UI 숨김, 데이터 파이프라인용으로 유지 */
   opponentRecord?: string;
-  homeUniform?: string;
+  uniformDesign?: UniformDesign;
+  uniformKindLabel?: string;
+  opponentEmblemSrc?: string | null;
   className?: string;
 }
 
+const DEFAULT_VENUE: MatchScheduleVenueInput = {
+  address: "수원 월드컵 보조 구장 A",
+  latitude: 0,
+  longitude: 0,
+};
+
 const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
-  matchDate = "2026-02-03(목)",
-  matchTime = "18:00~20:00",
-  stadium = "수원 월드컵 보조 구장 A",
+  matchScheduleLine = "2026-02-03(목) 18:00~20:00",
+  venue = DEFAULT_VENUE,
   opponent = "FC 빠름셀로나",
   opponentRecord = "전적 2승 1무 1패",
-  homeUniform = "빨강",
+  uniformDesign = "SOLID_RED",
+  uniformKindLabel = "홈 유니폼",
+  opponentEmblemSrc,
   className,
 }) => {
   return (
@@ -30,12 +41,13 @@ const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
         )}
       >
         <MatchScheduleCardDesktop
-          matchDate={matchDate}
-          matchTime={matchTime}
-          stadium={stadium}
+          matchScheduleLine={matchScheduleLine}
+          venue={venue}
           opponent={opponent}
           opponentRecord={opponentRecord}
-          homeUniform={homeUniform}
+          uniformDesign={uniformDesign}
+          uniformKindLabel={uniformKindLabel}
+          opponentEmblemSrc={opponentEmblemSrc}
         />
       </div>
     </section>

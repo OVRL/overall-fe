@@ -18,6 +18,19 @@ export const UNIFORM_DESIGN_VALUES = [
 
 export type UniformDesign = (typeof UNIFORM_DESIGN_VALUES)[number];
 
+/** GraphQL/JSON에서 온 문자열을 UniformDesign으로 안전하게 변환합니다. */
+export function parseUniformDesignFromApi(
+  value: string | null | undefined,
+): UniformDesign {
+  if (
+    value != null &&
+    (UNIFORM_DESIGN_VALUES as readonly string[]).includes(value)
+  ) {
+    return value as UniformDesign;
+  }
+  return "DEFAULT";
+}
+
 /** enum → 이미지 경로 (파일명: 소문자_언더스코어.webp) */
 export function getUniformImagePath(design: UniformDesign): string {
   return `/icons/uniforms/${design.toLowerCase()}.webp`;
