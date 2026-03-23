@@ -17,6 +17,7 @@ jest.mock("../UpcomingMatchDesktop", () => {
 });
 
 const mockDisplay: UpcomingMatchDisplay = {
+  matchId: "MatchModel:1",
   formattedDateTime: "03.19 (목) 20:00",
   homeTeam: { name: "Team A", emblemUrl: "/emblem-a.png" },
   awayTeam: { name: "Team B", emblemUrl: "/emblem-b.png" },
