@@ -3,25 +3,38 @@ import Image from "next/image";
 import fire from "@/public/icons/fire.svg";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 import MatchInfoRow from "./MatchInfoRow";
+import { MatchScheduleCardVenueRow } from "./MatchScheduleCardVenueRow";
+import type { UniformDesign } from "@/app/create-team/_lib/uniformDesign";
+import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
+import type { MatchScheduleVenueInput } from "@/lib/formation/matchToScheduleCardProps";
 
 interface MatchScheduleCardDesktopProps {
-  matchDate: string;
-  matchTime: string;
-  stadium: string;
+  /** 예: 2026-02-03(목) 18:00~20:00 */
+  matchScheduleLine: string;
+  venue: MatchScheduleVenueInput;
   opponent: string;
+  /** 추후 상대 전적 API 연동 시 노출 예정 — props는 유지하고 UI만 숨김 */
   opponentRecord: string;
-  homeUniform: string;
+  uniformDesign: UniformDesign;
+  uniformKindLabel: string;
+  opponentEmblemSrc?: string | null;
 }
 
+const SHOW_OPPONENT_RECORD = false;
+
 const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
-  matchDate,
-  matchTime,
-  stadium,
+  matchScheduleLine,
+  venue,
   opponent,
   opponentRecord,
-  homeUniform,
+  uniformDesign,
+  uniformKindLabel,
+  opponentEmblemSrc,
 }) => {
+  const uniformImagePath = getUniformImagePath(uniformDesign);
+
   return (
     <div className="hidden md:flex flex-col gap-4 relative">
       <div className="flex items-center gap-2.5">
@@ -40,37 +53,44 @@ const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
         <div className="flex flex-col gap-3">
           <MatchInfoRow title="매칭 상대">
             <div className="flex gap-1 items-center">
-              <div className="w-[30px] h-[30px] bg-gray-600 rounded-full overflow-hidden relative">
-                <Image
-                  src="/images/ovr.png"
-                  alt="Team Logo"
+              <div className="w-7.5 h-7.5 rounded-full overflow-hidden relative shrink-0">
+                <EmblemImage
+                  src={opponentEmblemSrc}
+                  alt={`${opponent} 엠블럼`}
                   fill
-                  className="object-cover"
+                  sizes="30px"
                 />
               </div>
               <span className="text-sm font-semibold text-[#f7f8f8]">
                 {opponent}
               </span>
-              <span className="text-[0.8125rem] text-Label-Tertiary">
-                {opponentRecord}
-              </span>
+              {SHOW_OPPONENT_RECORD ? (
+                <span className="text-[0.8125rem] text-Label-Tertiary">
+                  {opponentRecord}
+                </span>
+              ) : null}
             </div>
           </MatchInfoRow>
 
           <MatchInfoRow title="유니폼">
             <div className="flex gap-1 items-center flex-1">
-              <div className="w-[30px] h-[30px] rounded-full overflow-hidden relative">
+              <span
+                className="relative w-7.5 h-7.5 shrink-0 overflow-hidden"
+                aria-hidden
+              >
                 <Image
-                  src="/images/ovr_rogo.webp"
-                  alt="Uniform"
-                  fill
-                  className="object-cover"
+                  src={uniformImagePath}
+                  alt=""
+                  width={30}
+                  height={30}
+                  sizes="1.875rem"
+                  quality={100}
+                  className="object-contain w-full h-full"
                 />
-              </div>
-              <span className="text-sm font-semibold text-[#f7f8f8]">
-                홈 유니폼
               </span>
-              <span className="text-[13px] text-[#a6a5a5]">{homeUniform}</span>
+              <span className="text-sm font-semibold text-[#f7f8f8]">
+                {uniformKindLabel}
+              </span>
             </div>
           </MatchInfoRow>
         </div>
@@ -80,33 +100,13 @@ const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
           <MatchInfoRow title="경기 일정">
             <div className="flex gap-3 items-center">
               <span className="text-sm font-semibold text-[#f7f8f8]">
-                {matchDate} {matchTime}
+                {matchScheduleLine}
               </span>
             </div>
           </MatchInfoRow>
 
           <MatchInfoRow title="경기 구장">
-            <div className="flex gap-3 items-center">
-              <span className="text-sm font-semibold text-[#f7f8f8]">
-                {stadium}
-              </span>
-              <div className="flex flex-1 gap-2">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="px-3 text-Label-Tertiary"
-                >
-                  지도
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="whitespace-nowrap w-fit px-3 text-Label-Tertiary"
-                >
-                  주소 복사
-                </Button>
-              </div>
-            </div>
+            <MatchScheduleCardVenueRow venue={venue} />
           </MatchInfoRow>
         </div>
       </div>

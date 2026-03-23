@@ -47,6 +47,12 @@ export interface ModalPropsMap {
   REGISTER_GAME: Record<string, never>;
   ATTENDANCE_VOTE: Record<string, never>;
   TEAM_CREATED: Record<string, never>;
+  /** 포메이션 경기 카드 — 지도 버튼 */
+  FORMATION_VENUE_MAP: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export type ModalKey = keyof ModalPropsMap;
