@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import { getValidImageSrc } from "@/lib/utils";
-import type { TeamRole } from "./TeamManagementSidebar";
+import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
 
@@ -515,11 +515,11 @@ function KickModal({
 // Main Panel
 // ──────────────────────────────────────────────
 interface TeamSettingsPanelProps {
-  userRole: TeamRole;
+  userRole: TeamMemberRole;
 }
 
 export default function TeamSettingsPanel({ userRole }: TeamSettingsPanelProps) {
-  const isManager = userRole === "manager";
+  const isManager = userRole === "MANAGER";
 
   // 팀 정보 상태
   const [teamName, setTeamName] = useState("바르셀로나 FC");

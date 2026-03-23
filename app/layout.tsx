@@ -17,7 +17,8 @@ import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvide
 import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
 import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
 import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
-import { TEAM_REQUIRED_ROUTES } from "@/lib/routes";
+import { TEAM_REQUIRED_ROUTES, isTeamManagementPath } from "@/lib/routes";
+import { canUseTeamManagementStaffFeatures } from "@/lib/permissions/teamMemberRole";
 import { redirect } from "next/navigation";
 
 const pretendard = localFont({
@@ -82,8 +83,7 @@ export default async function RootLayout({
     } catch (e) {
       // SSR에서 refresh 후에도 Unauthorized(토큰 만료 등)면 세션 삭제 후 로그인 페이지로
       // (세션 삭제 없이 "/"로만 보내면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
-      const message =
-        e instanceof Error ? e.message : String(e);
+      const message = e instanceof Error ? e.message : String(e);
       if (
         message.includes("Unauthorized") ||
         message.toLowerCase().includes("unauthorized")
@@ -115,10 +115,22 @@ export default async function RootLayout({
     redirect("/home");
   }
 
+  // player는 팀 관리(및 하위 경로) SSR 단계에서 차단 (직링크·북마크)
+  const role = layoutState.initialSelectedTeamMemberRole;
+  if (
+    isPrivateRoute &&
+    isLoggedIn &&
+    isTeamManagementPath(pathname) &&
+    role != null &&
+    !canUseTeamManagementStaffFeatures(role)
+  ) {
+    redirect("/home");
+  }
+
   return (
     <html lang="ko" suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} w-full min-h-dvh antialiased overflow-x-hidden flex flex-col`}
+        className={`${pretendard.variable} w-full min-h-dvh h-screen antialiased overflow-x-hidden flex flex-col`}
       >
         <TransitionProvider>
           <ThemeProvider

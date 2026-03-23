@@ -150,13 +150,13 @@ input JoinTeamInput {
   inviteCode: String!
 
   """포지션 (선택)"""
-  position: String
+  position: Position
 
   """프로필 이미지 (선택)"""
   profileImg: String
 
   """역할 (player, coach, manager)"""
-  role: String! = "player"
+  role: Role! = PLAYER
 }
 
 """
@@ -395,6 +395,13 @@ type RegionSearchModel {
   siggName: String
 }
 
+"""팀 권한"""
+enum Role {
+  COACH
+  MANAGER
+  PLAYER
+}
+
 type TeamArrayModel {
   hasNextPage: Boolean!
   items: [TeamModel!]!
@@ -421,13 +428,13 @@ type TeamMemberModel {
   overall: OverallModel
 
   """포지션"""
-  position: String
+  position: Position
 
   """프로필 이미지"""
   profileImg: String
 
   """역할"""
-  role: String!
+  role: Role!
   team: TeamModel
 
   """팀 ID"""
@@ -535,13 +542,13 @@ input UpdateTeamMemberInput {
   id: Int!
 
   """포지션 (선택)"""
-  position: String
+  position: Position
 
   """프로필 이미지 (선택)"""
   profileImg: String
 
   """역할 (선택)"""
-  role: String
+  role: Role
 }
 
 input UpdateUserInput {

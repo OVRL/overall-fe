@@ -1,7 +1,7 @@
 import { MOCK_IMAGE_SRC } from "@/lib/utils";
-import type { Position } from "@/types/position";
 import type { Player, PlayerStats } from "../_types/player";
 import type { findManyTeamMemberQueryQuery } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
+import { relayPositionToAppPosition } from "@/lib/relay/relayPositionToAppPosition";
 
 /** findManyTeamMember 쿼리 멤버 한 건 타입 */
 type QueryMember =
@@ -48,7 +48,7 @@ export function mapTeamMemberToPlayer(member: QueryMember): Player {
     team: "",
     value: 0,
     image: MOCK_IMAGE_SRC,
-    position: (member.position ?? "MF") as Position,
+    position: relayPositionToAppPosition(member.position),
     backNumber: member.backNumber ?? 0,
     ovr,
     stats,

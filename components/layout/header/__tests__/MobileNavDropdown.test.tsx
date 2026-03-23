@@ -78,4 +78,11 @@ describe("MobileNavDropdown", () => {
     render(<MobileNavDropdown {...defaultProps} />);
     expect(screen.getByTestId("register-game-button")).toBeInTheDocument();
   });
+
+  it("showRegisterGame=false이면 RegisterGameButton이 없다", () => {
+    render(<MobileNavDropdown {...defaultProps} showRegisterGame={false} />);
+    expect(
+      screen.queryByTestId("register-game-button"),
+    ).not.toBeInTheDocument();
+  });
 });
