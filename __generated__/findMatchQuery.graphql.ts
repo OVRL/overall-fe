@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<84c1235344ab567f81330b0449a589a3>>
+ * @generated SignedSource<<b4dbac0e882825df9659c07d949535eb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,7 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type MatchType = "INTERNAL" | "MATCH" | "%future added value";
 export type Uniform = "AWAY" | "HOME" | "%future added value";
+export type UniformDesign = "DEFAULT" | "SOLID_BLACK" | "SOLID_BLUE" | "SOLID_PURPLE" | "SOLID_RED" | "SOLID_WHITE" | "STRIPE_BLUE" | "STRIPE_RED" | "STRIPE_WHITE" | "STRIPE_YELLOW" | "%future added value";
 export type findMatchQuery$variables = {
   createdTeamId: number;
 };
@@ -19,11 +20,14 @@ export type findMatchQuery$data = {
     readonly __typename: "MatchModel";
     readonly createdTeam: {
       readonly __typename: "TeamModel";
+      readonly awayUniform: UniformDesign | null | undefined;
       readonly emblem: string | null | undefined;
+      readonly homeUniform: UniformDesign | null | undefined;
       readonly id: string;
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly description: string | null | undefined;
+    readonly endTime: string;
     readonly id: string;
     readonly matchDate: any;
     readonly matchType: MatchType;
@@ -33,6 +37,8 @@ export type findMatchQuery$data = {
       readonly id: string;
       readonly name: string | null | undefined;
     } | null | undefined;
+    readonly quarterCount: number;
+    readonly quarterDuration: number;
     readonly startTime: string;
     readonly uniformType: Uniform | null | undefined;
     readonly venue: {
@@ -70,25 +76,21 @@ v2 = {
   "name": "id",
   "storageKey": null
 },
-v3 = [
-  (v1/*: any*/),
-  (v2/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "name",
-    "storageKey": null
-  },
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "emblem",
-    "storageKey": null
-  }
-],
-v4 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "emblem",
+  "storageKey": null
+},
+v5 = [
   {
     "alias": null,
     "args": [
@@ -123,6 +125,13 @@ v4 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
+        "name": "endTime",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
         "name": "voteDeadline",
         "storageKey": null
       },
@@ -131,6 +140,20 @@ v4 = [
         "args": null,
         "kind": "ScalarField",
         "name": "matchType",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarterCount",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarterDuration",
         "storageKey": null
       },
       {
@@ -154,7 +177,26 @@ v4 = [
         "kind": "LinkedField",
         "name": "createdTeam",
         "plural": false,
-        "selections": (v3/*: any*/),
+        "selections": [
+          (v1/*: any*/),
+          (v2/*: any*/),
+          (v3/*: any*/),
+          (v4/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "homeUniform",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "awayUniform",
+            "storageKey": null
+          }
+        ],
         "storageKey": null
       },
       {
@@ -164,7 +206,12 @@ v4 = [
         "kind": "LinkedField",
         "name": "opponentTeam",
         "plural": false,
-        "selections": (v3/*: any*/),
+        "selections": [
+          (v1/*: any*/),
+          (v2/*: any*/),
+          (v3/*: any*/),
+          (v4/*: any*/)
+        ],
         "storageKey": null
       },
       {
@@ -209,7 +256,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "findMatchQuery",
-    "selections": (v4/*: any*/),
+    "selections": (v5/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -218,19 +265,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "findMatchQuery",
-    "selections": (v4/*: any*/)
+    "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "2dca49eccdf9f6dc894c917a0327dfcf",
+    "cacheID": "7a84bf5708b2e3efb6c996910806b949",
     "id": null,
     "metadata": {},
     "name": "findMatchQuery",
     "operationKind": "query",
-    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    voteDeadline\n    matchType\n    description\n    uniformType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
+    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    endTime\n    voteDeadline\n    matchType\n    quarterCount\n    quarterDuration\n    description\n    uniformType\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n      homeUniform\n      awayUniform\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "cda57569044bf576337433e65216120a";
+(node as any).hash = "cec7ca4864d57d0ad1db80bb24514baa";
 
 export default node;

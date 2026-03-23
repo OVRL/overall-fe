@@ -7,16 +7,27 @@ const FIND_MATCH_QUERY = `
       id
       matchDate
       startTime
+      endTime
       matchType
+      quarterCount
+      quarterDuration
+      uniformType
       createdTeam {
         id
         name
         emblem
+        homeUniform
+        awayUniform
       }
       opponentTeam {
         id
         name
         emblem
+      }
+      venue {
+        address
+        latitude
+        longitude
       }
     }
   }
@@ -27,15 +38,26 @@ export type MatchTeamInfo = {
   id: string;
   name: string | null;
   emblem: string | null;
+  homeUniform?: string | null;
+  awayUniform?: string | null;
 } | null;
 
 export type MatchForUpcoming = {
   id: string;
   matchDate: string;
   startTime: string;
+  endTime: string;
   matchType: "INTERNAL" | "MATCH";
+  quarterCount: number;
+  quarterDuration: number;
+  uniformType?: "HOME" | "AWAY" | null;
   createdTeam: MatchTeamInfo;
   opponentTeam: MatchTeamInfo;
+  venue: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
 };
 
 /**
