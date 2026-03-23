@@ -4,7 +4,7 @@ import UpcomingMatchMobile from "./UpcomingMatchMobile";
 import type { UpcomingMatchDisplay } from "./upcomingMatchDisplay";
 
 interface UpcomingMatchProps {
-  /** SSR에서 계산한 다가오는 경기 1건 표시 데이터. null이면 다가오는 경기 없음 UI */
+  /** 다가오는 경기 1건 표시 데이터(matchId 포함). null이면 다가오는 경기 없음 UI */
   display: UpcomingMatchDisplay | null;
 }
 
