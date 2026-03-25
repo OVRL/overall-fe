@@ -8,9 +8,10 @@ import { usePlayerSearch } from "@/hooks/usePlayerSearch";
 
 interface PlayerSearchModalProps {
   onComplete: (player: Player) => void;
+  excludeMercenaries?: boolean;
 }
 
-const PlayerSearchModal = ({ onComplete }: PlayerSearchModalProps) => {
+const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModalProps) => {
   const id = useId();
   const {
     inputValue,
@@ -40,6 +41,7 @@ const PlayerSearchModal = ({ onComplete }: PlayerSearchModalProps) => {
             mercenary={mercenaryPlayer}
             selectedPlayerId={selectedPlayer?.id}
             onSelect={handleSelect}
+            excludeMercenaries={excludeMercenaries}
           />
         </div>
         <Button

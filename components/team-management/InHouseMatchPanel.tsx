@@ -418,7 +418,18 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
             <div className="px-4 mb-4 z-20">
                 <div className="flex items-center justify-between mb-3 min-h-[40px]">
                     <p className="text-[10px] text-gray-500 font-medium opacity-80">팀 카드를 눌러 포메이션을 편집하세요</p>
-                    <button className="bg-[#333] text-gray-200 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-lg border border-white/5 active:bg-[#444]" onClick={() => setMatchMode(prev => prev === "2WAY" ? "3WAY" : "2WAY")}>
+                    <button 
+                        className="bg-[#333] text-gray-200 text-xs px-5 py-2.5 rounded-xl font-bold active:scale-95 transition-all shadow-lg border border-white/5 active:bg-[#444]" 
+                        onClick={() => {
+                            const newMode = matchMode === "2WAY" ? "3WAY" : "2WAY";
+                            setMatchMode(newMode);
+                            if (newMode === "2WAY") {
+                                // 2파전으로 바뀔 때 C팀인 선수들을 미정(ALL)으로 변경
+                                setPlayers(prev => prev.map(p => p.team === "C" ? { ...p, team: "ALL" } : p));
+                                setIsDirty(true);
+                            }
+                        }}
+                    >
                         {matchMode === "2WAY" ? "3파전으로 바꾸기" : "2파전으로 바꾸기"}
                     </button>
                 </div>
@@ -426,22 +437,28 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     {[
                         { id: "ALL", color: "gray", label: "전체", avg: teamStats.ALL.avgOverall },
-                        { id: "A", color: "red", label: "A팀", avg: teamStats.A.avgOverall },
-                        { id: "B", color: "yellow", label: "B팀", avg: teamStats.B.avgOverall },
-                        ...(matchMode === "3WAY" ? [{ id: "C", color: "blue", label: "C팀", avg: teamStats.C.avgOverall }] : [])
+                        { id: "A", color: "#ef4444", label: "A팀", avg: teamStats.A.avgOverall },
+                        { id: "B", color: "#eab308", label: "B팀", avg: teamStats.B.avgOverall },
+                        ...(matchMode === "3WAY" ? [{ id: "C", color: "#3b82f6", label: "C팀", avg: teamStats.C.avgOverall }] : [])
                     ].map(t => (
-                        <button key={t.id} onClick={() => handleTeamCardClick(t.id as TeamType)} className={cn("flex flex-col items-center justify-center min-w-[88px] h-32 rounded-3xl transition-all border-2", selectedTeam === t.id ? `bg-white/10 border-primary` : "bg-[#1a1a1a] border-transparent hover:bg-white/5")}>
+                        <button key={t.id} onClick={() => handleTeamCardClick(t.id as TeamType)} className={cn("flex flex-col items-center justify-center min-w-[96px] h-36 rounded-[32px] transition-all border-2 relative overflow-hidden", selectedTeam === t.id ? `bg-white/10 border-primary` : "bg-[#1a1a1a] border-transparent hover:bg-white/5 shadow-xl")}>
                             {t.id === "ALL" ? (
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[11px] font-bold text-gray-500 mb-2">{t.label}</span>
+                                    <span className="text-[11px] font-black text-gray-500 mb-2 uppercase tracking-tight">{t.label}</span>
                                     <span className="text-2xl font-black text-white">{teamStats[t.id as TeamType].count}명</span>
-                                    <span className="text-[10px] text-gray-500 mt-1">평균 OVR {t.avg}</span>
+                                    <span className="text-[10px] text-gray-500 mt-1 font-bold">평균 OVR {t.avg}</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center">
-                                    <VestIcon color={t.id === "A" ? "#ef4444" : t.id === "B" ? "#eab308" : "#3b82f6"} className="mb-1" />
-                                    <span className="text-xl font-black text-white">{teamStats[t.id as TeamType].count}명</span>
-                                    <span className="text-[10px] text-gray-500 mt-0.5">평균 OVR {t.avg}</span>
+                                    <div className="mb-2 relative">
+                                        <VestIcon color={t.color} />
+                                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">{t.id}</span>
+                                    </div>
+                                    <span className="text-[11px] font-black text-white mb-0.5">{t.label}</span>
+                                    <div className="flex flex-col items-center opacity-60">
+                                        <span className="text-[10px] font-black text-white">{teamStats[t.id as TeamType].count}명</span>
+                                        <span className="text-[8px] text-gray-400 font-bold uppercase">Avg {t.avg}</span>
+                                    </div>
                                 </div>
                             )}
                         </button>
@@ -547,12 +564,26 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <div className="relative">
-                                                            <select className={cn("appearance-none text-[11px] font-bold px-6 py-2.5 rounded-2xl border transition-all cursor-pointer outline-none min-w-[100px] text-center", player.team === "ALL" ? "bg-[#222] text-gray-400 border-transparent" : player.team === "A" ? "bg-red-600 text-white border-red-500" : player.team === "B" ? "bg-yellow-600 text-black border-yellow-500" : "bg-blue-600 text-white border-blue-500")} value={player.team} onChange={(e) => handleTeamChange(player.id, e.target.value as TeamType)}>
-                                                                <option value="ALL">미지정</option><option value="A">팀A</option><option value="B">팀B</option>{matchMode === "3WAY" && <option value="C">팀C</option>}
-                                                            </select>
-                                                        </div>
-                                                        <button className="p-2 text-gray-800 hover:text-white transition-colors"><MoreVertical size={18} /></button>
+                                                    <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-2xl border border-white/5">
+                                                        {(["ALL", "A", "B", "C"] as TeamType[]).filter(t => t !== "C" || matchMode === "3WAY").map((team) => (
+                                                            <button
+                                                                key={team}
+                                                                onClick={() => handleTeamChange(player.id, team)}
+                                                                className={cn(
+                                                                    "min-w-[40px] px-2 h-8 rounded-xl text-[10px] font-black transition-all flex items-center justify-center border",
+                                                                    player.team === team
+                                                                        ? (team === "A" ? "bg-red-500 border-red-400 text-white shadow-lg shadow-red-500/20"
+                                                                            : team === "B" ? "bg-yellow-500 border-yellow-400 text-white shadow-lg shadow-yellow-500/20"
+                                                                                : team === "C" ? "bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20"
+                                                                                    : "bg-primary border-primary text-black")
+                                                                        : "bg-transparent border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5"
+                                                                )}
+                                                            >
+                                                                {team === "ALL" ? "미정" : team}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <button className="p-1 px-2 text-gray-700 hover:text-white transition-colors"><MoreVertical size={16} /></button>
                                                     </div>
                                                 </div>
                                             ))}

@@ -16,6 +16,10 @@ interface FormationBoardListProps {
   setCurrentQuarterId: (id: number | null) => void;
   /** 포지션 클릭 시 호출 (선택 시 포지션 지정 모달 등에 사용) */
   onPositionSelect?: (pos: PositionSelectPayload) => void;
+  /** 선택된 선수를 해당 포지션에 배치 */
+  onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
+  showBoardHeader?: boolean;
+  boardClassName?: string;
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
@@ -25,6 +29,9 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
   onPositionRemove,
   currentQuarterId,
   onPositionSelect,
+  onPlaceSelectedPlayer,
+  showBoardHeader = true,
+  boardClassName,
 }) => {
   return (
     <div className="flex-1 w-full overflow-x-auto">
@@ -44,6 +51,9 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
             hasSelection={currentQuarterId !== null}
             onPositionSelect={onPositionSelect ?? (() => {})}
             onPositionRemove={onPositionRemove}
+            onPlaceSelectedPlayer={onPlaceSelectedPlayer}
+            showHeader={showBoardHeader}
+            boardClassName={boardClassName}
             onFormationChange={(fmt) => {
               setQuarters((prev) =>
                 prev.map((q) =>
