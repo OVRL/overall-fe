@@ -4,8 +4,9 @@ import { useUserStore } from "@/contexts/UserContext";
 
 /**
  * Relay 글로벌 ID("NodeType:123") 또는 숫자 문자열에서 숫자 부분만 추출합니다.
+ * (로스터 등 Relay 응답의 user.id와 로그인 유저 id 비교 시 공용)
  */
-function parseUserId(id: string): number | null {
+export function parseUserId(id: string): number | null {
   const n = Number(id);
   if (!Number.isNaN(n)) return n;
   // Relay global ID 예: "UserModel:14"
