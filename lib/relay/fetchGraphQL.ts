@@ -5,6 +5,7 @@ import {
   type UploadableMap,
   type Variables,
 } from "relay-runtime";
+import { GraphQLHttpError } from "./GraphQLHttpError";
 
 /** SSR 시 fetch에 쓸 오리진 (Node에는 base URL이 없어 상대 URL 사용 불가) */
 function getServerOrigin(): string {
@@ -167,9 +168,7 @@ export const fetchQuery = async (
 
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)
   if (!response.ok) {
-    const detail =
-      errorPayload?.errors?.[0]?.message ?? response.statusText;
-    throw new Error(`GraphQL 요청 실패 (${response.status}): ${detail}`);
+    throw new GraphQLHttpError(response.status, errorPayload?.errors);
   }
 
   return payload as GraphQLResponse;

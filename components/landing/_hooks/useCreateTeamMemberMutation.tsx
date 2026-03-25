@@ -17,7 +17,7 @@ const createTeamMemberMutation = graphql`
 
 /**
  * 팀 초대 코드로 팀 가입 시 사용하는 createTeamMember 뮤테이션 훅.
- * JoinTeamInput (inviteCode, email, role 등)을 받아 팀 멤버로 등록합니다.
+ * JoinTeamInput(email, inviteCode)으로 팀 멤버로 등록합니다.
  */
 export const useCreateTeamMemberMutation = () => {
   const [commit, isInFlight] = useMutation<MutationType>(createTeamMemberMutation);
