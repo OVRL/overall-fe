@@ -6,13 +6,10 @@ interface PlayerPositionCardProps {
   player: Player;
 }
 
-const DEFAULT_PLAYER_IMAGE = "/images/ovr.png";
-
 /**
  * 포메이션 내 선수 카드 컴포넌트
  */
 const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
-  const playerImage = player.image ? player.image : DEFAULT_PLAYER_IMAGE;
 
   return (
     <div className="relative flex flex-col items-center">
@@ -36,7 +33,8 @@ const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
         <PlayerCard
           key={type}
           type={type}
-          imgUrl={playerImage}
+          imgUrl={player.image}
+          imgFallbackSrc={player.imageFallbackUrl}
           playerName={player.name}
           className={className}
         />

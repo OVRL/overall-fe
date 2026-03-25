@@ -1,8 +1,9 @@
 import type { Player } from "../_types/player";
 import { PLAYER_TABLE_COLUMNS, formatPlayerValue } from "./playerTableColumns";
+import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
 
 // 실제 축구 선수 더미 데이터
-export const allPlayers: Player[] = [
+const allPlayersBase: Player[] = [
   {
     id: 1,
     name: "호날두",
@@ -354,6 +355,12 @@ export const allPlayers: Player[] = [
     },
   },
 ];
+
+export const allPlayers: Player[] = allPlayersBase.map((p) => ({
+  ...p,
+  imageFallbackUrl:
+    p.imageFallbackUrl ?? getPlayerPlaceholderSrc(`m:${p.id}`),
+}));
 
 // 카테고리에 맞는 value 표시
 export const getPlayerValue = (player: Player, category: string) => {

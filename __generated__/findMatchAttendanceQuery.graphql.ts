@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d0b73ce9a4b1ae55d107ae14c87abe23>>
+ * @generated SignedSource<<ef16da08413418e240554c1a0f76e362>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,6 +18,7 @@ export type findMatchAttendanceQuery$data = {
   readonly findMatchAttendance: ReadonlyArray<{
     readonly attendanceStatus: AttendanceStatus | null | undefined;
     readonly user: {
+      readonly id: string;
       readonly name: string | null | undefined;
       readonly profileImage: string | null | undefined;
     } | null | undefined;
@@ -65,14 +66,33 @@ v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "name",
+  "name": "id",
   "storageKey": null
 },
 v4 = {
   "alias": null,
   "args": null,
-  "kind": "ScalarField",
-  "name": "profileImage",
+  "concreteType": "UserModel",
+  "kind": "LinkedField",
+  "name": "user",
+  "plural": false,
+  "selections": [
+    (v3/*: any*/),
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "name",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "profileImage",
+      "storageKey": null
+    }
+  ],
   "storageKey": null
 },
 v5 = {
@@ -80,13 +100,6 @@ v5 = {
   "args": null,
   "kind": "ScalarField",
   "name": "attendanceStatus",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
   "storageKey": null
 };
 return {
@@ -105,19 +118,7 @@ return {
         "plural": true,
         "selections": [
           (v2/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "UserModel",
-            "kind": "LinkedField",
-            "name": "user",
-            "plural": false,
-            "selections": [
-              (v3/*: any*/),
-              (v4/*: any*/)
-            ],
-            "storageKey": null
-          },
+          (v4/*: any*/),
           (v5/*: any*/)
         ],
         "storageKey": null
@@ -141,38 +142,25 @@ return {
         "plural": true,
         "selections": [
           (v2/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "UserModel",
-            "kind": "LinkedField",
-            "name": "user",
-            "plural": false,
-            "selections": [
-              (v3/*: any*/),
-              (v4/*: any*/),
-              (v6/*: any*/)
-            ],
-            "storageKey": null
-          },
+          (v4/*: any*/),
           (v5/*: any*/),
-          (v6/*: any*/)
+          (v3/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "b3ffe740b6abcde1ac8fcb3f48ad796c",
+    "cacheID": "5656e3fe867d613f8d3cd6f6a8f6ad7e",
     "id": null,
     "metadata": {},
     "name": "findMatchAttendanceQuery",
     "operationKind": "query",
-    "text": "query findMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    userId\n    user {\n      name\n      profileImage\n      id\n    }\n    attendanceStatus\n    id\n  }\n}\n"
+    "text": "query findMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    userId\n    user {\n      id\n      name\n      profileImage\n    }\n    attendanceStatus\n    id\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c35b63280a6c158a02b4305779b6e6c4";
+(node as any).hash = "11d4d7f02a96016b86a07e66a7299f0f";
 
 export default node;

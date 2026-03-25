@@ -1,9 +1,13 @@
+"use client";
+
 import PositionChip from "@/components/PositionChip";
 import ImgPlayer from "@/components/ui/ImgPlayer";
 import type { Position } from "@/types/position";
 import type { RosterMember } from "./useFindManyTeamMemberQuery";
-
-const MOCK_PLAYER_IMAGE = "/images/player/img_player_2.webp";
+import {
+  getTeamMemberProfileImageFallbackUrl,
+  getTeamMemberProfileImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
 
 function formatJoinedAt(joinedAt: unknown): string {
   if (joinedAt == null) return "-";
@@ -43,9 +47,8 @@ interface PlayerProfileHeaderProps {
 
 const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
   const name = member.user?.name ?? "";
-  const profileImg =
-    member.profileImg ?? member.user?.profileImage ?? MOCK_PLAYER_IMAGE;
-  console.log(member.user);
+  const rawUrl = getTeamMemberProfileImageRawUrl(member);
+  const fallbackUrl = getTeamMemberProfileImageFallbackUrl(member);
 
   return (
     <div className="relative w-full h-39.75">
@@ -80,7 +83,8 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
         </dl>
       </div>
       <ImgPlayer
-        src={profileImg}
+        src={rawUrl || undefined}
+        fallbackSrc={fallbackUrl}
         alt={`${name} 프로필 이미지`}
         className="size-45 absolute right-7.25 top-4 z-10"
       />

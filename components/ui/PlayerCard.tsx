@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { cn, MOCK_IMAGE_SRC } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
 import Icon from "@/components/ui/Icon";
 import close from "@/public/icons/close.svg";
@@ -18,7 +18,10 @@ const cardVariants = cva("relative flex shrink-0", {
 });
 
 interface PlayerCardProps extends VariantProps<typeof cardVariants> {
-  imgUrl: string;
+  /** 원본 이미지 URL */
+  imgUrl?: string | null;
+  /** 무효·로드 실패 시 */
+  imgFallbackSrc?: string;
   playerName: string;
   playerSeason?: string;
   onDelete?: () => void;
@@ -28,6 +31,7 @@ interface PlayerCardProps extends VariantProps<typeof cardVariants> {
 const PlayerCard = ({
   type = "L",
   imgUrl,
+  imgFallbackSrc = MOCK_IMAGE_SRC,
   playerName,
   playerSeason,
   onDelete,
@@ -39,7 +43,7 @@ const PlayerCard = ({
     <div className={cn(cardVariants({ type }), "relative", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-[5px] shrink-0 bg-transparent",
+          "relative overflow-hidden shrink-0 bg-transparent",
           type === "L" && "w-16 h-21",
           type === "S" && "w-12 h-16",
           type === "XS" && "w-8 h-10",
@@ -47,6 +51,7 @@ const PlayerCard = ({
       >
         <ImgPlayer
           src={imgUrl}
+          fallbackSrc={imgFallbackSrc}
           alt={playerName}
           className="scale-[2] origin-top bg-transparent w-full h-full"
         />

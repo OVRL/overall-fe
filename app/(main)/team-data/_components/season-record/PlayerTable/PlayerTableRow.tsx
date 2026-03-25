@@ -71,7 +71,12 @@ const PlayerTableRow = memo(function PlayerTableRow({
         if (col.key === "이름") {
           return (
             <td key={col.key} className={cn(CELL_LEFT_CLASS, colStyle)}>
-              <PlayerNameCell name={player.name} image={player.image} />
+              <PlayerNameCell
+                name={player.name}
+                image={player.image}
+                imageFallbackUrl={player.imageFallbackUrl}
+                playerId={player.id}
+              />
             </td>
           );
         }

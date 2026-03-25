@@ -1,7 +1,10 @@
-import { MOCK_IMAGE_SRC } from "@/lib/utils";
 import type { Player, PlayerStats } from "../_types/player";
 import type { findManyTeamMemberQueryQuery } from "@/__generated__/findManyTeamMemberQueryQuery.graphql";
 import { relayPositionToAppPosition } from "@/lib/relay/relayPositionToAppPosition";
+import {
+  getTeamMemberProfileImageFallbackUrl,
+  getTeamMemberProfileImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
 
 /** findManyTeamMember 쿼리 멤버 한 건 타입 */
 type QueryMember =
@@ -9,9 +12,10 @@ type QueryMember =
 
 /**
  * 쿼리 결과 멤버를 테이블용 Player로 변환합니다.
- * 이미지 서버 도메인 미설정 시 오류를 피하기 위해 프로필 이미지는 항상 MOCK_IMAGE_SRC를 사용합니다.
+ * `image`는 원본 URL, `imageFallbackUrl`은 로드 실패·무효 시용 플레이스홀더입니다.
  */
 export function mapTeamMemberToPlayer(member: QueryMember): Player {
+  const raw = getTeamMemberProfileImageRawUrl(member);
   const overall = member.overall;
   const ovr = overall?.ovr ?? 0;
   const appearances = overall?.appearances ?? 0;
@@ -47,7 +51,8 @@ export function mapTeamMemberToPlayer(member: QueryMember): Player {
     name: member.user?.name ?? "",
     team: "",
     value: 0,
-    image: MOCK_IMAGE_SRC,
+    image: raw || undefined,
+    imageFallbackUrl: getTeamMemberProfileImageFallbackUrl(member),
     position: relayPositionToAppPosition(member.position),
     backNumber: member.backNumber ?? 0,
     ovr,

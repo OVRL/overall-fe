@@ -3,6 +3,7 @@ import type { Player } from "../../_types/player";
 import RankCardRow from "./RankCardRow";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import Icon from "@/components/ui/Icon";
+import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
 import medal from "@/public/icons/gold_medal.svg";
 
 export interface RankingCardProps {
@@ -49,7 +50,13 @@ const RankingCard = ({
         >
           <ProfileAvatar
             size={72}
-            src={firstPlace?.image ?? "/images/ovr.png"}
+            src={firstPlace?.image}
+            fallbackSrc={
+              firstPlace
+                ? (firstPlace.imageFallbackUrl ??
+                  getPlayerPlaceholderSrc(`m:${firstPlace.id}`))
+                : getPlayerPlaceholderSrc("ranking:empty")
+            }
             alt={firstPlace ? firstPlace.name : ""}
           />
           <Icon

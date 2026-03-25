@@ -11,6 +11,10 @@ import cleatsIcon from "@/public/icons/player-infos/cleats.svg";
 import signpostIcon from "@/public/icons/player-infos/signpost.svg";
 import shieldIcon from "@/public/icons/player-infos/shield.svg";
 import whistleIcon from "@/public/icons/player-infos/whistle.svg";
+import {
+  getHallOfFamePlayerImageFallbackUrl,
+  getHallOfFamePlayerImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
 
 const RECORD_TYPE_ICON: Record<
   Exclude<HallOfFameCategoryType, "goal">,
@@ -60,7 +64,8 @@ const HallOfFameRecordCard = ({
       <div className="absolute bottom-7.5 left-7.5 flex items-end gap-5">
         <div className="flex size-18 shrink-0 overflow-hidden rounded-full border border-gray-1000 focus:outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary">
           <ProfileAvatar
-            src={player.image ?? "/images/player/img_player_1.webp"}
+            src={getHallOfFamePlayerImageRawUrl(player) || undefined}
+            fallbackSrc={getHallOfFamePlayerImageFallbackUrl(player)}
             alt={player.name}
             size={72}
           />
