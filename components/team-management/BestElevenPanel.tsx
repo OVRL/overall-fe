@@ -78,7 +78,15 @@ const StatCardItem = ({ icon, label, value }: { icon: string; label: string; val
 /**
  * 드래그 가능한 선수 리스트 로우 (이미지 기준 테이블 스타일)
  */
-const DraggablePlayerRow = ({ item }: { item: any }) => {
+const DraggablePlayerRow = ({ 
+  item, 
+  onClick, 
+  isSelected 
+}: { 
+  item: any; 
+  onClick?: () => void; 
+  isSelected?: boolean;
+}) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `row-${item.id}`,
     data: { type: "Player", player: { id: item.id, name: item.name, image: item.image, position: item.position, overall: item.ovr } },
@@ -89,9 +97,11 @@ const DraggablePlayerRow = ({ item }: { item: any }) => {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={onClick}
       className={cn(
         "group grid grid-cols-[50px_60px_1fr_60px] items-center px-4 py-2 hover:bg-white/5 transition-all cursor-grab active:cursor-grabbing border-b border-white/5",
-        isDragging && "opacity-30 bg-white/5"
+        isDragging && "opacity-30 bg-white/5",
+        isSelected && "bg-primary/10 border-l-2 border-l-primary"
       )}
     >
       <div className="flex justify-center">
@@ -111,6 +121,14 @@ const DraggablePlayerRow = ({ item }: { item: any }) => {
   );
 };
 
+interface SelectedPlayerDetail {
+  id: number;
+  name: string;
+  image: string;
+  ovr: number;
+  positions: string[];
+}
+
 export default function BestElevenPanel() {
   const isMobile = useIsMobile(1023);
   const dndId = useId();
@@ -122,6 +140,7 @@ export default function BestElevenPanel() {
   ]);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayerDetail, setSelectedPlayerDetail] = useState<SelectedPlayerDetail | null>(null);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [manager, setManager] = useState({ name: "정태우", image: "/images/player/img_player_1.webp" });
@@ -277,39 +296,71 @@ export default function BestElevenPanel() {
               </div>
             </div>
 
-            {/* 우측 패널 (이미지 스타일) */}
-            <div className="w-full xl:w-[420px] bg-[#0a0a0a] border-l border-white/5 flex flex-col h-full">
+            {/* 우측 패널 (사이드바) */}
+            <div className="w-full xl:w-[420px] bg-black border-l border-white/5 flex flex-col h-full">
               {/* 상세 카드 */}
-              <div className="relative p-6 pt-10 overflow-hidden min-h-[300px]">
-                {/* 배경 패턴 (이미지 그물망 패턴 시각화) */}
-                <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
-                  <svg viewBox="0 0 100 100" className="w-full h-full stroke-primary fill-none">
-                    <path d="M0 0 L100 100 M0 100 L100 0 M50 0 L50 100 M0 50 L100 50" strokeWidth="0.1" />
-                    <circle cx="50" cy="50" r="1" fill="currentColor" />
-                    <circle cx="20" cy="20" r="0.5" fill="currentColor" />
-                    <circle cx="80" cy="80" r="0.5" fill="currentColor" />
-                    <path d="M20 20 L50 50 L80 80" strokeWidth="0.05" />
-                  </svg>
+              <div className="relative p-6 pt-10 overflow-hidden min-h-[340px] flex flex-col justify-between">
+                {/* 배경 이미지 (사용자 요청: normal-green.webp) */}
+                <div className="absolute inset-0 z-0">
+                  <Image 
+                    src="/images/card-bgs/normal-green.webp" 
+                    alt="Player Card Background" 
+                    fill 
+                    className="object-cover" 
+                  />
+                  {/* 조명 효과와 그라데이션 추가하여 가독성 확보 */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-black/20" />
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black to-transparent" />
                 </div>
                 
-                <div className="relative flex justify-between">
+                {/* 상단: 선수 기본 정보 */}
+                <div className="relative z-20 flex">
                   <div className="flex-1">
-                    <div className="text-7xl font-black text-white leading-none tracking-tighter mb-4">{stats.ovr}</div>
-                    <h3 className="text-xl font-black text-white mb-2">{stats.name}</h3>
-                    <div className="flex gap-2 mb-6">
-                      {stats.positions.map(p => <span key={p} className="px-1.5 py-0.5 rounded bg-primary text-[10px] font-black text-black">{p}</span>)}
+                    <div className="text-7xl font-black text-white leading-none tracking-tighter mb-2 italic">
+                      {selectedPlayerDetail?.ovr || stats.ovr}
                     </div>
-                    <div className="text-[10px] text-gray-500 leading-relaxed font-bold">
+                    {/* 최근경기 MOM 뱃지 추가 */}
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase animate-pulse">
+                        최근경기 MOM
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-black text-white mb-3">
+                      {selectedPlayerDetail?.name || stats.name}
+                    </h3>
+                    <div className="flex gap-1.5 mb-6">
+                      {(selectedPlayerDetail?.positions || stats.positions).map((p: string, idx: number) => (
+                        <span 
+                          key={p} 
+                          className={cn(
+                            "px-2 py-0.5 rounded text-[11px] font-black uppercase tracking-tight shadow-sm",
+                            idx === 0 ? "bg-[#4ade80] text-black" : "bg-[#60a5fa] text-black"
+                          )}
+                        >
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="text-[11px] text-white/50 leading-relaxed font-bold">
                       <p>입단 {stats.joinDate}</p>
                       <p>나이 만 {stats.age}</p>
                     </div>
                   </div>
-                  <div className="relative w-36 h-44 rounded-2xl overflow-hidden border border-white/10 bg-linear-to-b from-white/10 to-transparent">
-                    <Image src="/images/player/img_player_1.webp" alt="선수" fill className="object-cover object-top" />
-                  </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mt-8">
+                {/* 중앙: 선수 이미지 (누끼 느낌으로 배경 위에 배치) */}
+                <div className="absolute top-0 right-0 w-[240px] h-[280px] z-10 pointer-events-none">
+                  <Image 
+                    key={selectedPlayerDetail?.id || 'default'}
+                    src={selectedPlayerDetail?.image || "/images/player/img_player_1.webp"} 
+                    alt="선수" 
+                    fill 
+                    className="object-contain object-bottom" 
+                  />
+                </div>
+
+                {/* 하단: 스탯 그리드 */}
+                <div className="relative z-20 grid grid-cols-3 gap-2 mt-auto">
                   <StatCardItem icon="🏃" label="출장" value={stats.matches} />
                   <StatCardItem icon="⚽" label="골" value={stats.goals} />
                   <StatCardItem icon="👟" label="도움" value={stats.assists} />
@@ -320,15 +371,28 @@ export default function BestElevenPanel() {
               </div>
 
               {/* 선수 리스트 테이블 */}
-              <div className="flex-1 flex flex-col p-4 pt-0">
-                <div className="grid grid-cols-[50px_60px_1fr_60px] px-4 py-3 text-[9px] font-black text-gray-600 uppercase tracking-widest border-b border-white/5">
+              <div className="flex-1 flex flex-col p-4 pt-0 relative z-10 bg-black">
+                <div className="grid grid-cols-[50px_60px_1fr_60px] px-4 py-3 text-[9px] font-black text-gray-700 uppercase tracking-widest border-b border-white/5">
                   <span className="text-center">포지션</span>
                   <span className="text-center">등번호</span>
                   <span className="pl-2">선수명</span>
                   <span className="text-right pr-1">OVR</span>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  {MOCK_LINEUP_LIST.map(item => <DraggablePlayerRow key={item.id} item={item} />)}
+                  {MOCK_LINEUP_LIST.map(item => (
+                    <DraggablePlayerRow 
+                      key={item.id} 
+                      item={item} 
+                      onClick={() => setSelectedPlayerDetail({
+                        id: item.id,
+                        name: item.name,
+                        image: item.image,
+                        ovr: item.ovr,
+                        positions: [item.position] // 목업 데이터 구조상 배열로 변환
+                      })}
+                      isSelected={selectedPlayerDetail?.id === item.id}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
