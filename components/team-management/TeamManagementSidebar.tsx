@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
+import Link from "next/link";
 
 export type TeamManagementMenu =
     | "settings"
@@ -16,13 +17,14 @@ interface MenuItem {
     id: TeamManagementMenu;
     label: string;
     icon: React.ReactNode;
+    href: string;
 }
 
 // SVG 아이콘 컴포넌트들
 const SettingsIcon = ({ active }: { active: boolean }) => (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <path
-            d="M9 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z"
+            d="M9 11.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Z"
             stroke={active ? "#000" : "#888"}
             strokeWidth="1.4"
             strokeLinecap="round"
@@ -95,31 +97,37 @@ const menuItems: MenuItem[] = [
         id: "settings",
         label: "팀 설정",
         icon: null,
+        href: "/team-management/settings",
     },
     {
         id: "match-record",
         label: "경기 기록 관리",
         icon: null,
+        href: "/team-management/match-record",
     },
     {
         id: "players",
         label: "선수 관리",
         icon: null,
+        href: "/team-management/players",
     },
     {
         id: "invitation",
         label: "가입 신청 관리",
         icon: null,
+        href: "/team-management/invitation",
     },
     {
         id: "mom-vote",
         label: "MOM 투표 설정",
         icon: null,
+        href: "/team-management/mom",
     },
     {
         id: "best-eleven",
         label: "베스트11 관리",
         icon: null,
+        href: "/team-management/best11",
     },
 ];
 
@@ -136,13 +144,11 @@ const getIcon = (id: TeamManagementMenu, active: boolean) => {
 
 interface TeamManagementSidebarProps {
     activeMenu: TeamManagementMenu;
-    onMenuChange: (menu: TeamManagementMenu) => void;
     userRole: TeamMemberRole;
 }
 
 export default function TeamManagementSidebar({
     activeMenu,
-    onMenuChange,
     userRole,
 }: TeamManagementSidebarProps) {
     const isManagerOrCoach =
@@ -162,9 +168,9 @@ export default function TeamManagementSidebar({
                 {menuItems.map((item) => {
                     const isActive = activeMenu === item.id;
                     return (
-                        <button
+                        <Link
                             key={item.id}
-                            onClick={() => onMenuChange(item.id)}
+                            href={item.href}
                             className={cn(
                                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-medium transition-all",
                                 isActive
@@ -174,7 +180,7 @@ export default function TeamManagementSidebar({
                         >
                             {getIcon(item.id, isActive)}
                             <span>{item.label}</span>
-                        </button>
+                        </Link>
                     );
                 })}
             </nav>

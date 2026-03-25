@@ -1,67 +1,14 @@
 "use client";
 
-import { useState } from "react";
-
-import TeamManagementSidebar, {
-  TeamManagementMenu,
-} from "@/components/team-management/TeamManagementSidebar";
-import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
-import TeamSettingsPanel from "@/components/team-management/TeamSettingsPanel";
-import PlayerManagementPanel from "@/components/team-management/PlayerManagementPanel";
-import BestElevenPanel from "@/components/team-management/BestElevenPanel";
-import InvitationPanel from "@/components/team-management/InvitationPanel";
-import MOMVotePanel from "@/components/team-management/MOMVotePanel";
-import MatchRecordManagementPanel from "@/components/team-management/MatchRecordManagementPanel";
-import TeamManagementFooter from "@/components/team-management/TeamManagementFooter";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function TeamManagementPage() {
-  const [activeMenu, setActiveMenu] = useState<TeamManagementMenu>("settings");
+  const router = useRouter();
 
-  // Mock: 현재 사용자 역할 (실제로는 인증 상태에서 가져옴)
-  const userRole: TeamMemberRole = "MANAGER";
+  useEffect(() => {
+    router.replace("/team-management/settings");
+  }, [router]);
 
-  const renderPanel = () => {
-    switch (activeMenu) {
-      case "settings":
-        return <TeamSettingsPanel userRole={userRole} />;
-      case "match-record":
-        return <MatchRecordManagementPanel />;
-      case "players":
-        return <PlayerManagementPanel />;
-      case "invitation":
-        return <InvitationPanel />;
-      case "best-eleven":
-        return <BestElevenPanel />;
-      case "mom-vote":
-        return <MOMVotePanel />;
-      default:
-        return <TeamSettingsPanel userRole={userRole} />;
-    }
-  };
-
-  return (
-    <div className="flex-1 bg-surface-primary min-h-screen">
-      <div className="flex min-h-screen">
-        {/* 좌측 사이드바 (데스크탑) — self-stretch로 하단까지 배경 연장 */}
-        <div className="hidden md:flex flex-col self-stretch">
-          <TeamManagementSidebar
-            activeMenu={activeMenu}
-            onMenuChange={setActiveMenu}
-            userRole={userRole}
-          />
-        </div>
-
-        {/* 메인 콘텐츠 영역 */}
-        <main className="flex-1 overflow-auto pb-20 md:pb-0">
-          {renderPanel()}
-        </main>
-
-        {/* 하단 내비게이션 (모바일) */}
-        <TeamManagementFooter
-          activeMenu={activeMenu}
-          onMenuChange={setActiveMenu}
-        />
-      </div>
-    </div>
-  );
+  return null;
 }
