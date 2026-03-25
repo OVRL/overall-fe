@@ -43,6 +43,29 @@ function tm128ToLatLng(
   };
 }
 
+/**
+ * 지역 검색 API mapx/mapy → WGS84 위·경도.
+ * 신규 응답은 경·위도×1e7 정수 문자열이 많고, 구 예시는 TM128 소수 정수이다.
+ */
+function localSearchMapxMapyToLatLng(
+  mapx: number,
+  mapy: number,
+): { latitude: number; longitude: number } | null {
+  const ax = Math.abs(mapx);
+  const ay = Math.abs(mapy);
+  const maxAbs = Math.max(ax, ay);
+  // 공식 XML 예시(31만대 등)는 TM128, JSON의 9자리급은 WGS84×1e7로 해석
+  if (maxAbs >= 10_000_000) {
+    return { longitude: mapx / 1e7, latitude: mapy / 1e7 };
+  }
+  return tm128ToLatLng(mapx, mapy);
+}
+
+/** 목록/중복 제거용 주소 정규화 */
+function normalizeAddressKey(address: string): string {
+  return address.replace(/\s+/g, " ").trim();
+}
+
 /** Geocode API 호출을 Promise로 래핑 */
 function geocode(keyword: string): Promise<NaverAddressResult[]> {
   return new Promise((resolve) => {
@@ -99,7 +122,10 @@ async function fetchLocalSearch(
 
   const results: NaverAddressResult[] = [];
   for (const item of items) {
-    const coords = tm128ToLatLng(Number(item.mapx), Number(item.mapy));
+    const coords = localSearchMapxMapyToLatLng(
+      Number(item.mapx),
+      Number(item.mapy),
+    );
     if (!coords) continue;
     results.push({
       address: item.roadAddress || item.address,
@@ -111,23 +137,48 @@ async function fetchLocalSearch(
   return results;
 }
 
-/** 두 결과 배열 병합: 지역 검색 우선, 주소 기준 중복 제거 */
+/**
+ * 지역 검색 + Geocode 병합.
+ * 같은 주소 문자열이면 Geocode 좌표로 맞춤(주소-좌표 일관), 업체명(title)은 지역 검색 유지.
+ */
 function mergeResults(
   local: NaverAddressResult[],
   geocodeResults: NaverAddressResult[],
 ): NaverAddressResult[] {
+  const geoByNormalized = new Map<string, NaverAddressResult>();
+  for (const r of geocodeResults) {
+    const k = normalizeAddressKey(r.address);
+    if (!geoByNormalized.has(k)) geoByNormalized.set(k, r);
+  }
+
   const seen = new Set<string>();
   const out: NaverAddressResult[] = [];
+
   for (const r of local) {
-    const key = `${r.address}|${r.latitude.toFixed(5)}|${r.longitude.toFixed(5)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(r);
+    const addrKey = normalizeAddressKey(r.address);
+    const geo = geoByNormalized.get(addrKey);
+    const merged: NaverAddressResult = geo
+      ? {
+          ...r,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+        }
+      : r;
+    const dedupKey = `${addrKey}|${merged.latitude.toFixed(
+      5,
+    )}|${merged.longitude.toFixed(5)}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+    out.push(merged);
   }
+
   for (const r of geocodeResults) {
-    const key = `${r.address}|${r.latitude.toFixed(5)}|${r.longitude.toFixed(5)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const addrKey = normalizeAddressKey(r.address);
+    const dedupKey = `${addrKey}|${r.latitude.toFixed(5)}|${r.longitude.toFixed(
+      5,
+    )}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
     out.push(r);
   }
   return out;
