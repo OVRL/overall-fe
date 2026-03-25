@@ -163,6 +163,7 @@ const Dropdown = ({
             >
               {options.map((option, index) => (
                 <button
+                  type="button"
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
                   role="option"
