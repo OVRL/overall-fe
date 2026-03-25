@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
-import { useWatch } from "react-hook-form";
+import { useCallback, useEffect } from "react";
+import { useWatch, type FieldErrors } from "react-hook-form";
 import Button from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import ModalLayout from "../ModalLayout";
 import ModalLoadingFallback from "../ModalLoadingFallback";
 import useModal from "@/hooks/useModal";
 import { useUserId } from "@/hooks/useUserId";
+import { toast } from "@/lib/toast";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import {
   useRegisterGameForm,
   useRegisterGameModals,
   useRegisterGameSubmit,
 } from "./hooks";
+import type { RegisterGameValues } from "./schema";
 import {
   MatchTypeSection,
   ScheduleSection,
@@ -23,6 +25,26 @@ import {
   MatchOnlySection,
   MemoSection,
 } from "./sections";
+
+/**
+ * react-hook-form FieldErrors에서 첫 메시지를 추출 (중첩 필드·venue 등 포함)
+ */
+function getFirstFormErrorMessage(errors: unknown): string | undefined {
+  if (errors == null || typeof errors !== "object") return undefined;
+  const record = errors as Record<string, unknown>;
+  if (
+    typeof record.message === "string" &&
+    record.message.trim().length > 0
+  ) {
+    return record.message;
+  }
+  for (const [key, value] of Object.entries(record)) {
+    if (key === "ref") continue;
+    const found = getFirstFormErrorMessage(value);
+    if (found) return found;
+  }
+  return undefined;
+}
 
 function RegisterGameFormContent() {
   const { hideModal } = useModal();
@@ -37,6 +59,16 @@ function RegisterGameFormContent() {
     selectedTeamIdNum,
     hideModal,
   });
+
+  const onSubmitInvalid = useCallback(
+    (errors: FieldErrors<RegisterGameValues>) => {
+      const message =
+        getFirstFormErrorMessage(errors) ??
+        "필수 항목을 확인한 뒤 다시 시도해 주세요.";
+      toast.error(message);
+    },
+    [],
+  );
 
   const currentVenue = useWatch({ control, name: "venue" });
   const currentMatchType = useWatch({ control, name: "matchType" });
@@ -64,7 +96,7 @@ function RegisterGameFormContent() {
       <div className="max-h-[70vh] pr-3">
         <div className="max-h-[70vh] overflow-y-auto scrollbar-thin w-[calc(100%+1rem)] pr-2">
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit, onSubmitInvalid)}
             className="flex flex-col gap-y-8"
             noValidate
           >

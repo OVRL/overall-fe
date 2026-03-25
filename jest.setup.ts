@@ -1,6 +1,29 @@
 import "@testing-library/jest-dom";
 import React from "react";
 
+// lib/toast: Sonner·ToastView 없이 호출 여부만 검증 (테스트 파일별 spy/mock 중복 방지)
+jest.mock("@/lib/toast", () => {
+  const success = jest.fn();
+  const error = jest.fn();
+  const warning = jest.fn();
+  const info = jest.fn();
+  const loading = jest.fn();
+  const promise = jest.fn();
+  const dismiss = jest.fn();
+  const custom = jest.fn();
+  const toast = Object.assign(jest.fn(), {
+    success,
+    error,
+    warning,
+    info,
+    loading,
+    promise,
+    dismiss,
+    custom,
+  });
+  return { toast };
+});
+
 // 전역 컴포넌트/폰트 스텁 (테스트 파일별 중복 jest.mock 제거)
 jest.mock("@/components/ui/ProfileAvatar", () => ({
   __esModule: true,

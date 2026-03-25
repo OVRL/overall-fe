@@ -19,7 +19,7 @@ const OnboardingManager = () => {
         에서 <br /> 설정할 수 있습니다.
       </p>
       <TeamManagementOnboardingCtaLink
-        href="/team-management/best-eleven"
+        href="/team-management/best11"
         className={onboardingCtaLinkClassName}
       >
         설정하기
