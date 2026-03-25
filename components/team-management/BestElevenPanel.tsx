@@ -43,13 +43,14 @@ const MOCK_SELECTED_PLAYER_STATS = {
   contributions: 5,
   cleanSheets: 24,
   winRate: "56%",
+  isMom: true,
 };
 
 /**
  * 우측 선수 리스트 목업 (이미지 기준)
  */
 const MOCK_LINEUP_LIST = [
-  { id: 101, position: "LB", number: 4, name: "메시", ovr: 90, image: "/images/player/img_player_1.webp" },
+  { id: 101, position: "LB", number: 4, name: "메시", ovr: 90, image: "/images/player/img_player_1.webp", isMom: true },
   { id: 102, position: "CB", number: 24, name: "수원알베스", ovr: 90, image: "/images/player/img_player_2.webp" },
   { id: 103, position: "SW", number: 3, name: "메시", ovr: 90, image: "/images/player/img_player_3.webp" },
   { id: 104, position: "CB", number: 46, name: "메시", ovr: 90, image: "/images/player/img_player_4.webp" },
@@ -111,10 +112,17 @@ const DraggablePlayerRow = ({
       </div>
       <span className="text-xs font-black text-gray-400 text-center">{item.number}</span>
       <div className="flex items-center gap-3 pl-2">
-        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-900 border border-white/10">
-          <Image src={item.image} alt={item.name} width={32} height={32} className="w-full h-full object-cover" />
+        <div className="w-8 h-8 relative flex items-end justify-center">
+          <Image src={item.image} alt={item.name} width={32} height={32} className="w-full h-full object-contain object-bottom drop-shadow-md" />
         </div>
-        <span className="text-xs font-bold text-white group-hover:text-primary transition-colors">{item.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-white group-hover:text-primary transition-colors">{item.name}</span>
+          {item.isMom && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-primary/20 text-primary border border-primary/30 uppercase tracking-tighter whitespace-nowrap">
+              MOM
+            </span>
+          )}
+        </div>
       </div>
       <span className="text-sm font-black text-primary text-right">{item.ovr}</span>
     </div>
@@ -127,6 +135,7 @@ interface SelectedPlayerDetail {
   image: string;
   ovr: number;
   positions: string[];
+  isMom?: boolean;
 }
 
 export default function BestElevenPanel() {
@@ -220,7 +229,7 @@ export default function BestElevenPanel() {
           
           <DndContext id={dndId} sensors={sensors} collisionDetection={customCollisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             {/* 좌측: 보드 */}
-            <div className="flex-1 p-6 md:p-8 flex flex-col gap-6">
+            <div className="flex-1 p-6 md:p-8 flex flex-col gap-4">
               <div className="relative flex-1 bg-[#121212] rounded-3xl border border-white/5 p-4 md:p-6 lg:p-8 flex flex-col">
                 <div className="absolute top-6 left-8 right-8 z-20 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 italic">
@@ -239,7 +248,7 @@ export default function BestElevenPanel() {
                   />
                 </div>
 
-                <div className="flex-1 relative mt-16">
+                <div className="flex-1 relative mt-12 mb-4 shrink max-h-[440px]">
                   <FormationBoardList
                     quarters={quarters}
                     selectedPlayer={selectedPlayer}
@@ -248,13 +257,13 @@ export default function BestElevenPanel() {
                     currentQuarterId={currentQuarterId}
                     setCurrentQuarterId={setCurrentQuarterId}
                     showBoardHeader={false}
-                    boardClassName="p-0 border-0 bg-transparent h-full min-h-[500px]"
+                    boardClassName="p-0 border-0 bg-transparent h-full min-h-[320px]"
                     onPlaceSelectedPlayer={(qId, idx) => { if (selectedPlayer) assignPlayer(qId, idx, selectedPlayer); }}
                   />
                 </div>
 
                 {/* 감독 & 팀 스탯 */}
-                <div className="mt-8 flex items-center gap-10 px-8 py-4 bg-white/2 rounded-3xl border border-white/5 relative group">
+                <div className="mt-auto flex flex-wrap lg:flex-nowrap items-center gap-6 md:gap-10 px-6 md:px-8 py-4 bg-white/5 rounded-2xl border border-white/10 relative group shrink-0">
                   <button 
                     onClick={() => openModal({ 
                       onComplete: (player) => {
@@ -319,12 +328,14 @@ export default function BestElevenPanel() {
                     <div className="text-7xl font-black text-white leading-none tracking-tighter mb-2 italic">
                       {selectedPlayerDetail?.ovr || stats.ovr}
                     </div>
-                    {/* 최근경기 MOM 뱃지 추가 */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span className="px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase animate-pulse">
-                        최근경기 MOM
-                      </span>
-                    </div>
+                    {/* 최근경기 MOM 뱃지 추가 (조건부) */}
+                    {(selectedPlayerDetail?.isMom ?? stats.isMom) && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="px-2 py-0.5 rounded-full bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase animate-pulse">
+                          최근경기 MOM
+                        </span>
+                      </div>
+                    )}
                     <h3 className="text-2xl font-black text-white mb-3">
                       {selectedPlayerDetail?.name || stats.name}
                     </h3>
@@ -388,7 +399,8 @@ export default function BestElevenPanel() {
                         name: item.name,
                         image: item.image,
                         ovr: item.ovr,
-                        positions: [item.position] // 목업 데이터 구조상 배열로 변환
+                        positions: [item.position],
+                        isMom: item.isMom
                       })}
                       isSelected={selectedPlayerDetail?.id === item.id}
                     />
