@@ -12,6 +12,7 @@ interface PlayerListSectionProps {
   mercenary: Player | null;
   selectedPlayerId?: number;
   onSelect: (player: Player) => void;
+  excludeMercenaries?: boolean;
 }
 
 const PlayerListSection = ({
@@ -21,6 +22,7 @@ const PlayerListSection = ({
   mercenary,
   selectedPlayerId,
   onSelect,
+  excludeMercenaries,
 }: PlayerListSectionProps) => {
   const renderPlayerList = () => {
     if (isSearching) {
@@ -58,7 +60,7 @@ const PlayerListSection = ({
       </div>
 
       {/* 용병으로 추가 섹션 */}
-      {mercenary && !isSearching && (
+      {mercenary && !isSearching && !excludeMercenaries && (
         <div className="flex flex-col gap-y-2">
           <span className="font-semibold text-sm leading-4 text-Label-Primary">
             용병으로 추가

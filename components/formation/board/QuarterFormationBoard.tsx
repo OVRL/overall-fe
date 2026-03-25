@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import DroppableSlot from "./DroppableSlot";
 import Dropdown from "../../ui/Dropdown";
 import ObjectField from "../../ui/ObjectField";
@@ -26,6 +27,8 @@ interface QuarterFormationBoardProps {
   /** 모바일: 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치 */
   onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
   onFormationChange?: (formation: string) => void;
+  showHeader?: boolean;
+  boardClassName?: string;
 }
 
 const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
@@ -38,6 +41,8 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
   onPositionRemove,
   onPlaceSelectedPlayer,
   onFormationChange,
+  showHeader = true,
+  boardClassName,
 }) => {
   const formationPositions = FORMATION_POSITIONS[quarter.formation] || [];
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -47,25 +52,30 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
       id={`quarter-board-${quarter.id}`}
       data-quarter-id={quarter.id}
       aria-label={`${quarter.id}쿼터 포메이션 보드`}
-      className={`flex flex-col gap-3 p-3 rounded-xl bg-surface-card h-full transition-all duration-300 ease-in-out border-2 ${
-        !hasSelection
+      className={cn(
+        "flex flex-col gap-3 p-3 rounded-xl transition-all duration-300 ease-in-out h-full",
+        showHeader && "bg-surface-card border-2",
+        showHeader && (!hasSelection
           ? "border-border-card opacity-100"
           : isSelected
           ? "border-Fill_AccentPrimary opacity-100 shadow-md"
-          : "border-border-card opacity-60"
-      }`}
+          : "border-border-card opacity-60"),
+        boardClassName
+      )}
     >
-      <div className="flex justify-between items-center">
-        <span className="font-bold text-Label-Primary w-9.75 h-4.75 flex items-center justify-center">
-          {quarter.id}Q
-        </span>
-        <Dropdown
-          options={FORMATION_OPTIONS}
-          value={quarter.formation}
-          onChange={(val) => onFormationChange?.(val)}
-          placeholder="포메이션"
-        />
-      </div>
+      {showHeader && (
+        <div className="flex justify-between items-center">
+          <span className="font-bold text-Label-Primary w-9.75 h-4.75 flex items-center justify-center">
+            {quarter.id}Q
+          </span>
+          <Dropdown
+            options={FORMATION_OPTIONS}
+            value={quarter.formation}
+            onChange={(val) => onFormationChange?.(val)}
+            placeholder="포메이션"
+          />
+        </div>
+      )}
       <div className="relative w-full rounded-lg overflow-hidden">
         <ObjectField
           type="full"

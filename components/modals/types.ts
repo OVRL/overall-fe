@@ -24,6 +24,7 @@ export interface ModalPropsMap {
   };
   PLAYER_SEARCH: {
     onComplete: (player: Player) => void;
+    excludeMercenaries?: boolean;
   };
   TEAM_SEARCH: {
     onComplete: (result: TeamSearchResult) => void;

@@ -278,12 +278,12 @@ export default function MatchRecordManagementPanel() {
                 <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
                 <Button 
                     variant="primary" 
-                    size="xs" 
-                    className="bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 flex items-center gap-1 px-2 py-1.5"
+                    size="s" 
+                    className="bg-primary text-black font-black flex items-center gap-1.5 px-4 shadow-xl shadow-primary/10"
                     onClick={() => setViewMode("IN_HOUSE")}
                 >
-                    <Swords size={14} />
-                    내전 확인
+                    <Plus size={16} strokeWidth={3} />
+                    내전 등록
                 </Button>
             </div>
 
