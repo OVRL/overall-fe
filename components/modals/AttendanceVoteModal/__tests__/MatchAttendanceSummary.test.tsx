@@ -1,4 +1,10 @@
-import { render, screen, act, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  act,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import { Suspense } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 import {
@@ -7,7 +13,7 @@ import {
 } from "relay-test-utils";
 import type { OperationDescriptor } from "relay-runtime";
 import "@testing-library/jest-dom";
-import { MatchAttendanceSummary } from "../MatchAttendanceSummary";
+import { MatchAttendanceSummarySlot } from "../MatchAttendanceSummarySlot";
 
 jest.mock("@/hooks/useMediaQuery", () => ({
   useMediaQuery: jest.fn(() => false),
@@ -16,19 +22,14 @@ jest.mock("@/hooks/useMediaQuery", () => ({
 const mockUseMediaQuery = jest.requireMock("@/hooks/useMediaQuery")
   .useMediaQuery as jest.Mock;
 
-function renderSummary(props: {
-  matchId?: number;
-  teamId?: number;
-  currentUserId?: number | null;
-}) {
+function renderSummary(props: { matchGraphqlId?: string; teamId?: number }) {
   const environment = createMockEnvironment();
   const ui = (
     <RelayEnvironmentProvider environment={environment}>
       <Suspense fallback={<div>로딩</div>}>
-        <MatchAttendanceSummary
-          matchId={props.matchId ?? 1}
+        <MatchAttendanceSummarySlot
+          matchGraphqlId={props.matchGraphqlId ?? "1"}
           teamId={props.teamId ?? 10}
-          currentUserId={props.currentUserId ?? null}
         />
       </Suspense>
     </RelayEnvironmentProvider>
@@ -37,15 +38,17 @@ function renderSummary(props: {
   return { ...result, environment };
 }
 
-describe("MatchAttendanceSummary", () => {
+describe("MatchAttendanceSummarySlot", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseMediaQuery.mockReturnValue(false);
   });
 
-  it("쿼리 완료 전에는 Suspense fallback이 보인다", () => {
+  it("쿼리 완료 전에는 Suspense fallback(스켈레톤)이 보인다", () => {
     renderSummary({});
-    expect(screen.getByText("로딩")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "참석 현황 불러오는 중" }),
+    ).toBeInTheDocument();
   });
 
   it("findMatchAttendance 결과로 참석·불참 인원 수를 표시한다", async () => {
@@ -93,8 +96,12 @@ describe("MatchAttendanceSummary", () => {
       );
     });
 
-    expect(await screen.findByText("2명 참석")).toBeInTheDocument();
-    expect(screen.getByText("1명 불참")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /2명 참석, 명단 보기/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /1명 불참, 명단 보기/ }),
+    ).toBeInTheDocument();
   });
 
   it("attendanceStatus가 없는 행은 참석·불참 집계에서 제외한다", async () => {
@@ -132,12 +139,16 @@ describe("MatchAttendanceSummary", () => {
       );
     });
 
-    expect(await screen.findByText("1명 참석")).toBeInTheDocument();
-    expect(screen.getByText("0명 불참")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /1명 참석, 명단 보기/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /0명 불참, 명단 보기/ }),
+    ).toBeInTheDocument();
   });
 
-  it("터치 모드에서 참석 트리거를 누르면 명단과 본인 뱃지가 보인다", async () => {
-    const { environment } = renderSummary({ currentUserId: 7 });
+  it("터치 모드에서 참석 트리거를 누르면 명단이 보인다", async () => {
+    const { environment } = renderSummary({});
 
     await act(async () => {
       environment.mock.resolveMostRecentOperation(
@@ -171,7 +182,9 @@ describe("MatchAttendanceSummary", () => {
       );
     });
 
-    expect(await screen.findByText("2명 참석")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /2명 참석, 명단 보기/ }),
+    ).toBeInTheDocument();
 
     const attendTrigger = screen.getByRole("button", {
       name: /2명 참석, 명단 보기/,
@@ -180,7 +193,6 @@ describe("MatchAttendanceSummary", () => {
 
     expect(await screen.findByText("나유저")).toBeInTheDocument();
     expect(screen.getByText("타인")).toBeInTheDocument();
-    expect(screen.getByLabelText("나")).toBeInTheDocument();
   });
 
   it("호버 모드에서는 마우스 진입 후 짧은 지연으로 팝오버가 닫힌다", async () => {
@@ -212,7 +224,9 @@ describe("MatchAttendanceSummary", () => {
         );
       });
 
-      expect(await screen.findByText("1명 참석")).toBeInTheDocument();
+      expect(
+        await screen.findByRole("button", { name: /1명 참석, 명단 보기/ }),
+      ).toBeInTheDocument();
 
       const attendTrigger = screen.getByRole("button", {
         name: /1명 참석, 명단 보기/,

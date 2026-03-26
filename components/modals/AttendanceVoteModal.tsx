@@ -22,7 +22,7 @@ import {
 const MODAL_TITLE = "참석 투표하기";
 const WRAPPER_CLASS_BASE = "md:w-110 gap-y-3 h-145.5";
 const WRAPPER_CLASS_SCROLL =
-  "md:w-110 gap-y-3 h-145.5 min-h-0 flex flex-col max-h-[90vh]";
+  "md:w-110 gap-y-3 h-190 min-h-0 flex flex-col max-h-[90vh]";
 
 /** 팀이 선택되지 않았을 때 표시. SRP: "팀 없음" 빈 상태 UI만 담당 */
 function AttendanceVoteModalNoTeam() {
@@ -97,8 +97,14 @@ function AttendanceVoteModalWithData({
         />
         <MatchUniformSection match={match} />
         <MatchMemoSection description={display.description} />
+        <div className="pt-1">
+          <MatchAttendanceSummarySlot
+            matchGraphqlId={match.id}
+            teamId={createdTeamId}
+          />
+        </div>
       </div>
-      <div className="flex flex-col shrink-0 pt-2">
+      <div className="flex shrink-0 flex-col gap-3 pt-12">
         <AttendanceVoteChoiceButtons
           voteClosed={voteClosed}
           isInFlight={isInFlight}
@@ -106,13 +112,6 @@ function AttendanceVoteModalWithData({
           onAbsent={handleAbsent}
           onAttend={handleAttend}
         />
-        <div className="flex justify-end">
-          <MatchAttendanceSummarySlot
-            matchGraphqlId={match.id}
-            teamId={createdTeamId}
-            currentUserId={userId}
-          />
-        </div>
       </div>
     </ModalLayout>
   );
