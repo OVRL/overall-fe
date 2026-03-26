@@ -13,6 +13,10 @@ interface DropdownProps {
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** 트리거 버튼 id (외부 label의 htmlFor와 연결) */
+  triggerId?: string;
+  /** 접근성: 외부 레이블 id 목록 (있으면 aria-label 대신 사용) */
+  ariaLabelledBy?: string;
   /** 루트 div에 적용 */
   className?: string;
   /** 트리거 버튼에 적용 (열기/닫기 버튼) */
@@ -24,6 +28,8 @@ const Dropdown = ({
   value,
   onChange,
   placeholder = "선택해주세요",
+  triggerId,
+  ariaLabelledBy,
   className,
   triggerClassName,
 }: DropdownProps) => {
@@ -112,6 +118,7 @@ const Dropdown = ({
       {/* Trigger Button */}
       <button
         type="button"
+        id={triggerId}
         onClick={() => {
           setIsOpen(!isOpen);
           if (!isOpen) {
@@ -121,7 +128,8 @@ const Dropdown = ({
         }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label={placeholder}
+        aria-label={ariaLabelledBy ? undefined : placeholder}
+        aria-labelledby={ariaLabelledBy}
         className={cn(
           "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
           "bg-Fill_Quatiary border-transparent",
