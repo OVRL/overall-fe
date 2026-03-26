@@ -1,7 +1,6 @@
-import type { findMatchAttendanceQuery } from "@/__generated__/findMatchAttendanceQuery.graphql";
+import type { MatchAttendanceRow } from "./findMyCommittedMatchAttendanceRow";
 
-export type MatchAttendanceRow =
-  findMatchAttendanceQuery["response"]["findMatchAttendance"][number];
+export type { MatchAttendanceRow };
 
 /** 참석·불참만 집계 (미투표 등은 제외) */
 export function partitionMatchAttendanceByStatus(
