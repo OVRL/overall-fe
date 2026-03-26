@@ -19,6 +19,9 @@ export function getServerEnvironment(
   return new Environment({
     network,
     store,
+    getDataID: (node: { [key: string]: any }, type: string) => {
+      return node.id ? `${type}:${node.id}` : null;
+    },
     isServer: true,
-  });
+  } as any);
 }

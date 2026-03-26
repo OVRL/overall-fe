@@ -12,8 +12,11 @@ function createEnvironment(initialRecords?: SerializedRelayRecords) {
   return new Environment({
     network: Network.create(fetchQuery),
     store: new Store(source),
+    getDataID: (node: { [key: string]: any }, type: string) => {
+      return node.id ? `${type}:${node.id}` : null;
+    },
     isServer: typeof window === "undefined",
-  });
+  } as any);
 }
 
 let clientEnvironment: Environment | undefined;

@@ -10,6 +10,7 @@ const matchRecordsQuery = graphql`
       quarterCount
       quarterDuration
       teamName
+      description
       opponentTeam {
         name
       }

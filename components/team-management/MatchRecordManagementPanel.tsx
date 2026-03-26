@@ -6,6 +6,9 @@ import { Edit2, Trash2, ChevronDown, Plus, X, Swords } from "lucide-react";
 import InHouseMatchPanel from "./InHouseMatchPanel";
 import { useMatchRecordsQuery } from "./hooks/useMatchRecordsQuery";
 import { useDeleteMatchMutation } from "./hooks/useDeleteMatchMutation";
+import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
+import { useUpdateMatchMutation } from "./hooks/useUpdateMatchMutation";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 
 interface Player {
     id: string;
@@ -25,12 +28,13 @@ interface MatchRecord {
     id: string;
     date: string;
     opponent: string;
-    score?: {
+    score: {
         home: number;
         away: number;
     };
-    result?: "win" | "draw" | "loss";
-    expanded?: boolean;
+    result: "win" | "draw" | "loss";
+    expanded: boolean;
+    logs: Record<number, ScoreLog[]>; // 쿼터별 로그
 }
 
 const MOCK_PLAYERS: Player[] = [
@@ -58,10 +62,11 @@ const ResultBadge = ({ result }: { result: "win" | "draw" | "loss" }) => {
 interface PlayerSelectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: any) => void;
+    onSave: (data: { goalId: string; assistId: string; preAssistId: string }) => void;
+    players: Player[];
 }
 
-const PlayerSelectModal = ({ isOpen, onClose, onSave }: PlayerSelectModalProps) => {
+const PlayerSelectModal = ({ isOpen, onClose, onSave, players }: PlayerSelectModalProps) => {
     const [selectedGoal, setSelectedGoal] = useState<string>("3");
     const [selectedAssist, setSelectedAssist] = useState<string>("1");
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
@@ -111,7 +116,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave }: PlayerSelectModalProps) 
                                     <span className={cn("text-xs font-bold", selectedGoal === "own-goal" ? "text-red-500" : "text-gray-500")}>자책골</span>
                                 </div>
                             </button>
-                            {MOCK_PLAYERS.map(player => (
+                            {players.map(player => (
                                 <button 
                                     key={player.id} 
                                     onClick={() => handleGoalChange(player.id)}
@@ -138,7 +143,13 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave }: PlayerSelectModalProps) 
                     <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
                         취소
                     </button>
-                    <button onClick={() => { onSave({}); onClose(); }} className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity">
+                    <button 
+                        onClick={() => { 
+                            onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
+                            onClose(); 
+                        }} 
+                        className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
+                    >
                         저장
                     </button>
                 </div>
@@ -149,22 +160,45 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave }: PlayerSelectModalProps) 
 
 function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const data = useMatchRecordsQuery(teamId);
+    const playersData = usePlayerManagementQuery(teamId);
     const { executeMutation: deleteMatch } = useDeleteMatchMutation();
     const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<"RECORD" | "IN_HOUSE">("RECORD");
     
-    // API 데이터를 로컬 상태와 결합 (확장 여부 관리용)
-    const initialMatches: MatchRecord[] = React.useMemo(() => (data.findMatch || []).map((m: any) => ({
+    // 실제 팀 멤버 데이터 매핑
+    const teamPlayers: Player[] = React.useMemo(() => (playersData.findManyTeamMember.members || []).map((m: any) => ({
         id: String(m.id),
-        date: m.matchDate ? new Date(m.matchDate).toLocaleDateString() : "-",
-        opponent: m.opponentTeam?.name || m.teamName || "상대팀 미정",
-        score: { home: 0, away: 0 },
-        result: "draw",
-        expanded: false,
-    })), [data.findMatch]);
+        name: m.user?.name || "알 수 없음",
+        profileImage: m.user?.profileImage || "/images/player/img_player_1.webp"
+    })), [playersData.findManyTeamMember.members]);
+    // API 데이터를 로컬 상태와 결합 (확장 여부 관리용 및 로그 데이터 복원)
+    const initialMatches: MatchRecord[] = React.useMemo(() => (data.findMatch || []).map((m: any) => {
+        let savedData = { score: { home: 0, away: 0 }, logs: { 1: [], 2: [], 3: [], 4: [] } };
+        try {
+            if (m.description && m.description.startsWith("{")) {
+                savedData = JSON.parse(m.description);
+            }
+        } catch (e) {
+            console.error("Failed to parse match description:", e);
+        }
+
+        return {
+            id: String(m.id),
+            date: m.matchDate ? new Date(m.matchDate).toLocaleDateString() : "-",
+            opponent: m.opponentTeam?.name || m.teamName || "상대팀 미정",
+            score: savedData.score,
+            result: (savedData.score.home > savedData.score.away ? "win" : 
+                    savedData.score.home < savedData.score.away ? "loss" : "draw") as "win" | "draw" | "loss",
+            expanded: false,
+            logs: savedData.logs,
+        };
+    }), [data.findMatch]);
 
     const [matches, setMatches] = useState<MatchRecord[]>(initialMatches);
+    const [changedIds, setChangedIds] = useState<Set<string>>(new Set());
+    const { executeMutation: updateMatch } = useUpdateMatchMutation();
     const [hasChanges, setHasChanges] = useState(false);
     const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
     const [isSavingChanges, setIsSavingChanges] = useState(false);
@@ -194,19 +228,61 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
         setHasChanges(false);
     };
 
+    const updateMatchData = (id: string, updater: (m: MatchRecord) => MatchRecord) => {
+        setMatches(prev => prev.map(m => {
+            if (m.id === id) {
+                const updated = updater(m);
+                // 결과 자동 계산
+                const result = updated.score.home > updated.score.away ? "win" : 
+                               updated.score.home < updated.score.away ? "loss" : "draw";
+                return { ...updated, result };
+            }
+            return m;
+        }));
+        setChangedIds(prev => new Set(prev).add(id));
+        setHasChanges(true);
+    };
+
     const handleSaveChanges = async () => {
-        if (pendingDeletes.length === 0) {
+        if (pendingDeletes.length === 0 && changedIds.size === 0) {
             setHasChanges(false);
             return;
         }
 
         setIsSavingChanges(true);
         try {
-            // 보류 중인 모든 삭제 요청 처리
-            await Promise.all(pendingDeletes.map(id => deleteMatch(Number(id))));
+            // 삭제 처리
+            if (pendingDeletes.length > 0) {
+                await Promise.all(pendingDeletes.map(id => deleteMatch(Number(id))));
+            }
+
+            // 수정 처리 (로그/스코어 보관을 위해 description 업데이트)
+            if (changedIds.size > 0) {
+                const updates = Array.from(changedIds).map(id => {
+                    const match = matches.find(m => m.id === id);
+                    if (!match) return Promise.resolve();
+                    
+                    const recordData = JSON.stringify({
+                        score: match.score,
+                        logs: match.logs
+                    });
+
+                    return updateMatch({
+                        variables: {
+                            input: {
+                                id: Number(id),
+                                description: recordData
+                            }
+                        }
+                    });
+                });
+                await Promise.all(updates);
+            }
+
             setPendingDeletes([]);
+            setChangedIds(new Set());
             setHasChanges(false);
-            alert("변경사항이 저장되었습니다.");
+            alert("변경사항이 성공적으로 저장되었습니다.");
         } catch (err) {
             console.error(err);
             alert("저장 중 오류가 발생했습니다.");
@@ -280,7 +356,116 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                         {/* 확장된 상세 정보 */}
                         {match.expanded && (
                             <div className="bg-[#1a1a1a] border border-white/5 border-t-transparent rounded-b-2xl p-4 md:p-6 flex flex-col gap-8">
-                                {/* ... (rest of the expanded content remains the same) */}
+                                {/* 쿼터 탭 */}
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    {[1, 2, 3, 4].map(q => (
+                                        <button
+                                            key={q}
+                                            onClick={() => setSelectedQuarter(q)}
+                                            className={cn(
+                                                "px-4 py-2 rounded-xl text-xs font-bold transition-all",
+                                                selectedQuarter === q ? "bg-primary text-black" : "bg-white/5 text-gray-500 hover:text-white"
+                                            )}
+                                        >
+                                            {q}쿼터
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* 스코어보드 */}
+                                <div className="flex flex-col items-center gap-6 py-4">
+                                    <div className="flex items-center gap-8 md:gap-16">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="text-xs text-gray-500 font-bold">HOME</span>
+                                            <span className="text-4xl md:text-5xl font-black text-white">{match.score.home}</span>
+                                        </div>
+                                        <div className="text-2xl md:text-3xl font-black text-gray-700">:</div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="text-xs text-gray-500 font-bold">AWAY</span>
+                                            <span className="text-4xl md:text-5xl font-black text-white">{match.score.away}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* 로그 리스트 */}
+                                    <div className="w-full max-w-md space-y-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Match Logs ({selectedQuarter}Q)</span>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        setActiveMatchId(match.id);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold hover:bg-emerald-500/20 transition-all"
+                                                >
+                                                    <Plus size={12} /> 득점 추가
+                                                </button>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newLogs = { ...match.logs };
+                                                        newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), { id: Date.now().toString(), type: "conceded" }];
+                                                        updateMatchData(match.id, m => ({
+                                                            ...m,
+                                                            logs: newLogs,
+                                                            score: { ...m.score, away: m.score.away + 1 }
+                                                        }));
+                                                    }}
+                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold hover:bg-red-500/20 transition-all"
+                                                >
+                                                    <Plus size={12} /> 실점 추가
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {(match.logs[selectedQuarter] || []).map(log => (
+                                                <div key={log.id} className="flex items-center justify-between bg-[#222] border border-white/5 rounded-xl px-4 py-3 group">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn(
+                                                            "w-1.5 h-1.5 rounded-full",
+                                                            log.type === "goal" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                                                        )} />
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-white">
+                                                                    {log.type === "goal" ? "득점" : "실점"}
+                                                                </span>
+                                                                {log.player && (
+                                                                    <div className="w-5 h-5 rounded-md overflow-hidden bg-white/5 border border-white/10">
+                                                                        <Image src={getValidImageSrc(log.player.profileImage)} alt={log.player.name} width={20} height={20} className="object-cover" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {log.player && (
+                                                                <span className="text-[10px] text-gray-500 mt-0.5">
+                                                                    {log.player.name} {log.assist && <span className="opacity-60 text-[9px] ml-1">(도움: {log.assist.name})</span>}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => {
+                                                            const newLogs = { ...match.logs };
+                                                            newLogs[selectedQuarter] = newLogs[selectedQuarter].filter(l => l.id !== log.id);
+                                                            const scoreUpdate = log.type === "goal" ? { home: match.score.home - 1 } : { away: match.score.away - 1 };
+                                                            updateMatchData(match.id, m => ({
+                                                                ...m,
+                                                                logs: newLogs,
+                                                                score: { ...m.score, ...scoreUpdate }
+                                                            }));
+                                                        }}
+                                                        className="text-gray-700 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {(match.logs[selectedQuarter] || []).length === 0 && (
+                                                <div className="py-8 text-center text-[10px] text-gray-700 font-bold bg-white/2 rounded-xl border border-dashed border-white/5 uppercase tracking-widest">No logs for this quarter</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -289,8 +474,34 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
 
             <PlayerSelectModal 
                 isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSave={() => setHasChanges(true)} 
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setActiveMatchId(null);
+                }} 
+                players={teamPlayers}
+                onSave={(saveData) => {
+                    if (!activeMatchId) return;
+                    
+                    const goalPlayer = teamPlayers.find(p => p.id === saveData.goalId);
+                    const assistPlayer = teamPlayers.find(p => p.id === saveData.assistId);
+                    
+                    const newLog: ScoreLog = {
+                        id: Date.now().toString(),
+                        type: "goal",
+                        player: goalPlayer,
+                        assist: assistPlayer
+                    };
+
+                    updateMatchData(activeMatchId, m => {
+                        const newLogs = { ...m.logs };
+                        newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), newLog];
+                        return { 
+                            ...m, 
+                            logs: newLogs, 
+                            score: { ...m.score, home: m.score.home + 1 } 
+                        };
+                    });
+                }} 
             />
 
             {/* 하단 저장 바 - 변경사항이 있을 때만 노출 */}
@@ -323,9 +534,15 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
 }
 
 export default function MatchRecordManagementPanel() {
+    const { selectedTeamIdNum } = useSelectedTeamId();
+
+    if (!selectedTeamIdNum) {
+        return <div className="p-8 text-center text-gray-500">팀을 선택해주세요.</div>;
+    }
+
     return (
         <Suspense fallback={<div className="p-8 text-center text-gray-500">경기 기록 로딩 중...</div>}>
-            <MatchRecordManagementPanelInner teamId={1} />
+            <MatchRecordManagementPanelInner teamId={selectedTeamIdNum} />
         </Suspense>
     );
 }

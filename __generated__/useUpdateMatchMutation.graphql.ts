@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<38b48c63a321bcb69d2a5c6c3ba1d7d2>>
+ * @generated SignedSource<<02b539266903d85c77c330a5e5c86b76>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,29 +10,39 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type MatchType = "INTERNAL" | "MATCH" | "%future added value";
-export type useMatchRecordsQuery$variables = {
-  teamId: number;
+export type UpdateMatchInput = {
+  description?: string | null | undefined;
+  endTime?: string | null | undefined;
+  id: number;
+  matchDate?: any | null | undefined;
+  matchType?: MatchType | null | undefined;
+  quarterCount?: number | null | undefined;
+  quarterDuration?: number | null | undefined;
+  startTime?: string | null | undefined;
+  venue?: VenueInput | null | undefined;
+  voteDeadline?: any | null | undefined;
 };
-export type useMatchRecordsQuery$data = {
-  readonly findMatch: ReadonlyArray<{
+export type VenueInput = {
+  address: string;
+  latitude: number;
+  longitude: number;
+};
+export type useUpdateMatchMutation$variables = {
+  input: UpdateMatchInput;
+};
+export type useUpdateMatchMutation$data = {
+  readonly updateMatch: {
     readonly description: string | null | undefined;
     readonly id: string;
     readonly matchDate: any;
-    readonly matchType: MatchType;
     readonly opponentTeam: {
       readonly name: string | null | undefined;
     } | null | undefined;
-    readonly quarterCount: number;
-    readonly quarterDuration: number;
-    readonly teamName: string | null | undefined;
-    readonly venue: {
-      readonly address: string;
-    };
-  }>;
+  };
 };
-export type useMatchRecordsQuery = {
-  response: useMatchRecordsQuery$data;
-  variables: useMatchRecordsQuery$variables;
+export type useUpdateMatchMutation = {
+  response: useUpdateMatchMutation$data;
+  variables: useUpdateMatchMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -40,14 +50,14 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "teamId"
+    "name": "input"
   }
 ],
 v1 = [
   {
     "kind": "Variable",
-    "name": "createdTeamId",
-    "variableName": "teamId"
+    "name": "input",
+    "variableName": "input"
   }
 ],
 v2 = {
@@ -61,67 +71,21 @@ v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "matchDate",
+  "name": "description",
   "storageKey": null
 },
 v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "matchType",
+  "name": "matchDate",
   "storageKey": null
 },
 v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "quarterCount",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "quarterDuration",
-  "storageKey": null
-},
-v7 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "teamName",
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "description",
-  "storageKey": null
-},
-v9 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
   "name": "name",
-  "storageKey": null
-},
-v10 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "VenueModel",
-  "kind": "LinkedField",
-  "name": "venue",
-  "plural": false,
-  "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "address",
-      "storageKey": null
-    }
-  ],
   "storageKey": null
 };
 return {
@@ -129,23 +93,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "useMatchRecordsQuery",
+    "name": "useUpdateMatchMutation",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
         "concreteType": "MatchModel",
         "kind": "LinkedField",
-        "name": "findMatch",
-        "plural": true,
+        "name": "updateMatch",
+        "plural": false,
         "selections": [
           (v2/*: any*/),
           (v3/*: any*/),
           (v4/*: any*/),
-          (v5/*: any*/),
-          (v6/*: any*/),
-          (v7/*: any*/),
-          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -154,39 +114,34 @@ return {
             "name": "opponentTeam",
             "plural": false,
             "selections": [
-              (v9/*: any*/)
+              (v5/*: any*/)
             ],
             "storageKey": null
-          },
-          (v10/*: any*/)
+          }
         ],
         "storageKey": null
       }
     ],
-    "type": "Query",
+    "type": "Mutation",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "useMatchRecordsQuery",
+    "name": "useUpdateMatchMutation",
     "selections": [
       {
         "alias": null,
         "args": (v1/*: any*/),
         "concreteType": "MatchModel",
         "kind": "LinkedField",
-        "name": "findMatch",
-        "plural": true,
+        "name": "updateMatch",
+        "plural": false,
         "selections": [
           (v2/*: any*/),
           (v3/*: any*/),
           (v4/*: any*/),
-          (v5/*: any*/),
-          (v6/*: any*/),
-          (v7/*: any*/),
-          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -195,28 +150,27 @@ return {
             "name": "opponentTeam",
             "plural": false,
             "selections": [
-              (v9/*: any*/),
+              (v5/*: any*/),
               (v2/*: any*/)
             ],
             "storageKey": null
-          },
-          (v10/*: any*/)
+          }
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "5c19b023d5704d21664c9eae20f7af37",
+    "cacheID": "237c4c8468e98db3985775b216f8f459",
     "id": null,
     "metadata": {},
-    "name": "useMatchRecordsQuery",
-    "operationKind": "query",
-    "text": "query useMatchRecordsQuery(\n  $teamId: Int!\n) {\n  findMatch(createdTeamId: $teamId) {\n    id\n    matchDate\n    matchType\n    quarterCount\n    quarterDuration\n    teamName\n    description\n    opponentTeam {\n      name\n      id\n    }\n    venue {\n      address\n    }\n  }\n}\n"
+    "name": "useUpdateMatchMutation",
+    "operationKind": "mutation",
+    "text": "mutation useUpdateMatchMutation(\n  $input: UpdateMatchInput!\n) {\n  updateMatch(input: $input) {\n    id\n    description\n    matchDate\n    opponentTeam {\n      name\n      id\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ad6ed7f13180da1e972c1bfee6e0be02";
+(node as any).hash = "3d31d5b5370837862ba8a03bf5dca421";
 
 export default node;
