@@ -8,7 +8,7 @@ const quarterButtonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-surface-card/30 border-2 border-gray-700 text-Label-Primary hover:border-gray-500 hover:bg-surface-card/50 active:scale-95",
+          "bg-surface-card/30 border-2 border-gray-900 text-Label-Primary hover:border-gray-500 hover:bg-surface-card/50 active:scale-95",
         selected:
           "border-2 bg-surface-card/30 border-Fill-AccentPrimary text-Label-AccentPrimary hover:brightness-110 active:scale-105",
         add: "bg-surface-card/30 border border-dashed border-border-card text-Fill_Primary hover:border-gray-400 hover:text-white hover:bg-surface-card/50 active:scale-95",
@@ -28,8 +28,7 @@ const quarterButtonVariants = cva(
 );
 
 export interface QuarterButtonProps
-  extends
-    ButtonHTMLAttributes<HTMLButtonElement>,
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof quarterButtonVariants> {
   children?: ReactNode;
 }
