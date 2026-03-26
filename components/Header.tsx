@@ -21,7 +21,7 @@ export interface MenuItem {
 const defaultMenuItems: MenuItem[] = [
   { label: "팀 관리", href: TEAM_MANAGEMENT_MENU_HREF },
   { label: "선수 기록", href: "/team-data" },
-  { label: "경기 일정", href: "#" },
+  { label: "경기 기록", href: "/match-record" },
 ];
 
 export interface ActionButton {

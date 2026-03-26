@@ -34,6 +34,7 @@ export const TEAM_REQUIRED_ROUTES = [
   TEAM_MANAGEMENT_PATH,
   /^\/formation(\/.*)?$/,
   /^\/player(\/.*)?$/,
+  /^\/match-record(\/.*)?$/,
 ];
 
 /**
