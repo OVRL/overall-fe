@@ -146,6 +146,11 @@ interface SelectedPlayerDetail {
 
 export default function BestElevenPanel() {
   const { selectedTeamIdNum } = useSelectedTeamId();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (!selectedTeamIdNum) {
     return (
@@ -155,10 +160,22 @@ export default function BestElevenPanel() {
     );
   }
 
+  // SSR 시에는 쿼리를 실행하지 않고 로딩 상태만 반환하여 Unauthorized 에러 방지
+  if (!isMounted) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-black h-full min-h-[720px]">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">
+          Preparing Best XI Board...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Suspense
       fallback={
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-black">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-black h-full min-h-[720px]">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">
             Loading Best XI Data...

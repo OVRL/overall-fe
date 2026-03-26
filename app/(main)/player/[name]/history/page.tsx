@@ -45,6 +45,22 @@ export default function PlayerHistoryPage() {
 }
 
 function PlayerHistoryContent() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return (
+    <div className="min-h-dvh bg-[#080808] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5a0]"></div>
+    </div>
+  );
+
+  return <PlayerHistoryDataView />;
+}
+
+function PlayerHistoryDataView() {
   const params = useParams();
   const router = useRouter();
   
@@ -53,7 +69,6 @@ function PlayerHistoryContent() {
   const getDecodedName = (name: string) => {
     try {
       let decoded = decodeURIComponent(name);
-      // 혹시 모르니 한 번 더 디코딩 시도 (이중 인코딩 방어)
       if (decoded.includes('%')) {
         decoded = decodeURIComponent(decoded);
       }
@@ -64,7 +79,6 @@ function PlayerHistoryContent() {
   };
   const playerName = getDecodedName(playerNameRaw);
 
-  // 실제 데이터 연동 (임시로 teamId 1 사용, 실제로는 URL이나 세션에서 가져와야 함)
   const queryData = useBestElevenQuery(1);
   const playerMember = queryData.findManyTeamMember?.members?.find(
     (m: any) => {
@@ -76,11 +90,14 @@ function PlayerHistoryContent() {
   const isDebutExpected = !stats || stats.appearances === 0;
 
   const [loading, setLoading] = useState(true);
+  const [showOpening, setShowOpening] = useState(false);
+  const [skipOpening, setSkipOpening] = useState(false);
+  const [countdown, setCountdown] = useState(10);
   const [selectedStat, setSelectedStat] = useState('goals');
   const [activeTab, setActiveTab] = useState('contribution');
   const [currentAwardPage, setCurrentAwardPage] = useState(0);
 
-  // 데이터 가공 (API 데이터 + 부족한 부분은 모킹 유지)
+  // 데이터 가공
   const historyData = [
     { 
       year: '2026', 
@@ -109,22 +126,199 @@ function PlayerHistoryContent() {
   ];
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
+    // 사용자가 '앞으로 안보기'를 눌렀어도 테스트 중에는 나오게 하거나, 명시적으로 확인 가능하도록 함
+    const savedSkip = localStorage.getItem('skipHistoryOpening') === 'true';
+    setSkipOpening(savedSkip);
+    
+    // 강제로 오프닝을 보여주기 위해 showOpening(true) 호출 (사용자 확인용)
+    setShowOpening(true);
+    
+    // 카운트다운 타이머
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // 실제 운영시에는 skip여부에 따라 닫아야 하지만, 지금은 10초 노출 후 닫음
+          setShowOpening(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  if (loading) return null;
+  useEffect(() => {
+    const loadTimer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(loadTimer);
+  }, []);
+
+  const handleOpeningComplete = () => {
+    setShowOpening(false);
+  };
+
+  const handleSkipToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setSkipOpening(checked);
+    localStorage.setItem('skipHistoryOpening', checked ? 'true' : 'false');
+  };
+
+  if (loading) return (
+    <div className="min-h-dvh bg-[#080808] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5a0]"></div>
+    </div>
+  );
 
   return (
-    <div className="min-h-dvh bg-[#080808] text-white font-['Noto_Sans_KR'] selection:bg-[#00e5a0]/30 selection:text-[#00e5a0] overflow-x-hidden">
-      {/* Background Blurs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[10%] -left-[5%] w-[40%] h-[40%] bg-[#00e5a0]/5 blur-[120px] rounded-full"></div>
-        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#00b4ff]/5 blur-[150px] rounded-full"></div>
-        <div className="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-[#ffd166]/5 blur-[100px] rounded-full"></div>
-      </div>
+    <div className="min-h-dvh bg-[#080808] text-white font-['Noto_Sans_KR'] selection:bg-[#00e5a0]/30 selection:text-[#00e5a0]">
+      <AnimatePresence>
+        {showOpening && (
+          <motion.div 
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-100 bg-[#080808] flex flex-col items-center justify-center overflow-hidden"
+          >
+            {/* Cinematic Background */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#00e5a0]/10 blur-[150px] rounded-full animate-pulse"></div>
+            </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-16">
+            <div className="relative z-10 flex flex-col items-center gap-12">
+              {/* Player Card Frame */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 1.2, 
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: 0.2
+                }}
+                className="relative w-72 h-[420px] rounded-[32px] overflow-hidden border border-white/10 shadow-2xl group/card"
+              >
+                {/* Real Card Background */}
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src="/images/card-bgs/normal-blue.webp" 
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover/card:scale-110"
+                    alt="Card Background"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover/card:bg-black/0 transition-colors duration-500"></div>
+                </div>
+
+                {/* Glossy Overlay */}
+                <div className="absolute inset-0 bg-linear-to-tr from-white/10 via-transparent to-white/20 z-20 pointer-events-none"></div>
+                
+                {/* Player Photo */}
+                <div className="absolute inset-0 z-10 p-2 flex items-end justify-center">
+                  <div className="relative w-full h-[85%] overflow-hidden">
+                    <img 
+                      src={getValidImageSrc(playerMember?.user?.profileImage)} 
+                      alt={playerName}
+                      className="w-full h-full object-contain object-bottom transition-all duration-700 group-hover/card:scale-105 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                    />
+                  </div>
+                </div>
+
+                {/* Card Info Overlay */}
+                <div className="absolute bottom-10 left-0 w-full z-30 px-8">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1 }}
+                  >
+                    <div className="text-[10px] font-black text-[#00e5a0] tracking-[0.4em] uppercase mb-1 drop-shadow-lg">Elite Class</div>
+                    <div className="text-3xl font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">{playerName}</div>
+                  </motion.div>
+                </div>
+
+                {/* OVR & Number Badge */}
+                <div className="absolute top-8 left-8 z-30 flex flex-col items-start gap-1">
+                  <motion.div 
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", delay: 1.2 }}
+                    className="text-6xl font-black italic tracking-tighter text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] leading-none"
+                  >
+                    {stats?.ovr || '--'}
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 0.8, x: 0 }}
+                    transition={{ delay: 1.5 }}
+                    className="text-2xl font-black text-white italic drop-shadow-md flex items-center gap-1"
+                  >
+                    <span className="text-[10px] uppercase font-black opacity-40 not-italic">NO.</span>
+                    {playerMember?.backNumber || '--'}
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* History Text */}
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex gap-2">
+                  {"HISTORY".split("").map((char, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.5, 
+                        delay: 0.8 + (i * 0.1),
+                        ease: "easeOut" 
+                      }}
+                      className="text-6xl md:text-8xl font-black italic tracking-tighter text-[#00e5a0] drop-shadow-[0_0_30px_rgba(0,229,160,0.3)]"
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2, duration: 1 }}
+                  className="px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-black tracking-[0.5em] text-white/40 uppercase"
+                >
+                  Season 2026 Archive
+                </motion.div>
+              </div>
+
+              {/* Enter Button with Countdown */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.5 }}
+                onClick={handleOpeningComplete}
+                className="group relative px-10 py-4 bg-white text-black font-black italic rounded-full overflow-hidden hover:scale-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center gap-4"
+              >
+                <span className="relative z-10">ENTER HISTORY</span>
+                <span className="relative z-10 w-6 h-6 rounded-full bg-black text-white text-[10px] flex items-center justify-center not-italic group-hover:bg-[#00e5a0] group-hover:text-black transition-colors">
+                  {countdown}
+                </span>
+                <div className="absolute inset-0 bg-[#00e5a0] -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+              </motion.button>
+            </div>
+
+            {/* Skip Option (Bottom Right Corner) */}
+            <div className="absolute bottom-6 right-6 md:bottom-10 md:right-16 z-110 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative w-6 h-6 rounded-lg border-2 border-white/10 bg-white/5 flex items-center justify-center group-hover:border-[#00e5a0]/50 transition-all overflow-hidden shadow-inner">
+                  <input 
+                    type="checkbox" 
+                    checked={skipOpening}
+                    onChange={handleSkipToggle}
+                    className="peer absolute inset-0 opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="w-3 h-3 bg-[#00e5a0] scale-0 peer-checked:scale-100 transition-all duration-300 rounded-md shadow-[0_0_10px_#00e5a0]"></div>
+                </div>
+                <span className="text-[11px] font-black text-white/40 group-hover:text-[#00e5a0] transition-colors tracking-widest uppercase italic">오프닝 앞으로 안보기</span>
+              </label>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 md:py-16 overflow-x-hidden">
         {/* Navigation Header */}
         <div className="flex flex-col gap-10 mb-16">
           <div className="flex flex-col gap-6">
@@ -275,7 +469,7 @@ function PlayerHistoryContent() {
 
         {/* Seasonal Best Partners - Full Width */}
         <div className="mb-16">
-          <div className="bg-white/[0.03] border border-white/10 rounded-[40px] p-8 md:p-10 backdrop-blur-2xl">
+          <div className="bg-white/3 border border-white/10 rounded-[40px] p-8 md:p-10 backdrop-blur-2xl">
             <div className="flex items-center gap-3 mb-12">
               <div className="p-3 bg-white/5 rounded-2xl">
                 <Users className="w-5 h-5 text-[#00b4ff]" />
@@ -292,13 +486,12 @@ function PlayerHistoryContent() {
 
         {/* Awards Record - Restored & Fallback Message Added */}
         <div className="mb-16">
-          <div className="bg-gradient-to-br from-[#111] to-[#080808] border border-white/10 rounded-[40px] p-8 md:p-10 relative overflow-hidden group">
+          <div className="bg-linear-to-br from-[#111] to-[#080808] border border-white/10 rounded-[40px] p-8 md:p-10 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#ffd166]/5 blur-[150px] rounded-full pointer-events-none group-hover:scale-125 transition-transform duration-1000"></div>
-            
-            <div className="flex items-center gap-3 mb-12">
-              <div className="p-3 bg-[#ffd166]/10 rounded-2xl border border-[#ffd166]/20">
-                <Trophy className="w-5 h-5 text-[#ffd166]" />
-              </div>
+                        <div className="flex flex-col items-center gap-1">
+                  <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#00e5a0]/20 to-transparent flex items-center justify-center mb-1">
+                    <Trophy className="w-5 h-5 text-[#00e5a0]" />
+                  </div>
               <h3 className="text-2xl font-black italic tracking-tight uppercase">수상 <span className="text-[#ffd166]">기록</span></h3>
             </div>
 
