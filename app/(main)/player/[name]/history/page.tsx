@@ -255,6 +255,7 @@ function PlayerHistoryDataView() {
               </motion.div>
 
               {/* History Text */}
+              {/* History Text */}
               <div className="flex flex-col items-center gap-4">
                 <div className="flex gap-2">
                   {"HISTORY".split("").map((char, i) => (
@@ -277,42 +278,44 @@ function PlayerHistoryDataView() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2, duration: 1 }}
-                  className="px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-black tracking-[0.5em] text-white/40 uppercase"
+                  className="hidden md:block px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-black tracking-[0.5em] text-white/40 uppercase"
                 >
                   Season 2026 Archive
                 </motion.div>
               </div>
 
               {/* Enter Button with Countdown */}
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.5 }}
-                onClick={handleOpeningComplete}
-                className="group relative px-10 py-4 bg-white text-black font-black italic rounded-full overflow-hidden hover:scale-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center gap-4"
-              >
-                <span className="relative z-10">ENTER HISTORY</span>
-                <span className="relative z-10 w-6 h-6 rounded-full bg-black text-white text-[10px] flex items-center justify-center not-italic group-hover:bg-[#00e5a0] group-hover:text-black transition-colors">
-                  {countdown}
-                </span>
-                <div className="absolute inset-0 bg-[#00e5a0] -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
-              </motion.button>
-            </div>
+              <div className="flex flex-col items-center gap-6">
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.5 }}
+                  onClick={handleOpeningComplete}
+                  className="group relative px-10 py-4 bg-white text-black font-black italic rounded-full overflow-hidden hover:scale-110 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center gap-4"
+                >
+                  <span className="relative z-10">ENTER HISTORY</span>
+                  <span className="relative z-10 w-6 h-6 rounded-full bg-black text-white text-[10px] flex items-center justify-center not-italic group-hover:bg-[#00e5a0] group-hover:text-black transition-colors">
+                    {countdown}
+                  </span>
+                  <div className="absolute inset-0 bg-[#00e5a0] -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                </motion.button>
 
-            {/* Skip Option (Bottom Right Corner) */}
-            <div className="absolute bottom-6 right-6 md:bottom-10 md:right-16 z-110 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative w-6 h-6 rounded-lg border-2 border-white/10 bg-white/5 flex items-center justify-center group-hover:border-[#00e5a0]/50 transition-all overflow-hidden shadow-inner">
-                  <input 
-                    type="checkbox" 
-                    checked={skipOpening}
-                    onChange={handleSkipToggle}
-                    className="peer absolute inset-0 opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="w-3 h-3 bg-[#00e5a0] scale-0 peer-checked:scale-100 transition-all duration-300 rounded-md shadow-[0_0_10px_#00e5a0]"></div>
+                {/* Skip Option (Below Button on Mobile, Bottom Right for Desktop) */}
+                <div className="md:fixed md:bottom-10 md:right-16 z-110 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 whitespace-nowrap">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative w-6 h-6 rounded-lg border-2 border-white/10 bg-white/5 flex items-center justify-center group-hover:border-[#00e5a0]/50 transition-all overflow-hidden shadow-inner">
+                      <input 
+                        type="checkbox" 
+                        checked={skipOpening}
+                        onChange={handleSkipToggle}
+                        className="peer absolute inset-0 opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="w-3 h-3 bg-[#00e5a0] scale-0 peer-checked:scale-100 transition-all duration-300 rounded-md shadow-[0_0_10px_#00e5a0]"></div>
+                    </div>
+                    <span className="text-[11px] font-black text-white/40 group-hover:text-[#00e5a0] transition-colors tracking-widest uppercase italic">오프닝 앞으로 안보기</span>
+                  </label>
                 </div>
-                <span className="text-[11px] font-black text-white/40 group-hover:text-[#00e5a0] transition-colors tracking-widest uppercase italic">오프닝 앞으로 안보기</span>
-              </label>
+              </div>
             </div>
           </motion.div>
         )}
@@ -477,7 +480,7 @@ function PlayerHistoryDataView() {
               <h3 className="text-2xl font-black italic tracking-tight uppercase">올시즌 <span className="text-[#00b4ff]">베스트 파트너</span></h3>
             </div>
             
-            <div className="flex flex-col items-center justify-center py-10 border border-dashed border-white/10 rounded-3xl bg-white/[0.01]">
+            <div className="flex flex-col items-center justify-center py-10 border border-dashed border-white/10 rounded-3xl bg-white/1">
                 <Users className="w-10 h-10 text-white/10 mb-4" />
                 <p className="text-white/40 font-bold italic tracking-tight">올시즌 베스트 파트너를 만들어보세요</p>
             </div>
@@ -495,7 +498,7 @@ function PlayerHistoryDataView() {
               <h3 className="text-2xl font-black italic tracking-tight uppercase">수상 <span className="text-[#ffd166]">기록</span></h3>
             </div>
 
-            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-white/5 rounded-3xl bg-white/[0.01] relative z-10">
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-white/5 rounded-3xl bg-white/1 relative z-10">
               <div className="w-16 h-16 rounded-full bg-[#ffd166]/5 flex items-center justify-center mb-6">
                 <Award className="w-8 h-8 text-[#ffd166]/20" />
               </div>
@@ -506,8 +509,8 @@ function PlayerHistoryDataView() {
         </div>
 
         {/* Seasonal Journey Table */}
-        <div className="bg-white/[0.02] border border-white/10 rounded-[40px] overflow-hidden mb-16">
-          <div className="p-10 border-b border-white/10 flex items-center justify-between bg-white/[0.01]">
+        <div className="bg-white/2 border border-white/10 rounded-[40px] overflow-hidden mb-16">
+          <div className="p-10 border-b border-white/10 flex items-center justify-between bg-white/1">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/5 rounded-2xl">
                 <History className="w-5 h-5 text-white/40" />
@@ -515,34 +518,34 @@ function PlayerHistoryDataView() {
               <h3 className="text-2xl font-black italic tracking-tight uppercase">시즌별 <span className="text-white/20">통합기록</span></h3>
             </div>
           </div>
-            <div className="">
-              <table className="w-full text-left min-w-[800px]">
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left min-w-[900px]">
               <thead>
-                <tr className="bg-white/[0.02] text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
-                  <th className="py-6 px-10">시즌</th>
-                  <th className="py-6 px-6 text-center">출장</th>
-                  <th className="py-6 px-6 text-center">득점</th>
-                  <th className="py-6 px-6 text-center">도움</th>
-                  <th className="py-6 px-6 text-center">클린시트</th>
-                  <th className="py-6 px-6 text-center">승률</th>
-                  <th className="py-6 px-10 text-right">TOP 3</th>
+                <tr className="bg-white/[0.02] text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">
+                  <th className="sticky left-0 bg-[#080808] z-20 py-4 px-6 border-b border-white/5 whitespace-nowrap">시즌</th>
+                  <th className="py-4 px-4 text-center border-b border-white/5">출장</th>
+                  <th className="py-4 px-4 text-center border-b border-white/5">득점</th>
+                  <th className="py-4 px-4 text-center border-b border-white/5">도움</th>
+                  <th className="py-4 px-4 text-center border-b border-white/5">클린시트</th>
+                  <th className="py-4 px-4 text-center border-b border-white/5">승률</th>
+                  <th className="py-4 px-6 text-right border-b border-white/5">TOP 3</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {historyData.map((r) => (
                   <tr key={r.year} className="group hover:bg-white/[0.03] transition-all">
-                    <td className="py-8 px-10">
+                    <td className="sticky left-0 bg-[#080808] z-20 py-5 px-6 border-b border-white/5">
                       <div className="flex items-center gap-3">
-                        <div className="w-1 h-8 rounded-full bg-[#00e5a0]/0 group-hover:bg-[#00e5a0] transition-all"></div>
-                        <div className="text-2xl font-black italic tracking-tighter text-[#00e5a0] group-hover:translate-x-1 transition-transform">{r.year}</div>
+                        <div className="w-1 h-5 rounded-full bg-[#00e5a0]/0 group-hover:bg-[#00e5a0] transition-all"></div>
+                        <div className="text-xl font-black italic tracking-tighter text-[#00e5a0] group-hover:translate-x-1 transition-transform">{r.year}</div>
                       </div>
                     </td>
-                    <td className="py-8 px-6 text-center font-black italic text-white/40 group-hover:text-white transition-colors">{r.matches}</td>
-                    <td className="py-8 px-6 text-center text-xl font-black italic group-hover:scale-110 transition-transform">{r.goals}</td>
-                    <td className="py-8 px-6 text-center text-xl font-black italic group-hover:scale-110 transition-transform">{r.assists}</td>
-                    <td className="py-8 px-6 text-center text-lg font-black italic text-[#4cc9f0]">{r.cleanSheets}</td>
-                    <td className="py-8 px-6 text-center font-black italic text-white/60">{r.winRate}%</td>
-                    <td className="py-8 px-10 text-right font-black italic text-2xl tracking-tighter text-[#ffd166]">{r.momTop3Count}</td>
+                    <td className="py-5 px-4 text-center font-black italic text-white/40 group-hover:text-white transition-colors border-b border-white/5 text-xs">{r.matches}</td>
+                    <td className="py-5 px-4 text-center text-lg font-black italic group-hover:scale-110 transition-transform border-b border-white/5">{r.goals}</td>
+                    <td className="py-5 px-4 text-center text-lg font-black italic group-hover:scale-110 transition-transform border-b border-white/5">{r.assists}</td>
+                    <td className="py-5 px-4 text-center text-base font-black italic text-[#4cc9f0] border-b border-white/5">{r.cleanSheets}</td>
+                    <td className="py-5 px-4 text-center font-black italic text-white/60 border-b border-white/5 text-xs">{r.winRate}%</td>
+                    <td className="py-5 px-6 text-right font-black italic text-xl tracking-tighter text-[#ffd166] border-b border-white/5">{r.momTop3Count}</td>
                   </tr>
                 ))}
               </tbody>
