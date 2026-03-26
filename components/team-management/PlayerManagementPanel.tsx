@@ -3,6 +3,10 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { getValidImageSrc } from "@/lib/utils";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
 
 // ──────────────────────────────────────────────
 // Types
@@ -17,7 +21,7 @@ interface PlayerStat {
   goals: number;
   assists: number;
   gaPoints: number;
-  yellowCards: number;
+  cleanSheets: number;
   wins: number;
   draws: number;
   losses: number;
@@ -43,7 +47,7 @@ const INITIAL_PLAYERS: PlayerStat[] = Array.from({ length: 14 }, (_, i) => ({
   goals: (i * 3) % 8,
   assists: (i * 2) % 12,
   gaPoints: (i * 5) % 8,
-  yellowCards: (i * 7) % 13,
+  cleanSheets: i % 4,
   wins: (i * 4) % 9,
   draws: i % 4,
   losses: (i * 6) % 10,
@@ -57,7 +61,7 @@ const COLUMNS: { key: keyof PlayerStat; label: string }[] = [
   { key: "goals", label: "득점" },
   { key: "assists", label: "도움" },
   { key: "gaPoints", label: "기점" },
-  { key: "yellowCards", label: "클린시트" },
+  { key: "cleanSheets", label: "클린시트" },
   { key: "wins", label: "승" },
   { key: "draws", label: "무" },
   { key: "losses", label: "패" },
@@ -199,13 +203,54 @@ function SavePreviewModal({
 // Main Panel
 // ──────────────────────────────────────────────
 export default function PlayerManagementPanel() {
-  const [savedPlayers, setSavedPlayers] = useState<PlayerStat[]>(INITIAL_PLAYERS); // 마지막 저장 스냅샷
-  const [players, setPlayers] = useState<PlayerStat[]>(INITIAL_PLAYERS);
+  const { selectedTeamIdNum } = useSelectedTeamId();
+
+  if (!selectedTeamIdNum) {
+    return <div className="p-6 text-white">팀을 선택해주세요.</div>;
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 py-20">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">
+            Loading Player Stats...
+          </p>
+        </div>
+      }
+    >
+      <PlayerManagementPanelInner teamId={selectedTeamIdNum} />
+    </Suspense>
+  );
+}
+
+function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
+  const data = usePlayerManagementQuery(teamId);
+  const apiPlayers: PlayerStat[] = (data.findManyTeamMember?.members || []).map((m: any) => ({
+    id: String(m.id),
+    backNumber: m.backNumber ?? 0,
+    name: m.user?.name ?? "알 수 없음",
+    profileImage: m.user?.profileImage ?? "/images/ovr.png",
+    position: m.position ?? "-",
+    attendance: m.overall?.appearances ?? 0,
+    goals: m.overall?.goals ?? 0,
+    assists: m.overall?.assists ?? 0,
+    gaPoints: m.overall?.keyPasses ?? 0,
+    cleanSheets: m.overall?.cleanSheets ?? 0,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+  }));
+
+  const [players, setPlayers] = useState<PlayerStat[]>(apiPlayers);
+  const [savedPlayers, setSavedPlayers] = useState<PlayerStat[]>(apiPlayers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBuffer, setEditBuffer] = useState<Partial<PlayerStat>>({});
   const [hasUnsaved, setHasUnsaved] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<ChangeItem[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = players.filter(
@@ -231,41 +276,13 @@ export default function PlayerManagementPanel() {
     setHasUnsaved(true);
   };
 
-  /** 저장 버튼 클릭 → 변경사항 계산 후 모달 표시 */
+  /** 저장 버튼 클릭 → 안내 메시지 출력 */
   const handleSaveClick = () => {
-    // 현재 편집 중인 버퍼 반영
-    let latestPlayers = players;
-    if (editingId) {
-      latestPlayers = flushBuffer(editingId, editBuffer);
-    }
-
-    // 변경사항 계산 (savedPlayers와 비교)
-    const changes: ChangeItem[] = [];
-    const statKeys = COLUMNS.map((c) => c.key);
-
-    latestPlayers.forEach((current) => {
-      const original = savedPlayers.find((p) => p.id === current.id);
-      if (!original) return;
-      statKeys.forEach((key) => {
-        const before = original[key] as number;
-        const after = current[key] as number;
-        if (before !== after) {
-          changes.push({
-            playerName: current.name,
-            field: COLUMNS.find((c) => c.key === key)?.label ?? String(key),
-            before,
-            after,
-          });
-        }
-      });
-    });
-
-    setShowPreview(true);
-    // changes를 모달로 전달하기 위해 상태로 저장
-    setPendingChanges(changes);
+    alert("현재 선수 능력치/통계는 매치 기록을 통해 자동으로 업데이트되며, 수동 수정 기능은 준비 중입니다.");
+    setHasUnsaved(false);
+    setEditingId(null);
+    setEditBuffer({});
   };
-
-  const [pendingChanges, setPendingChanges] = useState<ChangeItem[]>([]);
 
   const handleConfirmSave = () => {
     setSavedPlayers([...players]);
@@ -277,8 +294,8 @@ export default function PlayerManagementPanel() {
   };
 
   const handleReset = () => {
-    setPlayers(INITIAL_PLAYERS);
-    setSavedPlayers(INITIAL_PLAYERS);
+    setPlayers(apiPlayers);
+    setSavedPlayers(apiPlayers);
     setEditingId(null);
     setEditBuffer({});
     setHasUnsaved(false);
@@ -286,12 +303,11 @@ export default function PlayerManagementPanel() {
 
   return (
     <div className={`flex flex-col ${hasUnsaved ? "pb-16" : ""}`}>
-
       {/* ── 헤더 ── */}
       <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5">
         <h1 className="text-lg font-bold text-white mb-4 md:mb-5">선수 관리</h1>
 
-        {/* 검색 바 — input과 버튼 분리, 약간의 gap */}
+        {/* 검색 바 */}
         <div className="flex items-center gap-2 max-w-[380px]">
           <input
             ref={searchInputRef}
@@ -317,84 +333,84 @@ export default function PlayerManagementPanel() {
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-[#161616] border-b border-white/8 text-gray-500">
-              <th className="py-2.5 px-2 md:px-3 text-left font-medium w-[48px] md:w-[64px]">등번호</th>
-              <th className="py-2.5 px-1 md:px-2 text-left font-medium w-[100px] md:w-[140px]">이름</th>
-              <th className="py-2.5 px-1 md:px-2 text-center font-medium w-[48px] md:w-[56px]">포지션</th>
-              {COLUMNS.map((c) => (
-                <th key={c.key} className="py-2.5 px-1 md:px-2 text-center font-medium whitespace-nowrap text-[10px] md:text-xs">
-                  {c.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((player) => {
-              const isEditing = editingId === player.id;
-              const buf = isEditing ? editBuffer : player;
+                <th className="py-2.5 px-2 md:px-3 text-left font-medium w-[48px] md:w-[64px]">등번호</th>
+                <th className="py-2.5 px-1 md:px-2 text-left font-medium w-[100px] md:w-[140px]">이름</th>
+                <th className="py-2.5 px-1 md:px-2 text-center font-medium w-[48px] md:w-[56px]">포지션</th>
+                {COLUMNS.map((c) => (
+                  <th key={c.key} className="py-2.5 px-1 md:px-2 text-center font-medium whitespace-nowrap text-[10px] md:text-xs">
+                    {c.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((player) => {
+                const isEditing = editingId === player.id;
+                const buf = isEditing ? editBuffer : player;
 
-              return (
-                <tr
-                  key={player.id}
-                  onClick={() => handleRowClick(player)}
-                  className={`border-b border-white/6 cursor-pointer select-none transition-colors ${
-                    isEditing ? "bg-[#1c1c1c]" : "hover:bg-white/3"
-                  }`}
-                >
-                  {/* 등번호 */}
-                  <td className="py-2.5 px-2 md:px-3 text-gray-400 font-mono">
-                    {isEditing ? (
-                      <span className="border border-white/20 rounded px-1.5 md:px-2 py-1 text-white inline-block">
-                        {player.backNumber}
-                      </span>
-                    ) : (
-                      player.backNumber
-                    )}
-                  </td>
-
-                  {/* 이름 + 프로필 */}
-                  <td className="py-2.5 px-1 md:px-2">
-                    <div className="flex items-center gap-1.5 md:gap-2">
-                      <div className="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden bg-[#2a2a2a] shrink-0">
-                        <Image
-                          src={getValidImageSrc(player.profileImage)}
-                          alt={player.name}
-                          width={28}
-                          height={28}
-                          className="object-cover h-full w-full"
-                        />
-                      </div>
-                      <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs">
-                        {player.name}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* 포지션 */}
-                  <td className="py-2.5 px-1 md:px-2 text-center">
-                    <PosBadge label={player.position} />
-                  </td>
-
-                  {/* 통계 컬럼 */}
-                  {COLUMNS.map((col) => (
-                    <td key={col.key} className="py-2.5 px-1 md:px-2 text-center">
+                return (
+                  <tr
+                    key={player.id}
+                    onClick={() => handleRowClick(player)}
+                    className={`border-b border-white/6 cursor-pointer select-none transition-colors ${
+                      isEditing ? "bg-[#1c1c1c]" : "hover:bg-white/3"
+                    }`}
+                  >
+                    {/* 등번호 */}
+                    <td className="py-2.5 px-2 md:px-3 text-gray-400 font-mono">
                       {isEditing ? (
-                        <EditCell
-                          value={(buf[col.key] as number) ?? 0}
-                          onChange={(v) => updateBuffer(col.key, v)}
-                        />
-                      ) : (
-                        <span className="text-gray-300">
-                          {player[col.key] as number}
+                        <span className="border border-white/20 rounded px-1.5 md:px-2 py-1 text-white inline-block">
+                          {player.backNumber}
                         </span>
+                      ) : (
+                        player.backNumber
                       )}
                     </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+
+                    {/* 이름 + 프로필 */}
+                    <td className="py-2.5 px-1 md:px-2">
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                        <div className="w-6 h-6 md:w-7 md:h-7 overflow-hidden shrink-0 relative flex items-center justify-center">
+                          <Image
+                            src={getValidImageSrc(player.profileImage)}
+                            alt={player.name}
+                            width={28}
+                            height={28}
+                            className="object-cover h-full w-full"
+                          />
+                        </div>
+                        <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs">
+                          {player.name}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* 포지션 */}
+                    <td className="py-2.5 px-1 md:px-2 text-center">
+                      <PosBadge label={player.position} />
+                    </td>
+
+                    {/* 통계 컬럼 */}
+                    {COLUMNS.map((col) => (
+                      <td key={col.key} className="py-2.5 px-1 md:px-2 text-center">
+                        {isEditing ? (
+                          <EditCell
+                            value={(buf[col.key] as number) ?? 0}
+                            onChange={(v) => updateBuffer(col.key, v)}
+                          />
+                        ) : (
+                          <span className="text-gray-300">
+                            {player[col.key] as number}
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ── 고정 저장 바 ── */}

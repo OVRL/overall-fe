@@ -14,8 +14,18 @@ export interface Player {
   // Formation specific props
   quarterCount?: number;
   // New Props for Algorithm
-  age?: number;
+  age?: string;
   attendance?: number;
+  isMom?: boolean;
+  joinDate?: string;
+  stats?: {
+    matches: number;
+    goals: number;
+    assists: number;
+    contributions: number;
+    cleanSheets: number;
+    winRate: string;
+  };
 }
 
 export type TeamType = "A" | "B" | "C" | "D";

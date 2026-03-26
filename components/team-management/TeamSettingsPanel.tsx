@@ -10,6 +10,8 @@ import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useTeamSettingsQuery } from "./hooks/useTeamSettingsQuery";
 import { useUpdateTeamMutation } from "./hooks/useUpdateTeamMutation";
+import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
+import { useDeleteTeamMemberMutation } from "./hooks/useDeleteTeamMemberMutation";
 import useModal from "@/hooks/useModal";
 import locationIcon from "@/public/icons/location.svg";
 import TextField from "@/components/ui/TextField";
@@ -275,7 +277,7 @@ function TeamInfoModal({
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0">
                 <Image
-                  src={emblemSrc}
+                  src={getValidImageSrc(emblemSrc, "/images/teamemblum_default.webp")}
                   alt="엠블럼"
                   width={48}
                   height={48}
@@ -456,6 +458,8 @@ function TeamSettingsPanelInner({
   
   // 뮤테이션 훅
   const { executeMutation: updateTeam } = useUpdateTeamMutation();
+  const { executeMutation: updateMember, isInFlight: isUpdatingMember } = useUpdateTeamMemberMutation();
+  const { executeMutation: deleteMember, isInFlight: isDeletingMember } = useDeleteTeamMemberMutation();
 
   // 선수단 매핑
   const calculateAge = (birthDate?: string | null) => {
@@ -505,18 +509,42 @@ function TeamSettingsPanelInner({
     alert("링크가 복사되었습니다.");
   };
 
-  const handleRoleConfirm = () => {
+  const handleRoleConfirm = async () => {
     if (!roleModal) return;
-    // 추후 Role 변경 Mutation
-    alert("권한 변경은 준비 중입니다.");
-    setRoleModal(null);
+
+    const reverseMapping: Record<MemberRole, string> = {
+      "감독": "MANAGER",
+      "코치": "COACH",
+      "선수": "PLAYER",
+      "중무": "PLAYER" // 중무는 현재 스키마에 없으므로 선수로 매핑
+    };
+
+    try {
+      await updateMember({
+        id: Number(roleModal.memberId),
+        role: reverseMapping[roleModal.newRole]
+      });
+      alert("권한이 성공적으로 변경되었습니다.");
+    } catch (error) {
+      console.error("Failed to change role:", error);
+      alert("권한 변경에 실패했습니다.");
+    } finally {
+      setRoleModal(null);
+    }
   };
 
-  const handleKickConfirm = () => {
+  const handleKickConfirm = async () => {
     if (!kickModal) return;
-    // 추후 선수 방출 Mutation
-    alert("선수 방출은 준비 중입니다.");
-    setKickModal(null);
+
+    try {
+      await deleteMember(Number(kickModal.memberId));
+      alert("멤버가 팀에서 방출되었습니다.");
+    } catch (error) {
+      console.error("Failed to kick member:", error);
+      alert("멤버 방출에 실패했습니다.");
+    } finally {
+      setKickModal(null);
+    }
   };
 
   const handleInfoSave = (newData: {
@@ -632,7 +660,7 @@ function TeamSettingsPanelInner({
             {/* 팀 엠블럼 */}
             <div className="w-16 h-16 rounded-full overflow-hidden bg-[#2a2a2a] border-2 border-white/15 shrink-0">
               <Image
-                src={emblemSrc}
+                src={getValidImageSrc(emblemSrc, "/images/teamemblum_default.webp")}
                 alt="Team Logo"
                 width={64}
                 height={64}
@@ -659,11 +687,11 @@ function TeamSettingsPanelInner({
                   <div className="flex items-center gap-4 mt-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-gray-600">홈</span>
-                      <Image src={homeImagePath} alt="홈 유니폼" width={32} height={32} className="object-contain" />
+                      <Image src={getValidImageSrc(homeImagePath)} alt="홈 유니폼" width={32} height={32} className="object-contain" />
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-gray-600">어웨이</span>
-                      <Image src={awayImagePath} alt="어웨이 유니폼" width={32} height={32} className="object-contain" />
+                      <Image src={getValidImageSrc(awayImagePath)} alt="어웨이 유니폼" width={32} height={32} className="object-contain" />
                     </div>
                   </div>
                 </div>
