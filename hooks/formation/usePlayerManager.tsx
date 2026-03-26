@@ -61,7 +61,7 @@ export const usePlayerManager = (
       position: "MF",
       number: 0,
       overall: 70,
-      age: 20 + Math.floor(Math.random() * 10),
+      age: String(20 + Math.floor(Math.random() * 10)),
       attendance: Math.floor(Math.random() * 10),
     };
     setPlayers((prev) => [...prev, newPlayer]);
