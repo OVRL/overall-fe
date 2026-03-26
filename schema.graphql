@@ -140,23 +140,11 @@ type InviteCodeModel {
 }
 
 input JoinTeamInput {
-  """등번호 (선택)"""
-  backNumber: Int
-
   """유저 이메일"""
   email: String!
 
   """팀 초대 코드"""
   inviteCode: String!
-
-  """포지션 (선택)"""
-  position: Position
-
-  """프로필 이미지 (선택)"""
-  profileImg: String
-
-  """역할 (player, coach, manager)"""
-  role: Role! = PLAYER
 }
 
 """

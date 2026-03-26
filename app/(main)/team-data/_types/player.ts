@@ -21,7 +21,10 @@ export interface Player {
   name: string;
   team: string;
   value: string | number;
-  image?: string;
+  /** 원본 프로필 URL */
+  image?: string | null;
+  /** 무효·로드 실패 시 */
+  imageFallbackUrl?: string;
   position: Position;
   backNumber: number;
   ovr: number;

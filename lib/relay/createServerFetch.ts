@@ -8,6 +8,7 @@ import type {
 import { env } from "@/lib/env";
 import { postBackendSSR } from "@/utils/ssrBackendFetch";
 import { ensureIdStrings, ensureUniqueDataIds } from "./fetchGraphQL";
+import { GraphQLHttpError } from "./GraphQLHttpError";
 import { refreshAccessToken } from "@/lib/auth/refreshToken";
 import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
 
@@ -89,10 +90,9 @@ export function createServerFetch(
             const errorPayload = retryRaw as {
               errors?: Array<{ message?: string }>;
             };
-            const detail =
-              errorPayload?.errors?.[0]?.message ?? retryRes.statusText;
-            throw new Error(
-              `GraphQL 요청 실패 (${retryRes.status}): ${detail}`,
+            throw new GraphQLHttpError(
+              retryRes.status,
+              errorPayload?.errors,
             );
           }
           return retryPayload;
@@ -101,9 +101,7 @@ export function createServerFetch(
 
       if (!res.ok) {
         const errorPayload = raw as { errors?: Array<{ message?: string }> };
-        const detail =
-          errorPayload?.errors?.[0]?.message ?? res.statusText;
-        throw new Error(`GraphQL 요청 실패 (${res.status}): ${detail}`);
+        throw new GraphQLHttpError(res.status, errorPayload?.errors);
       }
 
       return payload;

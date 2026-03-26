@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/shadcn/popover";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { cn } from "@/lib/utils";
+import {
+  getPlayerPlaceholderSrc,
+  getUserAvatarSeedFromGraphqlId,
+} from "@/lib/playerPlaceholderImage";
 
 type AttendanceRow =
   findMatchAttendanceQuery["response"]["findMatchAttendance"][number];
@@ -75,11 +79,21 @@ function AttendanceMemberRow({
   isMe: boolean;
 }) {
   const name = row.user?.name?.trim() || "이름 없음";
-  const src = row.user?.profileImage ?? "";
+  const rawUrl = row.user?.profileImage?.trim() || "";
+  const fallbackSrc = getPlayerPlaceholderSrc(
+    getUserAvatarSeedFromGraphqlId(row.user?.id ?? String(row.userId)) ??
+      `u:${row.userId}`,
+  );
 
   return (
     <div className="flex min-w-0 items-center gap-2 py-1.5 pe-1 ps-1">
-      <ProfileAvatar src={src} alt={name} size={36} className="shrink-0" />
+      <ProfileAvatar
+        src={rawUrl || undefined}
+        fallbackSrc={fallbackSrc}
+        alt={name}
+        size={36}
+        className="shrink-0"
+      />
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
         {isMe ? (
           <span

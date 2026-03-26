@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import PositionChip from "@/components/PositionChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { Position } from "@/types/position";
 import PlayerListItemGradation from "./PlayerListItemGradation";
 import type { RosterMember } from "@/components/home/Roster/useFindManyTeamMemberQuery";
-
-// 이미지 서버 미구축으로 프로필 미사용 시 대체 이미지
-const MOCK_PLAYER_IMAGE = "/images/ovr.png";
+import {
+  getTeamMemberProfileImageFallbackUrl,
+  getTeamMemberProfileImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
 
 interface PlayerListItemProps {
   member: RosterMember;
@@ -18,11 +18,9 @@ interface PlayerListItemProps {
 }
 
 const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
-  const [imageError, setImageError] = useState(false);
   const name = member.user?.name ?? "";
-  const profileImg = member.profileImg ?? member.user?.profileImage;
-  const playerImage =
-    imageError || !profileImg ? MOCK_PLAYER_IMAGE : profileImg;
+  const rawUrl = getTeamMemberProfileImageRawUrl(member);
+  const fallbackUrl = getTeamMemberProfileImageFallbackUrl(member);
 
   return (
     <div
@@ -50,10 +48,10 @@ const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
       >
         <div className="flex-none mr-2 md:mr-3">
           <ProfileAvatar
-            src={playerImage}
+            src={rawUrl || undefined}
+            fallbackSrc={fallbackUrl}
             alt={name}
             size={36}
-            onError={() => setImageError(true)}
             priority={priority}
           />
         </div>
@@ -69,7 +67,6 @@ const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
         </span>
       </div>
 
-      {/* 구분선 */}
       <div className="absolute inset-x-0 bottom-0 h-px z-10 bg-[#252525]" />
       <PlayerListItemGradation
         position={(member.position ?? "MF") as Position}

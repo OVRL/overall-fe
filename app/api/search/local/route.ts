@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 const NAVER_LOCAL_API = "https://openapi.naver.com/v1/search/local.json";
 const DISPLAY = 10;
 
-/** 네이버 지역 검색 API 응답 item (mapx/mapy는 TM128 좌표) */
+/** 네이버 지역 검색 API 응답 item (mapx/mapy: WGS84×1e7 정수 또는 구형 TM128 — 클라이언트에서 구분) */
 interface NaverLocalItem {
   title: string;
   link: string;

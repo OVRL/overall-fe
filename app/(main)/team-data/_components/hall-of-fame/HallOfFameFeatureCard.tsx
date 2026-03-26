@@ -4,6 +4,10 @@ import Icon from "@/components/ui/Icon";
 import type { HallOfFameFeatureItem } from "../../_types/hallOfFame";
 import ballIcon from "@/public/icons/player-infos/ball.svg";
 import trendingUpIcon from "@/public/icons/trending_up.svg";
+import {
+  getHallOfFamePlayerImageFallbackUrl,
+  getHallOfFamePlayerImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
 
 interface HallOfFameFeatureCardProps {
   item: HallOfFameFeatureItem;
@@ -41,7 +45,8 @@ const HallOfFameFeatureCard = ({
           />
           <div className="absolute -top-12.5 left-0 size-50">
             <ImgPlayer
-              src={player.image ?? "/images/player/img_player_1.webp"}
+              src={getHallOfFamePlayerImageRawUrl(player) || undefined}
+              fallbackSrc={getHallOfFamePlayerImageFallbackUrl(player)}
               alt={player.name}
               className="size-full object-cover"
             />

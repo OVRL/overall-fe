@@ -16,6 +16,7 @@ import whistleIcon from "@/public/icons/player-infos/whistle.svg";
 import shieldIcon from "@/public/icons/player-infos/shield.svg";
 import trophyIcon from "@/public/icons/player-infos/trophy.svg";
 import Button from "@/components/ui/Button";
+import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
 
 export interface PlayerDetailModalProps {
   player: Player | null;
@@ -98,7 +99,11 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
       {/* 선수 프로필 카드 */}
       <div className="flex flex-col items-center mt-2 px-2">
         <MainProfileCard
-          imgUrl={player.image || "/images/ovr.png"}
+          imgUrl={player.image}
+          imgFallbackSrc={
+            player.imageFallbackUrl ??
+            getPlayerPlaceholderSrc(`m:${player.id}`)
+          }
           playerName={player.name}
           mainPosition={player.position}
           backNumber={player.ovr || 99}

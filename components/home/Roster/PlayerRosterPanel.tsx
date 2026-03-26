@@ -6,6 +6,7 @@ import RosterList from "./RosterList";
 import { useFindManyTeamMember } from "./useFindManyTeamMemberQuery";
 import type { RosterMember } from "./useFindManyTeamMemberQuery";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { parseUserId, useUserId } from "@/hooks/useUserId";
 
 interface PlayerRosterPanelProps {
   className?: string;
@@ -20,6 +21,7 @@ function PlayerRosterPanelWithTeam({
   className?: string;
 }) {
   const { members } = useFindManyTeamMember(teamId);
+  const currentUserId = useUserId();
   const [selectedMember, setSelectedMember] = useState<RosterMember | null>(
     null,
   );
@@ -28,9 +30,21 @@ function PlayerRosterPanelWithTeam({
     setSelectedMember(member);
   }, []);
 
+  /** 선택 없을 때: 로그인 유저가 로스터에 있으면 본인, 아니면 목록 첫 멤버 */
+  const defaultMember = useMemo(() => {
+    if (members.length === 0) return null;
+    if (currentUserId == null) return members[0] ?? null;
+    const mine = members.find((m) => {
+      const relayUserId = m.user?.id;
+      if (relayUserId == null) return false;
+      return parseUserId(relayUserId) === currentUserId;
+    });
+    return mine ?? members[0] ?? null;
+  }, [members, currentUserId]);
+
   const displayMember = useMemo(
-    () => selectedMember ?? members[0] ?? null,
-    [selectedMember, members],
+    () => selectedMember ?? defaultMember,
+    [selectedMember, defaultMember],
   );
 
   return (

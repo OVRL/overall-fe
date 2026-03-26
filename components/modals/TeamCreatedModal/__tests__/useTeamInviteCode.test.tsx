@@ -1,9 +1,8 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
+import { toast } from "@/lib/toast";
 import { useTeamInviteCode } from "../useTeamInviteCode";
 
 const mockExecuteMutation = jest.fn();
-const mockToastError = jest.fn();
-const mockToastSuccess = jest.fn();
 
 jest.mock("../useCreateInviteCodeMutation", () => ({
   useCreateInviteCodeMutation: () => ({
@@ -18,13 +17,6 @@ jest.mock("../fetchInviteCodeByTeam", () => ({
 
 jest.mock("../isAlreadyExistsInviteCodeError", () => ({
   isAlreadyExistsInviteCodeError: jest.fn(() => false),
-}));
-
-jest.mock("@/lib/toast", () => ({
-  toast: {
-    error: (...args: unknown[]) => mockToastError(...args),
-    success: (...args: unknown[]) => mockToastSuccess(...args),
-  },
 }));
 
 describe("useTeamInviteCode", () => {
@@ -67,7 +59,7 @@ describe("useTeamInviteCode", () => {
         result.current.requestInviteCode();
       });
 
-      expect(mockToastError).toHaveBeenCalledWith("팀 정보를 불러올 수 없습니다.");
+      expect(toast.error).toHaveBeenCalledWith("팀 정보를 불러올 수 없습니다.");
       expect(mockExecuteMutation).not.toHaveBeenCalled();
     });
   });
@@ -106,7 +98,7 @@ describe("useTeamInviteCode", () => {
         invokeOnError();
       });
 
-      expect(mockToastError).toHaveBeenCalledWith("초대 코드 생성에 실패했습니다.");
+      expect(toast.error).toHaveBeenCalledWith("초대 코드 생성에 실패했습니다.");
     });
   });
 
@@ -122,7 +114,7 @@ describe("useTeamInviteCode", () => {
       });
 
       expect(writeText).not.toHaveBeenCalled();
-      expect(mockToastSuccess).not.toHaveBeenCalled();
+      expect(toast.success).not.toHaveBeenCalled();
     });
 
     it("inviteCode가 있으면 클립보드에 복사 후 성공 토스트를 띄운다", async () => {
@@ -146,7 +138,7 @@ describe("useTeamInviteCode", () => {
       });
 
       expect(writeText).toHaveBeenCalledWith("ABC-123");
-      expect(mockToastSuccess).toHaveBeenCalledWith("코드가 복사되었습니다.");
+      expect(toast.success).toHaveBeenCalledWith("코드가 복사되었습니다.");
     });
   });
 });

@@ -4,7 +4,8 @@ import Icon from "../../ui/Icon";
 import selectedCircle from "@/public/icons/active_circle.svg";
 
 type Props = {
-  imgUrl: string;
+  imgUrl?: string | null;
+  imgFallbackSrc?: string;
   playerName: string;
   playerSeason?: string;
   isSelected?: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 const FormationPlayerImageThumbnail = ({
   imgUrl,
+  imgFallbackSrc,
   playerName,
   playerSeason,
   isSelected = false,
@@ -24,6 +26,7 @@ const FormationPlayerImageThumbnail = ({
     <div className={cn("relative text-Fill_AccentPrimary", className)}>
       <PlayerCard
         imgUrl={imgUrl}
+        imgFallbackSrc={imgFallbackSrc}
         playerName={playerName}
         playerSeason={playerSeason}
         onDelete={onDelete}

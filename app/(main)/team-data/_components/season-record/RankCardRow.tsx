@@ -2,6 +2,7 @@ import PositionChip from "@/components/PositionChip";
 import type { Player } from "../../_types/player";
 import { Racing_Sans_One } from "next/font/google";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
 
 const racingSansOne = Racing_Sans_One({
   weight: "400",
@@ -29,7 +30,11 @@ const RankCardRow = ({ player, index, onPlayerClick }: RankCardRowProps) => {
       </span>
       <div className="flex gap-2 items-center">
         <ProfileAvatar
-          src={player.image || "/images/ovr.png"}
+          src={player.image}
+          fallbackSrc={
+            player.imageFallbackUrl ??
+            getPlayerPlaceholderSrc(`m:${player.id}`)
+          }
           alt={player.name}
           size={36}
           className="object-cover"

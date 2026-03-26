@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
   // 4. 라우팅 분기 처리
   if (signupStatus === "pending") {
-    return redirect("/onboarding");
+    return redirect("/privacy-consent");
   }
 
   return redirect("/home");

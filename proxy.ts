@@ -7,6 +7,43 @@ import { isAccessTokenExpired } from "./lib/auth/jwtAccess";
 
 const BACKEND_URL = env.BACKEND_URL;
 
+/**
+ * 프록시 인증 디버그용 로그 (토큰 값은 출력하지 않음).
+ * - 로컬: `next dev`면 자동 출력
+ * - Vercel 등: 환경 변수 `DEBUG_PROXY_AUTH=1` 설정 후 재배포
+ */
+function logProxyAuthDebug(
+  phase: string,
+  request: NextRequest,
+  cookieSnapshot: {
+    accessToken: string | undefined;
+    refreshToken: string | undefined;
+  },
+) {
+  if (
+    process.env.NODE_ENV !== "development" &&
+    process.env.DEBUG_PROXY_AUTH !== "1"
+  ) {
+    return;
+  }
+  const { pathname, search } = request.nextUrl;
+  const access = cookieSnapshot.accessToken;
+  const refresh = cookieSnapshot.refreshToken;
+  console.log("[proxy auth]", phase, {
+    method: request.method,
+    pathname,
+    search,
+    isRscRequest: search.includes("_rsc="),
+    cookieHeaderPresent: request.headers.has("cookie"),
+    namedCookieCount: request.cookies.getAll().length,
+    hasAccessTokenCookie: access != null,
+    hasRefreshTokenCookie: refresh != null,
+    accessExpired:
+      access != null ? isAccessTokenExpired(access) : null,
+    hasUserIdCookie: request.cookies.get("userId") != null,
+  });
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
@@ -178,8 +215,16 @@ export async function proxy(request: NextRequest) {
 
   // 4. 로그인 된 사용자만 볼 수 있는 페이지 (Private)
   if (isPrivate) {
+    logProxyAuthDebug("private:입력", request, {
+      accessToken,
+      refreshToken,
+    });
     const { isAuthenticated, newTokens } = await checkAuth();
     if (!isAuthenticated) {
+      logProxyAuthDebug("private:인증실패→clear-session", request, {
+        accessToken,
+        refreshToken,
+      });
       // 비로그인/만료 사용자: 세션 쿠키를 제거한 뒤 로그인 페이지로 리다이렉트 (무효 토큰 잔존 방지)
       const clearSessionUrl = new URL(
         "/api/auth/clear-session",

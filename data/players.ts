@@ -1,6 +1,7 @@
 import { Player } from "@/types/player";
+import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
 
-export const INITIAL_PLAYERS: Player[] = [
+const INITIAL_PLAYERS_BASE: Player[] = [
   {
     id: 1,
     name: "박무트",
@@ -178,3 +179,9 @@ export const INITIAL_PLAYERS: Player[] = [
     image: "/images/player/img_player_4.webp",
   },
 ];
+
+/** 베스트 XI mock: 멤버별 플레이스홀더는 `id` 기준으로 부여 */
+export const INITIAL_PLAYERS: Player[] = INITIAL_PLAYERS_BASE.map((p) => ({
+  ...p,
+  imageFallbackUrl: getPlayerPlaceholderSrc(`m:${p.id}`),
+}));

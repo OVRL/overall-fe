@@ -1,12 +1,16 @@
 import Image from "next/image";
-import { cn, getValidImageSrc } from "@/lib/utils";
+import { cn, MOCK_IMAGE_SRC } from "@/lib/utils";
 import PositionChip from "../PositionChip";
 import { Position } from "@/types/position";
 import PlayerProfileDim from "./PlayerProfileDim";
 import { CARD_THEME_MAP, CardGrade } from "@/constants/playerCard";
+import { MainProfileCardPlayerPortrait } from "./MainProfileCardPlayerPortrait";
 
 interface MainProfileCardProps {
-  imgUrl: string;
+  /** 원본 선수 이미지 URL */
+  imgUrl?: string | null;
+  /** 무효·로드 실패 시 */
+  imgFallbackSrc?: string;
   grade?: CardGrade;
   playerName: string;
   mainPosition: Position;
@@ -21,6 +25,7 @@ interface MainProfileCardProps {
 
 const MainProfileCard = ({
   imgUrl,
+  imgFallbackSrc = MOCK_IMAGE_SRC,
   grade = "NORMAL_GREEN",
   playerName,
   mainPosition,
@@ -33,7 +38,6 @@ const MainProfileCard = ({
 }: MainProfileCardProps) => {
   const theme = CARD_THEME_MAP[grade];
   const cardSizes = "(max-width: 768px) 33vw, 128px";
-  const validImgUrl = getValidImageSrc(imgUrl);
   return (
     <div
       className={cn(
@@ -51,13 +55,12 @@ const MainProfileCard = ({
       />
       <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
         <div className="relative w-full h-full">
-          <Image
-            src={validImgUrl}
+          <MainProfileCardPlayerPortrait
+            imgUrl={imgUrl}
+            imgFallbackSrc={imgFallbackSrc}
             alt={playerName}
-            fill
             sizes={cardSizes}
-            className="object-contain object-bottom z-10"
-            {...(imagePriority && { loading: "eager" as const })}
+            imagePriority={imagePriority}
           />
         </div>
       </div>

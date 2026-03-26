@@ -10,6 +10,20 @@ import {
   SearchEmptyState,
 } from "@/components/ui/SearchState";
 
+/** 목록 항목 구분: 동일 지번/도로명에 여러 POI가 있으면 주소만으로는 동일 취급됨 */
+function isSameSearchResult(
+  selected: NaverAddressResult | null,
+  item: NaverAddressResult,
+): boolean {
+  if (!selected) return false;
+  return (
+    selected.address === item.address &&
+    selected.latitude === item.latitude &&
+    selected.longitude === item.longitude &&
+    (selected.title ?? "") === (item.title ?? "")
+  );
+}
+
 interface DetailAddressSearchModalProps {
   onComplete: (result: {
     address: string;
@@ -37,7 +51,7 @@ const SearchResultList = ({
         address={item.address}
         title={item.title}
         onClick={() => onSelect(item)}
-        selected={selectedAddress?.address === item.address}
+        selected={isSameSearchResult(selectedAddress, item)}
       />
     ))}
   </>

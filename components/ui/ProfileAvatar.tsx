@@ -1,17 +1,17 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import { cn, MOCK_IMAGE_SRC } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
 
 const avatarVariants = cva(
-  "relative overflow-hidden rounded-[5px] bg-gray-200 bg-transparent", // bg-gray-200 for placeholder/fallback visual
+  "relative overflow-hidden bg-gray-200 bg-transparent",
   {
     variants: {
       size: {
-        xs: "w-8 h-12 md:w-12 md:h-16", // 32x48 / 48x64 (responsive)
-        sm: "w-12 h-16 md:w-16 md:h-20", // 48x64 / 64x80 (responsive)
-        36: "w-9 h-9", // 36px (square)
-        48: "w-12 h-12", // 48px (square)
-        56: "w-14 h-14", // 56px (square)
+        xs: "w-8 h-12 md:w-12 md:h-16",
+        sm: "w-12 h-16 md:w-16 md:h-20",
+        36: "w-9 h-9",
+        48: "w-12 h-12",
+        56: "w-14 h-14",
         72: "w-18 h-18",
       },
     },
@@ -22,16 +22,19 @@ const avatarVariants = cva(
 );
 
 interface ProfileAvatarProps extends VariantProps<typeof avatarVariants> {
-  src: string;
+  /** 원본 이미지 URL */
+  src?: string | null;
+  /** 무효·로드 실패 시 (기본: MOCK_IMAGE_SRC) */
+  fallbackSrc?: string;
   alt: string;
   className?: string;
   onError?: () => void;
-  /** LCP 이미지일 때 true */
   priority?: boolean;
 }
 
 const ProfileAvatar = ({
   src,
+  fallbackSrc = MOCK_IMAGE_SRC,
   alt,
   size,
   className,
@@ -42,6 +45,7 @@ const ProfileAvatar = ({
     <div className={cn(avatarVariants({ size }), className)}>
       <ImgPlayer
         src={src}
+        fallbackSrc={fallbackSrc}
         alt={alt}
         className="scale-[2] origin-top bg-transparent"
         onError={onError}

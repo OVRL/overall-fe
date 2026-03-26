@@ -10,19 +10,18 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useUserStore } from "@/contexts/UserContext";
 import { useCreateTeamMemberMutation } from "./_hooks/useCreateTeamMemberMutation";
 import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
+import { toast } from "@/lib/toast";
 
 const LandingStartForm = () => {
   const router = useBridgeRouter();
   const user = useUserStore((state) => state.user);
   const [inviteCode, setInviteCode] = useState("");
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const { executeMutation, isInFlight } = useCreateTeamMemberMutation();
 
   const canSubmit = inviteCode.trim().length > 0 && !isInFlight;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
 
     if (!user?.email) return;
     const code = inviteCode.trim();
@@ -33,8 +32,6 @@ const LandingStartForm = () => {
         input: {
           email: user.email,
           inviteCode: code,
-          role: "PLAYER",
-          profileImg: user.profileImage ?? undefined,
         },
       },
       onCompleted: () => {
@@ -43,7 +40,7 @@ const LandingStartForm = () => {
         } catch (err) {
           // 프로덕션 빌드에서 Minified exception 대신 실제 에러 확인용
           console.error("[LandingStartForm] onCompleted 에러:", err);
-          setSubmitError(
+          toast.error(
             err instanceof Error
               ? err.message
               : "페이지 이동 중 오류가 발생했습니다.",
@@ -51,7 +48,7 @@ const LandingStartForm = () => {
         }
       },
       onError: (error) => {
-        setSubmitError(
+        toast.error(
           getGraphQLErrorMessage(error, "팀 가입에 실패했습니다."),
         );
       },
@@ -90,18 +87,8 @@ const LandingStartForm = () => {
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
             className="h-12.5 bg-surface-elevated rounded-[0.625rem] w-full flex items-center px-4 py-3 text-white border border-border-card"
-            aria-describedby={submitError ? "submit-error" : undefined}
           />
         </div>
-        {submitError && (
-          <p
-            id="submit-error"
-            className="text-red-500 text-sm text-left w-full"
-            role="alert"
-          >
-            {submitError}
-          </p>
-        )}
       </div>
       <Button
         type="submit"
