@@ -6,10 +6,10 @@ import useModal from "@/hooks/useModal";
 import ModalLayout from "./ModalLayout";
 import Button from "../ui/Button";
 import { useAttendanceVoteMatch } from "./AttendanceVoteModal/useAttendanceVoteMatch";
-import { useAttendanceVoteActions } from "./AttendanceVoteModal/useAttendanceVoteActions";
-import { AttendanceVoteChoiceButtons } from "./AttendanceVoteModal/AttendanceVoteChoiceButtons";
+import { useAttendanceVoteCopyAddress } from "./AttendanceVoteModal/useAttendanceVoteCopyAddress";
 import { getMatchDisplay } from "./AttendanceVoteModal/getMatchDisplay";
 import { MatchAttendanceSummarySlot } from "./AttendanceVoteModal/MatchAttendanceSummarySlot";
+import { AttendanceVoteActionFooterSlot } from "./AttendanceVoteModal/AttendanceVoteActionFooterSlot";
 import { isVoteDeadlinePassed } from "@/utils/match/isVoteDeadlinePassed";
 import {
   MatchOpponentSection,
@@ -60,16 +60,9 @@ function AttendanceVoteModalWithData({
 }: {
   createdTeamId: number;
 }) {
-  const { hideModal } = useModal();
   const userId = useUserId();
   const { match } = useAttendanceVoteMatch(createdTeamId);
-  const {
-    handleCopyAddress,
-    handleAttend,
-    handleAbsent,
-    isInFlight,
-    pendingVoteChoice,
-  } = useAttendanceVoteActions(match, createdTeamId, userId, hideModal);
+  const { handleCopyAddress } = useAttendanceVoteCopyAddress(match);
 
   if (match == null) {
     return <AttendanceVoteModalNoMatch />;
@@ -105,12 +98,12 @@ function AttendanceVoteModalWithData({
         </div>
       </div>
       <div className="flex shrink-0 flex-col gap-3 pt-12">
-        <AttendanceVoteChoiceButtons
+        <AttendanceVoteActionFooterSlot
+          matchGraphqlId={match.id}
+          teamId={createdTeamId}
+          userId={userId}
+          match={match}
           voteClosed={voteClosed}
-          isInFlight={isInFlight}
-          pendingVoteChoice={pendingVoteChoice}
-          onAbsent={handleAbsent}
-          onAttend={handleAttend}
         />
       </div>
     </ModalLayout>

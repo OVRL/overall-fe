@@ -4,7 +4,9 @@ import { graphql } from "react-relay";
 export const FindMatchAttendanceQuery = graphql`
   query findMatchAttendanceQuery($matchId: Int!, $teamId: Int!) {
     findMatchAttendance(matchId: $matchId, teamId: $teamId) {
+      id
       userId
+      memberType
       user {
         id
         name
