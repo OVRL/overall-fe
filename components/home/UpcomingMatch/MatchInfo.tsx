@@ -1,8 +1,18 @@
+import Link from "@/components/Link";
+import { buttonVariants } from "@/components/ui/Button";
 import TeamInfo from "./TeamInfo";
+import { cn } from "@/lib/utils";
 import type { UpcomingMatchDisplay } from "./upcomingMatchDisplay";
 
 interface MatchInfoProps {
   display: UpcomingMatchDisplay;
+}
+
+/** 데스크톱: 포메이션 설정 링크 노출·경로 제어 */
+export interface MatchInfoDesktopProps extends MatchInfoProps {
+  formationHref: string;
+  /** 헤더 RegisterGameButton과 동일: Player가 아닐 때 true */
+  showFormationSetup: boolean;
 }
 
 /**
@@ -12,7 +22,9 @@ export function MatchInfoMobile({ display }: MatchInfoProps) {
   const { formattedDateTime, homeTeam, awayTeam } = display;
   return (
     <div className="mt-6">
-      <div className="text-gray-500 text-[0.8125rem] mb-2">{formattedDateTime}</div>
+      <div className="text-gray-500 text-[0.8125rem] mb-2">
+        {formattedDateTime}
+      </div>
       <div className="flex items-center justify-center gap-3 flex-nowrap">
         <TeamInfo
           name={homeTeam.name}
@@ -33,7 +45,11 @@ export function MatchInfoMobile({ display }: MatchInfoProps) {
 /**
  * PC용 매치 정보 (날짜 위, 팀 아래 세로 배치)
  */
-export function MatchInfoDesktop({ display }: MatchInfoProps) {
+export function MatchInfoDesktop({
+  display,
+  formationHref,
+  showFormationSetup,
+}: MatchInfoDesktopProps) {
   const { formattedDateTime, homeTeam, awayTeam } = display;
   return (
     <div className="flex flex-col items-center justify-center flex-2 gap-2">
@@ -53,6 +69,17 @@ export function MatchInfoDesktop({ display }: MatchInfoProps) {
           reverse={false}
         />
       </div>
+      {showFormationSetup ? (
+        <Link
+          href={formationHref}
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "xs" }),
+            "w-fit py-1 px-3",
+          )}
+        >
+          포메이션 설정
+        </Link>
+      ) : null}
     </div>
   );
 }
