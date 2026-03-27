@@ -119,7 +119,7 @@ describe("verifyFormationMatchAccessSSR", () => {
     });
   });
 
-  it("성공 시 match, createdTeamId를 반환한다 (Relay id 매칭)", async () => {
+  it("성공 시 match, createdTeamId, accessToken을 반환한다 (Relay id 매칭)", async () => {
     mockCookieStore({
       accessToken: "t",
       userId: "42",
@@ -152,6 +152,7 @@ describe("verifyFormationMatchAccessSSR", () => {
       ok: true,
       match,
       createdTeamId: 7,
+      accessToken: "t",
     });
   });
 });

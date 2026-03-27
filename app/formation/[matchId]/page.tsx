@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 // Components
@@ -17,6 +16,21 @@ type FormationMatchPageProps = {
   params: Promise<{ matchId: string }>;
 };
 
+/** 개발 환경에서만 포메이션 경기 페이지 관측 로그를 남깁니다. */
+function devLogFormationMatchPage(
+  level: "log" | "error",
+  message: string,
+  ...args: unknown[]
+) {
+  if (process.env.NODE_ENV !== "development") return;
+  const prefix = "[formation/[matchId]]";
+  if (level === "error") {
+    console.error(prefix, message, ...args);
+  } else {
+    console.log(prefix, message, ...args);
+  }
+}
+
 /**
  * URL의 matchId는 신뢰하지 않고 서버에서
  * (세션 쿠키 + 선택 팀 소속 + findMatch 목록)으로 소유권을 재검증합니다.
@@ -27,62 +41,42 @@ export default async function FormationMatchPage({
 }: FormationMatchPageProps) {
   const { matchId: matchIdFromPath } = await params;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("[formation/[matchId]] params.matchId (raw)", matchIdFromPath);
-  }
+  devLogFormationMatchPage("log", "params.matchId (raw)", matchIdFromPath);
 
   if (matchIdFromPath == null || matchIdFromPath === "") {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[formation/[matchId]] 비어 있음 → notFound");
-    }
+    devLogFormationMatchPage("log", "비어 있음 → notFound");
     notFound();
   }
 
   const decodedMatchId = decodeURIComponent(matchIdFromPath);
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      "[formation/[matchId]] verifyFormationMatchAccessSSR 입력",
-      decodedMatchId,
-    );
-  }
+  devLogFormationMatchPage("log", "verifyFormationMatchAccessSSR 입력", decodedMatchId);
 
   const access = await verifyFormationMatchAccessSSR(decodedMatchId);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("[formation/[matchId]] 검증 결과", {
-      ok: access.ok,
-      matchId: access.ok ? access.match.id : null,
-    });
-  }
+  devLogFormationMatchPage("log", "검증 결과", {
+    ok: access.ok,
+    matchId: access.ok ? access.match.id : null,
+  });
 
   if (!access.ok) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[formation/[matchId]] 검증 실패 → notFound");
-    }
-    notFound();
-  }
-
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (accessToken == null) {
+    devLogFormationMatchPage("log", "검증 실패 → notFound");
     notFound();
   }
 
   const numericMatchId = parseNumericIdFromRelayGlobalId(access.match.id);
   if (numericMatchId == null) {
-    if (process.env.NODE_ENV === "development") {
-      console.error(
-        "[formation/[matchId]] match.id에서 숫자 경기 ID를 파싱할 수 없음",
-        access.match.id,
-      );
-    }
+    devLogFormationMatchPage(
+      "error",
+      "match.id에서 숫자 경기 ID를 파싱할 수 없음",
+      access.match.id,
+    );
     notFound();
   }
 
   const attendanceRows = await fetchFindMatchAttendanceSSR(
     numericMatchId,
     access.createdTeamId,
-    accessToken,
+    access.accessToken,
   );
   const attendingPlayers =
     matchAttendanceRowsToAttendingPlayers(attendanceRows);

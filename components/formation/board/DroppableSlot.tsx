@@ -2,6 +2,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import QuarterButton from "../../ui/QuarterButton";
 import FormationPlayerImageThumbnail from "./FormationPlayerImageThumbnail";
+import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { Player } from "@/types/formation";
 import { cn } from "@/lib/utils";
 
@@ -59,9 +60,13 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
   const isHovered = isOver && !player;
   const isSelected = player?.id === selectedPlayer?.id;
 
+  /** 보드 슬롯 썸네일: 명단·오버레이와 동일 플레이스홀더 규칙 */
+  const slotProfile =
+    player != null ? getFormationPlayerProfileAvatarUrls(player) : null;
+
   return (
     <div ref={setDroppableRef} className="relative group z-0">
-      {player ? (
+      {player != null && slotProfile != null ? (
         <div
           ref={setDraggableRef}
           {...attributes}
@@ -69,7 +74,8 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
           className={cn("touch-none", isDragging ? "opacity-50" : "")}
         >
           <FormationPlayerImageThumbnail
-            imgUrl={player.image || "/images/player/img_player_2.webp"}
+            imgUrl={slotProfile.src}
+            imgFallbackSrc={slotProfile.fallbackSrc}
             playerName={player.name}
             playerSeason={player.season}
             isSelected={isSelected}

@@ -69,11 +69,14 @@ function matchIdEquals(a: string, b: string): boolean {
  * 포메이션 등에서 URL 경로의 matchId(숫자 또는 Relay 글로벌 ID)를 신뢰하지 않고,
  * 로그인·선택 팀 기준 findMatch 목록에 포함되는지 서버에서만 검증합니다.
  * (Next.js 데이터 보안 가이드: 클라이언트 입력은 매 요청 서버에서 재검증)
+ *
+ * 성공 시 accessToken을 함께 반환해, 동일 요청에서 cookies()를 다시 읽지 않고
+ * 후속 SSR 페치(findMatchAttendance 등)에 재사용할 수 있게 합니다.
  */
 export async function verifyFormationMatchAccessSSR(
   matchIdFromClient: string,
 ): Promise<
-  | { ok: true; match: MatchForUpcoming; createdTeamId: number }
+  | { ok: true; match: MatchForUpcoming; createdTeamId: number; accessToken: string }
   | { ok: false }
 > {
   const trimmed = matchIdFromClient.trim();
@@ -111,5 +114,5 @@ export async function verifyFormationMatchAccessSSR(
     return { ok: false };
   }
 
-  return { ok: true, match, createdTeamId };
+  return { ok: true, match, createdTeamId, accessToken };
 }
