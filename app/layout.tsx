@@ -20,6 +20,7 @@ import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
 import { TEAM_REQUIRED_ROUTES, isTeamManagementPath } from "@/lib/routes";
 import { canUseTeamManagementStaffFeatures } from "@/lib/permissions/teamMemberRole";
 import { redirect } from "next/navigation";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -171,6 +172,7 @@ export default async function RootLayout({
           src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${env.NEXT_PUBLIC_NAVER_CLIENT_ID}&submodules=geocoder`}
           strategy="lazyOnload"
         />
+        <SpeedInsights />
       </body>
     </html>
   );
