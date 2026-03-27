@@ -72,7 +72,10 @@ function matchIdEquals(a: string, b: string): boolean {
  */
 export async function verifyFormationMatchAccessSSR(
   matchIdFromClient: string,
-): Promise<{ ok: true; match: MatchForUpcoming } | { ok: false }> {
+): Promise<
+  | { ok: true; match: MatchForUpcoming; createdTeamId: number }
+  | { ok: false }
+> {
   const trimmed = matchIdFromClient.trim();
   if (trimmed === "") return { ok: false };
 
@@ -108,5 +111,5 @@ export async function verifyFormationMatchAccessSSR(
     return { ok: false };
   }
 
-  return { ok: true, match };
+  return { ok: true, match, createdTeamId };
 }

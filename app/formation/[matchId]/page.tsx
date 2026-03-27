@@ -1,14 +1,16 @@
-import React from "react";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 // Components
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
 import FormationBuilder from "../_components/FormationBuilder";
 import FormationHeader from "../_components/FormationHeader";
+import { FormationMatchPlayersProvider } from "../_context/FormationMatchPlayersContext";
 
-// Mock Data
-import { MOCK_PLAYERS } from "@/constants/mock-players";
+import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import { matchToScheduleCardData } from "@/lib/formation/matchToScheduleCardProps";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
+import { fetchFindMatchAttendanceSSR } from "@/utils/fetchFindMatchAttendanceSSR";
 import { verifyFormationMatchAccessSSR } from "@/utils/verifyFormationMatchAccessSSR";
 
 type FormationMatchPageProps = {
@@ -60,6 +62,31 @@ export default async function FormationMatchPage({
     notFound();
   }
 
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  if (accessToken == null) {
+    notFound();
+  }
+
+  const numericMatchId = parseNumericIdFromRelayGlobalId(access.match.id);
+  if (numericMatchId == null) {
+    if (process.env.NODE_ENV === "development") {
+      console.error(
+        "[formation/[matchId]] match.id에서 숫자 경기 ID를 파싱할 수 없음",
+        access.match.id,
+      );
+    }
+    notFound();
+  }
+
+  const attendanceRows = await fetchFindMatchAttendanceSSR(
+    numericMatchId,
+    access.createdTeamId,
+    accessToken,
+  );
+  const attendingPlayers =
+    matchAttendanceRowsToAttendingPlayers(attendanceRows);
+
   const scheduleProps = matchToScheduleCardData(access.match);
   const scheduleCard = (
     <MatchScheduleCard
@@ -77,15 +104,16 @@ export default async function FormationMatchPage({
     <div className="min-h-dvh pt-safe bg-surface-primary flex flex-col">
       <FormationHeader />
       <main className="flex-1 flex flex-col px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
-        <FormationBuilder
-          scheduleCard={scheduleCard}
-          initialPlayers={MOCK_PLAYERS}
-          matchQuarterSpec={{
-            quarterCount: access.match.quarterCount,
-            quarterDurationMinutes: access.match.quarterDuration,
-            matchType: access.match.matchType,
-          }}
-        />
+        <FormationMatchPlayersProvider players={attendingPlayers}>
+          <FormationBuilder
+            scheduleCard={scheduleCard}
+            matchQuarterSpec={{
+              quarterCount: access.match.quarterCount,
+              quarterDurationMinutes: access.match.quarterDuration,
+              matchType: access.match.matchType,
+            }}
+          />
+        </FormationMatchPlayersProvider>
       </main>
     </div>
   );

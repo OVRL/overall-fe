@@ -4,6 +4,7 @@ import React from "react";
 import FormationControls from "@/components/formation/FormationControls";
 import FormationBoardList from "@/components/formation/board/FormationBoardList";
 import FormationPlayerList from "@/components/formation/player-list/FormationPlayerList";
+import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatchPlayersContext";
 import { QuarterData, Player } from "@/types/formation";
 
 export interface FormationBuilderDesktopProps {
@@ -24,7 +25,6 @@ export interface FormationBuilderDesktopProps {
     positionIndex: number,
     player: Player,
   ) => void;
-  initialPlayers: Player[];
 }
 
 /**
@@ -44,8 +44,9 @@ export default function FormationBuilderDesktop({
   selectedPlayer,
   setSelectedPlayer,
   onPositionRemove,
-  initialPlayers,
 }: FormationBuilderDesktopProps) {
+  const rosterPlayers = useFormationMatchPlayers();
+
   return (
     <div className="flex-1 flex flex-col lg:flex-row gap-4 w-full max-w-screen-xl justify-center lg:items-stretch 2xl:max-w-none">
       <div className="w-full lg:flex-1 2xl:w-225 2xl:flex-none flex flex-col gap-4 shrink-0 transition-all duration-300">
@@ -72,7 +73,7 @@ export default function FormationBuilderDesktop({
       </div>
 
       <FormationPlayerList
-        players={initialPlayers}
+        players={rosterPlayers}
         currentQuarterLineups={quarters.map((q) => q.lineup || {})}
         selectedPlayer={selectedPlayer}
         onSelectPlayer={setSelectedPlayer}

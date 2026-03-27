@@ -6,6 +6,7 @@ import PositionChip from "@/components/PositionChip";
 import QuarterChip from "@/components/ui/QuarterChip";
 import { Position } from "@/types/position";
 import { cn } from "@/lib/utils";
+import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { useIsMobile } from "@/hooks/useIsMobile"; // Added hook
 
 interface FormationPlayerRowProps {
@@ -24,6 +25,9 @@ const FormationPlayerRow: React.FC<FormationPlayerRowProps> = ({
   onSelect,
 }) => {
   const isMobile = useIsMobile();
+
+  const { src: avatarSrc, fallbackSrc: avatarFallbackSrc } =
+    getFormationPlayerProfileAvatarUrls(player);
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `player-${player.id}`,
@@ -53,7 +57,8 @@ const FormationPlayerRow: React.FC<FormationPlayerRowProps> = ({
       {/* Profile Avatar */}
       <div className="flex items-center gap-2">
         <ProfileAvatar
-          src="/images/player/Rectangle.webp"
+          src={avatarSrc}
+          fallbackSrc={avatarFallbackSrc}
           alt={player.name}
           size={48}
           className={cn(isSelected ? "bg-[#262F0D]" : "bg-gray-1100")}

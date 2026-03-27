@@ -9,6 +9,8 @@ export interface Player {
   number: number;
   overall: number;
   image?: string;
+  /** 프로필 없을 때 플레이스홀더 시드용 (없으면 `m:{id}` 해시) */
+  imageFallbackUrl?: string | null;
   season?: string;
   seasonType?: "general" | "worldBest";
   // Formation specific props
