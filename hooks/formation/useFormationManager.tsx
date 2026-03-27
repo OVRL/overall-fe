@@ -1,15 +1,15 @@
 import { useState, useCallback } from "react";
 import { Player, QuarterData } from "@/types/formation";
 
-export const useFormationManager = (initialQuarters?: QuarterData[]) => {
-  const defaultQuarter: QuarterData = {
-    id: 1,
-    type: "IN_HOUSE",
-    formation: "4-3-3",
-    matchup: { home: "A", away: "B" },
-    lineup: {},
-  };
+const defaultQuarter: QuarterData = {
+  id: 1,
+  type: "IN_HOUSE",
+  formation: "4-3-3",
+  matchup: { home: "A", away: "B" },
+  lineup: {},
+};
 
+export const useFormationManager = (initialQuarters?: QuarterData[]) => {
   const [quarters, setQuarters] = useState<QuarterData[]>(
     initialQuarters?.length ? initialQuarters : [defaultQuarter],
   );
@@ -109,6 +109,10 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
     });
   }, []);
 
+  const resetQuarters = useCallback(() => {
+    setQuarters(initialQuarters?.length ? initialQuarters : [defaultQuarter]);
+  }, [initialQuarters]);
+
   return {
     quarters,
     setQuarters,
@@ -116,5 +120,6 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
     removePlayer,
     getAssignedQuarters,
     addQuarter,
+    resetQuarters,
   };
 };

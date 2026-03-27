@@ -41,6 +41,14 @@ jest.mock("../FormationBuilderMobile", () => {
   };
 });
 
+// FormationHeader는 Next.js 라우터·브릿지 훅을 쓰므로 단위 테스트에서는 스텁 처리
+jest.mock("../FormationHeader", () => ({
+  __esModule: true,
+  default: function MockFormationHeader() {
+    return <div data-testid="formation-header" />;
+  },
+}));
+
 describe("FormationBuilder 컴포넌트", () => {
   const mockScheduleCard = <div data-testid="schedule-card">Mock Schedule</div>;
   const mockInitialPlayers: any[] = [];
