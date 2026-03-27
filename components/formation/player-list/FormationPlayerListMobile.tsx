@@ -8,6 +8,7 @@ import AssistiveChip from "@/components/ui/AssistiveChip";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import PositionChip from "@/components/PositionChip";
 import { cn } from "@/lib/utils";
+import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import calendar from "@/public/icons/calendar.svg";
 import useModal from "@/hooks/useModal";
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
@@ -45,6 +46,9 @@ function PlayerCardMobile({
 }) {
   const hasAssignment = assignedQuarterIds && assignedQuarterIds.length > 0;
 
+  const { src: avatarSrc, fallbackSrc: avatarFallbackSrc } =
+    getFormationPlayerProfileAvatarUrls(player);
+
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `player-list-mobile-${player.id}`,
     data: {
@@ -75,7 +79,8 @@ function PlayerCardMobile({
       }
     >
       <ProfileAvatar
-        src={player.image ?? "/images/player/Rectangle.webp"}
+        src={avatarSrc}
+        fallbackSrc={avatarFallbackSrc}
         alt=""
         size={48}
       />

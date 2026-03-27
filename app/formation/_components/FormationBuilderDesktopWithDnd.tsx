@@ -16,7 +16,24 @@ import { snapCenterToCursor } from "@dnd-kit/modifiers";
 
 import FormationBuilderDesktop from "./FormationBuilderDesktop";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { QuarterData, Player } from "@/types/formation";
+
+/** 드래그 오버레이: 명단 행과 동일 `getFormationPlayerProfileAvatarUrls` */
+function DragOverlayPlayerAvatar({ player }: { player: Player }) {
+  const { src, fallbackSrc } = getFormationPlayerProfileAvatarUrls(player);
+
+  return (
+    <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
+      <ProfileAvatar
+        src={src}
+        fallbackSrc={fallbackSrc}
+        alt={player.name}
+        size={48}
+      />
+    </div>
+  );
+}
 
 export interface FormationBuilderDesktopWithDndProps {
   scheduleCard: React.ReactNode;
@@ -36,7 +53,6 @@ export interface FormationBuilderDesktopWithDndProps {
     positionIndex: number,
     player: Player,
   ) => void;
-  initialPlayers: Player[];
 }
 
 /**
@@ -121,18 +137,11 @@ export default function FormationBuilderDesktopWithDnd(
         setSelectedPlayer={props.setSelectedPlayer}
         onPositionRemove={props.onPositionRemove}
         assignPlayer={props.assignPlayer}
-        initialPlayers={props.initialPlayers}
       />
 
       <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
         {activePlayer ? (
-          <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
-            <ProfileAvatar
-              src={activePlayer.image || "/images/player/img_player_2.webp"}
-              alt={activePlayer.name}
-              size={48}
-            />
-          </div>
+          <DragOverlayPlayerAvatar player={activePlayer} />
         ) : null}
       </DragOverlay>
     </DndContext>

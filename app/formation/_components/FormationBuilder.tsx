@@ -50,17 +50,15 @@ export type MatchQuarterSpec = {
 
 interface FormationBuilderProps {
   scheduleCard: React.ReactNode;
-  initialPlayers: Player[];
   matchQuarterSpec?: MatchQuarterSpec | null;
 }
 
 /**
  * 포메이션 빌더 오케스트레이터: 비즈니스 상태만 유지, 1024px 기준 데스크/모바일 분기.
- * 모바일: FormationBuilderMobile (탭 배치, DnD 없음). 데스크톱: FormationBuilderDesktopWithDnd (DnD 번들 별도 청크).
+ * 선수 풀은 `FormationMatchPlayersProvider`(SSR 데이터)에서 읽습니다.
  */
 export default function FormationBuilder({
   scheduleCard,
-  initialPlayers,
   matchQuarterSpec = null,
 }: FormationBuilderProps) {
   const initialQuarters =
@@ -96,7 +94,6 @@ export default function FormationBuilder({
     setSelectedPlayer: setSelectedListPlayer,
     onPositionRemove: removePlayer,
     assignPlayer,
-    initialPlayers,
   };
 
   if (isLgOrBelow) {

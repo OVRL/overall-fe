@@ -15,9 +15,11 @@ import {
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import QuarterSelectorTabs from "@/components/formation/quarter/QuarterSelectorTabs";
 import FormationBoardSingle from "@/components/formation/board/FormationBoardSingle";
 import FormationPlayerListMobile from "@/components/formation/player-list/FormationPlayerListMobile";
+import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatchPlayersContext";
 import { QuarterData, Player } from "@/types/formation";
 import fire from "@/public/icons/fire.svg";
 import Icon from "@/components/ui/Icon";
@@ -37,7 +39,20 @@ export interface FormationBuilderMobileProps {
     positionIndex: number,
     player: Player,
   ) => void;
-  initialPlayers: Player[];
+}
+
+function MobileDragOverlayAvatar({ player }: { player: Player }) {
+  const { src, fallbackSrc } = getFormationPlayerProfileAvatarUrls(player);
+  return (
+    <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
+      <ProfileAvatar
+        src={src}
+        fallbackSrc={fallbackSrc}
+        alt={player.name}
+        size={48}
+      />
+    </div>
+  );
 }
 
 /**
@@ -53,8 +68,9 @@ export default function FormationBuilderMobile({
   setSelectedPlayer,
   onPositionRemove,
   assignPlayer,
-  initialPlayers,
 }: FormationBuilderMobileProps) {
+  const rosterPlayers = useFormationMatchPlayers();
+
   /** 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치. 중복은 useFormationManager.assignPlayer에서 처리. */
   const handlePlaceSelectedPlayer = (quarterId: number, index: number) => {
     if (selectedPlayer) {
@@ -169,7 +185,7 @@ export default function FormationBuilderMobile({
         </div>
 
         <FormationPlayerListMobile
-          players={initialPlayers}
+          players={rosterPlayers}
           selectedPlayer={selectedPlayer}
           onSelectPlayer={(player) =>
             setSelectedPlayer(selectedPlayer?.id === player.id ? null : player)
@@ -182,13 +198,7 @@ export default function FormationBuilderMobile({
 
         <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
           {activePlayer ? (
-            <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
-              <ProfileAvatar
-                src={activePlayer.image || "/images/player/img_player_2.webp"}
-                alt={activePlayer.name}
-                size={48}
-              />
-            </div>
+            <MobileDragOverlayAvatar player={activePlayer} />
           ) : null}
         </DragOverlay>
       </div>

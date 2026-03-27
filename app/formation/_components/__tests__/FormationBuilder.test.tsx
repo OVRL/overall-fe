@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import FormationBuilder from "../FormationBuilder";
+import { FormationMatchPlayersProvider } from "../../_context/FormationMatchPlayersContext";
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
 
 // 1. 모듈 모킹
@@ -59,10 +60,9 @@ describe("FormationBuilder 컴포넌트", () => {
 
   it("기본 레이아웃 및 렌더링이 정상적으로 동작해야 한다", () => {
     render(
-      <FormationBuilder
-        scheduleCard={mockScheduleCard}
-        initialPlayers={mockInitialPlayers}
-      />,
+      <FormationMatchPlayersProvider players={mockInitialPlayers}>
+        <FormationBuilder scheduleCard={mockScheduleCard} />
+      </FormationMatchPlayersProvider>,
     );
 
     expect(screen.getByTestId("formation-builder-desktop")).toBeInTheDocument();
@@ -74,10 +74,9 @@ describe("FormationBuilder 컴포넌트", () => {
 
   it("FormationControls를 통한 쿼터 선택 상태가 FormationBoardList로 올바르게 전달되어야 한다", () => {
     render(
-      <FormationBuilder
-        scheduleCard={mockScheduleCard}
-        initialPlayers={mockInitialPlayers}
-      />,
+      <FormationMatchPlayersProvider players={mockInitialPlayers}>
+        <FormationBuilder scheduleCard={mockScheduleCard} />
+      </FormationMatchPlayersProvider>,
     );
 
     // 초기값은 null로 설정되어 있는지 확인 (page 변경 이전엔 null로 초기화됨)
