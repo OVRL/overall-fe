@@ -1,5 +1,7 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { RelayEnvironmentProvider } from "react-relay";
+import { createMockEnvironment } from "relay-test-utils";
 import RegisterGameModal from "../RegisterGameModal";
 import { getRegisterGameDefaultValues } from "../schema";
 import type { RegisterGameValues } from "../schema";
@@ -55,6 +57,11 @@ jest.mock("../hooks/useCreateMatchMutation", () => ({
     }),
     isInFlight: false,
   }),
+}));
+
+// 제출 후 findMatch refetch(await)가 끝나야 hideModal이 호출되므로, 테스트에선 즉시 이행
+jest.mock("@/lib/relay/observableToPromise", () => ({
+  observableToPromise: jest.fn(() => Promise.resolve(null)),
 }));
 
 const defaultFormValues = getRegisterGameDefaultValues();
@@ -123,8 +130,19 @@ function createMockForm(overrides = {}) {
 }
 
 describe("RegisterGameModal", () => {
+  let relayEnvironment: ReturnType<typeof createMockEnvironment>;
+
+  function renderModal() {
+    return render(
+      <RelayEnvironmentProvider environment={relayEnvironment}>
+        <RegisterGameModal />
+      </RelayEnvironmentProvider>,
+    );
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
+    relayEnvironment = createMockEnvironment();
     mockUseRegisterGameForm.mockReturnValue({
       ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
@@ -132,7 +150,7 @@ describe("RegisterGameModal", () => {
   });
 
   it("모달 타이틀과 주요 섹션이 렌더링된다", () => {
-    render(<RegisterGameModal />);
+    renderModal();
 
     expect(screen.getByText("경기 등록")).toBeInTheDocument();
     expect(screen.getByText("경기 성격")).toBeInTheDocument();
@@ -144,14 +162,14 @@ describe("RegisterGameModal", () => {
   });
 
   it("등록·취소 버튼이 렌더링된다", () => {
-    render(<RegisterGameModal />);
+    renderModal();
 
     expect(screen.getByRole("button", { name: "등록" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "취소" })).toBeInTheDocument();
   });
 
   it("취소 버튼 클릭 시 resetToDefaults와 hideModal이 호출된다", () => {
-    render(<RegisterGameModal />);
+    renderModal();
 
     fireEvent.click(screen.getByRole("button", { name: "취소" }));
 
@@ -159,7 +177,7 @@ describe("RegisterGameModal", () => {
     expect(mockHideModal).toHaveBeenCalledTimes(1);
   });
 
-  it("폼 제출 시 handleSubmit 콜백이 호출된 뒤 hideModal이 호출된다", () => {
+  it("폼 제출 시 handleSubmit 콜백이 호출된 뒤 hideModal이 호출된다", async () => {
     const handleSubmitFn = jest.fn((onValid: (data: unknown) => void) => (e: React.FormEvent) => {
       e?.preventDefault();
       onValid(defaultFormValues);
@@ -169,11 +187,13 @@ describe("RegisterGameModal", () => {
       resetToDefaults: mockResetToDefaults,
     });
 
-    render(<RegisterGameModal />);
+    renderModal();
     fireEvent.click(screen.getByRole("button", { name: "등록" }));
 
     expect(handleSubmitFn).toHaveBeenCalled();
-    expect(mockHideModal).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockHideModal).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("폼 검증 실패 시 첫 필드 에러 메시지로 toast.error를 띄우고 hideModal은 호출되지 않는다", () => {
@@ -199,7 +219,7 @@ describe("RegisterGameModal", () => {
       resetToDefaults: mockResetToDefaults,
     });
 
-    render(<RegisterGameModal />);
+    renderModal();
     fireEvent.click(screen.getByRole("button", { name: "등록" }));
 
     expect(toast.error).toHaveBeenCalledTimes(1);
@@ -223,7 +243,7 @@ describe("RegisterGameModal", () => {
       resetToDefaults: mockResetToDefaults,
     });
 
-    render(<RegisterGameModal />);
+    renderModal();
     fireEvent.click(screen.getByRole("button", { name: "등록" }));
 
     expect(toast.error).toHaveBeenCalledWith(
@@ -237,7 +257,7 @@ describe("RegisterGameModal", () => {
       ...createMockForm(),
       resetToDefaults: mockResetToDefaults,
     });
-    render(<RegisterGameModal />);
+    renderModal();
 
     expect(
       screen.getByPlaceholderText("상대팀 명을 입력하세요"),

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
@@ -9,6 +9,7 @@ import FormationBuilderMobile from "./FormationBuilderMobile";
 import Skeleton from "@/components/ui/Skeleton";
 import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import { Player } from "@/types/formation";
+import FormationHeader from "./FormationHeader";
 
 /** 데스크톱 레이아웃과 비슷한 스켈레톤 (매치 카드 + 쿼터/컨트롤 + 보드 + 선수 명단) */
 function FormationBuilderDesktopSkeleton() {
@@ -61,15 +62,17 @@ export default function FormationBuilder({
   scheduleCard,
   matchQuarterSpec = null,
 }: FormationBuilderProps) {
-  const initialQuarters =
+  const initialQuarters = useMemo(() => 
     matchQuarterSpec == null
       ? undefined
       : buildQuartersFromMatch(
           matchQuarterSpec.quarterCount,
           matchQuarterSpec.matchType,
-        );
+        ),
+    [matchQuarterSpec]
+  );
 
-  const { quarters, setQuarters, assignPlayer, removePlayer } =
+  const { quarters, setQuarters, assignPlayer, removePlayer, resetQuarters } =
     useFormationManager(initialQuarters);
   const isLgOrBelow = useIsMobile(1023);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(null);
@@ -96,14 +99,27 @@ export default function FormationBuilder({
     assignPlayer,
   };
 
-  if (isLgOrBelow) {
-    return <FormationBuilderMobile {...commonProps} />;
-  }
+  const handleReset = () => {
+    resetQuarters();
+    setCurrentQuarterId(null);
+    setSelectedListPlayer(null);
+  };
 
-  return (
+  const content = isLgOrBelow ? (
+    <FormationBuilderMobile {...commonProps} />
+  ) : (
     <FormationBuilderDesktopWithDnd
       scheduleCard={scheduleCard}
       {...commonProps}
     />
+  );
+
+  return (
+    <div className="min-h-dvh pt-safe bg-surface-primary flex flex-col">
+      <FormationHeader onReset={handleReset} />
+      <main className="flex-1 flex flex-col px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
+        {content}
+      </main>
+    </div>
   );
 }

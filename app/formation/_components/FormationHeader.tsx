@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Header from "@/components/Header";
+import Header from "./Header";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import arrowBack from "@/public/icons/arrow_back.svg";
 import Icon from "@/components/ui/Icon";
@@ -10,18 +9,20 @@ import matchLineup from "@/public/icons/title_matchlineup.svg";
 type FormationHeaderProps = {
   onBack?: () => void;
   onSave?: () => void;
+  onReset?: () => void;
 };
 
 const FormationHeader = (props: FormationHeaderProps) => {
-  const router = useRouter();
   const isMobile = useIsMobile(1023);
 
   if (isMobile) {
     return (
       <Header
+        variant="mobile"
+        onBack={props.onBack}
+        onReset={props.onReset}
         leftAction={{
           icon: arrowBack,
-          onClick: props.onBack ?? (() => router.back()),
           alt: "뒤로 가기",
         }}
         logo={
@@ -35,7 +36,7 @@ const FormationHeader = (props: FormationHeaderProps) => {
     );
   }
 
-  return <Header variant="global" />;
+  return <Header onBack={props.onBack} onReset={props.onReset} />;
 };
 
 export default FormationHeader;

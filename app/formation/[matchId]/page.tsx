@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 // Components
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
 import FormationBuilder from "../_components/FormationBuilder";
-import FormationHeader from "../_components/FormationHeader";
 import { FormationMatchPlayersProvider } from "../_context/FormationMatchPlayersContext";
 
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
@@ -95,20 +94,15 @@ export default async function FormationMatchPage({
   );
 
   return (
-    <div className="min-h-dvh pt-safe bg-surface-primary flex flex-col">
-      <FormationHeader />
-      <main className="flex-1 flex flex-col px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
-        <FormationMatchPlayersProvider players={attendingPlayers}>
-          <FormationBuilder
-            scheduleCard={scheduleCard}
-            matchQuarterSpec={{
-              quarterCount: access.match.quarterCount,
-              quarterDurationMinutes: access.match.quarterDuration,
-              matchType: access.match.matchType,
-            }}
-          />
-        </FormationMatchPlayersProvider>
-      </main>
-    </div>
+    <FormationMatchPlayersProvider players={attendingPlayers}>
+      <FormationBuilder
+        scheduleCard={scheduleCard}
+        matchQuarterSpec={{
+          quarterCount: access.match.quarterCount,
+          quarterDurationMinutes: access.match.quarterDuration,
+          matchType: access.match.matchType,
+        }}
+      />
+    </FormationMatchPlayersProvider>
   );
 }
