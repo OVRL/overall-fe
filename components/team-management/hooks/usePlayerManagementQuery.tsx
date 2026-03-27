@@ -5,10 +5,13 @@ const playerManagementQuery = graphql`
   query usePlayerManagementQuery($teamId: Int!) {
     findManyTeamMember(teamId: $teamId, limit: 200) {
       members {
+        __typename
         id
         backNumber
         position
         user {
+          __typename
+          id
           name
           profileImage
         }

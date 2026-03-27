@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a27521fa71cc3d9796618614a1600e81>>
+ * @generated SignedSource<<767c0faee511f27d7aba0b3eab83ebfc>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,6 +18,7 @@ export type useBestElevenQuery$variables = {
 export type useBestElevenQuery$data = {
   readonly findManyTeamMember: {
     readonly members: ReadonlyArray<{
+      readonly __typename: "TeamMemberModel";
       readonly backNumber: number | null | undefined;
       readonly id: number;
       readonly overall: {
@@ -35,7 +36,9 @@ export type useBestElevenQuery$data = {
       readonly position: Position | null | undefined;
       readonly role: Role;
       readonly user: {
+        readonly __typename: "UserModel";
         readonly birthDate: any | null | undefined;
+        readonly id: string;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
       } | null | undefined;
@@ -68,14 +71,13 @@ v2 = {
   "name": "teamId",
   "variableName": "teamId"
 },
-v3 = [
-  {
-    "kind": "Literal",
-    "name": "limit",
-    "value": 200
-  },
-  (v2/*: any*/)
-],
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "__typename",
+  "storageKey": null
+},
 v4 = {
   "alias": null,
   "args": null,
@@ -83,162 +85,208 @@ v4 = {
   "name": "id",
   "storageKey": null
 },
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "backNumber",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "position",
-  "storageKey": null
-},
-v7 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "role",
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "name",
-  "storageKey": null
-},
-v9 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "profileImage",
-  "storageKey": null
-},
-v10 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "birthDate",
-  "storageKey": null
-},
-v11 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "OverallModel",
-  "kind": "LinkedField",
-  "name": "overall",
-  "plural": false,
-  "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "ovr",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "appearances",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "goals",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "assists",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "keyPasses",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "attackPoints",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "cleanSheets",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "mom3",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "mom8",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "winRate",
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-},
-v12 = {
-  "alias": null,
-  "args": [
-    {
-      "kind": "Variable",
-      "name": "matchId",
-      "variableName": "matchId"
-    },
-    (v2/*: any*/)
-  ],
-  "concreteType": "MatchFormationModel",
-  "kind": "LinkedField",
-  "name": "findMatchFormation",
-  "plural": true,
-  "selections": [
-    (v4/*: any*/),
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "quarter",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "tactics",
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-};
+v5 = [
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Literal",
+        "name": "limit",
+        "value": 200
+      },
+      (v2/*: any*/)
+    ],
+    "concreteType": "TeamMemberArrayModel",
+    "kind": "LinkedField",
+    "name": "findManyTeamMember",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TeamMemberModel",
+        "kind": "LinkedField",
+        "name": "members",
+        "plural": true,
+        "selections": [
+          (v3/*: any*/),
+          (v4/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "backNumber",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "position",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "role",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "UserModel",
+            "kind": "LinkedField",
+            "name": "user",
+            "plural": false,
+            "selections": [
+              (v3/*: any*/),
+              (v4/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "name",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "profileImage",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "birthDate",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "OverallModel",
+            "kind": "LinkedField",
+            "name": "overall",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "ovr",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "appearances",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "goals",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "assists",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "keyPasses",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "attackPoints",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "cleanSheets",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "mom3",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "mom8",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "winRate",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "matchId",
+        "variableName": "matchId"
+      },
+      (v2/*: any*/)
+    ],
+    "concreteType": "MatchFormationModel",
+    "kind": "LinkedField",
+    "name": "findMatchFormation",
+    "plural": true,
+    "selections": [
+      (v4/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarter",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "tactics",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  }
+];
 return {
   "fragment": {
     "argumentDefinitions": [
@@ -248,50 +296,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "useBestElevenQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v3/*: any*/),
-        "concreteType": "TeamMemberArrayModel",
-        "kind": "LinkedField",
-        "name": "findManyTeamMember",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamMemberModel",
-            "kind": "LinkedField",
-            "name": "members",
-            "plural": true,
-            "selections": [
-              (v4/*: any*/),
-              (v5/*: any*/),
-              (v6/*: any*/),
-              (v7/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "UserModel",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v8/*: any*/),
-                  (v9/*: any*/),
-                  (v10/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v11/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      },
-      (v12/*: any*/)
-    ],
+    "selections": (v5/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -303,63 +308,19 @@ return {
     ],
     "kind": "Operation",
     "name": "useBestElevenQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v3/*: any*/),
-        "concreteType": "TeamMemberArrayModel",
-        "kind": "LinkedField",
-        "name": "findManyTeamMember",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamMemberModel",
-            "kind": "LinkedField",
-            "name": "members",
-            "plural": true,
-            "selections": [
-              (v4/*: any*/),
-              (v5/*: any*/),
-              (v6/*: any*/),
-              (v7/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "UserModel",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v8/*: any*/),
-                  (v9/*: any*/),
-                  (v10/*: any*/),
-                  (v4/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v11/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      },
-      (v12/*: any*/)
-    ]
+    "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "bd1f303a23376cfb2a2e72fd7e9c0b40",
+    "cacheID": "3cf87bfaa8975da4ad61d2101d99b05b",
     "id": null,
     "metadata": {},
     "name": "useBestElevenQuery",
     "operationKind": "query",
-    "text": "query useBestElevenQuery(\n  $teamId: Int!\n  $matchId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      id\n      backNumber\n      position\n      role\n      user {\n        name\n        profileImage\n        birthDate\n        id\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    quarter\n    tactics\n  }\n}\n"
+    "text": "query useBestElevenQuery(\n  $teamId: Int!\n  $matchId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    quarter\n    tactics\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3e0322a4cb09dbf9fd7f2f61cc23322e";
+(node as any).hash = "3bea3281e92d732cc8dfb8a1e3abe1e0";
 
 export default node;

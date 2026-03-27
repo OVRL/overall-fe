@@ -496,7 +496,7 @@ export default function MOMVotePanel() {
     <div className="px-4 md:px-8 pt-8 md:pt-14 pb-24 max-w-5xl mx-auto w-full flex flex-col">
       <header className="flex items-center justify-between mb-12">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-black text-white tracking-tighter leading-none">MOM 투표 리스트</h1>
+          <h1 className="text-[20px] font-bold text-white tracking-tighter leading-none">MOM 투표 리스트</h1>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <p className="text-[11px] text-gray-600 font-black uppercase tracking-[0.2em]">Automated Intelligence System</p>

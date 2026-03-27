@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ecbfef8275b3c4109eb70a628144faff>>
+ * @generated SignedSource<<b5914da23b7234c55c80d03f90eab10a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,6 +16,7 @@ export type usePlayerManagementQuery$variables = {
 export type usePlayerManagementQuery$data = {
   readonly findManyTeamMember: {
     readonly members: ReadonlyArray<{
+      readonly __typename: "TeamMemberModel";
       readonly backNumber: number | null | undefined;
       readonly id: number;
       readonly overall: {
@@ -29,6 +30,8 @@ export type usePlayerManagementQuery$data = {
       } | null | undefined;
       readonly position: Position | null | undefined;
       readonly user: {
+        readonly __typename: "UserModel";
+        readonly id: string;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
       } | null | undefined;
@@ -49,18 +52,13 @@ var v0 = [
     "name": "teamId"
   }
 ],
-v1 = [
-  {
-    "kind": "Literal",
-    "name": "limit",
-    "value": 200
-  },
-  {
-    "kind": "Variable",
-    "name": "teamId",
-    "variableName": "teamId"
-  }
-],
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "__typename",
+  "storageKey": null
+},
 v2 = {
   "alias": null,
   "args": null,
@@ -68,149 +66,158 @@ v2 = {
   "name": "id",
   "storageKey": null
 },
-v3 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "backNumber",
-  "storageKey": null
-},
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "position",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "name",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "profileImage",
-  "storageKey": null
-},
-v7 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "OverallModel",
-  "kind": "LinkedField",
-  "name": "overall",
-  "plural": false,
-  "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "appearances",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "goals",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "assists",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "keyPasses",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "cleanSheets",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "winRate",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "attackPoints",
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "totalCount",
-  "storageKey": null
-};
+v3 = [
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Literal",
+        "name": "limit",
+        "value": 200
+      },
+      {
+        "kind": "Variable",
+        "name": "teamId",
+        "variableName": "teamId"
+      }
+    ],
+    "concreteType": "TeamMemberArrayModel",
+    "kind": "LinkedField",
+    "name": "findManyTeamMember",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TeamMemberModel",
+        "kind": "LinkedField",
+        "name": "members",
+        "plural": true,
+        "selections": [
+          (v1/*: any*/),
+          (v2/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "backNumber",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "position",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "UserModel",
+            "kind": "LinkedField",
+            "name": "user",
+            "plural": false,
+            "selections": [
+              (v1/*: any*/),
+              (v2/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "name",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "profileImage",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "OverallModel",
+            "kind": "LinkedField",
+            "name": "overall",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "appearances",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "goals",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "assists",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "keyPasses",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "cleanSheets",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "winRate",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "attackPoints",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "totalCount",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  }
+];
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "usePlayerManagementQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "TeamMemberArrayModel",
-        "kind": "LinkedField",
-        "name": "findManyTeamMember",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamMemberModel",
-            "kind": "LinkedField",
-            "name": "members",
-            "plural": true,
-            "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "UserModel",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v5/*: any*/),
-                  (v6/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v7/*: any*/)
-            ],
-            "storageKey": null
-          },
-          (v8/*: any*/)
-        ],
-        "storageKey": null
-      }
-    ],
+    "selections": (v3/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -219,61 +226,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "usePlayerManagementQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "TeamMemberArrayModel",
-        "kind": "LinkedField",
-        "name": "findManyTeamMember",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamMemberModel",
-            "kind": "LinkedField",
-            "name": "members",
-            "plural": true,
-            "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "UserModel",
-                "kind": "LinkedField",
-                "name": "user",
-                "plural": false,
-                "selections": [
-                  (v5/*: any*/),
-                  (v6/*: any*/),
-                  (v2/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v7/*: any*/)
-            ],
-            "storageKey": null
-          },
-          (v8/*: any*/)
-        ],
-        "storageKey": null
-      }
-    ]
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "a3e18555a70fe585357ce420b4e97efe",
+    "cacheID": "e74eef53d920d5af903db400fd51af79",
     "id": null,
     "metadata": {},
     "name": "usePlayerManagementQuery",
     "operationKind": "query",
-    "text": "query usePlayerManagementQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      id\n      backNumber\n      position\n      user {\n        name\n        profileImage\n        id\n      }\n      overall {\n        appearances\n        goals\n        assists\n        keyPasses\n        cleanSheets\n        winRate\n        attackPoints\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query usePlayerManagementQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      user {\n        __typename\n        id\n        name\n        profileImage\n      }\n      overall {\n        appearances\n        goals\n        assists\n        keyPasses\n        cleanSheets\n        winRate\n        attackPoints\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "1ad980355b155e6fccdbb34389ba357d";
+(node as any).hash = "d552a2a3ba1813bc8b6273414fcd2617";
 
 export default node;

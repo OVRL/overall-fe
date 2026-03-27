@@ -43,22 +43,22 @@ export default function InvitationPanel() {
 
     return (
         <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
-            <div className="flex items-center gap-2 mb-6">
-                <h3 className="text-xl font-bold text-white">가입 신청 관리</h3>
+            <div className="flex items-center gap-2 mb-8">
+                <h3 className="text-[20px] font-bold text-white">가입 신청 관리</h3>
                 {pendingCount > 0 && (
-                    <span className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">
+                    <span className="w-5 h-5 bg-[#fb2c36] rounded-full flex items-center justify-center text-[11px] text-white font-bold">
                         {pendingCount}
                     </span>
                 )}
             </div>
 
             {/* 필터 탭 */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-[8px] mb-6">
                 <button 
                     onClick={() => setFilter("all")}
                     className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                        filter === "all" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                        "px-[12px] h-[41px] rounded-[10px] text-[14px] font-semibold flex items-center justify-center",
+                        filter === "all" ? "bg-[rgba(184,255,18,0.1)] text-[#b8ff12]" : "bg-[#131312] text-[#d6d6d5]"
                     )}
                 >
                     전체
@@ -66,8 +66,8 @@ export default function InvitationPanel() {
                 <button 
                     onClick={() => setFilter("pending")}
                     className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                        filter === "pending" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                        "px-[12px] h-[41px] rounded-[10px] text-[14px] font-semibold flex items-center justify-center",
+                        filter === "pending" ? "bg-[rgba(184,255,18,0.1)] text-[#b8ff12]" : "bg-[#131312] text-[#d6d6d5]"
                     )}
                 >
                     대기중
@@ -75,8 +75,8 @@ export default function InvitationPanel() {
                 <button 
                     onClick={() => setFilter("approved")}
                     className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                        filter === "approved" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                        "px-[12px] h-[41px] rounded-[10px] text-[14px] font-semibold flex items-center justify-center",
+                        filter === "approved" ? "bg-[rgba(184,255,18,0.1)] text-[#b8ff12]" : "bg-[#131312] text-[#d6d6d5]"
                     )}
                 >
                     승인 완료
@@ -84,8 +84,8 @@ export default function InvitationPanel() {
                 <button 
                     onClick={() => setFilter("rejected")}
                     className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                        filter === "rejected" ? "bg-primary/20 text-primary border border-primary/30" : "bg-white/5 text-gray-400 hover:text-white"
+                        "px-[12px] h-[41px] rounded-[10px] text-[14px] font-semibold flex items-center justify-center",
+                        filter === "rejected" ? "bg-[rgba(184,255,18,0.1)] text-[#b8ff12]" : "bg-[#131312] text-[#d6d6d5]"
                     )}
                 >
                     거절
@@ -93,40 +93,40 @@ export default function InvitationPanel() {
             </div>
 
             {/* 신청 리스트 */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/10">
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-white/10">
                 {filteredRequests.map((req) => (
-                    <div key={req.id} className="bg-white/5 border border-white/5 rounded-2xl p-6 flex items-center justify-between transition-all hover:bg-white/[0.07]">
-                        <div className="flex items-center gap-6">
-                            <span className="text-xs text-gray-500 font-medium w-20">{req.requestedAt}</span>
-                            <div className="flex flex-col gap-0.5">
-                                <span className="text-sm text-white font-bold">{req.name}</span>
+                    <div key={req.id} className={cn("bg-[#1a1a1a] border border-[#3e3e3e] rounded-[12px] px-[24px] py-[13px] h-[80px] flex flex-wrap md:flex-nowrap items-center justify-between", req.status === "rejected" && "opacity-80")}>
+                        <div className="flex items-center gap-[16px] w-full">
+                            <span className="text-[13px] text-[#a6a5a5] whitespace-nowrap">{req.requestedAt}</span>
+                            <div className="flex flex-wrap md:flex-nowrap items-center gap-[12px] text-[14px]">
+                                <span className="text-white font-bold">{req.name}</span>
+                                <span className="text-[#d6d6d5] font-medium">{req.email}</span>
+                                <span className="text-[#d6d6d5] font-medium">{req.phone}</span>
                             </div>
-                            <span className="text-sm text-gray-400 mx-2">{req.email}</span>
-                            <span className="text-sm text-gray-400">{req.phone}</span>
                         </div>
 
-                        <div>
+                        <div className="flex shrink-0 ml-4 mt-4 md:mt-0">
                             {req.status === "pending" ? (
                                 <div className="flex gap-2">
                                     <button 
                                         onClick={() => setModal({ type: "approve", request: req })}
-                                        className="px-6 py-2 bg-primary rounded-lg text-black text-xs font-bold hover:opacity-90 transition-opacity"
+                                        className="w-[77px] h-[41px] flex items-center justify-center bg-[#b8ff12] rounded-[10px] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity"
                                     >
                                         수락
                                     </button>
                                     <button 
                                         onClick={() => setModal({ type: "reject", request: req })}
-                                        className="px-6 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs font-bold hover:bg-white/10 transition-colors"
+                                        className="w-[77px] h-[41px] flex items-center justify-center bg-[#252525] rounded-[10px] text-[#a6a5a5] text-[14px] font-semibold hover:bg-white/10 hover:text-white transition-colors"
                                     >
                                         거절
                                     </button>
                                 </div>
                             ) : req.status === "approved" ? (
-                                <div className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-primary text-[10px] font-bold">
+                                <div className="px-3 h-[30px] flex items-center justify-center bg-[rgba(184,255,18,0.2)] rounded-[10px] text-[#b8ff12] text-[12px] font-medium">
                                     승인완료
                                 </div>
                             ) : (
-                                <div className="px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-red-500/80 text-[10px] font-bold">
+                                <div className="px-3 h-[30px] flex items-center justify-center bg-[rgba(245,67,70,0.2)] rounded-[10px] text-[#f54346] text-[12px] font-medium">
                                     거절됨
                                 </div>
                             )}

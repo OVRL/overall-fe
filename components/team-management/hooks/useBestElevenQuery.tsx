@@ -5,11 +5,14 @@ const bestElevenQuery = graphql`
   query useBestElevenQuery($teamId: Int!, $matchId: Int!) {
     findManyTeamMember(teamId: $teamId, limit: 200) {
       members {
+        __typename
         id
         backNumber
         position
         role
         user {
+          __typename
+          id
           name
           profileImage
           birthDate

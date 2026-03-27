@@ -390,7 +390,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
     <div className={`flex flex-col ${hasUnsaved ? "pb-16" : ""}`}>
       {/* ── 헤더 ── */}
       <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5">
-        <h1 className="text-lg font-bold text-white mb-4 md:mb-5">선수 관리</h1>
+        <h1 className="text-[20px] font-bold text-white mb-4 md:mb-5">선수 관리</h1>
 
         {/* 검색 바 */}
         <div className="flex items-center gap-2 max-w-[380px]">
@@ -418,8 +418,8 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
           <table className="w-full text-xs border-collapse">
             <thead>
               <tr className="bg-[#161616] border-b border-white/8 text-gray-500">
-                <th className="py-2.5 px-2 md:px-3 text-left font-medium w-[48px] md:w-[64px]">등번호</th>
-                <th className="py-2.5 px-1 md:px-2 text-left font-medium w-[100px] md:w-[140px]">이름</th>
+                <th className="py-2.5 px-2 md:px-3 text-center font-medium w-[48px] md:w-[64px]">등번호</th>
+                <th className="py-2.5 px-3 md:px-4 text-left font-medium w-[100px] md:w-[140px]">이름</th>
                 <th className="py-2.5 px-1 md:px-2 text-center font-medium w-[48px] md:w-[56px]">포지션</th>
                 {COLUMNS.map((c) => (
                   <th key={c.key} className="py-2.5 px-1 md:px-2 text-center font-medium whitespace-nowrap text-[10px] md:text-xs">
@@ -442,7 +442,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
                     }`}
                   >
                     {/* 등번호 */}
-                    <td className="py-2.5 px-2 md:px-3 text-gray-400 font-mono">
+                    <td className="py-2.5 px-2 md:px-3 text-center text-gray-400 font-mono">
                       {isEditing ? (
                         <EditCell
                           value={buf.backNumber ?? 0}
@@ -454,7 +454,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
                     </td>
 
                     {/* 이름 + 프로필 */}
-                    <td className="py-2.5 px-1 md:px-2">
+                    <td className="py-2.5 px-3 md:px-4 text-left">
                       <div className="flex items-center gap-1.5 md:gap-2">
                         <div className="w-6 h-6 md:w-7 md:h-7 overflow-hidden shrink-0 relative flex items-center justify-center">
                           <ProfileAvatar
@@ -464,7 +464,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
                             size={36}
                           />
                         </div>
-                        <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs">
+                        <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs text-left">
                           {player.name}
                         </span>
                       </div>

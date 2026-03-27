@@ -6,8 +6,9 @@ import type { useFindTeamMemberQueryQuery as QueryType } from "@/__generated__/u
 const FindTeamMemberForGameQuery = graphql`
   query useFindTeamMemberQueryQuery($userId: Int!) {
     findTeamMember(userId: $userId) {
-      teamId
+      __typename
       id
+      teamId
     }
   }
 `;
