@@ -39,9 +39,7 @@ export default function UpcomingMatchWithData() {
   const { selectedTeamIdNum, isSoloTeam } = useSelectedTeamId();
 
   if (selectedTeamIdNum == null) {
-    return (
-      <NoMatchContent isSoloTeam={isSoloTeam} teamId={null} />
-    );
+    return <NoMatchContent isSoloTeam={isSoloTeam} teamId={null} />;
   }
 
   return (
@@ -65,7 +63,8 @@ function UpcomingMatchWithQuery({
     { fetchPolicy: "store-or-network" },
   );
 
-  const matches = (data?.findMatch ?? []) as unknown as MatchForUpcomingDisplay[];
+  const matches = (data?.findMatch ??
+    []) as unknown as MatchForUpcomingDisplay[];
   const soonest = pickSoonestUpcomingMatch(matches);
   const display = soonest ? buildUpcomingMatchDisplay(soonest) : null;
 
@@ -95,13 +94,11 @@ function UpcomingMatchWithQuery({
   }
 
   if (display == null) {
-    return (
-      <NoMatchContent isSoloTeam={isSoloTeam} teamId={createdTeamId} />
-    );
+    return <NoMatchContent isSoloTeam={isSoloTeam} teamId={createdTeamId} />;
   }
 
   return (
-    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
+    <div className="bg-surface-card rounded-[1.25rem] p-4 border border-border-card">
       <UpcomingMatchMobile display={display} />
       <UpcomingMatchDesktop display={display} />
     </div>
