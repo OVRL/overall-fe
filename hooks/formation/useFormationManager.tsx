@@ -19,16 +19,26 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
       setQuarters((prev) =>
         prev.map((q) => {
           if (q.id === quarterId) {
-            // Check if player is already assigned somewhere else in this quarter
-            // and remove them there first to prevent duplicates
             const currentLineup = { ...(q.lineup || {}) };
+            let sourceIndex: number | undefined;
 
+            // 드래그한 선수가 이미 이 쿼터의 다른 포지션에 배치되어 있는지 확인하고,
+            // 중복 배치를 방지하기 위해 기존 위치에서 먼저 제거합니다.
             Object.keys(currentLineup).forEach((key) => {
               const k = Number(key);
               if (currentLineup[k]?.id === player.id) {
+                sourceIndex = k;
                 delete currentLineup[k];
               }
             });
+
+            // 타겟 포지션에 이미 다른 선수가 배치되어 있고,
+            // 현재 드래그 중인 선수가 같은 쿼터의 다른 위치에서 이동해온 경우라면,
+            // 타겟 위치에 있던 선수를 드래그 중인 선수의 기존 위치로 옮겨서 상호 교체(Swap)합니다.
+            const targetPlayer = currentLineup[positionIndex];
+            if (sourceIndex !== undefined && targetPlayer) {
+              currentLineup[sourceIndex] = targetPlayer;
+            }
 
             return {
               ...q,
