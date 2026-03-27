@@ -7,6 +7,13 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
+import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
+import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { parseUserId } from "@/hooks/useUserId";
+import { 
+  getTeamMemberProfileImageRawUrl, 
+  getTeamMemberProfileImageFallbackUrl 
+} from "@/lib/playerPlaceholderImage";
 
 // ──────────────────────────────────────────────
 // Types
@@ -98,10 +105,16 @@ const EditCell = ({
 }) => (
   <input
     type="number"
-    value={value}
+    value={value === 0 ? "" : value}
+    placeholder="0"
     min={0}
     onClick={(e) => e.stopPropagation()}
-    onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
+    onFocus={(e) => e.target.select()}
+    onChange={(e) => {
+      const val = e.target.value;
+      const num = val === "" ? 0 : parseInt(val, 10);
+      onChange(isNaN(num) ? 0 : num);
+    }}
     className="w-12 text-center bg-transparent border border-white/30 rounded text-white text-xs py-1 outline-none focus:border-primary/70 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
   />
 );
@@ -161,15 +174,29 @@ function SavePreviewModal({
                     <div className="flex items-center gap-2 text-xs font-mono">
                       <span className="text-gray-400">{ch.before}</span>
                       <span className="text-gray-600">→</span>
-                      <span
-                        className={
-                          ch.after > ch.before
-                            ? "text-primary font-bold"
-                            : "text-red-400 font-bold"
-                        }
-                      >
-                        {ch.after}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={
+                            ch.after > ch.before
+                              ? "text-red-500 font-bold"
+                              : ch.after < ch.before
+                                ? "text-blue-500 font-bold"
+                                : "text-white font-bold"
+                          }
+                        >
+                          {ch.after}
+                        </span>
+                        {ch.after > ch.before && (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-red-500">
+                            <path d="M5 2L8 6H2L5 2Z" fill="currentColor" />
+                          </svg>
+                        )}
+                        {ch.after < ch.before && (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-blue-500">
+                            <path d="M5 8L2 4H8L5 8Z" fill="currentColor" />
+                          </svg>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -227,21 +254,28 @@ export default function PlayerManagementPanel() {
 
 function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
   const data = usePlayerManagementQuery(teamId);
-  const apiPlayers: PlayerStat[] = (data.findManyTeamMember?.members || []).map((m: any) => ({
-    id: String(m.id),
-    backNumber: m.backNumber ?? 0,
-    name: m.user?.name ?? "알 수 없음",
-    profileImage: m.user?.profileImage ?? "/images/ovr.png",
-    position: m.position ?? "-",
-    attendance: m.overall?.appearances ?? 0,
-    goals: m.overall?.goals ?? 0,
-    assists: m.overall?.assists ?? 0,
-    gaPoints: m.overall?.keyPasses ?? 0,
-    cleanSheets: m.overall?.cleanSheets ?? 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-  }));
+  const apiPlayers: PlayerStat[] = (data.findManyTeamMember?.members || []).map((m: any) => {
+    // 이미지 렌더링 방식 일원화
+    const normalizedMemberId = m.id ? parseUserId(String(m.id)) : 0;
+    const memberForImage = { ...m, id: normalizedMemberId || 0 };
+    
+    return {
+      id: String(m.id),
+      backNumber: m.backNumber ?? 0,
+      name: m.user?.name ?? "알 수 없음",
+      profileImage: getTeamMemberProfileImageRawUrl(memberForImage as any),
+      fallbackImage: getTeamMemberProfileImageFallbackUrl(memberForImage as any),
+      position: m.position ?? "-",
+      attendance: m.overall?.appearances ?? 0,
+      goals: m.overall?.goals ?? 0,
+      assists: m.overall?.assists ?? 0,
+      gaPoints: m.overall?.keyPasses ?? 0,
+      cleanSheets: m.overall?.cleanSheets ?? 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+    };
+  });
 
   const [players, setPlayers] = useState<PlayerStat[]>(apiPlayers);
   const [savedPlayers, setSavedPlayers] = useState<PlayerStat[]>(apiPlayers);
@@ -251,6 +285,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<ChangeItem[]>([]);
+  const { executeMutation: updateMember, isInFlight: isUpdating } = useUpdateTeamMemberMutation();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = players.filter(
@@ -264,6 +299,11 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
     return updated;
   };
 
+  const updateBuffer = (field: keyof PlayerStat, value: number) => {
+    setEditBuffer((prev) => ({ ...prev, [field]: value }));
+    setHasUnsaved(true);
+  };
+
   const handleRowClick = (player: PlayerStat) => {
     if (editingId === player.id) return;
     if (editingId) flushBuffer(editingId, editBuffer);
@@ -271,26 +311,71 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
     setEditBuffer({ ...player });
   };
 
-  const updateBuffer = (field: keyof PlayerStat, value: number) => {
-    setEditBuffer((prev) => ({ ...prev, [field]: value }));
-    setHasUnsaved(true);
-  };
-
-  /** 저장 버튼 클릭 → 안내 메시지 출력 */
+  /** 저장 버튼 클릭 → 변경 사항 분석 및 모달 노출 */
   const handleSaveClick = () => {
-    alert("현재 선수 능력치/통계는 매치 기록을 통해 자동으로 업데이트되며, 수동 수정 기능은 준비 중입니다.");
-    setHasUnsaved(false);
-    setEditingId(null);
-    setEditBuffer({});
+    const changes: ChangeItem[] = [];
+    players.forEach((p) => {
+      const saved = savedPlayers.find((s) => s.id === p.id);
+      if (!saved) return;
+
+      if (p.backNumber !== saved.backNumber) {
+        changes.push({ playerName: p.name, field: "등번호", before: saved.backNumber, after: p.backNumber });
+      }
+      if (p.goals !== saved.goals) {
+        changes.push({ playerName: p.name, field: "득점", before: saved.goals, after: p.goals });
+      }
+      if (p.assists !== saved.assists) {
+        changes.push({ playerName: p.name, field: "도움", before: saved.assists, after: p.assists });
+      }
+      if (p.attendance !== saved.attendance) {
+        changes.push({ playerName: p.name, field: "출석", before: saved.attendance, after: p.attendance });
+      }
+      if (p.gaPoints !== saved.gaPoints) {
+        changes.push({ playerName: p.name, field: "기점", before: saved.gaPoints, after: p.gaPoints });
+      }
+      if (p.cleanSheets !== saved.cleanSheets) {
+        changes.push({ playerName: p.name, field: "클린시트", before: saved.cleanSheets, after: p.cleanSheets });
+      }
+    });
+
+    if (changes.length === 0) {
+      alert("변경된 내용이 없습니다.");
+      setHasUnsaved(false);
+      setEditingId(null);
+      return;
+    }
+
+    setPendingChanges(changes);
+    setShowPreview(true);
   };
 
-  const handleConfirmSave = () => {
-    setSavedPlayers([...players]);
-    setEditingId(null);
-    setEditBuffer({});
-    setHasUnsaved(false);
-    setShowPreview(false);
-    setPendingChanges([]);
+  const handleConfirmSave = async () => {
+    try {
+      // 실제 API가 지원하는 "등번호" 위주로 먼저 저장
+      // (다른 통계 수치는 현재 스키마상 수동 입력 API가 매치 기록 위주라 임시로 UI만 반영)
+      const changedWithBackNumber = players.filter(p => {
+        const saved = savedPlayers.find(s => s.id === p.id);
+        return saved && p.backNumber !== saved.backNumber;
+      });
+
+      for (const p of changedWithBackNumber) {
+        await updateMember({
+          id: Number(p.id),
+          backNumber: p.backNumber
+        });
+      }
+
+      setSavedPlayers([...players]);
+      setEditingId(null);
+      setEditBuffer({});
+      setHasUnsaved(false);
+      setShowPreview(false);
+      setPendingChanges([]);
+      alert("선수단 정보가 성공적으로 저장되었습니다.");
+    } catch (error) {
+      console.error("Failed to save changes:", error);
+      alert("저장 중 오류가 발생했습니다.");
+    }
   };
 
   const handleReset = () => {
@@ -359,9 +444,10 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
                     {/* 등번호 */}
                     <td className="py-2.5 px-2 md:px-3 text-gray-400 font-mono">
                       {isEditing ? (
-                        <span className="border border-white/20 rounded px-1.5 md:px-2 py-1 text-white inline-block">
-                          {player.backNumber}
-                        </span>
+                        <EditCell
+                          value={buf.backNumber ?? 0}
+                          onChange={(v) => updateBuffer("backNumber", v)}
+                        />
                       ) : (
                         player.backNumber
                       )}
@@ -371,12 +457,11 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
                     <td className="py-2.5 px-1 md:px-2">
                       <div className="flex items-center gap-1.5 md:gap-2">
                         <div className="w-6 h-6 md:w-7 md:h-7 overflow-hidden shrink-0 relative flex items-center justify-center">
-                          <Image
-                            src={getValidImageSrc(player.profileImage)}
+                          <ProfileAvatar
+                            src={player.profileImage || undefined}
+                            fallbackSrc={(player as any).fallbackImage}
                             alt={player.name}
-                            width={28}
-                            height={28}
-                            className="object-cover h-full w-full"
+                            size={36}
                           />
                         </div>
                         <span className="text-white font-medium truncate max-w-[60px] md:max-w-[80px] text-[10px] md:text-xs">

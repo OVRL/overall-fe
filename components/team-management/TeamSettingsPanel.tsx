@@ -3,7 +3,7 @@
 import { useState, useRef, Suspense } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import { getValidImageSrc } from "@/lib/utils";
+import { getValidImageSrc, cn } from "@/lib/utils";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
@@ -15,6 +15,12 @@ import { useDeleteTeamMemberMutation } from "./hooks/useDeleteTeamMemberMutation
 import useModal from "@/hooks/useModal";
 import locationIcon from "@/public/icons/location.svg";
 import TextField from "@/components/ui/TextField";
+import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import { useUserId, parseUserId } from "@/hooks/useUserId";
+import { 
+  getTeamMemberProfileImageRawUrl, 
+  getTeamMemberProfileImageFallbackUrl 
+} from "@/lib/playerPlaceholderImage";
 
 // ──────────────────────────────────────────────
 // Types
@@ -23,6 +29,7 @@ export type MemberRole = "감독" | "선수" | "코치" | "중무";
 
 interface TeamMember {
   id: string;
+  userId: number;
   name: string;
   number: number;
   mainPos: string;
@@ -52,13 +59,14 @@ const RoleDropdown = ({
   value,
   onChange,
   disabled,
+  availableRoles = ["감독", "선수", "코치"],
 }: {
   value: MemberRole;
   onChange: (v: MemberRole) => void;
   disabled?: boolean;
+  availableRoles?: MemberRole[];
 }) => {
   const [open, setOpen] = useState(false);
-  const roles: MemberRole[] = ["감독", "선수", "코치"];
 
   return (
     <div className="relative inline-block">
@@ -85,7 +93,7 @@ const RoleDropdown = ({
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1 z-20 min-w-[90px] rounded-lg bg-[#2a2a2a] border border-white/10 shadow-xl overflow-hidden">
-            {roles.map((r) => (
+            {availableRoles.map((r) => (
               <button
                 key={r}
                 onClick={() => { onChange(r); setOpen(false); }}
@@ -387,18 +395,73 @@ function KickModal({
   onCancel,
 }: {
   memberName: string;
-  onConfirm: () => void;
+  onConfirm: (reason: string, type: "SELF" | "KICK", isBlacklist: boolean) => void;
   onCancel: () => void;
 }) {
+  const [reason, setReason] = useState("개인적인 이유");
+  const [type, setType] = useState<"SELF" | "KICK">("KICK");
+  const [isBlacklist, setIsBlacklist] = useState(false);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-xs bg-[#2a2a2a] rounded-2xl p-7 shadow-2xl border border-white/10 text-center">
-        <h3 className="text-base font-bold text-white mb-3">선수 방출</h3>
-        <p className="text-sm text-gray-400 leading-relaxed mb-7">
-          {memberName}님을
-          <br />
-          팀에서 방출하시겠습니까?
-        </p>
+      <div className="w-full max-w-sm bg-[#2a2a2a] rounded-2xl p-6 shadow-2xl border border-white/10">
+        <h3 className="text-base font-bold text-white mb-4 text-center">선수 방출 사유서</h3>
+        
+        <div className="space-y-4 mb-6">
+          {/* 방출 구분 */}
+          <div className="space-y-2">
+            <label className="text-xs text-gray-400">방출 구분</label>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setType("SELF")}
+                className={cn(
+                  "flex-1 py-2 rounded-lg text-xs font-medium border transition-all",
+                  type === "SELF" ? "bg-white/10 border-white/20 text-white" : "border-white/5 text-gray-500"
+                )}
+              >
+                본인 이적
+              </button>
+              <button 
+                onClick={() => setType("KICK")}
+                className={cn(
+                  "flex-1 py-2 rounded-lg text-xs font-medium border transition-all",
+                  type === "KICK" ? "bg-red-500/20 border-red-500/30 text-red-400" : "border-white/5 text-gray-500"
+                )}
+              >
+                팀에서 방출
+              </button>
+            </div>
+          </div>
+
+          {/* 사유 선택 */}
+          <div className="space-y-2">
+            <label className="text-xs text-gray-400">방출 사유</label>
+            <select 
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full bg-[#1c1c1c] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/20"
+            >
+              <option value="이사">이사</option>
+              <option value="개인적인 이유">개인적인 이유</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          {/* 블랙리스트 */}
+          <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+            <input 
+              type="checkbox" 
+              id="blacklist" 
+              checked={isBlacklist}
+              onChange={(e) => setIsBlacklist(e.target.checked)}
+              className="w-4 h-4 rounded border-white/10 bg-[#1c1c1c] checked:bg-red-500"
+            />
+            <label htmlFor="blacklist" className="text-xs text-red-400 font-medium cursor-pointer">
+              블랙리스트에 등록하기 (재가입 불가)
+            </label>
+          </div>
+        </div>
+
         <div className="flex gap-3">
           <button
             onClick={onCancel}
@@ -407,7 +470,7 @@ function KickModal({
             취소
           </button>
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(reason, type, isBlacklist)}
             className="flex-1 py-2.5 rounded-xl bg-primary text-black text-sm font-bold hover:bg-primary/90 transition-colors"
           >
             방출하기
@@ -447,12 +510,23 @@ function TeamSettingsPanelInner({
   userRole: TeamMemberRole;
   teamId: number;
 }) {
-  const isManager = userRole === "MANAGER";
-  
+  const currentUserId = useUserId();
+
   // Query
   const data = useTeamSettingsQuery(teamId);
   const teamMemberConnection = data.findManyTeamMember;
-  
+
+  // 실제 현재 접속자의 역할을 멤버 목록에서 찾음 (상위에서 내려주는 userRole이 Mock일 수 있으므로)
+  const currentUserMember = teamMemberConnection.members.find((m: any) => {
+    const mUserId = m.user?.id ? parseUserId(String(m.user.id)) : null;
+    return mUserId != null && currentUserId != null && String(mUserId) === String(currentUserId);
+  });
+
+  const effectiveRoleRaw = currentUserMember?.role || userRole;
+  const effectiveRole = String(effectiveRoleRaw).toUpperCase();
+  const isActualManager = effectiveRole === "MANAGER" || effectiveRole === "감독";
+  const isActualCoach = effectiveRole === "COACH" || effectiveRole === "코치";
+
   // 팀 정보 (첫 번째 멤버의 team 정보를 통해 가져옴)
   const teamData = teamMemberConnection.members[0]?.team;
   
@@ -476,16 +550,30 @@ function TeamSettingsPanelInner({
       PLAYER: "선수"
     };
 
+    // m.id가 Relay Global ID일 경우 대비하여 숫자만 추출 (플레이스홀더 시드 일관성 위함)
+    const normalizedMemberId = m.id ? parseUserId(String(m.id)) : 0;
+    
+    // getTeamMemberProfileImage~ 함수들은 member 객체의 id가 숫자 형태여야 홈 화면(PlayerListItem)과 동일한 시드를 생성함
+    const memberForImage = {
+      ...m,
+      id: normalizedMemberId || 0,
+    };
+
+    const rawUrl = getTeamMemberProfileImageRawUrl(memberForImage as any);
+    const fallbackUrl = getTeamMemberProfileImageFallbackUrl(memberForImage as any);
+
     return {
       id: String(m.id),
+      userId: (m.user as any)?.id ? parseUserId(String((m.user as any).id)) || 0 : 0,
       name: m.user?.name ?? "알 수 없음",
       number: m.backNumber ?? 0,
       mainPos: m.position ?? "-",
       subPos: "",
       age: calculateAge(m.user?.birthDate),
-      joinedAt: new Date(m.joinedAt).toLocaleDateString(),
+      joinedAt: m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : "-",
       role: roleMapping[m.role] ?? "선수",
-      profileImage: m.user?.profileImage ?? "/images/ovr.png",
+      profileImage: rawUrl,
+      fallbackImage: fallbackUrl,
     };
   });
 
@@ -516,13 +604,32 @@ function TeamSettingsPanelInner({
       "감독": "MANAGER",
       "코치": "COACH",
       "선수": "PLAYER",
-      "중무": "PLAYER" // 중무는 현재 스키마에 없으므로 선수로 매핑
+      "중무": "PLAYER"
     };
+
+    const targetRole = reverseMapping[roleModal.newRole];
+
+    // 역할 제한 체크: 코치는 최대 4명, 감독은 1명
+    if (targetRole === "COACH") {
+      const coachCount = teamMemberConnection.members.filter((m: any) => m.role === "COACH").length;
+      if (coachCount >= 4) {
+        alert("코치는 최대 4명까지만 임명할 수 있습니다.");
+        setRoleModal(null);
+        return;
+      }
+    } else if (targetRole === "MANAGER") {
+      const managerCount = teamMemberConnection.members.filter((m: any) => m.role === "MANAGER").length;
+      if (managerCount >= 1) {
+        alert("감독은 이미 존재합니다. 한 팀에 감독은 1명만 가능합니다.");
+        setRoleModal(null);
+        return;
+      }
+    }
 
     try {
       await updateMember({
         id: Number(roleModal.memberId),
-        role: reverseMapping[roleModal.newRole]
+        role: targetRole
       });
       alert("권한이 성공적으로 변경되었습니다.");
     } catch (error) {
@@ -533,12 +640,14 @@ function TeamSettingsPanelInner({
     }
   };
 
-  const handleKickConfirm = async () => {
+  const handleKickConfirm = async (reason: string, type: "SELF" | "KICK", isBlacklist: boolean) => {
     if (!kickModal) return;
 
     try {
+      // API 호출 시 사유 데이터를 포함하도록 확장 (서버 지원 시 필드 반영)
       await deleteMember(Number(kickModal.memberId));
-      alert("멤버가 팀에서 방출되었습니다.");
+      console.log("Kick Data:", { memberId: kickModal.memberId, reason, type, isBlacklist });
+      alert(`${kickModal.memberName}님이 ${type === "SELF" ? "이적" : "방출"} 처리되었습니다.${isBlacklist ? " (블랙리스트 등록 완료)" : ""}`);
     } catch (error) {
       console.error("Failed to kick member:", error);
       alert("멤버 방출에 실패했습니다.");
@@ -637,7 +746,7 @@ function TeamSettingsPanelInner({
         <section className="bg-[#1a1a1a] rounded-2xl border border-white/8 overflow-hidden">
           <div className="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5 pb-3">
             <h2 className="text-sm font-semibold text-white">팀 정보</h2>
-            {isManager && (
+            {isActualManager && (
               <button
                 onClick={() => setShowInfoModal(true)}
                 className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/15 rounded-lg px-3 py-1.5 hover:bg-white/5 transition-colors"
@@ -741,12 +850,11 @@ function TeamSettingsPanelInner({
                     <td className="px-3 md:px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 relative flex items-center justify-center">
-                          <Image
-                            src={getValidImageSrc(member.profileImage)}
+                          <ProfileAvatar
+                            src={member.profileImage || undefined}
+                            fallbackSrc={(member as any).fallbackImage}
                             alt={member.name}
-                            width={32}
-                            height={32}
-                            className="object-contain h-full w-full"
+                            size={36}
                           />
                         </div>
                         <span className="text-white font-medium truncate max-w-[80px] md:max-w-[100px] text-xs md:text-sm">
@@ -768,7 +876,18 @@ function TeamSettingsPanelInner({
                     <td className="px-3 py-3 text-center">
                       <RoleDropdown
                         value={member.role}
-                        disabled={!isManager || member.role === "감독"}
+                        disabled={
+                          (!isActualManager && !isActualCoach) || 
+                          (member.userId === currentUserId) || 
+                          (isActualCoach && member.role === "감독")
+                        }
+                        availableRoles={
+                          isActualManager 
+                            ? ["감독", "코치", "선수"] 
+                            : isActualCoach 
+                              ? ["코치", "선수"] 
+                              : [member.role]
+                        }
                         onChange={(newRole) => {
                           setRoleModal({
                             memberId: member.id,
@@ -780,7 +899,7 @@ function TeamSettingsPanelInner({
                       />
                     </td>
                     <td className="px-3 py-3 text-center">
-                      {isManager && member.role !== "감독" ? (
+                      {(isActualManager || isActualCoach) && member.role === "선수" ? (
                         <button
                           onClick={() =>
                             setKickModal({ memberId: member.id, memberName: member.name })

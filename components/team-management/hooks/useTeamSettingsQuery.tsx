@@ -10,7 +10,9 @@ const teamSettingsQuery = graphql`
         position
         role
         joinedAt
+        profileImg
         user {
+          id
           name
           profileImage
           birthDate

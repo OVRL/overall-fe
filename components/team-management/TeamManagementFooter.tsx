@@ -22,6 +22,7 @@ const menuItems: MenuItem[] = [
     { id: "best-eleven", label: "베스트 11", icon: "⭐", href: "/team-management/best11" },
     { id: "invitation", label: "가입 신청 관리", icon: "📨", href: "/team-management/invitation" },
     { id: "mom-vote", label: "MOM 투표", icon: "🏆", href: "/team-management/mom" },
+    { id: "deleted-players", label: "방출 관리", icon: "🚫", href: "/team-management/deleted-players" },
 ];
 
 export default function TeamManagementFooter({
