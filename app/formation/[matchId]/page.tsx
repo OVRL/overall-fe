@@ -3,13 +3,10 @@ import { notFound } from "next/navigation";
 // Components
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
 import FormationBuilder from "../_components/FormationBuilder";
-import { FormationMatchPlayersProvider } from "../_context/FormationMatchPlayersContext";
-
-import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import { matchToScheduleCardData } from "@/lib/formation/matchToScheduleCardProps";
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
-import { fetchFindMatchAttendanceSSR } from "@/utils/fetchFindMatchAttendanceSSR";
 import { verifyFormationMatchAccessSSR } from "@/utils/verifyFormationMatchAccessSSR";
+import FormationMatchDataLoader from "./_components/FormationMatchDataLoader";
 
 type FormationMatchPageProps = {
   params: Promise<{ matchId: string }>;
@@ -48,7 +45,11 @@ export default async function FormationMatchPage({
   }
 
   const decodedMatchId = decodeURIComponent(matchIdFromPath);
-  devLogFormationMatchPage("log", "verifyFormationMatchAccessSSR 입력", decodedMatchId);
+  devLogFormationMatchPage(
+    "log",
+    "verifyFormationMatchAccessSSR 입력",
+    decodedMatchId,
+  );
 
   const access = await verifyFormationMatchAccessSSR(decodedMatchId);
 
@@ -72,14 +73,6 @@ export default async function FormationMatchPage({
     notFound();
   }
 
-  const attendanceRows = await fetchFindMatchAttendanceSSR(
-    numericMatchId,
-    access.createdTeamId,
-    access.accessToken,
-  );
-  const attendingPlayers =
-    matchAttendanceRowsToAttendingPlayers(attendanceRows);
-
   const scheduleProps = matchToScheduleCardData(access.match);
   const scheduleCard = (
     <MatchScheduleCard
@@ -94,7 +87,10 @@ export default async function FormationMatchPage({
   );
 
   return (
-    <FormationMatchPlayersProvider players={attendingPlayers}>
+    <FormationMatchDataLoader
+      matchId={numericMatchId}
+      teamId={access.createdTeamId}
+    >
       <FormationBuilder
         scheduleCard={scheduleCard}
         matchQuarterSpec={{
@@ -103,6 +99,6 @@ export default async function FormationMatchPage({
           matchType: access.match.matchType,
         }}
       />
-    </FormationMatchPlayersProvider>
+    </FormationMatchDataLoader>
   );
 }

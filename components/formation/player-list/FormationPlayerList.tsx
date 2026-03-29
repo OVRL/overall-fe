@@ -9,13 +9,13 @@ import plus from "@/public/icons/plus.svg";
 import FormationPlayerGroupList from "./FormationPlayerGroupList";
 import useModal from "@/hooks/useModal";
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
+import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchContext";
 
 export interface FormationPlayerListProps {
   players: Player[];
   currentQuarterLineups: Record<number, Player | null>[];
   selectedPlayer: Player | null;
   onSelectPlayer: (player: Player) => void;
-  onAddPlayer?: (name: string) => void;
   onRemovePlayer?: (id: number) => void;
   targetPosition?: string | null;
   activePosition?: {
@@ -30,12 +30,12 @@ export default function FormationPlayerList({
   currentQuarterLineups,
   selectedPlayer,
   onSelectPlayer,
-  onAddPlayer,
   onRemovePlayer,
   targetPosition,
   activePosition,
 }: FormationPlayerListProps) {
   const { openModal } = useModal("PLAYER_SEARCH");
+  const { matchId, teamId } = useFormationMatchIds();
   const {
     searchTerm,
     setSearchTerm,
@@ -62,11 +62,8 @@ export default function FormationPlayerList({
             size="m"
             onClick={() => {
               openModal({
-                onComplete: (player) => {
-                  if (player && onAddPlayer) {
-                    onAddPlayer(player.name);
-                  }
-                },
+                matchId,
+                teamId,
               });
             }}
             className="flex gap-1 text-Label-Primary font-semibold"

@@ -190,7 +190,6 @@ export default function FormationBuilderMobile({
           onSelectPlayer={(player) =>
             setSelectedPlayer(selectedPlayer?.id === player.id ? null : player)
           }
-          onAddPlayer={() => {}}
           targetPosition={null}
           activePosition={null}
           getAssignedQuarterIdsForPlayer={getAssignedQuarterIdsForPlayer}

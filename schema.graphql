@@ -366,6 +366,7 @@ type Query {
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
+  searchTeamMember(name: String!): [TeamMemberModel!]!
 }
 
 type RegionSearchArrayModel {

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import calendar from "@/public/icons/calendar.svg";
 import useModal from "@/hooks/useModal";
+import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchContext";
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
 import { useDraggable } from "@dnd-kit/core";
 import QuarterDotsMobile from "../quarter/QuarterDotsMobile";
@@ -19,7 +20,6 @@ export interface FormationPlayerListMobileProps {
   players: Player[];
   selectedPlayer: Player | null;
   onSelectPlayer: (player: Player) => void;
-  onAddPlayer?: (name: string) => void;
   targetPosition?: string | null;
   activePosition?: {
     quarterId: number;
@@ -101,12 +101,12 @@ const FormationPlayerListMobile = ({
   players,
   selectedPlayer,
   onSelectPlayer,
-  onAddPlayer,
   targetPosition,
   activePosition,
   getAssignedQuarterIdsForPlayer,
 }: FormationPlayerListMobileProps) => {
   const { openModal } = useModal("PLAYER_SEARCH");
+  const { matchId, teamId } = useFormationMatchIds();
   const { activePosTab, setActivePosTab, filteredPlayers } =
     useFormationPlayerList({ players, targetPosition, activePosition });
 
@@ -133,11 +133,7 @@ const FormationPlayerListMobile = ({
             variant="ghost"
             size="s"
             onClick={() => {
-              openModal({
-                onComplete: (player) => {
-                  if (player && onAddPlayer) onAddPlayer(player.name);
-                },
-              });
+              openModal({ matchId, teamId });
             }}
             className="shrink-0 flex gap-1 text-Label-Tertiary font-semibold px-3.5"
           >

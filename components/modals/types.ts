@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { Player } from "@/types/formation";
+
 import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
 import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 
@@ -23,7 +23,8 @@ export interface ModalPropsMap {
     onSave: (image: string, file: File) => void;
   };
   PLAYER_SEARCH: {
-    onComplete: (player: Player) => void;
+    matchId: number;
+    teamId: number;
     excludeMercenaries?: boolean;
   };
   TEAM_SEARCH: {

@@ -1,117 +1,320 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDebounce } from "@toss/react";
 import useModal from "@/hooks/useModal";
 import { Player } from "@/types/formation";
+import {
+  useRelayEnvironment,
+  useLazyLoadQuery,
+  fetchQuery,
+  commitMutation,
+} from "react-relay";
+import { FormationMatchAttendanceQuery } from "@/lib/relay/queries/formationMatchAttendanceQuery";
+import { SearchTeamMemberQuery } from "@/lib/relay/queries/searchTeamMemberQuery";
+import { CreateMatchAttendanceMutation } from "@/lib/relay/mutations/createMatchAttendanceMutation";
+import { UpdateMatchAttendanceMutation } from "@/lib/relay/mutations/updateMatchAttendanceMutation";
+import type { formationMatchAttendanceQuery } from "@/__generated__/formationMatchAttendanceQuery.graphql";
+import type { searchTeamMemberQuery } from "@/__generated__/searchTeamMemberQuery.graphql";
+import type { createMatchAttendanceMutation } from "@/__generated__/createMatchAttendanceMutation.graphql";
+import type { updateMatchAttendanceMutation } from "@/__generated__/updateMatchAttendanceMutation.graphql";
+
+import {
+  getTeamMemberProfileImageFallbackUrl,
+  getTeamMemberProfileImageRawUrl,
+} from "@/lib/playerPlaceholderImage";
+import { parseMatchIdForApi } from "@/utils/match/parseMatchIdForApi";
 
 interface UsePlayerSearchProps {
-  onComplete: (player: Player) => void;
+  matchId: number;
+  teamId: number;
 }
 
-// TODO: 피그마 반영 및 백엔드 API 연동 시 교체될 임시 검색 함수
-const mockSearchPlayers = async (keyword: string): Promise<Player[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: Date.now(),
-          name: keyword,
-          position: "ST",
-          number: 9,
-          overall: 90,
-          image: "/images/player/img_player_2.webp",
-          season: "23-24",
-        },
-        {
-          id: Date.now() + 1,
-          name: `${keyword} Junior`,
-          position: "LW",
-          number: 11,
-          overall: 85,
-          image: "/images/player/img_player_2.webp",
-          season: "22-23",
-        },
-      ]);
-    }, 500); // 가짜 딜레이
-  });
-};
+export type AttendanceStatus = "ATTEND" | "ABSENT";
 
-export const usePlayerSearch = ({ onComplete }: UsePlayerSearchProps) => {
+export interface PendingPlayerItem extends Player {
+  teamMemberId: number;
+  userId: number;
+  memberType: "MEMBER" | "MERCENARY";
+  originalStatus?: AttendanceStatus | null;
+  currentStatus: AttendanceStatus | null; // null if neither
+}
+
+function mapTeamMemberToPlayerProps(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tm: any,
+): Omit<PendingPlayerItem, "currentStatus" | "originalStatus"> {
+  const user = tm.user;
+  const back = tm.backNumber;
+  const preferred = user?.preferredNumber;
+  const number =
+    back != null ? back : preferred != null ? Math.round(preferred) : 0;
+  const name = user?.name?.trim() || "이름 없음";
+  const position = tm.position ?? "ST";
+  const overall = tm.overall?.ovr ?? 0;
+
+  const profileRaw = getTeamMemberProfileImageRawUrl({
+    profileImg: tm.profileImg,
+    user: tm.user ?? undefined,
+  });
+  const imageFallbackUrl = getTeamMemberProfileImageFallbackUrl({
+    id: tm.id,
+    user: tm.user ?? undefined,
+  });
+
+  return {
+    id: tm.id,
+    teamMemberId: tm.id,
+    userId: Number(tm.userId ?? user.id),
+    memberType: "MEMBER",
+    name,
+    position,
+    number,
+    overall,
+    image: profileRaw || undefined,
+    imageFallbackUrl,
+  };
+}
+
+export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
   const { hideModal } = useModal();
+  const environment = useRelayEnvironment();
+
+  // Load current attendance from Relay local store / network
+  const attendanceData = useLazyLoadQuery<formationMatchAttendanceQuery>(
+    FormationMatchAttendanceQuery,
+    { matchId, teamId },
+    { fetchPolicy: "store-and-network" },
+  );
+
   const [inputValue, setInputValue] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
-  const [searchResults, setSearchResults] = useState<Player[]>([]);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [rawSearchResults, setRawSearchResults] = useState<
+    NonNullable<searchTeamMemberQuery["response"]["searchTeamMember"]>
+  >([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Map: teamMemberId -> Target AttendanceStatus
+  const [pendingChanges, setPendingChanges] = useState<
+    Map<number, PendingPlayerItem>
+  >(new Map());
+
+  // Quick lookup for existing attendance
+  const attendanceMap = useMemo(() => {
+    const map = new Map();
+    attendanceData.findMatchAttendance?.forEach((att) => {
+      if (att && att.teamMember) {
+        map.set(att.teamMember.id, att);
+      }
+    });
+    return map;
+  }, [attendanceData]);
 
   const debouncedUpdate = useDebounce((value: string) => {
     setDebouncedKeyword(value.trim());
   }, 300);
 
-  // Update debounced keyword when input changes
   useEffect(() => {
     debouncedUpdate(inputValue);
   }, [inputValue, debouncedUpdate]);
 
-  // Search logic based on debounced keyword
   useEffect(() => {
     let isMounted = true;
 
     const performSearch = async () => {
       if (!debouncedKeyword) {
-        if (isMounted) setSearchResults([]);
+        if (isMounted) setRawSearchResults([]);
         return;
       }
 
       if (isMounted) setIsSearching(true);
 
-      const results = await mockSearchPlayers(debouncedKeyword);
+      try {
+        const result = await fetchQuery<searchTeamMemberQuery>(
+          environment,
+          SearchTeamMemberQuery,
+          { name: debouncedKeyword },
+          { fetchPolicy: "network-only" },
+        ).toPromise();
 
-      if (isMounted) {
-        setSearchResults(results);
-        setIsSearching(false);
+        if (isMounted && result?.searchTeamMember) {
+          setRawSearchResults(result.searchTeamMember);
+        }
+      } catch (e) {
+        console.error("Search failed", e);
+      } finally {
+        if (isMounted) setIsSearching(false);
       }
     };
 
     performSearch();
-
     return () => {
       isMounted = false;
     };
-  }, [debouncedKeyword]);
+  }, [debouncedKeyword, environment]);
 
-  const handleSelect = (player: Player) => {
-    setSelectedPlayer(player);
-  };
+  const searchResults = useMemo<PendingPlayerItem[]>(() => {
+    return rawSearchResults.map((tm) => {
+      const base = mapTeamMemberToPlayerProps(tm);
+      const existing = attendanceMap.get(tm.id);
+      const targetStatus = pendingChanges.has(tm.id)
+        ? pendingChanges.get(tm.id)!.currentStatus
+        : ((existing?.attendanceStatus as AttendanceStatus | undefined) ??
+          null);
 
-  const handleComplete = () => {
-    if (selectedPlayer) {
-      onComplete(selectedPlayer);
+      return {
+        ...base,
+        originalStatus: existing?.attendanceStatus as
+          | AttendanceStatus
+          | undefined,
+        currentStatus: targetStatus,
+      };
+    });
+  }, [rawSearchResults, attendanceMap, pendingChanges]);
+
+  // Derived Mercenary logic
+  const mercenaryPlayer = useMemo(() => {
+    if (!inputValue.trim()) return null;
+    // Check if the exact name exists in search results to avoid duplicate mercenary adding
+    if (searchResults.some((p) => p.name === inputValue.trim())) return null;
+
+    // Use a negative ID to represent a new mercenary temporarily
+    const tmId = -1;
+    const currentStatus = pendingChanges.has(tmId)
+      ? pendingChanges.get(tmId)!.currentStatus
+      : null;
+
+    return {
+      id: tmId,
+      teamMemberId: tmId,
+      userId: 0, // Wait, if userId is 0 it might throw error in createMatchAttendance??
+      memberType: "MERCENARY",
+      name: `${inputValue.trim()} (용병)`,
+      position: "용병",
+      number: 0,
+      overall: 0,
+      imageFallbackUrl: null,
+      currentStatus,
+      originalStatus: null,
+    } as PendingPlayerItem;
+  }, [inputValue, searchResults, pendingChanges]);
+
+  const handleToggleAttendance = useCallback((player: PendingPlayerItem) => {
+    setPendingChanges((prev) => {
+      const next = new Map(prev);
+      const newStatus = player.currentStatus === "ATTEND" ? "ABSENT" : "ATTEND";
+
+      const isRevertedBackToOriginal = newStatus === player.originalStatus;
+      const isNewRecordReverted =
+        player.originalStatus == null && newStatus === "ABSENT";
+
+      if (isRevertedBackToOriginal || isNewRecordReverted) {
+        next.delete(player.teamMemberId);
+      } else {
+        next.set(player.teamMemberId, { ...player, currentStatus: newStatus });
+      }
+
+      return next;
+    });
+  }, []);
+
+  const handleComplete = async () => {
+    setIsSubmitting(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const promises: Promise<any>[] = [];
+
+    for (const [teamMemberId, player] of Array.from(pendingChanges.entries())) {
+      const existing = attendanceMap.get(teamMemberId);
+      const targetStatus = player.currentStatus!;
+
+      if (existing) {
+        // Update existing attendance
+        if (existing.attendanceStatus !== targetStatus) {
+          const attendanceRowId = parseMatchIdForApi(existing.id);
+          if (attendanceRowId == null) {
+            promises.push(
+              Promise.reject(
+                new Error(
+                  `참석 레코드 ID를 숫자로 변환할 수 없습니다: ${String(existing.id)}`,
+                ),
+              ),
+            );
+            continue;
+          }
+          promises.push(
+            new Promise((resolve, reject) => {
+              commitMutation<updateMatchAttendanceMutation>(environment, {
+                mutation: UpdateMatchAttendanceMutation,
+                variables: {
+                  input: {
+                    id: attendanceRowId,
+                    attendanceStatus: targetStatus,
+                    memberType: existing.memberType ?? "MEMBER",
+                  },
+                },
+                onCompleted: resolve,
+                onError: reject,
+              });
+            }),
+          );
+        }
+      } else {
+        // Create new attendance
+        promises.push(
+          new Promise((resolve, reject) => {
+            commitMutation<createMatchAttendanceMutation>(environment, {
+              mutation: CreateMatchAttendanceMutation,
+              variables: {
+                input: {
+                  matchId,
+                  teamId,
+                  userId: player.userId,
+                  attendanceStatus: targetStatus,
+                  memberType: player.memberType,
+                },
+              },
+              onCompleted: resolve,
+              onError: reject,
+            });
+          }),
+        );
+      }
+    }
+
+    try {
+      if (promises.length > 0) {
+        await Promise.all(promises);
+        // Force refresh Relay's local store for findMatchAttendance
+        await fetchQuery(
+          environment,
+          FormationMatchAttendanceQuery,
+          { matchId, teamId },
+          { fetchPolicy: "network-only" },
+        ).toPromise();
+      }
+
       hideModal();
+    } catch (err) {
+      console.error("Failed to commit match attendance changes", err);
+      // Handle error gracefully
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const mercenaryPlayer: Player | null = inputValue.trim()
-    ? {
-        id: 0, // 용병 섹션에는 하나만 존재하므로 0으로 고정
-        name: `${inputValue.trim()} (용병)`,
-        position: "용병",
-        number: 0,
-        overall: 0,
-        image: "/images/player/img_player_2.webp",
-      }
-    : null;
-
-  const isLoading = isSearching || inputValue !== debouncedKeyword;
+  const isLoading =
+    isSearching ||
+    (inputValue.trim() !== "" && inputValue !== debouncedKeyword) ||
+    isSubmitting;
 
   return {
     inputValue,
     setInputValue,
     debouncedKeyword,
     searchResults,
-    selectedPlayer,
+    pendingChanges,
     mercenaryPlayer,
-    isSearching: isLoading, // 디바운스 대기 중에도 로딩으로 처리
-    handleSelect,
+    isSearching: isLoading,
+    handleToggleAttendance,
     handleComplete,
     hideModal,
   };

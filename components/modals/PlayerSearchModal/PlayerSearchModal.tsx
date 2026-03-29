@@ -1,32 +1,37 @@
-import { useId } from "react";
+import { useId, Suspense } from "react";
 import ModalLayout from "../ModalLayout";
 import Button from "@/components/ui/Button";
 import SearchInputSection from "./SearchInputSection";
 import PlayerListSection from "./PlayerListSection";
-import { Player } from "@/types/formation";
+
 import { usePlayerSearch } from "@/hooks/usePlayerSearch";
 
 interface PlayerSearchModalProps {
-  onComplete: (player: Player) => void;
+  matchId: number;
+  teamId: number;
   excludeMercenaries?: boolean;
 }
 
-const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModalProps) => {
+const PlayerSearchModalContent = ({
+  matchId,
+  teamId,
+  excludeMercenaries,
+}: PlayerSearchModalProps) => {
   const id = useId();
   const {
     inputValue,
     setInputValue,
     debouncedKeyword,
     searchResults,
-    selectedPlayer,
+    pendingChanges,
     mercenaryPlayer,
     isSearching,
-    handleSelect,
+    handleToggleAttendance,
     handleComplete,
-  } = usePlayerSearch({ onComplete });
+  } = usePlayerSearch({ matchId, teamId });
 
   return (
-    <ModalLayout title="선수 검색">
+    <>
       <div className="flex-1 flex flex-col gap-y-8">
         <SearchInputSection
           id={id}
@@ -39,8 +44,8 @@ const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModal
             isSearching={isSearching}
             results={searchResults}
             mercenary={mercenaryPlayer}
-            selectedPlayerId={selectedPlayer?.id}
-            onSelect={handleSelect}
+            pendingChanges={pendingChanges}
+            onToggle={handleToggleAttendance}
             excludeMercenaries={excludeMercenaries}
           />
         </div>
@@ -48,12 +53,25 @@ const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModal
           variant="primary"
           size="xl"
           onClick={handleComplete}
-          disabled={!selectedPlayer}
+          disabled={pendingChanges.size === 0}
           className="mt-auto"
         >
-          완료
+          완료{" "}
+          {pendingChanges.size > 0 ? `(${pendingChanges.size}명 변경)` : ""}
         </Button>
       </div>
+    </>
+  );
+};
+
+const PlayerSearchModal = (props: PlayerSearchModalProps) => {
+  return (
+    <ModalLayout title="선수 검색">
+      <Suspense
+        fallback={<div className="p-4 text-center">불러오는 중...</div>}
+      >
+        <PlayerSearchModalContent {...props} />
+      </Suspense>
     </ModalLayout>
   );
 };

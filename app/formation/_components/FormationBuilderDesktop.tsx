@@ -77,8 +77,6 @@ export default function FormationBuilderDesktop({
         currentQuarterLineups={quarters.map((q) => q.lineup || {})}
         selectedPlayer={selectedPlayer}
         onSelectPlayer={setSelectedPlayer}
-        onAddPlayer={() => {}}
-        onRemovePlayer={() => {}}
         activePosition={null}
       />
     </div>

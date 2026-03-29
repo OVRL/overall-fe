@@ -31,22 +31,20 @@ jest.mock("@/components/ui/Button", () => ({ children, onClick }: any) => (
   </button>
 ));
 
-// 선수 추가는 모달(PLAYER_SEARCH) 완료 시 onAddPlayer가 호출되는 방식으로 동작함
+// 선수 추가는 모달(PLAYER_SEARCH)이 열리는 방식으로 동작함
 jest.mock("@/hooks/useModal", () => ({
   __esModule: true,
   default: () => ({
-    openModal: (options: { onComplete?: (player: { name: string }) => void }) => {
-      if (options?.onComplete) {
-        options.onComplete({ name: "새 선수" });
-      }
-    },
+    openModal: jest.fn(),
   }),
+}));
+
+jest.mock("@/app/formation/_context/FormationMatchContext", () => ({
+  useFormationMatchIds: () => ({ matchId: 1, teamId: 1 }),
 }));
 
 describe("FormationPlayerList 컴포넌트", () => {
   const mockOnSelectPlayer = jest.fn();
-  const mockOnAddPlayer = jest.fn();
-  const mockOnRemovePlayer = jest.fn();
 
   const mockPlayers = [
     { id: 1, name: "손흥민", position: "LW", overall: 90 },
@@ -59,8 +57,6 @@ describe("FormationPlayerList 컴포넌트", () => {
     currentQuarterLineups: [],
     selectedPlayer: null,
     onSelectPlayer: mockOnSelectPlayer,
-    onAddPlayer: mockOnAddPlayer,
-    onRemovePlayer: mockOnRemovePlayer,
     targetPosition: null, // "ST" 등
     activePosition: null, // Dropdown 클릭 포지션 등
   };
@@ -75,13 +71,6 @@ describe("FormationPlayerList 컴포넌트", () => {
     expect(screen.getByTestId("player-filter")).toBeInTheDocument();
     expect(screen.getByTestId("group-list")).toBeInTheDocument();
     expect(screen.getByTestId("mock-add-btn")).toBeInTheDocument();
-  });
-
-  it("선수 추가 버튼 클릭 시 모달 완료 콜백이 호출되며 onAddPlayer가 실행되어야 한다", () => {
-    render(<FormationPlayerList {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId("mock-add-btn"));
-    expect(mockOnAddPlayer).toHaveBeenCalledWith("새 선수");
   });
 
   it("필터 탭을 변경하면 FormationPlayerGroupList에 전달되는 선수 목록이 필터링되어야 한다", () => {

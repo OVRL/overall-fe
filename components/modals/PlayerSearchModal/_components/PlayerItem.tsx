@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Player } from "@/types/formation";
 import { cn } from "@/lib/utils";
 import plus from "@/public/icons/plus.svg";
@@ -12,7 +13,7 @@ interface PlayerItemProps {
 /**
  * 개별 플레이어 아이템 컴포넌트
  */
-const PlayerItem = ({ player, isSelected, onSelect }: PlayerItemProps) => (
+const PlayerItem = memo(({ player, isSelected, onSelect }: PlayerItemProps) => (
   <li
     onClick={() => onSelect(player)}
     className={cn(
@@ -29,6 +30,8 @@ const PlayerItem = ({ player, isSelected, onSelect }: PlayerItemProps) => (
       )}
     />
   </li>
-);
+));
+
+PlayerItem.displayName = "PlayerItem";
 
 export default PlayerItem;
