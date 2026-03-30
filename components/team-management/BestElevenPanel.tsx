@@ -431,7 +431,9 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                         setManager({ name: player.name, image: getValidImageSrc(player.image) });
                         setHasChanges(true);
                       },
-                      excludeMercenaries: true
+                      excludeMercenaries: true,
+                      isTeamSearch: true,
+                      teamPlayers: allPlayers
                     })}
                     className="flex items-center gap-4 pr-10 border-r border-white/10 hover:opacity-80 transition-all text-left"
                   >

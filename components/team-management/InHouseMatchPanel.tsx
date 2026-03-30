@@ -297,6 +297,8 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
 
     const handleAddPlayer = () => {
         openModal({
+            isTeamSearch: true,
+            teamPlayers: formationTeamPlayers,
             onComplete: (playerData) => {
                 if (!playerData) return;
                 const newId = String(Date.now());

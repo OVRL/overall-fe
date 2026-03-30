@@ -63,13 +63,63 @@ interface PlayerSelectModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (data: { goalId: string; assistId: string; preAssistId: string }) => void;
+    onSaveText: (data: (ScoreLog & { quarter: number })[]) => void;
     players: Player[];
 }
 
-const PlayerSelectModal = ({ isOpen, onClose, onSave, players }: PlayerSelectModalProps) => {
-    const [selectedGoal, setSelectedGoal] = useState<string>("3");
-    const [selectedAssist, setSelectedAssist] = useState<string>("1");
+const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players }: PlayerSelectModalProps) => {
+    const [mode, setMode] = useState<"SELECT" | "TEXT">("SELECT");
+    const [textInput, setTextInput] = useState("");
+    const [selectedGoal, setSelectedGoal] = useState<string>("none");
+    const [selectedAssist, setSelectedAssist] = useState<string>("none");
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
+
+    // 텍스트 파싱 로직
+    const parsedSummary = React.useMemo(() => {
+        if (!textInput.trim()) return [];
+        
+        const lines = textInput.split(/\n| /); // 뉴라인이나 공백으로 분리
+        let currentQuarter = 1;
+        const results: (ScoreLog & { quarter: number })[] = [];
+
+        const quarterRegex = /(\d+)[qQ]/;
+        const goalRegex = /([^득점어시기점\s\n]+)득점/;
+        const assistRegex = /([^득점어시기점\s\n]+)어시/;
+        const preAssistRegex = /([^득점어시기점\s\n]+)기점/;
+
+        textInput.split(/\n/).forEach(line => {
+            const qMatch = line.match(quarterRegex);
+            if (qMatch) {
+                currentQuarter = parseInt(qMatch[1]);
+            }
+
+            const goalEvents = line.split(/(?=.+?득점)/);
+            goalEvents.forEach(event => {
+                const g = event.match(goalRegex);
+                if (g) {
+                    const playerName = g[1].trim();
+                    const player = players.find(p => p.name.includes(playerName));
+                    
+                    const a = event.match(assistRegex);
+                    const assistPlayer = a ? players.find(p => p.name.includes(a[1].trim())) : undefined;
+                    
+                    const pa = event.match(preAssistRegex);
+                    const preAssistPlayer = pa ? players.find(p => p.name.includes(pa[1].trim())) : undefined;
+                    
+                    results.push({
+                        id: Date.now().toString() + Math.random(),
+                        type: "goal",
+                        player,
+                        assist: assistPlayer,
+                        preAssist: preAssistPlayer,
+                        quarter: currentQuarter
+                    });
+                }
+            });
+        });
+
+        return results;
+    }, [textInput, players]);
 
     const handleGoalChange = (id: string) => {
         setSelectedGoal(id);
@@ -86,57 +136,218 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, players }: PlayerSelectMod
             <div className="w-full max-w-md bg-[#1e1e1e] rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
                     <div className="w-6" /> 
-                    <h2 className="text-base font-bold text-white">득점 선수 입력</h2>
+                    <h2 className="text-base font-bold text-white">득점 정보 입력</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-8">
-                    {/* 득점 */}
-                    <section>
-                        <div className="flex items-center gap-2 mb-4">
-                            <span className="text-sm font-medium text-gray-400">득점</span>
-                            <span className="text-sm font-bold text-primary">
-                                {selectedGoal === "own-goal" ? "자책골" : MOCK_PLAYERS.find(p => p.id === selectedGoal)?.name}
-                            </span>
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <button 
-                                onClick={() => handleGoalChange("own-goal")}
-                                className={cn(
-                                    "flex flex-col items-center gap-2 shrink-0 group",
-                                    selectedGoal === "own-goal" ? "opacity-100" : "opacity-60"
-                                )}
-                            >
-                                <div className={cn(
-                                    "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
-                                    selectedGoal === "own-goal" ? "border-red-500 scale-105" : "border-transparent"
-                                )}>
-                                    <span className={cn("text-xs font-bold", selectedGoal === "own-goal" ? "text-red-500" : "text-gray-500")}>자책골</span>
-                                </div>
-                            </button>
-                            {players.map(player => (
-                                <button 
-                                    key={player.id} 
-                                    onClick={() => handleGoalChange(player.id)}
-                                    className="flex flex-col items-center gap-2 shrink-0 group"
-                                >
-                                    <div className={cn(
-                                        "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
-                                        selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
-                                    )}>
-                                        <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
-                                    </div>
-                                    <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>
-                                        {player.name}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
+                <div className="p-6 space-y-6">
+                    {/* 입력 방식 선택 탭 */}
+                    <div className="flex p-1 bg-black/40 rounded-2xl border border-white/5">
+                        <button 
+                            onClick={() => setMode("SELECT")}
+                            className={cn(
+                                "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
+                                mode === "SELECT" ? "bg-primary text-black" : "text-gray-500 hover:text-white"
+                            )}
+                        >
+                            선택해서 넣기
+                        </button>
+                        <button 
+                            onClick={() => setMode("TEXT")}
+                            className={cn(
+                                "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
+                                mode === "TEXT" ? "bg-primary text-black" : "text-gray-500 hover:text-white"
+                            )}
+                        >
+                            텍스트로 넣기
+                        </button>
+                    </div>
 
-                    {/* 도움/기점 섹션은 MOCK 기반이므로 구조만 유지 */}
+                    {mode === "SELECT" ? (
+                        <div className="space-y-8">
+                            {/* 득점 */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <span className="text-sm font-medium text-gray-400">득점</span>
+                                    <span className="text-sm font-bold text-primary">
+                                        {selectedGoal === "own-goal" ? "자책골" : players.find(p => p.id === selectedGoal)?.name}
+                                    </span>
+                                </div>
+                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                    <button 
+                                        onClick={() => handleGoalChange("own-goal")}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 shrink-0 group",
+                                            selectedGoal === "own-goal" ? "opacity-100" : "opacity-60"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
+                                            selectedGoal === "own-goal" ? "border-red-500 scale-105" : "border-transparent"
+                                        )}>
+                                            <span className={cn("text-xs font-bold", selectedGoal === "own-goal" ? "text-red-500" : "text-gray-500")}>자책골</span>
+                                        </div>
+                                    </button>
+                                    {players.map(player => (
+                                        <button 
+                                            key={player.id} 
+                                            onClick={() => handleGoalChange(player.id)}
+                                            className="flex flex-col items-center gap-2 shrink-0 group"
+                                        >
+                                            <div className={cn(
+                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
+                                                selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
+                                            )}>
+                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                            </div>
+                                            <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>
+                                                {player.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* 도움 섹션 */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <span className="text-sm font-medium text-gray-400">도움</span>
+                                    <span className="text-sm font-bold text-primary">
+                                        {selectedAssist === "none" ? "없음" : players.find(p => p.id === selectedAssist)?.name}
+                                    </span>
+                                </div>
+                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                    <button 
+                                        onClick={() => setSelectedAssist("none")}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 shrink-0 group",
+                                            selectedAssist === "none" ? "opacity-100" : "opacity-60"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
+                                            selectedAssist === "none" ? "border-primary scale-105" : "border-transparent"
+                                        )}>
+                                            <span className={cn("text-xs font-bold", selectedAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
+                                        </div>
+                                    </button>
+                                    {players.map(player => (
+                                        <button 
+                                            key={player.id} 
+                                            onClick={() => setSelectedAssist(player.id)}
+                                            disabled={selectedGoal === player.id || selectedGoal === "own-goal"}
+                                            className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <div className={cn(
+                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
+                                                selectedAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
+                                            )}>
+                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                            </div>
+                                            <span className={cn("text-[10px] font-medium transition-colors", selectedAssist === player.id ? "text-white" : "text-gray-500")}>
+                                                {player.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* 기점 섹션 */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <span className="text-sm font-medium text-gray-400">기점</span>
+                                    <span className="text-sm font-bold text-primary">
+                                        {selectedPreAssist === "none" ? "없음" : players.find(p => p.id === selectedPreAssist)?.name}
+                                    </span>
+                                </div>
+                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                    <button 
+                                        onClick={() => setSelectedPreAssist("none")}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 shrink-0 group",
+                                            selectedPreAssist === "none" ? "opacity-100" : "opacity-60"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
+                                            selectedPreAssist === "none" ? "border-primary scale-105" : "border-transparent"
+                                        )}>
+                                            <span className={cn("text-xs font-bold", selectedPreAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
+                                        </div>
+                                    </button>
+                                    {players.map(player => (
+                                        <button 
+                                            key={player.id} 
+                                            onClick={() => setSelectedPreAssist(player.id)}
+                                            disabled={selectedGoal === player.id || selectedAssist === player.id || selectedGoal === "own-goal"}
+                                            className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <div className={cn(
+                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
+                                                selectedPreAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
+                                            )}>
+                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                            </div>
+                                            <span className={cn("text-[10px] font-medium transition-colors", selectedPreAssist === player.id ? "text-white" : "text-gray-500")}>
+                                                {player.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">텍스트 입력 (카톡 스타일)</label>
+                                    <span className="text-[10px] text-primary/60 font-medium">예시: 1q 메시득점 호날두어시</span>
+                                </div>
+                                <textarea 
+                                    className="w-full h-32 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-gray-700"
+                                    placeholder="입력 예시:&#10;1q&#10;메시득점호날두어시반날두기점"
+                                    value={textInput}
+                                    onChange={(e) => setTextInput(e.target.value)}
+                                />
+                                {/* 선수 이름 힌트 (자동완성 느낌) */}
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {players.slice(0, 8).map(p => (
+                                        <button 
+                                            key={p.id}
+                                            onClick={() => setTextInput(prev => prev + p.name)}
+                                            className="px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                                        >
+                                            {p.name}
+                                        </button>
+                                    ))}
+                                    <span className="text-[10px] text-gray-600 self-center ml-1">...클릭하여 이름 추가</span>
+                                </div>
+                            </div>
+
+                            {parsedSummary.length > 0 && (
+                                <div className="space-y-4">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">파싱 미리보기</label>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto pr-2 scrollbar-hide">
+                                        {parsedSummary.map((item, idx) => (
+                                            <div key={idx} className="bg-white/5 border border-white/5 rounded-xl px-4 py-3 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] font-black text-primary">{item.quarter}Q</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs font-bold text-white">득점: {item.player?.name || "알 수 없음"}</span>
+                                                        <span className="text-[10px] text-gray-500">
+                                                            어시: {item.assist?.name || "-"} / 기점: {item.preAssist?.name || "-"}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-6 flex gap-3">
@@ -145,7 +356,11 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, players }: PlayerSelectMod
                     </button>
                     <button 
                         onClick={() => { 
-                            onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
+                            if (mode === "SELECT") {
+                                onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
+                            } else {
+                                onSaveText(parsedSummary);
+                            }
                             onClose(); 
                         }} 
                         className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
@@ -340,12 +555,6 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                     <Edit2 size={18} />
                                 </button>
                                 <button 
-                                    onClick={(e) => handleDelete(match.id, e)}
-                                    className="p-2 text-gray-500 hover:text-red-400 transition-colors"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                                <button 
                                     className={cn("p-2 text-gray-500 hover:text-white transition-all", match.expanded && "rotate-180")}
                                 >
                                     <ChevronDown size={18} />
@@ -445,18 +654,17 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                     </div>
                                                     <button 
                                                         onClick={() => {
-                                                            const newLogs = { ...match.logs };
-                                                            newLogs[selectedQuarter] = newLogs[selectedQuarter].filter(l => l.id !== log.id);
-                                                            const scoreUpdate = log.type === "goal" ? { home: match.score.home - 1 } : { away: match.score.away - 1 };
-                                                            updateMatchData(match.id, m => ({
-                                                                ...m,
-                                                                logs: newLogs,
-                                                                score: { ...m.score, ...scoreUpdate }
-                                                            }));
+                                                            if (confirm("수정하시겠습니까?")) {
+                                                                // 수정 로직: 기존 데이터를 모달에 세팅하거나 별도 처리
+                                                                // 현재는 단순 확인 후 모달 열기로 안내
+                                                                setActiveMatchId(match.id);
+                                                                setIsModalOpen(true);
+                                                                // TODO: 선택된 로그의 데이터를 PlayerSelectModal에 전달하는 기능 필요
+                                                            }
                                                         }}
-                                                        className="text-gray-700 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
+                                                        className="text-gray-700 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Edit2 size={14} />
                                                     </button>
                                                 </div>
                                             ))}
@@ -484,12 +692,14 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                     
                     const goalPlayer = teamPlayers.find(p => p.id === saveData.goalId);
                     const assistPlayer = teamPlayers.find(p => p.id === saveData.assistId);
+                    const preAssistPlayer = teamPlayers.find(p => p.id === saveData.preAssistId);
                     
                     const newLog: ScoreLog = {
                         id: Date.now().toString(),
                         type: "goal",
                         player: goalPlayer,
-                        assist: assistPlayer
+                        assist: assistPlayer,
+                        preAssist: preAssistPlayer
                     };
 
                     updateMatchData(activeMatchId, m => {
@@ -502,6 +712,26 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                         };
                     });
                 }} 
+                onSaveText={(parsedLogs) => {
+                    if (!activeMatchId) return;
+                    
+                    updateMatchData(activeMatchId, m => {
+                        const newLogs = { ...m.logs };
+                        let homeScoreAdd = 0;
+                        
+                        parsedLogs.forEach(log => {
+                            const { quarter, ...logData } = log;
+                            newLogs[quarter] = [...(newLogs[quarter] || []), logData];
+                            homeScoreAdd++;
+                        });
+
+                        return {
+                            ...m,
+                            logs: newLogs,
+                            score: { ...m.score, home: m.score.home + homeScoreAdd }
+                        };
+                    });
+                }}
             />
 
             {/* 하단 저장 바 - 변경사항이 있을 때만 노출 */}

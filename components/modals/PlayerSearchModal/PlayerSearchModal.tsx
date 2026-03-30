@@ -5,14 +5,26 @@ import SearchInputSection from "./SearchInputSection";
 import PlayerListSection from "./PlayerListSection";
 import { Player } from "@/types/formation";
 import { usePlayerSearch } from "@/hooks/usePlayerSearch";
+import { useTeamPlayerSearch } from "@/hooks/useTeamPlayerSearch";
 
 interface PlayerSearchModalProps {
   onComplete: (player: Player) => void;
   excludeMercenaries?: boolean;
+  isTeamSearch?: boolean;
+  teamPlayers?: Player[];
 }
 
-const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModalProps) => {
+const PlayerSearchModal = ({ 
+  onComplete, 
+  excludeMercenaries, 
+  isTeamSearch, 
+  teamPlayers 
+}: PlayerSearchModalProps) => {
   const id = useId();
+  
+  // 상황에 맞는 훅 선택
+  const searchHook = isTeamSearch ? useTeamPlayerSearch : usePlayerSearch;
+  
   const {
     inputValue,
     setInputValue,
@@ -23,10 +35,10 @@ const PlayerSearchModal = ({ onComplete, excludeMercenaries }: PlayerSearchModal
     isSearching,
     handleSelect,
     handleComplete,
-  } = usePlayerSearch({ onComplete });
+  } = searchHook({ onComplete, teamPlayers } as any);
 
   return (
-    <ModalLayout title="선수 검색">
+    <ModalLayout title={isTeamSearch ? "팀 선수 검색" : "선수 검색"}>
       <div className="flex-1 flex flex-col gap-y-8">
         <SearchInputSection
           id={id}
