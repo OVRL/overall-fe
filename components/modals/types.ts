@@ -6,7 +6,14 @@ import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 export interface ModalPropsMap {
   // 예시:
   // ALERT: { message: string };
-  // CONFIRM: { title: string; onConfirm: () => void };
+  CONFIRM: {
+    title: string;
+    description?: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  };
   DEFAULT_IMAGE_SELECT: {
     initialImage: string;
     onSave: (image: string) => void;
@@ -48,6 +55,10 @@ export interface ModalPropsMap {
   REGISTER_GAME: Record<string, never>;
   ATTENDANCE_VOTE: Record<string, never>;
   TEAM_CREATED: Record<string, never>;
+  EDIT_GAME: {
+    matchId: number;
+    teamId: number;
+  };
   /** 포메이션 경기 카드 — 지도 버튼 */
   FORMATION_VENUE_MAP: {
     address: string;

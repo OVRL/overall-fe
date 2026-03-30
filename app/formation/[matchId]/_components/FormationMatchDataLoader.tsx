@@ -7,11 +7,7 @@ import { FormationMatchAttendanceQuery } from "@/lib/relay/queries/formationMatc
 import type { formationMatchAttendanceQuery } from "@/__generated__/formationMatchAttendanceQuery.graphql";
 import { FormationMatchPlayersProvider } from "../../_context/FormationMatchPlayersContext";
 import { FormationMatchContext } from "../../_context/FormationMatchContext";
-import {
-  getTeamMemberProfileImageFallbackUrl,
-  getTeamMemberProfileImageRawUrl,
-} from "@/lib/playerPlaceholderImage";
-import type { Player } from "@/types/formation";
+import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 
 interface Props {
   matchId: number;
@@ -19,60 +15,19 @@ interface Props {
   children: React.ReactNode;
 }
 
-function matchAttendanceNodesToAttendingPlayers(
-  data: formationMatchAttendanceQuery["response"]["findMatchAttendance"],
-): Player[] {
-  if (!data) return [];
-
-  const attending = data.filter(
-    (row): row is NonNullable<typeof row> =>
-      row != null &&
-      row.attendanceStatus === "ATTEND" &&
-      row.teamMember != null,
-  );
-
-  return attending.map((row) => {
-    const tm = row.teamMember!;
-    const user = tm.user;
-    const back = tm.backNumber;
-    const preferred = user?.preferredNumber;
-    const number =
-      back != null ? back : preferred != null ? Math.round(preferred) : 0;
-
-    const name = user?.name?.trim() || "이름 없음";
-    const position = tm.position ?? "ST";
-    const overall = tm.overall?.ovr ?? 0;
-
-    const profileRaw = getTeamMemberProfileImageRawUrl({
-      profileImg: tm.profileImg,
-      user: tm.user ?? undefined,
-    });
-    const imageFallbackUrl = getTeamMemberProfileImageFallbackUrl({
-      id: tm.id,
-      user: tm.user ?? undefined,
-    });
-
-    return {
-      id: tm.id,
-      name,
-      position,
-      number,
-      overall,
-      image: profileRaw || undefined,
-      imageFallbackUrl,
-    } satisfies Player;
-  });
-}
-
+/**
+ * 실제 데이터를 가져오고 Context에 공급하는 컴포넌트
+ * - fetchPolicy: 'store-or-network'로 설정하여 SSR 하이드레이션 데이터를 우선 활용하고 중복 호출을 방지합니다.
+ */
 function DataFetcher({ matchId, teamId, children }: Props) {
   const data = useLazyLoadQuery<formationMatchAttendanceQuery>(
     FormationMatchAttendanceQuery,
     { matchId, teamId },
-    { fetchPolicy: "store-and-network" },
+    { fetchPolicy: "store-or-network" },
   );
 
-  const attendingPlayers = matchAttendanceNodesToAttendingPlayers(
-    data.findMatchAttendance,
+  const attendingPlayers = matchAttendanceRowsToAttendingPlayers(
+    data.findMatchAttendance ?? [],
   );
 
   return (
@@ -82,6 +37,12 @@ function DataFetcher({ matchId, teamId, children }: Props) {
   );
 }
 
+/**
+ * 포메이션 경기 데이터 로더 (관심사 분리)
+ * - ErrorBoundary & Suspense: 로딩 및 에러 상태 관리 (종단 관심사)
+ * - FormationMatchContext: 경기 ID 및 팀 ID 공급
+ * - DataFetcher: 실제 데이터 페칭 (Relay)
+ */
 export default function FormationMatchDataLoader({
   matchId,
   teamId,
@@ -95,19 +56,40 @@ export default function FormationMatchDataLoader({
   }, []);
 
   if (!isMounted) {
-    return <div className="p-4 text-center">참석자 명단 로딩 중...</div>;
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-text-secondary text-sm">경기를 불러오는 중...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <ErrorBoundary
       fallback={
-        <div className="p-4 text-center">
-          참석자 명단을 불러오는데 실패했습니다.
+        <div className="p-8 text-center bg-surface-card border border-border-card rounded-xl mx-4 my-8">
+          <p className="text-text-primary font-medium mb-2">
+            데이터를 불러오지 못했습니다.
+          </p>
+          <p className="text-text-secondary text-sm">
+            잠시 후 다시 시도해 주세요.
+          </p>
         </div>
       }
     >
       <Suspense
-        fallback={<div className="p-4 text-center">참석자 명단 로딩 중...</div>}
+        fallback={
+          <div className="p-8 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-text-secondary text-sm">
+                참석자 명단 로딩 중...
+              </p>
+            </div>
+          </div>
+        }
       >
         <FormationMatchContext.Provider value={{ matchId, teamId }}>
           <DataFetcher matchId={matchId} teamId={teamId}>

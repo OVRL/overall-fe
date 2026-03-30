@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 // Components
-import MatchScheduleCard from "@/components/formation/MatchScheduleCard";
+import MatchScheduleCard from "@/components/formation/MatchScheduleCard/MatchScheduleCardClientOnly";
 import FormationBuilder from "../_components/FormationBuilder";
 import { matchToScheduleCardData } from "@/lib/formation/matchToScheduleCardProps";
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
@@ -83,6 +83,8 @@ export default async function FormationMatchPage({
       uniformDesign={scheduleProps.uniformDesign}
       uniformKindLabel={scheduleProps.uniformKindLabel}
       opponentEmblemSrc={scheduleProps.opponentEmblemSrc}
+      matchId={numericMatchId}
+      teamId={access.createdTeamId}
     />
   );
 

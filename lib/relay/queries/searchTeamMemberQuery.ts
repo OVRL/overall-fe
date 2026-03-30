@@ -1,8 +1,8 @@
 import { graphql } from "react-relay";
 
 export const SearchTeamMemberQuery = graphql`
-  query searchTeamMemberQuery($name: String!) {
-    searchTeamMember(name: $name) {
+  query searchTeamMemberQuery($name: String!, $teamId: Int!) {
+    searchTeamMember(name: $name, teamId: $teamId) {
       id
       __typename
       backNumber

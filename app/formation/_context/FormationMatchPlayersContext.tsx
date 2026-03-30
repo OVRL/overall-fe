@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { Player } from "@/types/formation";
 
-const FormationMatchPlayersContext = createContext<Player[] | undefined>(
+export const FormationMatchPlayersContext = createContext<Player[] | undefined>(
   undefined,
 );
 

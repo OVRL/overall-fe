@@ -48,6 +48,8 @@ export async function refreshAccessToken(
       data.errors.length > 0
     ) {
       console.error("Token refresh GraphQL errors:", data.errors);
+      console.log("이 때의 RefreshToken:", refreshToken);
+
       return null;
     }
     return data?.data?.refresh ?? null;

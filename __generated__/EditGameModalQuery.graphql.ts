@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3a791c18799473590f80ea52faba5745>>
+ * @generated SignedSource<<7eecfd281745483a8056424048121e7e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,10 +12,10 @@ import { ConcreteRequest } from 'relay-runtime';
 export type MatchType = "INTERNAL" | "MATCH" | "%future added value";
 export type Uniform = "AWAY" | "HOME" | "%future added value";
 export type UniformDesign = "DEFAULT" | "SOLID_BLACK" | "SOLID_BLUE" | "SOLID_PURPLE" | "SOLID_RED" | "SOLID_WHITE" | "STRIPE_BLUE" | "STRIPE_RED" | "STRIPE_WHITE" | "STRIPE_YELLOW" | "%future added value";
-export type findMatchQuery$variables = {
+export type EditGameModalQuery$variables = {
   createdTeamId: number;
 };
-export type findMatchQuery$data = {
+export type EditGameModalQuery$data = {
   readonly findMatch: ReadonlyArray<{
     readonly __typename: "MatchModel";
     readonly createdTeam: {
@@ -50,9 +50,9 @@ export type findMatchQuery$data = {
     readonly voteDeadline: any;
   }>;
 };
-export type findMatchQuery = {
-  response: findMatchQuery$data;
-  variables: findMatchQuery$variables;
+export type EditGameModalQuery = {
+  response: EditGameModalQuery$data;
+  variables: EditGameModalQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -263,7 +263,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "findMatchQuery",
+    "name": "EditGameModalQuery",
     "selections": (v5/*: any*/),
     "type": "Query",
     "abstractKey": null
@@ -272,20 +272,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "findMatchQuery",
+    "name": "EditGameModalQuery",
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "8189918e10d4b484015722c0435aecff",
+    "cacheID": "cde2ca9076989a83026386f92106d114",
     "id": null,
     "metadata": {},
-    "name": "findMatchQuery",
+    "name": "EditGameModalQuery",
     "operationKind": "query",
-    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    endTime\n    voteDeadline\n    matchType\n    quarterCount\n    quarterDuration\n    description\n    uniformType\n    teamName\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n      homeUniform\n      awayUniform\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
+    "text": "query EditGameModalQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    endTime\n    voteDeadline\n    matchType\n    quarterCount\n    quarterDuration\n    description\n    uniformType\n    teamName\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n      homeUniform\n      awayUniform\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "9893217ebbdde2b08b6ce4890448bf77";
+(node as any).hash = "f2aee220499050569c966ef8a7e94e24";
 
 export default node;

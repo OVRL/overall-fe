@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useCallback } from "react";
 import Image from "next/image";
 import fire from "@/public/icons/fire.svg";
 import Icon from "@/components/ui/Icon";
@@ -9,6 +11,7 @@ import { MatchScheduleCardVenueRow } from "./MatchScheduleCardVenueRow";
 import type { UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { getUniformImagePath } from "@/app/create-team/_lib/uniformDesign";
 import type { MatchScheduleVenueInput } from "@/lib/formation/matchToScheduleCardProps";
+import useModal from "@/hooks/useModal";
 
 interface MatchScheduleCardDesktopProps {
   /** 예: 2026-02-03(목) 18:00~20:00 */
@@ -20,6 +23,8 @@ interface MatchScheduleCardDesktopProps {
   uniformDesign: UniformDesign;
   uniformKindLabel: string;
   opponentEmblemSrc?: string | null;
+  matchId: number;
+  teamId: number;
 }
 
 const SHOW_OPPONENT_RECORD = false;
@@ -32,8 +37,15 @@ const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
   uniformDesign,
   uniformKindLabel,
   opponentEmblemSrc,
+  matchId,
+  teamId,
 }) => {
+  const { openModal } = useModal("EDIT_GAME");
   const uniformImagePath = getUniformImagePath(uniformDesign);
+
+  const handleEditClick = useCallback(() => {
+    openModal({ matchId, teamId });
+  }, [openModal, matchId, teamId]);
 
   return (
     <div className="hidden md:flex flex-col gap-4 relative">
@@ -45,6 +57,7 @@ const MatchScheduleCardDesktop: React.FC<MatchScheduleCardDesktopProps> = ({
         variant="primary"
         size="s"
         className="absolute -top-1 -right-3 w-fit px-3.5 py-3"
+        onClick={handleEditClick}
       >
         경기 설정 변경
       </Button>

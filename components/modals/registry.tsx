@@ -10,6 +10,14 @@ const AddressSearchModal = dynamic(() => import("./AddressSearchModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const GlobalConfirmModal = dynamic(() => import("./GlobalConfirmModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
+const EditGameModal = dynamic(() => import("./EditGameModal/EditGameModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 const DetailAddressSearchModal = dynamic(
   () => import("./DetailAddressSearchModal/DetailAddressSearchModal"),
   {
@@ -87,4 +95,6 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   ATTENDANCE_VOTE: AttendanceVoteModal,
   TEAM_CREATED: TeamCreatedModal,
   FORMATION_VENUE_MAP: FormationVenueMapModal,
+  CONFIRM: GlobalConfirmModal,
+  EDIT_GAME: EditGameModal,
 } as ModalComponentMap;

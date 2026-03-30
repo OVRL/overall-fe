@@ -132,7 +132,7 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
         const result = await fetchQuery<searchTeamMemberQuery>(
           environment,
           SearchTeamMemberQuery,
-          { name: debouncedKeyword },
+          { name: debouncedKeyword, teamId },
           { fetchPolicy: "network-only" },
         ).toPromise();
 
@@ -150,7 +150,7 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
     return () => {
       isMounted = false;
     };
-  }, [debouncedKeyword, environment]);
+  }, [debouncedKeyword, environment, teamId]);
 
   const searchResults = useMemo<PendingPlayerItem[]>(() => {
     return rawSearchResults.map((tm) => {

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import MatchScheduleCardDesktop from "./MatchScheduleCardDesktop";
@@ -13,6 +15,8 @@ interface MatchScheduleCardProps {
   uniformDesign?: UniformDesign;
   uniformKindLabel?: string;
   opponentEmblemSrc?: string | null;
+  matchId: number;
+  teamId: number;
   className?: string;
 }
 
@@ -30,6 +34,8 @@ const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
   uniformDesign = "SOLID_RED",
   uniformKindLabel = "홈 유니폼",
   opponentEmblemSrc,
+  matchId,
+  teamId,
   className,
 }) => {
   return (
@@ -48,6 +54,8 @@ const MatchScheduleCard: React.FC<MatchScheduleCardProps> = ({
           uniformDesign={uniformDesign}
           uniformKindLabel={uniformKindLabel}
           opponentEmblemSrc={opponentEmblemSrc}
+          matchId={matchId}
+          teamId={teamId}
         />
       </div>
     </section>

@@ -18,6 +18,7 @@ export const FindMatchQuery = graphql`
       quarterDuration
       description
       uniformType
+      teamName
       createdTeam {
         __typename
         id

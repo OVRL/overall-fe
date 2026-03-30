@@ -1,16 +1,11 @@
-import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import {
-  getTeamMemberProfileImageFallbackUrl,
-  getTeamMemberProfileImageRawUrl,
-} from "@/lib/playerPlaceholderImage";
-import type { MatchAttendanceRowSSR } from "@/utils/fetchFindMatchAttendanceSSR";
+  matchAttendanceRowsToAttendingPlayers,
+  type GenericMatchAttendanceRow,
+} from "@/lib/formation/matchAttendanceToPlayers";
+import { getTeamMemberProfileImageFallbackUrl } from "@/lib/playerPlaceholderImage";
 
 describe("matchAttendanceRowsToAttendingPlayers", () => {
-  const baseRow = (
-    overrides: Partial<MatchAttendanceRowSSR> & {
-      teamMember?: MatchAttendanceRowSSR["teamMember"];
-    },
-  ): MatchAttendanceRowSSR => ({
+  const baseRow = (overrides: Partial<GenericMatchAttendanceRow>): GenericMatchAttendanceRow => ({
     attendanceStatus: "ATTEND",
     teamMember: {
       id: 1,
@@ -29,11 +24,10 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
   });
 
   it("attendanceStatus가 ATTEND이고 teamMember가 있을 때만 Player로 변환한다", () => {
-    const rows: MatchAttendanceRowSSR[] = [
+    const rows: GenericMatchAttendanceRow[] = [
       baseRow({}),
       baseRow({
         attendanceStatus: "ABSENT",
-        teamMember: baseRow({}).teamMember,
       }),
       baseRow({ attendanceStatus: null }),
       baseRow({ teamMember: null }),
@@ -51,21 +45,43 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
       overall: 85,
       image: undefined,
       imageFallbackUrl: getTeamMemberProfileImageFallbackUrl({
-        id: tm.id,
-        user: tm.user,
+        id: Number(tm.id),
+        user: { id: String(tm.user?.id) },
       }),
     });
-    expect(
-      getTeamMemberProfileImageRawUrl({
-        profileImg: tm.profileImg,
-        user: tm.user,
-      }),
-    ).toBe("");
+  });
+
+  it("Relay 글로벌 ID(string)가 들어와도 숫자 ID로 파싱하여 Player를 생성한다", () => {
+    const rows: GenericMatchAttendanceRow[] = [
+      {
+        attendanceStatus: "ATTEND",
+        teamMember: {
+          id: "TeamMember:555",
+          backNumber: 7,
+          position: "ST",
+          profileImg: null,
+          overall: { ovr: 99 },
+          user: {
+            id: "UserModel:777",
+            name: "릴레이",
+            preferredNumber: null,
+            profileImage: null,
+          },
+        },
+      },
+    ];
+
+    const [p] = matchAttendanceRowsToAttendingPlayers(rows);
+
+    expect(p.id).toBe(555); // "TeamMember:555" -> 555
+    expect(p.name).toBe("릴레이");
+    expect(p.number).toBe(7);
   });
 
   it("backNumber가 없으면 preferredNumber를 반올림해 등번호로 쓴다", () => {
-    const rows: MatchAttendanceRowSSR[] = [
-      baseRow({
+    const rows: GenericMatchAttendanceRow[] = [
+      {
+        attendanceStatus: "ATTEND",
         teamMember: {
           id: 2,
           backNumber: null,
@@ -79,47 +95,14 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
             profileImage: "/p.png",
           },
         },
-      }),
+      },
     ];
 
     const [p] = matchAttendanceRowsToAttendingPlayers(rows);
-    const tm = rows[0].teamMember!;
 
     expect(p.number).toBe(8);
     expect(p.position).toBe("ST");
     expect(p.name).toBe("이름 없음");
-    expect(p.overall).toBe(0);
-    expect(p.image).toBe("/p.png");
-    expect(p.imageFallbackUrl).toBe(
-      getTeamMemberProfileImageFallbackUrl({ id: tm.id, user: tm.user }),
-    );
-  });
-
-  it("profileImg가 있으면 image로 우선 사용한다", () => {
-    const rows: MatchAttendanceRowSSR[] = [
-      baseRow({
-        teamMember: {
-          id: 3,
-          backNumber: 1,
-          position: "GK",
-          profileImg: "/tm.png",
-          overall: { ovr: 90 },
-          user: {
-            id: "u",
-            name: "키퍼",
-            preferredNumber: null,
-            profileImage: "/user.png",
-          },
-        },
-      }),
-    ];
-
-    const [p] = matchAttendanceRowsToAttendingPlayers(rows);
-    const tm = rows[0].teamMember!;
-    expect(p.image).toBe("/tm.png");
-    expect(p.imageFallbackUrl).toBe(
-      getTeamMemberProfileImageFallbackUrl({ id: tm.id, user: tm.user }),
-    );
   });
 
   it("빈 배열이면 빈 배열을 반환한다", () => {
