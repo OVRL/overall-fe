@@ -25,8 +25,7 @@ import { QuarterData, Player } from "@/types/formation";
 import { Position } from "@/types/position";
 import { FORMATION_OPTIONS } from "@/constants/formations";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Edit2, X, Check, Loader2 } from "lucide-react";
-import useModal from "@/hooks/useModal";
+import { X, Check, Loader2 } from "lucide-react";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useBestElevenQuery, BEST_ELEVEN_MATCH_ID } from "./hooks/useBestElevenQuery";
 import { useUpdateMatchFormationMutation } from "./hooks/useUpdateMatchFormationMutation";
@@ -191,7 +190,6 @@ export default function BestElevenPanel() {
 function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const isMobile = useIsMobile(1023);
   const dndId = useId();
-  const { openModal } = useModal("PLAYER_SEARCH");
   const searchParams = useSearchParams();
   const managerSectionRef = useRef<HTMLDivElement>(null);
 
@@ -425,29 +423,35 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   ref={managerSectionRef}
                   className="mt-4 flex flex-wrap lg:flex-nowrap items-center gap-6 md:gap-10 px-6 md:px-8 py-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 relative z-30 group shrink-0"
                 >
-                  <button 
-                    onClick={() => openModal({ 
-                      onComplete: (player) => {
-                        setManager({ name: player.name, image: getValidImageSrc(player.image) });
-                        setHasChanges(true);
-                      },
-                      excludeMercenaries: true
-                    })}
-                    className="flex items-center gap-4 pr-10 border-r border-white/10 hover:opacity-80 transition-all text-left"
-                  >
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-900 border border-white/10 group-hover:border-primary/30 transition-colors shadow-lg">
+                  <div className="flex items-center gap-4 pr-10 border-r border-white/10 flex-1 min-w-0">
+                    <div className="relative w-14 h-14 shrink-0 rounded-full overflow-hidden bg-gray-900 border border-white/10 shadow-lg">
                       <Image src={getValidImageSrc(manager.image)} alt="감독" width={56} height={56} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Edit2 size={16} className="text-white" />
-                      </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col min-w-0">
                       <span className="text-[10px] text-gray-500 font-black flex items-center gap-1.5 uppercase">
-                        감독 <Edit2 size={8} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                        감독
                       </span>
-                      <span className="text-base font-black text-white group-hover:text-primary transition-colors">{manager.name}</span>
+                      <span className="text-base font-black text-white truncate">{manager.name}</span>
                     </div>
-                  </button>
+                    <Dropdown
+                      options={allPlayers.map((p) => ({
+                        value: String(p.id),
+                        label: p.name,
+                      }))}
+                      onChange={(id) => {
+                        const p = allPlayers.find((x) => String(x.id) === id);
+                        if (p) {
+                          setManager({
+                            name: p.name,
+                            image: getValidImageSrc(p.image),
+                          });
+                          setHasChanges(true);
+                        }
+                      }}
+                      placeholder="감독 선택"
+                      className="bg-black/60 shadow-xl border-white/10 text-white min-w-[140px] rounded-xl shrink-0"
+                    />
+                  </div>
                   <div className="flex flex-1 items-center justify-around">
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold">경기수</span>

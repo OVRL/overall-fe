@@ -6,17 +6,15 @@ import PlayerListSection from "./PlayerListSection";
 
 import { usePlayerSearch } from "@/hooks/usePlayerSearch";
 
-interface PlayerSearchModalProps {
+export interface MatchAttendancePlayerModalProps {
   matchId: number;
   teamId: number;
-  excludeMercenaries?: boolean;
 }
 
-const PlayerSearchModalContent = ({
+const MatchAttendancePlayerModalContent = ({
   matchId,
   teamId,
-  excludeMercenaries,
-}: PlayerSearchModalProps) => {
+}: MatchAttendancePlayerModalProps) => {
   const id = useId();
   const {
     inputValue,
@@ -46,7 +44,6 @@ const PlayerSearchModalContent = ({
             mercenary={mercenaryPlayer}
             pendingChanges={pendingChanges}
             onToggle={handleToggleAttendance}
-            excludeMercenaries={excludeMercenaries}
           />
         </div>
         <Button
@@ -64,16 +61,17 @@ const PlayerSearchModalContent = ({
   );
 };
 
-const PlayerSearchModal = (props: PlayerSearchModalProps) => {
+/** 포메이션 화면 전용: 해당 매치 참석 여부·용병 추가 등을 처리하는 모달 */
+const MatchAttendancePlayerModal = (props: MatchAttendancePlayerModalProps) => {
   return (
-    <ModalLayout title="선수 검색">
+    <ModalLayout title="참석 선수 관리">
       <Suspense
         fallback={<div className="p-4 text-center">불러오는 중...</div>}
       >
-        <PlayerSearchModalContent {...props} />
+        <MatchAttendancePlayerModalContent {...props} />
       </Suspense>
     </ModalLayout>
   );
 };
 
-export default PlayerSearchModal;
+export default MatchAttendancePlayerModal;

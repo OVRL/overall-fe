@@ -46,7 +46,6 @@ describe("PlayerListSection", () => {
     mercenary: null,
     pendingChanges: new Map<number, PendingPlayerItem>(),
     onToggle: mockOnToggle,
-    excludeMercenaries: false,
   };
 
   beforeEach(() => {
@@ -98,24 +97,6 @@ describe("PlayerListSection", () => {
     // 용병 하나만 렌더링됨 (results는 비어있음)
     expect(items).toHaveLength(1);
     expect(items[0]).toHaveTextContent("용병1");
-  });
-
-  it("excludeMercenaries가 true이면 용병 추가 섹션이 노출되지 않아야 한다", () => {
-    const mercenary = createMockPlayer({
-      id: -1,
-      teamMemberId: -1,
-      name: "용병1",
-    });
-
-    render(
-      <PlayerListSection
-        {...defaultProps}
-        mercenary={mercenary}
-        excludeMercenaries={true}
-      />,
-    );
-
-    expect(screen.queryByText("용병으로 추가")).not.toBeInTheDocument();
   });
 
   it("pendingChanges가 존재하면 변경 사항 미리보기 섹션이 렌더링되어야 한다", () => {

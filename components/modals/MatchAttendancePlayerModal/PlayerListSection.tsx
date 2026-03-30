@@ -16,7 +16,6 @@ interface PlayerListSectionProps {
   mercenary: PendingPlayerItem | null;
   pendingChanges: Map<number, PendingPlayerItem>;
   onToggle: (player: PendingPlayerItem) => void;
-  excludeMercenaries?: boolean;
 }
 
 const PlayerListSection = ({
@@ -26,7 +25,6 @@ const PlayerListSection = ({
   mercenary,
   pendingChanges,
   onToggle,
-  excludeMercenaries,
 }: PlayerListSectionProps) => {
   const renderPlayerList = () => {
     if (isSearching) {
@@ -67,7 +65,7 @@ const PlayerListSection = ({
       </div>
 
       {/* 용병으로 추가 섹션 */}
-      {mercenary && !isSearching && !excludeMercenaries && (
+      {mercenary && !isSearching && (
         <div className="flex flex-col gap-y-2">
           <span className="font-semibold text-sm leading-4 text-Label-Primary">
             용병으로 추가

@@ -15,3 +15,8 @@ export function useFormationMatchIds() {
   }
   return ctx;
 }
+
+/** Provider 밖에서는 null (예: 팀 관리 목업에서 FormationPlayerList만 쓸 때) */
+export function useFormationMatchIdsOptional() {
+  return useContext(FormationMatchContext);
+}

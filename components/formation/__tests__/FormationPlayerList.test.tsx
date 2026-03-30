@@ -31,7 +31,7 @@ jest.mock("@/components/ui/Button", () => ({ children, onClick }: any) => (
   </button>
 ));
 
-// 선수 추가는 모달(PLAYER_SEARCH)이 열리는 방식으로 동작함
+// 선수 추가는 참석 선수 관리 모달(FORMATION_MATCH_ATTENDANCE_PLAYER)이 열리는 방식으로 동작함
 jest.mock("@/hooks/useModal", () => ({
   __esModule: true,
   default: () => ({
@@ -40,7 +40,7 @@ jest.mock("@/hooks/useModal", () => ({
 }));
 
 jest.mock("@/app/formation/_context/FormationMatchContext", () => ({
-  useFormationMatchIds: () => ({ matchId: 1, teamId: 1 }),
+  useFormationMatchIdsOptional: () => ({ matchId: 1, teamId: 1 }),
 }));
 
 describe("FormationPlayerList 컴포넌트", () => {

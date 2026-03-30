@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import PlayerSearchModal from "../PlayerSearchModal";
+import MatchAttendancePlayerModal from "../MatchAttendancePlayerModal";
 import { usePlayerSearch } from "@/hooks/usePlayerSearch";
 
 jest.mock("@/hooks/usePlayerSearch", () => ({
@@ -40,7 +40,7 @@ jest.mock("@/components/ui/Button", () => {
   };
 });
 
-describe("PlayerSearchModal", () => {
+describe("MatchAttendancePlayerModal", () => {
   const mockHandleComplete = jest.fn();
   const mockSetInputValue = jest.fn();
 
@@ -66,17 +66,17 @@ describe("PlayerSearchModal", () => {
   };
 
   it("모달 레이아웃, 검색 입력, 선수 목록 및 완료 버튼이 렌더링되어야 한다", () => {
-    render(<PlayerSearchModal {...defaultProps} />);
+    render(<MatchAttendancePlayerModal {...defaultProps} />);
 
     expect(screen.getByTestId("modal-layout")).toBeInTheDocument();
-    expect(screen.getByText("선수 검색")).toBeInTheDocument();
+    expect(screen.getByText("참석 선수 관리")).toBeInTheDocument();
     expect(screen.getByTestId("search-input")).toBeInTheDocument();
     expect(screen.getByTestId("player-list")).toBeInTheDocument();
     expect(screen.getByTestId("complete-btn")).toBeInTheDocument();
   });
 
   it("pendingChanges가 비어있을 때 완료 버튼은 비활성화되고 텍스트는 '완료'여야 한다", () => {
-    render(<PlayerSearchModal {...defaultProps} />);
+    render(<MatchAttendancePlayerModal {...defaultProps} />);
 
     const btn = screen.getByTestId("complete-btn");
     expect(btn).toBeDisabled();
@@ -100,7 +100,7 @@ describe("PlayerSearchModal", () => {
       handleComplete: mockHandleComplete,
     });
 
-    render(<PlayerSearchModal {...defaultProps} />);
+    render(<MatchAttendancePlayerModal {...defaultProps} />);
 
     const btn = screen.getByTestId("complete-btn");
     expect(btn).not.toBeDisabled();
@@ -123,7 +123,7 @@ describe("PlayerSearchModal", () => {
       handleComplete: mockHandleComplete,
     });
 
-    render(<PlayerSearchModal {...defaultProps} />);
+    render(<MatchAttendancePlayerModal {...defaultProps} />);
 
     const btn = screen.getByTestId("complete-btn");
     fireEvent.click(btn);

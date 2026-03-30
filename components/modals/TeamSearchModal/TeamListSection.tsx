@@ -69,7 +69,7 @@ const TeamListSection = ({
         </div>
       </div>
 
-      {/* 외부팀으로 추가 섹션 (PlayerSearchModal의 용병으로 추가와 동일) */}
+      {/* 외부팀으로 추가 섹션 (참석 선수 관리 모달의 용병으로 추가와 동일 UX) */}
       {externalTeam && !isSearching && (
         <div className="flex flex-col gap-y-2">
           <span className="font-semibold text-sm leading-4 text-Label-Primary">

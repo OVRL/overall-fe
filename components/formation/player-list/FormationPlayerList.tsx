@@ -9,7 +9,7 @@ import plus from "@/public/icons/plus.svg";
 import FormationPlayerGroupList from "./FormationPlayerGroupList";
 import useModal from "@/hooks/useModal";
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
-import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchContext";
+import { useFormationMatchIdsOptional } from "@/app/formation/_context/FormationMatchContext";
 
 export interface FormationPlayerListProps {
   players: Player[];
@@ -23,6 +23,11 @@ export interface FormationPlayerListProps {
     index: number;
     role: string;
   } | null;
+  /**
+   * 포메이션 매치 컨텍스트가 없을 때(예: 인하우스 목업) '선수 추가'가 열 모달 대신
+   * 이 콜백을 호출합니다.
+   */
+  onAddPlayer?: () => void;
 }
 
 export default function FormationPlayerList({
@@ -33,9 +38,10 @@ export default function FormationPlayerList({
   onRemovePlayer,
   targetPosition,
   activePosition,
+  onAddPlayer,
 }: FormationPlayerListProps) {
-  const { openModal } = useModal("PLAYER_SEARCH");
-  const { matchId, teamId } = useFormationMatchIds();
+  const { openModal } = useModal("FORMATION_MATCH_ATTENDANCE_PLAYER");
+  const matchCtx = useFormationMatchIdsOptional();
   const {
     searchTerm,
     setSearchTerm,
@@ -61,9 +67,19 @@ export default function FormationPlayerList({
             variant="line"
             size="m"
             onClick={() => {
+              if (onAddPlayer) {
+                onAddPlayer();
+                return;
+              }
+              if (!matchCtx) {
+                console.warn(
+                  "FormationPlayerList: FormationMatchProvider가 없고 onAddPlayer도 없어 선수 추가를 할 수 없습니다.",
+                );
+                return;
+              }
               openModal({
-                matchId,
-                teamId,
+                matchId: matchCtx.matchId,
+                teamId: matchCtx.teamId,
               });
             }}
             className="flex gap-1 text-Label-Primary font-semibold"

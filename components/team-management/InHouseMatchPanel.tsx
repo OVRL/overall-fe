@@ -23,7 +23,6 @@ import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import FormationBoardList from "@/components/formation/board/FormationBoardList";
 import FormationPlayerList from "@/components/formation/player-list/FormationPlayerList";
 import { QuarterData, Player } from "@/types/formation";
-import useModal from "@/hooks/useModal";
 
 // --- 상수 및 타입 정의 ---
 type TeamType = "ALL" | "A" | "B" | "C";
@@ -203,7 +202,6 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
         C: generateInitialQuarters(),
     });
 
-    const { openModal } = useModal("PLAYER_SEARCH");
     const dndId = useId();
     const [activePlayer, setActivePlayer] = useState<Player | null>(null);
     const [selectedDndPlayer, setSelectedDndPlayer] = useState<Player | null>(null);
@@ -295,34 +293,28 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
         setIsDirty(true);
     };
 
+    /** 인하우스 목업 전용: 용병 선수를 로컬 상태에 추가 (실매치 참석 모달과 분리) */
     const handleAddPlayer = () => {
-        openModal({
-            onComplete: (playerData) => {
-                if (!playerData) return;
-                const newId = String(Date.now());
-
-                // 포지션 정보를 대분류로 변환하여 에러 방지
-                const rawPos = playerData.position || "ST";
-                const broadPos = getBroadPosition(rawPos);
-
-                const subPosOptions = POS_MAP[broadPos] || ['ST'];
-                const subPos = rawPos.length <= 3 ? rawPos.toUpperCase() : subPosOptions[0];
-
-                const newPlayer: InHousePlayer = {
-                    id: newId,
-                    name: playerData.name || "비공개",
-                    overall: (playerData as any).overall || 80 + Math.floor(Math.random() * 20),
-                    age: (playerData as any).age || 20 + Math.floor(Math.random() * 15),
-                    position: broadPos,
-                    subPosition: subPos,
-                    goals: 0, assists: 0, cleanSheets: 0, mom: 0,
-                    team: selectedTeam === "ALL" ? "ALL" : selectedTeam,
-                    isMercenary: true, image: playerData.image || "/images/player/img_player_2.webp"
-                };
-                setPlayers(prev => [...prev, newPlayer]);
-                setIsDirty(true);
-            },
-        });
+        const newId = String(Date.now());
+        const broadPos: InHousePlayer["position"] = "FW";
+        const subPos = POS_MAP[broadPos][0];
+        const newPlayer: InHousePlayer = {
+            id: newId,
+            name: `용병 ${newId.slice(-4)}`,
+            overall: 80 + Math.floor(Math.random() * 20),
+            age: 20 + Math.floor(Math.random() * 15),
+            position: broadPos,
+            subPosition: subPos,
+            goals: 0,
+            assists: 0,
+            cleanSheets: 0,
+            mom: 0,
+            team: selectedTeam === "ALL" ? "ALL" : selectedTeam,
+            isMercenary: true,
+            image: "/images/player/img_player_2.webp",
+        };
+        setPlayers((prev) => [...prev, newPlayer]);
+        setIsDirty(true);
     };
 
     const handleTeamCardClick = (team: TeamType) => {

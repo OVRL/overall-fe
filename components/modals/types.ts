@@ -22,10 +22,10 @@ export interface ModalPropsMap {
     initialImage: string;
     onSave: (image: string, file: File) => void;
   };
-  PLAYER_SEARCH: {
+  /** 포메이션 — 매치 참석·용병 반영용 선수 검색/편집 모달 */
+  FORMATION_MATCH_ATTENDANCE_PLAYER: {
     matchId: number;
     teamId: number;
-    excludeMercenaries?: boolean;
   };
   TEAM_SEARCH: {
     onComplete: (result: TeamSearchResult) => void;

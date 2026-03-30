@@ -105,7 +105,7 @@ const FormationPlayerListMobile = ({
   activePosition,
   getAssignedQuarterIdsForPlayer,
 }: FormationPlayerListMobileProps) => {
-  const { openModal } = useModal("PLAYER_SEARCH");
+  const { openModal } = useModal("FORMATION_MATCH_ATTENDANCE_PLAYER");
   const { matchId, teamId } = useFormationMatchIds();
   const { activePosTab, setActivePosTab, filteredPlayers } =
     useFormationPlayerList({ players, targetPosition, activePosition });
