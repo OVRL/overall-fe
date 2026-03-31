@@ -66,9 +66,10 @@ interface PlayerSelectModalProps {
     onSaveText: (data: (ScoreLog & { quarter: number })[]) => void;
     onShowSummary?: () => void;
     players: Player[];
+    currentQuarter: number;
 }
 
-const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary, players }: PlayerSelectModalProps) => {
+const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary, players, currentQuarter }: PlayerSelectModalProps) => {
     const [mode, setMode] = useState<"SELECT" | "TEXT">("SELECT");
     const [textInput, setTextInput] = useState("");
     const [selectedGoal, setSelectedGoal] = useState<string>("none");
@@ -76,6 +77,33 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
     const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
     const [showLocalSummary, setShowLocalSummary] = useState(false);
+
+    // 선택 모드와 텍스트 모드 동기화 로직
+    React.useEffect(() => {
+        if (mode !== "SELECT") return;
+
+        const goalPlayer = players.find(p => p.id === selectedGoal)?.name;
+        const assistPlayer = players.find(p => p.id === selectedAssist)?.name;
+        const preAssistPlayer = players.find(p => p.id === selectedPreAssist)?.name;
+
+        if (!goalPlayer && selectedGoal !== "own-goal") {
+            setTextInput("");
+            return;
+        }
+
+        const parts = [];
+        if (selectedGoal === "own-goal") parts.push("자책골");
+        else if (goalPlayer) parts.push(`${goalPlayer}골`);
+        
+        if (assistPlayer) parts.push(`${assistPlayer}어시`);
+        if (preAssistPlayer) parts.push(`${preAssistPlayer}기점`);
+
+        if (parts.length > 0) {
+            setTextInput(`${currentQuarter}Q ${parts.join(" ")}`);
+        } else {
+            setTextInput("");
+        }
+    }, [selectedGoal, selectedAssist, selectedPreAssist, mode, currentQuarter, players]);
 
     // 제안 로직 고도화
     React.useEffect(() => {
@@ -514,6 +542,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<"RECORD" | "IN_HOUSE">("RECORD");
     const [showFullSummary, setShowFullSummary] = useState(false);
+    const [logToDelete, setLogToDelete] = useState<{ matchId: string; quarter: number; logId: string; description: string } | null>(null);
     
     // 실제 팀 멤버 데이터 매핑
     const teamPlayers: Player[] = React.useMemo(() => (playersData.findManyTeamMember.members || []).map((m: any) => ({
@@ -787,20 +816,40 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <button 
-                                                        onClick={() => {
-                                                            if (confirm("수정하시겠습니까?")) {
-                                                                // 수정 로직: 기존 데이터를 모달에 세팅하거나 별도 처리
-                                                                // 현재는 단순 확인 후 모달 열기로 안내
+                                                    <div className="flex items-center gap-1.5">
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 setActiveMatchId(match.id);
                                                                 setIsModalOpen(true);
-                                                                // TODO: 선택된 로그의 데이터를 PlayerSelectModal에 전달하는 기능 필요
-                                                            }
-                                                        }}
-                                                        className="text-gray-700 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 p-1"
-                                                    >
-                                                        <Edit2 size={14} />
-                                                    </button>
+                                                                // TODO: 실제 수정을 위해 기존 정보를 모달에 세팅하는 로직은 향후 고도화 가능
+                                                            }}
+                                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-primary hover:bg-primary/10 transition-all"
+                                                        >
+                                                            <Edit2 size={13} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const parts = [];
+                                                                if (log.player) parts.push(`${log.player.name}골`);
+                                                                else if (log.type === "conceded") parts.push("실점");
+                                                                
+                                                                if (log.assist) parts.push(`${log.assist.name}어시`);
+                                                                if (log.preAssist) parts.push(`${log.preAssist.name}기점`);
+                                                                
+                                                                setLogToDelete({
+                                                                    matchId: match.id,
+                                                                    quarter: selectedQuarter,
+                                                                    logId: log.id,
+                                                                    description: `${selectedQuarter}Q ${parts.join(" ")}`
+                                                                });
+                                                            }}
+                                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                             {(match.logs[selectedQuarter] || []).length === 0 && (
@@ -822,6 +871,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                     setActiveMatchId(null);
                 }} 
                 players={teamPlayers}
+                currentQuarter={selectedQuarter}
                 onShowSummary={() => setShowFullSummary(true)}
                 onSave={(saveData) => {
                     if (!activeMatchId) return;
@@ -911,6 +961,51 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                     <div className="h-px bg-white/5 w-full" />
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 삭제 확인 모달 */}
+            {logToDelete && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+                    <div className="w-full max-w-sm bg-[#1a1a1a] rounded-[2.5rem] border border-white/10 shadow-2xl p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 rounded-3xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
+                            <Trash2 size={32} strokeWidth={2.5} />
+                        </div>
+                        <h3 className="text-lg font-black text-white mb-2">기록 삭제 확인</h3>
+                        <p className="text-sm text-gray-500 leading-relaxed mb-8">
+                            <span className="text-white font-bold bg-white/5 px-2 py-1 rounded-lg">{logToDelete.description}</span>
+                            <br /><br />
+                            정말로 이 기록을 삭제하시겠습니까?
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button 
+                                onClick={() => setLogToDelete(null)}
+                                className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 text-sm font-bold hover:bg-white/10 transition-all"
+                            >
+                                취소
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    updateMatchData(logToDelete.matchId, m => {
+                                        const newLogs = { ...m.logs };
+                                        const removedLog = newLogs[logToDelete.quarter]?.find(l => l.id === logToDelete.logId);
+                                        newLogs[logToDelete.quarter] = (newLogs[logToDelete.quarter] || []).filter(l => l.id !== logToDelete.logId);
+                                        
+                                        // 스코어 차감
+                                        let { home, away } = m.score;
+                                        if (removedLog?.type === "goal") home = Math.max(0, home - 1);
+                                        else if (removedLog?.type === "conceded") away = Math.max(0, away - 1);
+
+                                        return { ...m, logs: newLogs, score: { home, away } };
+                                    });
+                                    setLogToDelete(null);
+                                }}
+                                className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                            >
+                                삭제하기
+                            </button>
                         </div>
                     </div>
                 </div>
