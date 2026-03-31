@@ -1,0 +1,30 @@
+---
+trigger: always_on
+---
+
+- 이 프로젝트는 Tailwindcss 4버전을 사용하고 있어.
+- 스타일링을 할 때는 항상 Tailwindcss의 토큰과 global.css 의 디자인 토큰을 먼저 확인해.
+- spacing(width, height 등 사이징)을 처리할 때는 px단위로 계산하지말고 항상 tailwindcss의 토큰을 활용하도록 해(rem 단위를 활용할 것)
+- 디자인 토큰에 새로운 컬러코드를 추가하고 싶은 경우에는 global.css에 oklch 단위로 변환해서 넣어줘.
+- 우리 프로젝트는 PC레이아웃 뿐만 아니라 모바일, 모바일 웹뷰 까지 대응하는 반응형 웹이야.
+- 디자인 토큰의 단일 출처
+색·서피스·시맨틱 컬러는 먼저 styles/globals.css의 @theme와 CSS 변수(--color-*, Label/Fill/bg-* 계열)를 기준으로 한다. 임의 hex/rgb는 토큰에 없을 때만, 그리고 가능하면 토큰 추가를 검토한다.
+- 다크 모드 규칙
+.dark와 :root에서 정의된 시맨틱 변수가 다르다. 한쪽 테마만 맞추고 다른 쪽을 깨지 않도록, 배경/텍스트/보더를 항상 쌍으로 확인한다.
+- Tailwind v4 스타일 설정
+@import "tailwindcss"와 @theme 기반이므로, 클래스는 bg-gray-900 같은 토큰에서 파생된 유틸을 쓰고, 구버전 tailwind.config만 보고 판단하지 않는다.
+- 반응형 브레이크포인트
+sm/md/lg 등이 이 프로젝트 전용 rem 값으로 정의되어 있다. Figma 기준 픽셀과 1:1로 두지 말고, 이 레포의 breakpoint 정의를 기준으로 md: 등을 쓴다.
+- 타이포그래피
+pretendard, paperlogy 등 테마에 등록된 폰트 패밀리를 따른다. 임의 font-family 추가는 디자인 일관성을 깨기 쉽다.
+- 폴더 역할 (어디를 고칠지)
+화면 단위는 app/, 공통 UI는 components/·components/ui/. “한 화면만” 바꿀 땐 해당 page.tsx와 그 아래 쓰는 컴포넌트부터 찾는다.
+- 기존 UI 프리미티브 우선
+버튼·입력 등은 이미 components/ui 등에 패턴이 있을 수 있으니, 비슷한 걸 새로 className 뭉치로 만들기보다 기존 컴포넌트의 variant/className 확장을 우선한다.
+- Relay / GraphQL 경계
+스타일만 바꿀 때는 graphql 태그·fragment 이름·필드 선택을 건드리지 않는다. 데이터 쿼리 변경은 스코프 밖으로 두고, 마크업·클래스·레이아웃만 조정한다.
+- 예외 라우트·별도 테마
+예: app/calculation 쪽은 theme.css 등 메인 앱과 다른 스타일 계층이 있을 수 있다. 메인 globals.css 토큰과 혼동하지 않도록 “어느 앱 영역인지”를 먼저 식별한다.
+- 도메인·공유 상수와의 정합
+쿼터 색, 포지션 칩 색 등은 lib/quarterColors.ts 같은 코드 상수와 Tailwind 토큰이 맞물려 있다. 한곳만 바꾸면 UI가 어긋나므로, “이 화면이 그 패턴을 쓰는지” 확인 후 같이 조정한다.
+- 비즈니스 로직은 최대한 건드리지 말아야 한다.
