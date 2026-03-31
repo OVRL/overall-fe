@@ -74,76 +74,69 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     const [selectedGoal, setSelectedGoal] = useState<string>("none");
     const [selectedAssist, setSelectedAssist] = useState<string>("none");
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
-    const [suggestion, setSuggestion] = useState("");
+    const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
     const [showLocalSummary, setShowLocalSummary] = useState(false);
 
-    // 제안 로직
+    // 제안 로직 고도화
     React.useEffect(() => {
         if (mode !== "TEXT" || !textInput.trim()) {
-            setSuggestion("");
+            setSuggestions([]);
             return;
         }
 
         const lines = textInput.split("\n");
-        const currentLine = lines[lines.length - 1].trim();
+        const lastLine = lines[lines.length - 1];
         
-        if (!currentLine) {
-            setSuggestion("");
+        // 현재 라인에서 마지막 토큰 추출 (공백 기준)
+        const tokens = lastLine.trim().split(/\s+/);
+        const lastToken = tokens[tokens.length - 1] || "";
+
+        if (!lastToken) {
+            setSuggestions([]);
             return;
         }
+
+        const newSuggestions: { label: string; value: string }[] = [];
 
         // 1. 숫자만 입력된 경우 Q 제안
-        if (/^\d+$/.test(currentLine)) {
-            setSuggestion("Q");
-            return;
+        if (/^\d+$/.test(lastToken)) {
+            newSuggestions.push({ label: `${lastToken}Q`, value: "Q " });
         }
 
-        // 현재 라인에서 마지막 토큰 추출 (득점, 골, 어시, 기점 키워드 이후 텍스트)
-        const parts = currentLine.split(/(득점|골|어시|기점)/);
-        const lastPart = parts[parts.length - 1].trim();
+        // 현재 라인에 이미 등장한 선수들 찾기
+        const playersOnLine = players.filter(p => lastLine.includes(p.name)).map(p => p.name);
 
-        if (!lastPart) {
-            setSuggestion("");
-            return;
-        }
-
-        // 현재 라인에 이미 등장한 선수들 찾기 (어시/기점 제안 시 제외용)
-        const playersOnLine = players.filter(p => currentLine.includes(p.name)).map(p => p.name);
-
-        // 2. 선수 이름 매칭 시도
-        const matchedPlayer = players.find(p => p.name.includes(lastPart));
-        if (matchedPlayer && matchedPlayer.name !== lastPart) {
-            // 어시/기점 입력 중이면 이미 득점한 선수는 제안에서 제외 (선택 사항이나 요청 반영)
-            const isScorerPart = !currentLine.includes("득점") && !currentLine.includes("골");
-            if (!isScorerPart && playersOnLine.includes(matchedPlayer.name)) {
-                setSuggestion("");
-                return;
-            }
-
-            const remaining = matchedPlayer.name.slice(matchedPlayer.name.indexOf(lastPart) + lastPart.length);
-            setSuggestion(remaining);
-            return;
-        }
-
-        // 3. 정확히 이름과 일치하면 다음 액션 제안 (골 -> 어시 -> 기점)
-        const isExactPlayer = players.some(p => p.name === lastPart);
-        if (isExactPlayer) {
-            const hasGoal = currentLine.includes("득점") || currentLine.includes("골");
-            const hasAssist = currentLine.includes("어시");
+        // 2. 정확히 이름과 일치하면 다음 액션 제안 (골 -> 어시 -> 기점)
+        const exactPlayer = players.find(p => p.name === lastToken);
+        if (exactPlayer) {
+            const hasGoal = lastLine.includes("득점") || lastLine.includes("골");
+            const hasAssist = lastLine.includes("어시");
             
-            if (!hasGoal) setSuggestion("골");
-            else if (!hasAssist) setSuggestion("어시");
-            else setSuggestion("기점");
-            return;
+            if (!hasGoal) newSuggestions.push({ label: "골", value: "골 " });
+            else if (!hasAssist) newSuggestions.push({ label: "어시", value: "어시 " });
+            else newSuggestions.push({ label: "기점", value: "기점 " });
+        } else {
+            // 3. 선수 이름 매칭 시도 (부분 일치)
+            const matchedPlayers = players
+                .filter(p => !playersOnLine.includes(p.name) && p.name.startsWith(lastToken))
+                .slice(0, 3);
+            
+            matchedPlayers.forEach(p => {
+                newSuggestions.push({ 
+                    label: p.name, 
+                    value: p.name.slice(lastToken.length) + " " 
+                });
+            });
         }
 
-        setSuggestion("");
+        setSuggestions(newSuggestions.slice(0, 3));
     }, [textInput, mode, players]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (mode === "TEXT" && e.key === " " && suggestion) {
+        if (mode === "TEXT" && e.key === " " && suggestions.length > 0) {
+            // 스페이스바 입력 시 첫 번째 제안 적용 (기존 동작 유지하되 힌트는 제거)
             e.preventDefault();
-            setTextInput(prev => prev + suggestion);
+            setTextInput(prev => prev + suggestions[0].value);
         }
     };
 
@@ -379,15 +372,6 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     <span className="text-[10px] text-primary/60 font-medium">예시: 1Q 메시골 호날두어시</span>
                                 </div>
                                 <div className="relative group">
-                                    {/* 고스트 텍스트 레이어 (PC) */}
-                                    <div 
-                                        className="absolute inset-0 p-4 text-sm pointer-events-none whitespace-pre-wrap break-all select-none"
-                                        aria-hidden="true"
-                                    >
-                                        <span className="text-transparent">{textInput}</span>
-                                        <span className="text-primary/50 animate-pulse">{suggestion}</span>
-                                    </div>
-
                                     <textarea 
                                         className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-gray-700 relative z-10 scrollbar-hide"
                                         placeholder="입력 예시:&#10;1Q 메시골 호날두어시 이니에스타기점&#10;2Q&#10;음바페득점 벨링엄어시 손흥민기점"
@@ -396,28 +380,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         onChange={(e) => setTextInput(e.target.value)}
                                         onKeyDown={handleKeyDown}
                                     />
-                                    
-                                    {/* 제안 팝업 (모바일/PC 공통 힌트) */}
-                                    {suggestion && (
-                                        <div className="absolute -bottom-10 left-0 right-0 flex justify-center z-20 animate-in fade-in slide-in-from-top-1">
-                                            <button 
-                                                onClick={() => setTextInput(prev => prev + suggestion)}
-                                                className="px-3 py-1.5 rounded-lg bg-primary text-black text-[10px] font-bold shadow-lg flex items-center gap-2"
-                                            >
-                                                <span>{suggestion}</span>
-                                                <span className="opacity-50 border-l border-black/20 pl-2 hidden md:inline">스페이스바를 누르면 바로 적용됩니다</span>
-                                                <span className="opacity-50 border-l border-black/20 pl-2 md:hidden">탭하여 적용</span>
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
-                                {suggestion && (
-                                    <div className="mt-2 text-center animate-in fade-in transition-all">
-                                        <span className="text-[10px] text-primary/80 font-bold tracking-tight bg-primary/10 px-3 py-1 rounded-full border border-primary/20 animate-pulse">
-                                            스페이스바를 누르면 자동완성(어시)을 해줍니다
-                                        </span>
-                                    </div>
-                                )}
                             </div>
 
                             {parsedSummary.length > 0 && (
@@ -502,23 +465,40 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                     )}
                 </div>
 
-                <div className="p-6 flex gap-3">
-                    <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
-                        취소
-                    </button>
-                    <button 
-                        onClick={() => { 
-                            if (mode === "SELECT") {
-                                onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
-                            } else {
-                                onSaveText(parsedSummary);
-                            }
-                            onClose(); 
-                        }} 
-                        className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
-                    >
-                        저장
-                    </button>
+                <div className="px-6 space-y-4">
+                    {/* 자동완성 제안 바 - 모바일 최우선 배치 */}
+                    {mode === "TEXT" && suggestions.length > 0 && (
+                        <div className="flex gap-2 p-2 bg-black/40 rounded-xl border border-white/5 overflow-x-auto scrollbar-hide animate-in fade-in slide-in-from-bottom-2">
+                            {suggestions.map((s, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setTextInput(prev => prev + s.value)}
+                                    className="px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-bold whitespace-nowrap active:bg-primary active:text-black transition-all"
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="flex gap-3 pb-6">
+                        <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
+                            취소
+                        </button>
+                        <button 
+                            onClick={() => { 
+                                if (mode === "SELECT") {
+                                    onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
+                                } else {
+                                    onSaveText(parsedSummary);
+                                }
+                                onClose(); 
+                            }} 
+                            className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
+                        >
+                            저장
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -692,12 +672,12 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                 match.expanded ? "rounded-t-2xl border-b-transparent" : "rounded-2xl"
                             )}
                         >
-                            <div className="flex items-center gap-4 md:gap-8">
-                                <span className="text-xs text-gray-500 font-mono">{match.date}</span>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm md:text-base font-bold text-white">vs {match.opponent}</span>
+                            <div className="flex items-center gap-2 md:gap-8 min-w-0">
+                                <span className="text-[10px] md:text-xs text-gray-500 font-mono shrink-0">{match.date}</span>
+                                <div className="flex items-center gap-2 md:gap-3 min-w-0 overflow-hidden">
+                                    <span className="text-xs md:text-base font-bold text-white truncate">vs {match.opponent}</span>
                                     {match.score && (
-                                        <span className="text-sm md:text-base font-bold text-white">
+                                        <span className="hidden md:inline md:text-base font-bold text-white shrink-0">
                                             {match.score.home} - {match.score.away}
                                         </span>
                                     )}
