@@ -1,8 +1,40 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import StartingXI from "../StartingXI";
 import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
 import { Player } from "@/types/player";
+import StartingXI from "../StartingXI";
+
+// framer-motion 패스스루 — 애니메이션·viewport 이슈 회피
+jest.mock("framer-motion", () => {
+  const ReactMod = jest.requireActual<typeof import("react")>("react");
+  function stripMotionProps(props: Record<string, unknown>) {
+    const next = { ...props };
+    delete next.initial;
+    delete next.animate;
+    delete next.exit;
+    delete next.transition;
+    delete next.variants;
+    delete next.whileInView;
+    delete next.viewport;
+    delete next.whileTap;
+    delete next.whileHover;
+    return next;
+  }
+  const MotionDiv = ({
+    children,
+    ...rest
+  }: React.PropsWithChildren<Record<string, unknown>>) =>
+    ReactMod.createElement(
+      "div",
+      stripMotionProps(rest) as React.HTMLAttributes<HTMLDivElement>,
+      children,
+    );
+  return {
+    motion: { div: MotionDiv },
+    MotionConfig: ({ children }: React.PropsWithChildren) => children,
+    useReducedMotion: () => false,
+  };
+});
 
 function renderWithSelectedTeamProvider(
   ui: React.ReactElement,
@@ -21,14 +53,6 @@ function renderWithSelectedTeamProvider(
     </SelectedTeamProvider>,
   );
 }
-
-// Use a simplified mock for createDataTransfer since jsdom doesn't implement it fully
-const createDataTransfer = () => ({
-  dropEffect: "none",
-  effectAllowed: "none",
-  setData: jest.fn(),
-  getData: jest.fn(),
-});
 
 const mockPlayers: Player[] = [
   {

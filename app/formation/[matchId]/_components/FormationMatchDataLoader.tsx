@@ -8,6 +8,7 @@ import type { formationMatchAttendanceQuery } from "@/__generated__/formationMat
 import { FormationMatchPlayersProvider } from "../../_context/FormationMatchPlayersContext";
 import { FormationMatchContext } from "../../_context/FormationMatchContext";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
+import { FormationMatchPageLoadingShell } from "../../_components/FormationMatchPageLoadingShell";
 
 interface Props {
   matchId: number;
@@ -56,14 +57,7 @@ export default function FormationMatchDataLoader({
   }, []);
 
   if (!isMounted) {
-    return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-text-secondary text-sm">경기를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+    return <FormationMatchPageLoadingShell />;
   }
 
   return (
@@ -79,18 +73,7 @@ export default function FormationMatchDataLoader({
         </div>
       }
     >
-      <Suspense
-        fallback={
-          <div className="p-8 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-text-secondary text-sm">
-                참석자 명단 로딩 중...
-              </p>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<FormationMatchPageLoadingShell />}>
         <FormationMatchContext.Provider value={{ matchId, teamId }}>
           <DataFetcher matchId={matchId} teamId={teamId}>
             {children}

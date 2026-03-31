@@ -1,53 +1,10 @@
-import { Player } from "@/types/player";
-import Icon from "@/components/ui/Icon";
-import { SelectedTeamBadge } from "@/components/home/SelectedTeamBadge";
-import bestXI from "@/public/icons/bestXI.svg";
-import FormationField from "./FormationField";
-import ManagerInfo from "./ManagerInfo";
-import AdBoard from "./AdBoard";
+import StartingXIView, { type StartingXIProps } from "./StartingXIView";
 
-interface StartingXIProps {
-  players: Player[];
-  /** layout SSR findManyTeamMember 기반. 팀원 1명이면 true (온보딩 분기용) */
-  isSoloTeam: boolean;
-  onPlayersChange: (players: Player[]) => void;
-  onPlayerSelect?: (player: Player) => void;
-}
+export type { StartingXIProps };
 
 /**
- * 포메이션 컴포넌트
+ * 포메이션 카드 — UI는 클라이언트(StartingXIView)에서 렌더링
  */
-const StartingXI = ({ players, isSoloTeam }: StartingXIProps) => {
-  return (
-    <div className="bg-surface-card rounded-[1.25rem] p-4 sm:px-0 md:p-6 flex-1 border border-border-card flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-4 md:mb-5 sm:px-4">
-        <Icon src={bestXI} alt="Best XI" width={95} height={34} nofill />
-        <SelectedTeamBadge />
-      </div>
-
-      <div>
-        <div className="relative h-9.5">
-          <AdBoard
-            imageUrl="/images/logo_OVR_head.png"
-            linkUrl="#"
-            altText="OVR Ad Banner"
-            className="w-31 absolute left-3 sm:left-2 md:left-1/6 lg:left-1/5"
-          />
-          <AdBoard
-            linkUrl="#"
-            altText="OVR Ad Banner"
-            className="w-31 absolute right-3 sm:right-2 md:right-1/6 lg:right-1/5"
-          />
-        </div>
-        <FormationField
-          players={players}
-          isSoloTeam={isSoloTeam}
-          className="relative md:aspect-video"
-        />
-      </div>
-      <ManagerInfo isSoloTeam={isSoloTeam} />
-    </div>
-  );
-};
-
-export default StartingXI;
+export default function StartingXI(props: StartingXIProps) {
+  return <StartingXIView {...props} />;
+}

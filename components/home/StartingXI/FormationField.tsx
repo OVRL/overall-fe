@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import ObjectField from "@/components/ui/ObjectField";
 import PlayerPositionCard from "./PlayerPositionCard";
 import Skeleton from "@/components/ui/Skeleton";
@@ -8,6 +9,10 @@ import { Player } from "@/types/player";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
 import OnboardingBestXl from "./OnboardingBestXl";
+import {
+  formationPlayerSlotVariants,
+  formationPlayersContainerVariants,
+} from "./motion-variants";
 
 // 홈 화면 Starting XI 전용 크롭 설정
 const HOME_DESKTOP_CROP = { x: 0, y: 0, width: 1.0, height: 1.0 };
@@ -46,6 +51,7 @@ const FormationField = ({
   className,
 }: FormationFieldProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const prefersReducedMotion = useReducedMotion();
 
   // 훅은 항상 동일한 순서로 호출되어야 하므로 early return 이전에 선언
   const currentCrop = useMemo(
@@ -97,24 +103,37 @@ const FormationField = ({
   return (
     <ObjectField crop={currentCrop} className={className}>
       {/* 선수 배치: 팀원 2명 이상이고 베스트 XI 데이터 있을 때만 표시 (현재는 isSoloTeam으로만 분기) */}
-      {!isSoloTeam &&
-        players.slice(0, 11).map((player, index) => {
-          const absPosition = FORMATION_POSITIONS[index + 1];
-          const transformedPos = getTransformedPosition(absPosition);
+      {!isSoloTeam && (
+        <motion.div
+          className="absolute inset-0 z-10 pointer-events-none"
+          variants={formationPlayersContainerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {players.slice(0, 11).map((player, index) => {
+            const absPosition = FORMATION_POSITIONS[index + 1];
+            const transformedPos = getTransformedPosition(absPosition);
 
-          return (
-            <div
-              key={player.id}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-              style={{
-                top: transformedPos.top,
-                left: transformedPos.left,
-              }}
-            >
-              <PlayerPositionCard player={player} />
-            </div>
-          );
-        })}
+            return (
+              <motion.div
+                key={player.id}
+                className="absolute -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-auto"
+                style={{
+                  top: transformedPos.top,
+                  left: transformedPos.left,
+                }}
+                variants={formationPlayerSlotVariants}
+                whileTap={
+                  prefersReducedMotion ? undefined : { scale: 0.97 }
+                }
+                transition={{ type: "spring", stiffness: 500, damping: 28 }}
+              >
+                <PlayerPositionCard player={player} />
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      )}
       {isSoloTeam && <OnboardingBestXl />}
     </ObjectField>
   );

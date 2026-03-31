@@ -34,6 +34,7 @@ function ImgPlayerInner({
         alt={alt}
         fill
         sizes={sizes}
+        draggable={false}
         className="object-cover"
         quality={100}
         onError={() => {

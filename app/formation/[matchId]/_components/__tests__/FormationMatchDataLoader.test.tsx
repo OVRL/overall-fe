@@ -51,7 +51,9 @@ describe("FormationMatchDataLoader", () => {
 
   it("마운트 초기에는 클라이언트 실행 보장을 위한 로딩 UI를 보여준다", () => {
     renderLoader();
-    expect(screen.getByText("참석자 명단 로딩 중...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "포메이션 로딩 중" }),
+    ).toBeInTheDocument();
   });
 
   it("데이터 로드 성공 시 Context를 통해 선수 명단과 경기 정보를 자식에게 전달한다", async () => {

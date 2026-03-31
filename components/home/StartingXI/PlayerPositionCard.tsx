@@ -10,7 +10,6 @@ interface PlayerPositionCardProps {
  * 포메이션 내 선수 카드 컴포넌트
  */
 const PlayerPositionCard = ({ player }: PlayerPositionCardProps) => {
-
   return (
     <div className="relative flex flex-col items-center">
       {/* 주장 배지 (첫 번째 선수에만 - Mock logic) */}
