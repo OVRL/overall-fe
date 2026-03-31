@@ -201,7 +201,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                     const preAssistPlayer = pa ? players.find(p => p.name.includes(pa[1].trim())) : undefined;
                     
                     results.push({
-                        id: Date.now().toString() + Math.random(),
+                        id: crypto.randomUUID(),
                         type: "goal",
                         player,
                         assist: assistPlayer,
@@ -220,6 +220,25 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         if (id === "own-goal") {
             setSelectedAssist("none");
             setSelectedPreAssist("none");
+        } else {
+            if (selectedAssist === id) setSelectedAssist("none");
+            if (selectedPreAssist === id) setSelectedPreAssist("none");
+        }
+    };
+
+    const handleAssistChange = (id: string) => {
+        setSelectedAssist(id);
+        if (id !== "none") {
+            if (selectedGoal === id) setSelectedGoal("none");
+            if (selectedPreAssist === id) setSelectedPreAssist("none");
+        }
+    };
+
+    const handlePreAssistChange = (id: string) => {
+        setSelectedPreAssist(id);
+        if (id !== "none") {
+            if (selectedGoal === id) setSelectedGoal("none");
+            if (selectedAssist === id) setSelectedAssist("none");
         }
     };
 
@@ -314,7 +333,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                     <button 
-                                        onClick={() => setSelectedAssist("none")}
+                                        onClick={() => handleAssistChange("none")}
                                         className={cn(
                                             "flex flex-col items-center gap-2 shrink-0 group",
                                             selectedAssist === "none" ? "opacity-100" : "opacity-60"
@@ -330,8 +349,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     {players.map(player => (
                                         <button 
                                             key={player.id} 
-                                            onClick={() => setSelectedAssist(player.id)}
-                                            disabled={selectedGoal === player.id || selectedGoal === "own-goal"}
+                                            onClick={() => handleAssistChange(player.id)}
+                                            disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
                                         >
                                             <div className={cn(
@@ -358,7 +377,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                     <button 
-                                        onClick={() => setSelectedPreAssist("none")}
+                                        onClick={() => handlePreAssistChange("none")}
                                         className={cn(
                                             "flex flex-col items-center gap-2 shrink-0 group",
                                             selectedPreAssist === "none" ? "opacity-100" : "opacity-60"
@@ -374,8 +393,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     {players.map(player => (
                                         <button 
                                             key={player.id} 
-                                            onClick={() => setSelectedPreAssist(player.id)}
-                                            disabled={selectedGoal === player.id || selectedAssist === player.id || selectedGoal === "own-goal"}
+                                            onClick={() => handlePreAssistChange(player.id)}
+                                            disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
                                         >
                                             <div className={cn(
@@ -776,7 +795,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                 <button 
                                                     onClick={() => {
                                                         const newLogs = { ...match.logs };
-                                                        newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), { id: Date.now().toString(), type: "conceded" }];
+                                                        newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), { id: crypto.randomUUID(), type: "conceded" }];
                                                         updateMatchData(match.id, m => ({
                                                             ...m,
                                                             logs: newLogs,
@@ -881,7 +900,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                     const preAssistPlayer = teamPlayers.find(p => p.id === saveData.preAssistId);
                     
                     const newLog: ScoreLog = {
-                        id: Date.now().toString(),
+                        id: crypto.randomUUID(),
                         type: "goal",
                         player: goalPlayer,
                         assist: assistPlayer,
