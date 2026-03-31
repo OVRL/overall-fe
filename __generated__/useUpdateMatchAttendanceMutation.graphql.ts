@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<97b66740161f2ff20bd2450057f55073>>
+ * @generated SignedSource<<97818f5d3d0ddd8b44c3a9d9e70c4eb2>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,11 +10,9 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
-export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type UpdateMatchAttendanceInput = {
   attendanceStatus: AttendanceStatus;
   id: number;
-  memberType: MemberType;
 };
 export type useUpdateMatchAttendanceMutation$variables = {
   input: UpdateMatchAttendanceInput;
@@ -22,7 +20,7 @@ export type useUpdateMatchAttendanceMutation$variables = {
 export type useUpdateMatchAttendanceMutation$data = {
   readonly updateMatchAttendance: {
     readonly attendanceStatus: AttendanceStatus | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly matchId: number;
     readonly teamId: number;
     readonly userId: number;

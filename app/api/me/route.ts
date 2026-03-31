@@ -83,7 +83,7 @@ export async function GET() {
     }
 
     const user: UserModel = {
-      id: String(raw.id),
+      id: raw.id,
       email: raw.email,
       name: raw.name ?? null,
       profileImage: raw.profileImage ?? null,

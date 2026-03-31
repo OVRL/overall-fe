@@ -1,6 +1,7 @@
 /**
- * MatchModel.id(GraphQL ID 스칼라)를 백엔드 Int 인자(findMatchAttendance, createMatchAttendance 등)로 넘기기 위한 정수로 변환합니다.
- * Nest/GraphQL에서 ID를 숫자 문자열·Relay 스타일 base64·"Type:123" 형태로 줄 수 있어 모두 시도합니다.
+ * MatchModel.id(GraphQL `Int` 또는 Relay 정규화 id 문자열)를
+ * 백엔드 Int 인자(findMatchAttendance, createMatchAttendance 등)로 넘기기 위한 정수로 변환합니다.
+ * 숫자 문자열·Relay 스타일 base64·"Type:123" 형태도 호환합니다.
  */
 export function parseMatchIdForApi(
   id: string | number | null | undefined,

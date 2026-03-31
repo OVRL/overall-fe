@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3a791c18799473590f80ea52faba5745>>
+ * @generated SignedSource<<c76be428e989ac9095e823164880c666>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,18 +23,18 @@ export type findMatchQuery$data = {
       readonly awayUniform: UniformDesign | null | undefined;
       readonly emblem: string | null | undefined;
       readonly homeUniform: UniformDesign | null | undefined;
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly description: string | null | undefined;
     readonly endTime: string;
-    readonly id: string;
+    readonly id: number;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
       readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly quarterCount: number;

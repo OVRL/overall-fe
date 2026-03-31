@@ -85,9 +85,7 @@ export function useTeamSearch({ onComplete }: UseTeamSearchProps) {
 
         const team = data?.findTeam;
         const numId =
-          team?.id != null
-            ? parseNumericIdFromRelayGlobalId(String(team.id)) ?? 0
-            : 0;
+          team?.id != null ? parseNumericIdFromRelayGlobalId(team.id) ?? 0 : 0;
         const teams: TeamSearchItem[] = team
           ? [
               {

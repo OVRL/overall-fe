@@ -8,6 +8,7 @@ import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import {
   parseNumericIdFromRelayGlobalId,
   isSameTeamId,
+  normalizeRelayTeamGlobalId,
 } from "@/lib/relay/parseRelayGlobalId";
 import { cn } from "@/lib/utils";
 import { useFindTeamMemberForHeader } from "@/components/layout/header/useFindTeamMemberForHeaderQuery";
@@ -141,7 +142,7 @@ function HamburgerTeamListSection({
           m.team != null,
       )
       .map((m) => ({
-        id: m.team.id,
+        id: normalizeRelayTeamGlobalId(m.team.id) ?? String(m.team.id),
         name: m.team.name ?? "",
         imageUrl: m.team.emblem ?? null,
       }));

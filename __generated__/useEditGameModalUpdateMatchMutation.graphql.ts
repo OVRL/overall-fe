@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<587aeba3f20ebf58de38dbd9946af4b3>>
+ * @generated SignedSource<<b10b7474beacfc12f2c3a77beff890a0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -36,7 +36,7 @@ export type useEditGameModalUpdateMatchMutation$data = {
     readonly createdTeamId: number;
     readonly description: string | null | undefined;
     readonly endTime: string;
-    readonly id: string;
+    readonly id: number;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeamId: number | null | undefined;

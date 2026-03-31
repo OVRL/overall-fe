@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f1ed56e664744b2981956e521d8bec5e>>
+ * @generated SignedSource<<6ae5ed86c167371662cd52b114ca0d5d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -27,7 +27,7 @@ export type searchTeamMemberQuery$data = {
     readonly teamId: number;
     readonly user: {
       readonly __typename: "UserModel";
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
       readonly preferredNumber: number | null | undefined;
       readonly profileImage: string | null | undefined;

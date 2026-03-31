@@ -8,7 +8,10 @@ import TeamSelector, {
   type TeamOption,
 } from "@/components/layout/header/TeamSelector";
 import { useFindTeamMemberForHeader } from "@/components/layout/header/useFindTeamMemberForHeaderQuery";
-import { isSameTeamId } from "@/lib/relay/parseRelayGlobalId";
+import {
+  isSameTeamId,
+  normalizeRelayTeamGlobalId,
+} from "@/lib/relay/parseRelayGlobalId";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useUserId } from "@/hooks/useUserId";
 
@@ -29,7 +32,7 @@ function useTeamSelectorData(userId: number) {
           m.team != null,
       )
       .map((m) => ({
-        id: m.team.id,
+        id: normalizeRelayTeamGlobalId(m.team.id) ?? String(m.team.id),
         name: m.team.name ?? "",
         imageUrl: DEFAULT_TEAM_IMAGE,
       }));
@@ -65,7 +68,9 @@ function TeamSelectorWithDataInner({
     useTeamSelectorData(userId);
 
   const handleSelect = (teamId: string) => {
-    const member = members.find((m) => m.team?.id === teamId);
+    const member = members.find(
+      (m) => m.team != null && isSameTeamId(m.team.id, teamId),
+    );
     setSelectedTeamId(teamId, member?.teamId);
     onAfterSelect?.();
   };

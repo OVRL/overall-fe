@@ -19,7 +19,7 @@ export type TeamMemberForHeader = {
   id: number;
   teamId: number;
   team: {
-    id: string;
+    id: number;
     name: string | null;
     emblem: string | null;
   } | null;

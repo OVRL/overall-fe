@@ -11,6 +11,7 @@ import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId"
 export interface GenericMatchAttendanceRow {
   readonly attendanceStatus?: string | null;
   readonly teamMember?: {
+    /** GraphQL Int 또는 레거시 Relay `Type:id` 문자열 */
     readonly id: string | number;
     readonly backNumber?: number | null;
     readonly position?: string | null;
@@ -19,6 +20,7 @@ export interface GenericMatchAttendanceRow {
       readonly ovr?: number | null;
     } | null;
     readonly user?: {
+      /** GraphQL Int 또는 레거시 Relay `Type:id` 문자열 */
       readonly id: string | number;
       readonly name?: string | null;
       readonly preferredNumber?: number | null;
@@ -44,8 +46,8 @@ export function matchAttendanceRowsToAttendingPlayers(
     const back = tm.backNumber;
     const preferred = user?.preferredNumber;
 
-    const idStr = String(tm.id);
-    const numericId = parseNumericIdFromRelayGlobalId(idStr) ?? Number(idStr);
+    const numericId =
+      parseNumericIdFromRelayGlobalId(tm.id) ?? Number(String(tm.id));
 
     const number =
       back != null ? back : preferred != null ? Math.round(preferred) : 0;
@@ -54,14 +56,15 @@ export function matchAttendanceRowsToAttendingPlayers(
     const position = tm.position ?? "ST";
     const overall = tm.overall?.ovr ?? 0;
 
-    // underlying utility expectations: id as number, user.id as string | null
     const profileRaw = getTeamMemberProfileImageRawUrl({
       profileImg: tm.profileImg,
-      user: user ? { id: String(user.id), profileImage: user.profileImage } : null,
+      user: user
+        ? { id: user.id, profileImage: user.profileImage }
+        : null,
     });
     const imageFallbackUrl = getTeamMemberProfileImageFallbackUrl({
       id: numericId,
-      user: user ? { id: String(user.id) } : null,
+      user: user ? { id: user.id } : null,
     });
 
     return {

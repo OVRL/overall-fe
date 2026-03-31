@@ -34,7 +34,7 @@ export type MatchAttendanceRowSSR = {
     profileImg: string | null;
     overall: { ovr: number } | null;
     user: {
-      id: string;
+      id: number;
       name: string | null;
       preferredNumber: number | null;
       profileImage: string | null;

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7eecfd281745483a8056424048121e7e>>
+ * @generated SignedSource<<a06339f4ceb469f262d6e166801a8886>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,18 +23,18 @@ export type EditGameModalQuery$data = {
       readonly awayUniform: UniformDesign | null | undefined;
       readonly emblem: string | null | undefined;
       readonly homeUniform: UniformDesign | null | undefined;
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly description: string | null | undefined;
     readonly endTime: string;
-    readonly id: string;
+    readonly id: number;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
       readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
     } | null | undefined;
     readonly quarterCount: number;

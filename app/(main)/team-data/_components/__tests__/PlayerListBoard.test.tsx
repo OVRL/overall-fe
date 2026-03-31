@@ -18,7 +18,7 @@ const MOCK_MEMBERS: RosterMember[] = [
     profileImg: null,
     user: {
       __typename: "UserModel" as const,
-      id: "u1",
+      id: 101,
       name: "손흥민",
       profileImage: null,
       birthDate: null,
@@ -47,7 +47,7 @@ const MOCK_MEMBERS: RosterMember[] = [
     profileImg: null,
     user: {
       __typename: "UserModel" as const,
-      id: "u2",
+      id: 102,
       name: "이강인",
       profileImage: null,
       birthDate: null,
@@ -76,7 +76,7 @@ const MOCK_MEMBERS: RosterMember[] = [
     profileImg: null,
     user: {
       __typename: "UserModel" as const,
-      id: "u3",
+      id: 103,
       name: "김민재",
       profileImage: null,
       birthDate: null,

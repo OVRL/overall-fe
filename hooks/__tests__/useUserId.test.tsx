@@ -12,6 +12,10 @@ describe("parseUserId", () => {
     expect(parseUserId("UserModel:14")).toBe(14);
   });
 
+  it("정수 id를 그대로 반환한다", () => {
+    expect(parseUserId(42)).toBe(42);
+  });
+
   it("파싱 불가하면 null", () => {
     expect(parseUserId("abc")).toBeNull();
     expect(parseUserId("UserModel:x")).toBeNull();
@@ -28,11 +32,11 @@ describe("useUserId", () => {
     expect(result.current).toBeNull();
   });
 
-  it("user.id에서 숫자 id를 반환한다", () => {
+  it("user.id가 Int이면 그대로 반환한다", () => {
     act(() => {
       useUserStore.setState({
         user: {
-          id: "UserModel:7",
+          id: 7,
           email: "a@b.c",
         },
       });
@@ -40,4 +44,5 @@ describe("useUserId", () => {
     const { result } = renderHook(() => useUserId());
     expect(result.current).toBe(7);
   });
+
 });

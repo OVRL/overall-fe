@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<30c28d9725fdb1b1718cf23e9ef6eea2>>
+ * @generated SignedSource<<799adf57344496914dce63784fd5f63a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -38,7 +38,7 @@ export type useModifyUserMutation$data = {
     readonly favoritePlayer: string | null | undefined;
     readonly foot: Foot | null | undefined;
     readonly gender: Gender | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly name: string | null | undefined;
     readonly preferredNumber: number | null | undefined;
   };

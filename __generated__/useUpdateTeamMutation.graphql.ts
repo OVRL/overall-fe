@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2e69474d7c0b2cf5f208f5ac4d72eb07>>
+ * @generated SignedSource<<e3b712f5c09f13b5d52e9a7577c24144>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -31,7 +31,7 @@ export type useUpdateTeamMutation$data = {
     readonly emblem: string | null | undefined;
     readonly historyStartDate: any | null | undefined;
     readonly homeUniform: UniformDesign | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly name: string | null | undefined;
     readonly region: {
       readonly code: string;

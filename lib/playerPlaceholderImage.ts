@@ -33,14 +33,18 @@ export function getPlayerPlaceholderSrc(seed: string): string {
 }
 
 /**
- * GraphQL `user.id`가 `"14"`이든 Relay 글로벌 ID `"UserModel:14"`이든
+ * GraphQL `user.id`(Int), `"14"`, Relay 글로벌 ID `"UserModel:14"` 모두
  * 동일 DB 유저면 같은 플레이스홀더가 나오도록 정규화합니다.
  * (`hooks/useUserId`의 parseUserId와 동일 규칙)
  */
 export function normalizeUserIdForAvatarSeed(
-  raw: string | null | undefined,
+  raw: string | number | null | undefined,
 ): string | null {
-  const s = raw?.trim();
+  if (raw == null) return null;
+  if (typeof raw === "number") {
+    return Number.isInteger(raw) && !Number.isNaN(raw) ? String(raw) : null;
+  }
+  const s = raw.trim();
   if (!s) return null;
   const n = Number(s);
   if (!Number.isNaN(n)) return String(n);
@@ -55,7 +59,7 @@ export function normalizeUserIdForAvatarSeed(
  * 플레이스홀더 해시용 시드 `u:<정규화 id>` (없으면 null).
  */
 export function getUserAvatarSeedFromGraphqlId(
-  graphqlUserId: string | null | undefined,
+  graphqlUserId: string | number | null | undefined,
 ): string | null {
   const normalized = normalizeUserIdForAvatarSeed(graphqlUserId);
   if (normalized == null) return null;
@@ -68,7 +72,7 @@ export function getUserAvatarSeedFromGraphqlId(
  */
 export function getTeamMemberAvatarSeed(member: {
   id: number;
-  user?: { id: string | null } | null;
+  user?: { id: string | number | null } | null;
 }): string {
   const userSeed = getUserAvatarSeedFromGraphqlId(member.user?.id ?? undefined);
   if (userSeed) return userSeed;
@@ -78,7 +82,7 @@ export function getTeamMemberAvatarSeed(member: {
 /** 팀 멤버 프로필 **원본** URL만 (트림, 없으면 빈 문자열). UI는 `fallbackSrc`와 함께 전달. */
 export function getTeamMemberProfileImageRawUrl(member: {
   profileImg?: string | null;
-  user?: { id: string | null; profileImage?: string | null } | null;
+  user?: { id: string | number | null; profileImage?: string | null } | null;
 }): string {
   return (member.profileImg ?? member.user?.profileImage ?? "").trim();
 }
@@ -86,7 +90,7 @@ export function getTeamMemberProfileImageRawUrl(member: {
 /** 팀 멤버별 결정론적 플레이스홀더 URL만. */
 export function getTeamMemberProfileImageFallbackUrl(member: {
   id: number;
-  user?: { id: string | null } | null;
+  user?: { id: string | number | null } | null;
 }): string {
   return getPlayerPlaceholderSrc(getTeamMemberAvatarSeed(member));
 }
@@ -100,7 +104,7 @@ export function getUserProfileImageRawUrl(
 
 /** 로그인 유저용 플레이스홀더 URL만 (감독 카드 등). */
 export function getUserProfileImageFallbackUrl(
-  user: { id?: string | null } | null | undefined,
+  user: { id?: string | number | null } | null | undefined,
 ): string {
   const userSeed = getUserAvatarSeedFromGraphqlId(user?.id ?? undefined);
   if (userSeed) return getPlayerPlaceholderSrc(userSeed);
@@ -130,7 +134,7 @@ export function getHallOfFamePlayerImageFallbackUrl(player: {
 export function resolveTeamMemberProfileImage(member: {
   id: number;
   profileImg?: string | null;
-  user?: { id: string | null; profileImage?: string | null } | null;
+  user?: { id: string | number | null; profileImage?: string | null } | null;
 }): string {
   const fallback = getTeamMemberProfileImageFallbackUrl(member);
   const raw = getTeamMemberProfileImageRawUrl(member);
@@ -140,7 +144,7 @@ export function resolveTeamMemberProfileImage(member: {
 
 /** 로그인 유저 단일 URL (비 UI 경로용). */
 export function resolveUserAvatarImage(user: {
-  id: string;
+  id: string | number;
   profileImage?: string | null;
 }): string {
   const fallback = getUserProfileImageFallbackUrl(user);

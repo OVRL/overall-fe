@@ -7,7 +7,7 @@ import type {
 } from "relay-runtime";
 import { env } from "@/lib/env";
 import { postBackendSSR } from "@/utils/ssrBackendFetch";
-import { ensureIdStrings, ensureUniqueDataIds } from "./fetchGraphQL";
+import { ensureUniqueDataIds } from "./fetchGraphQL";
 import { GraphQLHttpError } from "./GraphQLHttpError";
 import { refreshAccessToken } from "@/lib/auth/refreshToken";
 import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
@@ -72,8 +72,7 @@ export function createServerFetch(
     const doRequest = async (): Promise<GraphQLResponse> => {
       const res = await postBackendSSR(url, headers, body);
       const raw = await res.json().catch(() => ({}));
-      let payload = ensureIdStrings(raw) as GraphQLResponse;
-      payload = ensureUniqueDataIds(payload) as GraphQLResponse;
+      let payload = ensureUniqueDataIds(raw) as GraphQLResponse;
 
       const isUnauthorized =
         res.status === 401 || hasUnauthorizedError(raw);
@@ -84,8 +83,7 @@ export function createServerFetch(
           headers["Authorization"] = `Bearer ${newTokens.accessToken}`;
           const retryRes = await postBackendSSR(url, headers, body);
           const retryRaw = await retryRes.json().catch(() => ({}));
-          let retryPayload = ensureIdStrings(retryRaw) as GraphQLResponse;
-          retryPayload = ensureUniqueDataIds(retryPayload) as GraphQLResponse;
+          let retryPayload = ensureUniqueDataIds(retryRaw) as GraphQLResponse;
           if (!retryRes.ok) {
             const errorPayload = retryRaw as {
               errors?: Array<{ message?: string }>;

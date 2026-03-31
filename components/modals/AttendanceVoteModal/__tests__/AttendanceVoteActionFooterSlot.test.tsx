@@ -12,7 +12,7 @@ import { AttendanceVoteActionFooterSlot } from "../AttendanceVoteActionFooterSlo
 
 type MatchNode = findMatchQuery["response"]["findMatch"][number];
 
-const minimalMatch = { id: "1" } as MatchNode;
+const minimalMatch = { id: 1 } as MatchNode;
 
 function renderFooter(options: {
   userId?: number | null;

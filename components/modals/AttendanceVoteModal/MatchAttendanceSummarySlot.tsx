@@ -9,8 +9,8 @@ import { MatchAttendanceSummaryPanel } from "./MatchAttendanceSummaryPanel";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** findMatch MatchModel.id (GraphQL ID 스칼라) */
-  matchGraphqlId: string;
+  /** findMatch MatchModel.id (GraphQL Int 또는 Relay 정규화 id 문자열) */
+  matchGraphqlId: string | number;
   teamId: number;
 };
 

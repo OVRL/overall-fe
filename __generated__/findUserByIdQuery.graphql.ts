@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f049b4019d56aaafa2d41a0a188789dd>>
+ * @generated SignedSource<<12e6c525dfb8eb2eace6bf1b11e38337>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -24,7 +24,7 @@ export type findUserByIdQuery$data = {
     readonly favoritePlayer: string | null | undefined;
     readonly foot: Foot | null | undefined;
     readonly gender: Gender | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly mainPosition: Position | null | undefined;
     readonly name: string | null | undefined;
     readonly phone: string | null | undefined;

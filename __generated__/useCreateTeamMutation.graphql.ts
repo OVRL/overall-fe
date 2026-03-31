@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dc677989780fa158cac3cfad31290c2a>>
+ * @generated SignedSource<<e703c844db62956cb75204205f89641a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -32,7 +32,7 @@ export type useCreateTeamMutation$data = {
     readonly emblem: string | null | undefined;
     readonly historyStartDate: any | null | undefined;
     readonly homeUniform: UniformDesign | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly name: string | null | undefined;
   };
 };

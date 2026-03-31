@@ -35,7 +35,7 @@ const FIND_MATCH_QUERY = `
 
 /** findMatch 응답의 팀 정보 (createdTeam / opponentTeam) */
 export type MatchTeamInfo = {
-  id: string;
+  id: number;
   name: string | null;
   emblem: string | null;
   homeUniform?: string | null;
@@ -43,7 +43,7 @@ export type MatchTeamInfo = {
 } | null;
 
 export type MatchForUpcoming = {
-  id: string;
+  id: number;
   matchDate: string;
   startTime: string;
   endTime: string;

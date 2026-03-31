@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<767c0faee511f27d7aba0b3eab83ebfc>>
+ * @generated SignedSource<<c8c2198f192dbebe1ca65a550a39d3d6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -38,7 +38,7 @@ export type useBestElevenQuery$data = {
       readonly user: {
         readonly __typename: "UserModel";
         readonly birthDate: any | null | undefined;
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
       } | null | undefined;

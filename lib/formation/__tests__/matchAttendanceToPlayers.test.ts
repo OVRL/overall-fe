@@ -14,7 +14,7 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
       profileImg: null,
       overall: { ovr: 85 },
       user: {
-        id: "UserModel:99",
+        id: 99,
         name: "  홍길동  ",
         preferredNumber: null,
         profileImage: null,
@@ -46,7 +46,7 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
       image: undefined,
       imageFallbackUrl: getTeamMemberProfileImageFallbackUrl({
         id: Number(tm.id),
-        user: { id: String(tm.user?.id) },
+        user: { id: tm.user?.id ?? null },
       }),
     });
   });

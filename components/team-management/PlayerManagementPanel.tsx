@@ -9,7 +9,7 @@ import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
 import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
-import { parseUserId } from "@/hooks/useUserId";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { 
   getTeamMemberProfileImageRawUrl, 
   getTeamMemberProfileImageFallbackUrl 
@@ -256,7 +256,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
   const data = usePlayerManagementQuery(teamId);
   const apiPlayers: PlayerStat[] = (data.findManyTeamMember?.members || []).map((m: any) => {
     // 이미지 렌더링 방식 일원화
-    const normalizedMemberId = m.id ? parseUserId(String(m.id)) : 0;
+    const normalizedMemberId = m.id != null ? parseNumericIdFromRelayGlobalId(m.id) ?? 0 : 0;
     const memberForImage = { ...m, id: normalizedMemberId || 0 };
     
     return {

@@ -34,7 +34,7 @@ jest.mock("@/lib/toast", () => ({
 }));
 
 const myCommittedRow = {
-  id: "100",
+  id: 100,
   userId: 42,
   attendanceStatus: "ATTEND" as const,
   memberType: "MEMBER" as const,
@@ -50,7 +50,7 @@ function SubmitHarness({
   wantsRevote: boolean;
   onRevoteComplete: () => void;
 }) {
-  const match = { id: "99" } as MatchNode;
+  const match = { id: 99 } as MatchNode;
   const { handleAttend } = useAttendanceVoteSubmitActions(match, 10, 42, {
     myCommittedRow: row,
     wantsRevote,
@@ -90,7 +90,7 @@ describe("useAttendanceVoteSubmitActions", () => {
     mockExecuteCreate.mockImplementation((cfg: { onCompleted?: (r: unknown) => void }) => {
       cfg.onCompleted?.({
         createMatchAttendance: {
-          id: "1",
+          id: 1,
           matchId: 99,
           teamId: 10,
           userId: 42,
@@ -140,7 +140,7 @@ describe("useAttendanceVoteSubmitActions", () => {
     mockExecuteUpdate.mockImplementation((cfg: { onCompleted?: (r: unknown) => void }) => {
       cfg.onCompleted?.({
         updateMatchAttendance: {
-          id: "1",
+          id: 1,
           matchId: 99,
           teamId: 10,
           userId: 42,
@@ -163,7 +163,6 @@ describe("useAttendanceVoteSubmitActions", () => {
     expect(mockExecuteUpdate.mock.calls[0][0].variables.input).toMatchObject({
       id: 100,
       attendanceStatus: "ATTEND",
-      memberType: "MEMBER",
     });
     expect(onRevoteComplete).toHaveBeenCalledTimes(1);
     expect(mockExecuteCreate).not.toHaveBeenCalled();

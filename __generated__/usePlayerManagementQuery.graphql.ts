@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b5914da23b7234c55c80d03f90eab10a>>
+ * @generated SignedSource<<fecaffcdc2d2d44fa7bc8fd4d5095b99>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -31,7 +31,7 @@ export type usePlayerManagementQuery$data = {
       readonly position: Position | null | undefined;
       readonly user: {
         readonly __typename: "UserModel";
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
       } | null | undefined;

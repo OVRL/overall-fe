@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<38b48c63a321bcb69d2a5c6c3ba1d7d2>>
+ * @generated SignedSource<<d56d61eb3ed80d46c579eeaf0065f1fd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,7 +16,7 @@ export type useMatchRecordsQuery$variables = {
 export type useMatchRecordsQuery$data = {
   readonly findMatch: ReadonlyArray<{
     readonly description: string | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
@@ -45,124 +45,115 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "createdTeamId",
-    "variableName": "teamId"
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "createdTeamId",
+        "variableName": "teamId"
+      }
+    ],
+    "concreteType": "MatchModel",
+    "kind": "LinkedField",
+    "name": "findMatch",
+    "plural": true,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "id",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchDate",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchType",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarterCount",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarterDuration",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "teamName",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "description",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TeamModel",
+        "kind": "LinkedField",
+        "name": "opponentTeam",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "name",
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "VenueModel",
+        "kind": "LinkedField",
+        "name": "venue",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "address",
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
-],
-v2 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v3 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "matchDate",
-  "storageKey": null
-},
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "matchType",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "quarterCount",
-  "storageKey": null
-},
-v6 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "quarterDuration",
-  "storageKey": null
-},
-v7 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "teamName",
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "description",
-  "storageKey": null
-},
-v9 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "name",
-  "storageKey": null
-},
-v10 = {
-  "alias": null,
-  "args": null,
-  "concreteType": "VenueModel",
-  "kind": "LinkedField",
-  "name": "venue",
-  "plural": false,
-  "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "address",
-      "storageKey": null
-    }
-  ],
-  "storageKey": null
-};
+];
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "useMatchRecordsQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "MatchModel",
-        "kind": "LinkedField",
-        "name": "findMatch",
-        "plural": true,
-        "selections": [
-          (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/),
-          (v5/*: any*/),
-          (v6/*: any*/),
-          (v7/*: any*/),
-          (v8/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamModel",
-            "kind": "LinkedField",
-            "name": "opponentTeam",
-            "plural": false,
-            "selections": [
-              (v9/*: any*/)
-            ],
-            "storageKey": null
-          },
-          (v10/*: any*/)
-        ],
-        "storageKey": null
-      }
-    ],
+    "selections": (v1/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -171,48 +162,15 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "useMatchRecordsQuery",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "MatchModel",
-        "kind": "LinkedField",
-        "name": "findMatch",
-        "plural": true,
-        "selections": [
-          (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/),
-          (v5/*: any*/),
-          (v6/*: any*/),
-          (v7/*: any*/),
-          (v8/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamModel",
-            "kind": "LinkedField",
-            "name": "opponentTeam",
-            "plural": false,
-            "selections": [
-              (v9/*: any*/),
-              (v2/*: any*/)
-            ],
-            "storageKey": null
-          },
-          (v10/*: any*/)
-        ],
-        "storageKey": null
-      }
-    ]
+    "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "5c19b023d5704d21664c9eae20f7af37",
+    "cacheID": "4b10a1d8cf6e81b619e5e2e1db9f4952",
     "id": null,
     "metadata": {},
     "name": "useMatchRecordsQuery",
     "operationKind": "query",
-    "text": "query useMatchRecordsQuery(\n  $teamId: Int!\n) {\n  findMatch(createdTeamId: $teamId) {\n    id\n    matchDate\n    matchType\n    quarterCount\n    quarterDuration\n    teamName\n    description\n    opponentTeam {\n      name\n      id\n    }\n    venue {\n      address\n    }\n  }\n}\n"
+    "text": "query useMatchRecordsQuery(\n  $teamId: Int!\n) {\n  findMatch(createdTeamId: $teamId) {\n    id\n    matchDate\n    matchType\n    quarterCount\n    quarterDuration\n    teamName\n    description\n    opponentTeam {\n      name\n    }\n    venue {\n      address\n    }\n  }\n}\n"
   }
 };
 })();

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<02b539266903d85c77c330a5e5c86b76>>
+ * @generated SignedSource<<cacd8812787e308fa8183f0593827896>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -33,7 +33,7 @@ export type useUpdateMatchMutation$variables = {
 export type useUpdateMatchMutation$data = {
   readonly updateMatch: {
     readonly description: string | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly matchDate: any;
     readonly opponentTeam: {
       readonly name: string | null | undefined;
@@ -55,73 +55,69 @@ var v0 = [
 ],
 v1 = [
   {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input"
-  }
-],
-v2 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v3 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "description",
-  "storageKey": null
-},
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "matchDate",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "name",
-  "storageKey": null
-};
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "useUpdateMatchMutation",
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input"
+      }
+    ],
+    "concreteType": "MatchModel",
+    "kind": "LinkedField",
+    "name": "updateMatch",
+    "plural": false,
     "selections": [
       {
         "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "MatchModel",
+        "args": null,
+        "kind": "ScalarField",
+        "name": "id",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "description",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchDate",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TeamModel",
         "kind": "LinkedField",
-        "name": "updateMatch",
+        "name": "opponentTeam",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
-            "concreteType": "TeamModel",
-            "kind": "LinkedField",
-            "name": "opponentTeam",
-            "plural": false,
-            "selections": [
-              (v5/*: any*/)
-            ],
+            "kind": "ScalarField",
+            "name": "name",
             "storageKey": null
           }
         ],
         "storageKey": null
       }
     ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "useUpdateMatchMutation",
+    "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -130,43 +126,15 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "useUpdateMatchMutation",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "MatchModel",
-        "kind": "LinkedField",
-        "name": "updateMatch",
-        "plural": false,
-        "selections": [
-          (v2/*: any*/),
-          (v3/*: any*/),
-          (v4/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "TeamModel",
-            "kind": "LinkedField",
-            "name": "opponentTeam",
-            "plural": false,
-            "selections": [
-              (v5/*: any*/),
-              (v2/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      }
-    ]
+    "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "237c4c8468e98db3985775b216f8f459",
+    "cacheID": "e52f219b2ee3f619771551a400a57c48",
     "id": null,
     "metadata": {},
     "name": "useUpdateMatchMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchMutation(\n  $input: UpdateMatchInput!\n) {\n  updateMatch(input: $input) {\n    id\n    description\n    matchDate\n    opponentTeam {\n      name\n      id\n    }\n  }\n}\n"
+    "text": "mutation useUpdateMatchMutation(\n  $input: UpdateMatchInput!\n) {\n  updateMatch(input: $input) {\n    id\n    description\n    matchDate\n    opponentTeam {\n      name\n    }\n  }\n}\n"
   }
 };
 })();

@@ -96,12 +96,12 @@ describe("verifyFormationMatchAccessSSR", () => {
       {
         id: 12,
         teamId: 7,
-        team: { id: "TeamModel:7", name: "T", emblem: null },
+        team: { id: 7, name: "T", emblem: null },
       },
     ]);
     mockedMatches.mockResolvedValue([
       {
-        id: "MatchModel:1",
+        id: 1,
         matchDate: "2025-01-01",
         startTime: "10:00",
         endTime: "12:00",
@@ -128,19 +128,19 @@ describe("verifyFormationMatchAccessSSR", () => {
       {
         id: 11,
         teamId: 7,
-        team: { id: "TeamModel:7", name: "T", emblem: null },
+        team: { id: 7, name: "T", emblem: null },
       },
     ]);
 
     const match = {
-      id: "MatchModel:15",
+      id: 15,
       matchDate: "2025-03-01",
       startTime: "10:00",
       endTime: "12:00",
       matchType: "MATCH" as const,
       quarterCount: 4,
       quarterDuration: 45,
-      createdTeam: { id: "TeamModel:7", name: "T", emblem: null },
+      createdTeam: { id: 7, name: "T", emblem: null },
       opponentTeam: null,
       venue: { address: "서울", latitude: 37, longitude: 127 },
     };

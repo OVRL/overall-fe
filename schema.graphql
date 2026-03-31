@@ -161,7 +161,7 @@ type LoginResponseModel {
   favoritePlayer: String
   foot: Foot
   gender: Gender
-  id: ID!
+  id: Int!
   mainPosition: Position
   name: String
   phone: String
@@ -176,7 +176,7 @@ type LoginResponseModel {
 type MatchAttendanceModel {
   attendanceStatus: AttendanceStatus
   createdAt: GraphQLDateTime!
-  id: ID!
+  id: Int!
 
   """경기 정보"""
   match: MatchModel
@@ -216,7 +216,7 @@ type MatchModel {
   createdTeamId: Int!
   description: String
   endTime: String!
-  id: ID!
+  id: Int!
   matchDate: Date!
   matchType: MatchType!
   opponentTeam: TeamModel
@@ -355,6 +355,7 @@ type Query {
   findInviteCode(code: String!): InviteCodeModel
   findInviteCodeByTeam(teamId: Int!): InviteCodeModel
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
+  findManyMatches(limit: Int! = 10, offset: Int! = 0): [MatchModel!]!
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
   findManyTeamMember(limit: Int! = 10, offset: Int! = 0, teamId: Int!): TeamMemberArrayModel!
@@ -441,7 +442,7 @@ type TeamModel {
   emblem: String
   historyStartDate: Date
   homeUniform: UniformDesign
-  id: ID!
+  id: Int!
   members: [TeamMemberModel!]
   name: String
   region: RegionSearchModel
@@ -473,7 +474,6 @@ input UpdateMatchAttendanceInput {
 
   """참석 투표 ID"""
   id: Int!
-  memberType: MemberType!
 }
 
 input UpdateMatchFormationInput {
@@ -572,7 +572,7 @@ type UserModel {
   favoritePlayer: String
   foot: Foot
   gender: Gender
-  id: ID!
+  id: Int!
   mainPosition: Position
   name: String
   phone: String
@@ -588,7 +588,7 @@ type UserTokenModel {
   accessToken: String
   createdAt: GraphQLDateTime!
   deviceInfo: String
-  id: ID!
+  id: Int!
   refreshToken: String
   updatedAt: GraphQLDateTime!
   userId: Float!

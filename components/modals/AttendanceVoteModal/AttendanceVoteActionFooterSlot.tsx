@@ -14,7 +14,7 @@ import { AttendanceVoteChoiceButtons } from "./AttendanceVoteChoiceButtons";
 type MatchNode = findMatchQuery["response"]["findMatch"][number];
 
 type Props = {
-  matchGraphqlId: string;
+  matchGraphqlId: string | number;
   teamId: number;
   userId: number | null;
   match: MatchNode;

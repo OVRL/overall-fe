@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ae96eeb2b32db8832373e0d4563c4fcd>>
+ * @generated SignedSource<<a4dca458100dc3d1a3f2c6fe651991ca>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -31,7 +31,7 @@ export type useTeamSettingsQuery$data = {
         readonly emblem: string | null | undefined;
         readonly historyStartDate: any | null | undefined;
         readonly homeUniform: UniformDesign | null | undefined;
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly region: {
           readonly code: string;
@@ -40,7 +40,7 @@ export type useTeamSettingsQuery$data = {
       } | null | undefined;
       readonly user: {
         readonly birthDate: any | null | undefined;
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
       } | null | undefined;

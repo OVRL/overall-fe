@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3ea020c4462d8a1a09de521a108bf9bf>>
+ * @generated SignedSource<<eeb9bbeac4ef55ff3e48b9e3ac58616e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type findManyTeamQuery$data = {
     readonly items: ReadonlyArray<{
       readonly __typename: "TeamModel";
       readonly emblem: string | null | undefined;
-      readonly id: string;
+      readonly id: number;
       readonly name: string | null | undefined;
     }>;
     readonly totalCount: number;

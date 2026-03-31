@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<447c50637cf266718a2972ede20c401b>>
+ * @generated SignedSource<<27b1804fabe786d1f214b8e39e0f780c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,7 +20,7 @@ export type formationMatchAttendanceQuery$data = {
   readonly findMatchAttendance: ReadonlyArray<{
     readonly __typename: "MatchAttendanceModel";
     readonly attendanceStatus: AttendanceStatus | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
@@ -33,7 +33,7 @@ export type formationMatchAttendanceQuery$data = {
       readonly profileImg: string | null | undefined;
       readonly user: {
         readonly __typename: "UserModel";
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly preferredNumber: number | null | undefined;
         readonly profileImage: string | null | undefined;

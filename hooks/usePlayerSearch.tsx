@@ -248,7 +248,6 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
                   input: {
                     id: attendanceRowId,
                     attendanceStatus: targetStatus,
-                    memberType: existing.memberType ?? "MEMBER",
                   },
                 },
                 onCompleted: resolve,

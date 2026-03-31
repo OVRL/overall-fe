@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5c417179325077761c7c1159c0acfe7c>>
+ * @generated SignedSource<<ea83edfc199a438d3922b656d9bdd8f1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -40,7 +40,7 @@ export type findManyTeamMemberQueryQuery$data = {
       readonly user: {
         readonly __typename: "UserModel";
         readonly birthDate: any | null | undefined;
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly profileImage: string | null | undefined;
         readonly subPositions: ReadonlyArray<Position> | null | undefined;

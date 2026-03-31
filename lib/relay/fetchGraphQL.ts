@@ -20,26 +20,6 @@ function getServerOrigin(): string {
 }
 
 /**
- * Relay는 Global Object Identification 때문에 모든 id를 문자열로 기대합니다.
- * 백엔드가 TeamMemberModel 등에서 id를 Int로 반환할 경우 응답을 정규화합니다.
- * (SSR 직렬화/응답 처리에서도 사용)
- */
-export function ensureIdStrings(value: unknown): unknown {
-  if (value === null || typeof value !== "object") return value;
-  if (Array.isArray(value)) return value.map(ensureIdStrings);
-  const obj = value as Record<string, unknown>;
-  const result: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(obj)) {
-    if (key === "id" && typeof val === "number") {
-      result[key] = String(val);
-    } else {
-      result[key] = ensureIdStrings(val);
-    }
-  }
-  return result;
-}
-
-/**
  * 백엔드가 서로 다른 타입에 같은 숫자 id를 줄 수 있어 Relay 정규화 시 충돌이 납니다.
  * 모든 노드에 __typename:원본id 형태로 id를 덮어쓰면 타입별로 고유 키가 보장됩니다.
  * (서버/클라이언트 fetch 공통 적용)
@@ -145,9 +125,7 @@ export const fetchQuery = async (
     throw new Error(message);
   }
 
-  // 백엔드가 id를 Int로 주는 타입(TeamMemberModel 등) 대응: Relay는 id를 문자열로 기대함
-  payload = ensureIdStrings(payload);
-  // UserInfoModel 등 동일 id가 다른 타입과 충돌하지 않도록 타입 접두사 부여
+  // GraphQL Int id와 동일 숫자가 서로 다른 타입에 있을 때 Relay 정규화 충돌 방지
   payload = ensureUniqueDataIds(payload);
 
   const errorPayload = payload as { errors?: Array<{ message?: string }> };

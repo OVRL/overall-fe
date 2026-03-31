@@ -13,7 +13,7 @@ const mockMembers: readonly RosterMember[] = [
     profileImg: null,
     user: {
       __typename: "UserModel",
-      id: "u1",
+      id: 101,
       name: "Player A",
       profileImage: null,
       birthDate: null,
@@ -42,7 +42,7 @@ const mockMembers: readonly RosterMember[] = [
     profileImg: null,
     user: {
       __typename: "UserModel",
-      id: "u2",
+      id: 102,
       name: "Player B",
       profileImage: null,
       birthDate: null,

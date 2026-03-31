@@ -121,14 +121,11 @@ export function useAttendanceVoteSubmitActions(
       return;
     }
 
-    const memberType = myCommittedRow.memberType ?? "MEMBER";
-
     executeUpdate({
       variables: {
         input: {
           id: recordId,
           attendanceStatus,
-          memberType,
         },
       },
       onCompleted: (response: UpdateMatchAttendanceMutationType["response"]) => {

@@ -27,7 +27,7 @@ export type SelectedTeamContextValue = {
   isSoloTeam: boolean;
   /** teamName/teamImageUrl은 클럽 생성 직후 등 팀 목록 refetch 전에 뱃지 표시를 위해 선택적으로 전달 */
   setSelectedTeamId: (
-    teamId: string | null,
+    teamId: string | number | null,
     teamIdNum?: number | null,
     teamName?: string | null,
     teamImageUrl?: string | null,
@@ -82,7 +82,7 @@ export function SelectedTeamProvider({
 
   const setSelectedTeamId = useCallback(
     (
-      teamId: string | null,
+      teamId: string | number | null,
       teamIdNum?: number | null,
       teamName?: string | null,
       teamImageUrl?: string | null,

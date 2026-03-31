@@ -44,7 +44,7 @@ const AttendanceMemberRow = memo(function AttendanceMemberRow({
   const name = row.user?.name?.trim() || "이름 없음";
   const rawUrl = row.user?.profileImage?.trim() || "";
   const fallbackSrc = getPlayerPlaceholderSrc(
-    getUserAvatarSeedFromGraphqlId(row.user?.id ?? String(row.userId)) ??
+    getUserAvatarSeedFromGraphqlId(row.user?.id ?? row.userId) ??
       `u:${row.userId}`,
   );
 

@@ -17,6 +17,7 @@ import locationIcon from "@/public/icons/location.svg";
 import TextField from "@/components/ui/TextField";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { useUserId, parseUserId } from "@/hooks/useUserId";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { 
   getTeamMemberProfileImageRawUrl, 
   getTeamMemberProfileImageFallbackUrl 
@@ -518,7 +519,7 @@ function TeamSettingsPanelInner({
 
   // 실제 현재 접속자의 역할을 멤버 목록에서 찾음 (상위에서 내려주는 userRole이 Mock일 수 있으므로)
   const currentUserMember = teamMemberConnection.members.find((m: any) => {
-    const mUserId = m.user?.id ? parseUserId(String(m.user.id)) : null;
+    const mUserId = m.user?.id != null ? parseUserId(m.user.id) : null;
     return mUserId != null && currentUserId != null && String(mUserId) === String(currentUserId);
   });
 
@@ -550,8 +551,9 @@ function TeamSettingsPanelInner({
       PLAYER: "선수"
     };
 
-    // m.id가 Relay Global ID일 경우 대비하여 숫자만 추출 (플레이스홀더 시드 일관성 위함)
-    const normalizedMemberId = m.id ? parseUserId(String(m.id)) : 0;
+    // m.id가 Relay 정규화 id(`TeamModel:5` 등)일 때도 숫자만 추출 (플레이스홀더 시드 일관성)
+    const normalizedMemberId =
+      m.id != null ? parseNumericIdFromRelayGlobalId(m.id) ?? 0 : 0;
     
     // getTeamMemberProfileImage~ 함수들은 member 객체의 id가 숫자 형태여야 홈 화면(PlayerListItem)과 동일한 시드를 생성함
     const memberForImage = {
@@ -564,7 +566,10 @@ function TeamSettingsPanelInner({
 
     return {
       id: String(m.id),
-      userId: (m.user as any)?.id ? parseUserId(String((m.user as any).id)) || 0 : 0,
+      userId:
+        (m.user as { id?: number } | null)?.id != null
+          ? parseUserId((m.user as { id: number }).id) || 0
+          : 0,
       name: m.user?.name ?? "알 수 없음",
       number: m.backNumber ?? 0,
       mainPos: m.position ?? "-",

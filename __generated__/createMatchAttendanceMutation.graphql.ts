@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5b82ab7eb50583e18422bbcb808dc624>>
+ * @generated SignedSource<<544a6e117d7998ef9c015c5c4a334789>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -26,7 +26,7 @@ export type createMatchAttendanceMutation$data = {
   readonly createMatchAttendance: {
     readonly __typename: "MatchAttendanceModel";
     readonly attendanceStatus: AttendanceStatus | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
@@ -39,7 +39,7 @@ export type createMatchAttendanceMutation$data = {
       readonly profileImg: string | null | undefined;
       readonly user: {
         readonly __typename: "UserModel";
-        readonly id: string;
+        readonly id: number;
         readonly name: string | null | undefined;
         readonly preferredNumber: number | null | undefined;
         readonly profileImage: string | null | undefined;

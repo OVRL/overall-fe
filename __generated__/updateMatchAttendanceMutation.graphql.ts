@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<efccd9e9b53ab9af1978af7122e37285>>
+ * @generated SignedSource<<12c0c8fc7f575bc4e047f22cacc753c3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,6 @@ export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type UpdateMatchAttendanceInput = {
   attendanceStatus: AttendanceStatus;
   id: number;
-  memberType: MemberType;
 };
 export type updateMatchAttendanceMutation$variables = {
   input: UpdateMatchAttendanceInput;
@@ -23,7 +22,7 @@ export type updateMatchAttendanceMutation$data = {
   readonly updateMatchAttendance: {
     readonly __typename: "MatchAttendanceModel";
     readonly attendanceStatus: AttendanceStatus | null | undefined;
-    readonly id: string;
+    readonly id: number;
     readonly memberType: MemberType | null | undefined;
   };
 };
