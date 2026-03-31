@@ -1,8 +1,8 @@
 import { graphql, useMutation, UseMutationConfig } from "react-relay";
-import type { useUpdateMatchMutation as MutationType } from "@/__generated__/useUpdateMatchMutation.graphql";
+import type { useEditGameModalUpdateMatchMutation as MutationType } from "@/__generated__/useEditGameModalUpdateMatchMutation.graphql";
 
 const updateMatchMutation = graphql`
-  mutation useUpdateMatchMutation($input: UpdateMatchInput!) {
+  mutation useEditGameModalUpdateMatchMutation($input: UpdateMatchInput!) {
     updateMatch(input: $input) {
       id
       matchDate

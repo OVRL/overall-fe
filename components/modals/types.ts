@@ -2,6 +2,7 @@ import { ComponentType } from "react";
 
 import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
 import type { TeamSearchResult } from "@/hooks/useTeamSearch";
+import type { Player } from "@/types/formation";
 
 export interface ModalPropsMap {
   // 예시:

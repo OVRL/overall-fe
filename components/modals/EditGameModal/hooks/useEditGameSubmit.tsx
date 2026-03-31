@@ -11,7 +11,7 @@ import useModal from "@/hooks/useModal";
 import { useModalStore } from "@/contexts/ModalContext";
 import type { RegisterGameValues } from "../../RegisterGameModal/schema";
 import { mapRegisterGameValuesToUpdateMatchInput } from "../lib/mapRegisterGameValuesToUpdateMatchInput";
-import { useUpdateMatchMutation } from "./useUpdateMatchMutation";
+import { useUpdateMatchMutation } from "./useEditGameModalUpdateMatch";
 
 interface UseEditGameSubmitProps {
   matchId: number;

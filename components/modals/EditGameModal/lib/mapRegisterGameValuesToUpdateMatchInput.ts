@@ -1,5 +1,5 @@
 import type { RegisterGameValues } from "../../RegisterGameModal/schema";
-import type { UpdateMatchInput } from "@/__generated__/useUpdateMatchMutation.graphql";
+import type { UpdateMatchInput } from "@/__generated__/useEditGameModalUpdateMatchMutation.graphql";
 import { computeVoteDeadlineDateTime } from "../../RegisterGameModal/lib/voteDeadline";
 
 export function mapRegisterGameValuesToUpdateMatchInput(

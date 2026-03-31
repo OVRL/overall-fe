@@ -20,6 +20,8 @@ jest.mock("../MatchScheduleCardDesktop", () => {
 
 describe("MatchScheduleCard 컴포넌트", () => {
   const defaultProps = {
+    matchId: 1,
+    teamId: 2,
     matchScheduleLine: "2026-02-03(목) 18:00~20:00",
     venue: {
       address: "수원 월드컵 보조 구장 A",
@@ -53,8 +55,8 @@ describe("MatchScheduleCard 컴포넌트", () => {
     );
   });
 
-  it("props가 주어지지 않았을 때 기본(Fallback) 데이터를 사용하여 렌더링해야 한다", () => {
-    render(<MatchScheduleCard />);
+  it("선택 props를 생략했을 때 기본(Fallback) 데이터로 렌더링해야 한다", () => {
+    render(<MatchScheduleCard matchId={1} teamId={2} />);
 
     const desktopCard = screen.getByTestId("desktop-card");
     expect(desktopCard).toHaveTextContent(
