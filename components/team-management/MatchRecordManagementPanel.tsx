@@ -94,7 +94,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         const parts = [];
         if (selectedGoal === "own-goal") parts.push("자책골");
         else if (goalPlayer) parts.push(`${goalPlayer}골`);
-        
+
         if (assistPlayer) parts.push(`${assistPlayer}어시`);
         if (preAssistPlayer) parts.push(`${preAssistPlayer}기점`);
 
@@ -114,7 +114,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
 
         const lines = textInput.split("\n");
         const lastLine = lines[lines.length - 1];
-        
+
         // 현재 라인에서 마지막 토큰 추출 (공백 기준)
         const tokens = lastLine.trim().split(/\s+/);
         const lastToken = tokens[tokens.length - 1] || "";
@@ -139,7 +139,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         if (exactPlayer) {
             const hasGoal = lastLine.includes("득점") || lastLine.includes("골");
             const hasAssist = lastLine.includes("어시");
-            
+
             if (!hasGoal) newSuggestions.push({ label: "골", value: "골 " });
             else if (!hasAssist) newSuggestions.push({ label: "어시", value: "어시 " });
             else newSuggestions.push({ label: "기점", value: "기점 " });
@@ -148,11 +148,11 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
             const matchedPlayers = players
                 .filter(p => !playersOnLine.includes(p.name) && p.name.startsWith(lastToken))
                 .slice(0, 3);
-            
+
             matchedPlayers.forEach(p => {
-                newSuggestions.push({ 
-                    label: p.name, 
-                    value: p.name.slice(lastToken.length) + " " 
+                newSuggestions.push({
+                    label: p.name,
+                    value: p.name.slice(lastToken.length) + " "
                 });
             });
         }
@@ -171,7 +171,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     // 텍스트 파싱 로직
     const parsedSummary = React.useMemo(() => {
         if (!textInput.trim()) return [];
-        
+
         const lines = textInput.split(/\n| /); // 뉴라인이나 공백으로 분리
         let currentQuarter = 1;
         const results: (ScoreLog & { quarter: number })[] = [];
@@ -193,13 +193,13 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                 if (g) {
                     const playerName = g[1].trim();
                     const player = players.find(p => p.name.includes(playerName));
-                    
+
                     const a = event.match(assistRegex);
                     const assistPlayer = a ? players.find(p => p.name.includes(a[1].trim())) : undefined;
-                    
+
                     const pa = event.match(preAssistRegex);
                     const preAssistPlayer = pa ? players.find(p => p.name.includes(pa[1].trim())) : undefined;
-                    
+
                     results.push({
                         id: crypto.randomUUID(),
                         type: "goal",
@@ -248,7 +248,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="w-full max-w-md bg-[#1e1e1e] rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
-                    <div className="w-6" /> 
+                    <div className="w-6" />
                     <h2 className="text-base font-bold text-white">득점 정보 입력</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
                         <X size={20} />
@@ -258,7 +258,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                 <div className="p-6 space-y-6">
                     {/* 입력 방식 선택 탭 */}
                     <div className="flex p-1 bg-black/40 rounded-2xl border border-white/5">
-                        <button 
+                        <button
                             onClick={() => setMode("SELECT")}
                             className={cn(
                                 "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
@@ -267,7 +267,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                         >
                             선택해서 넣기
                         </button>
-                        <button 
+                        <button
                             onClick={() => setMode("TEXT")}
                             className={cn(
                                 "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
@@ -289,7 +289,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     </span>
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button 
+                                    <button
                                         onClick={() => handleGoalChange("own-goal")}
                                         className={cn(
                                             "flex flex-col items-center gap-2 shrink-0 group",
@@ -304,8 +304,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         </div>
                                     </button>
                                     {players.map(player => (
-                                        <button 
-                                            key={player.id} 
+                                        <button
+                                            key={player.id}
                                             onClick={() => handleGoalChange(player.id)}
                                             className="flex flex-col items-center gap-2 shrink-0 group"
                                         >
@@ -332,7 +332,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     </span>
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button 
+                                    <button
                                         onClick={() => handleAssistChange("none")}
                                         className={cn(
                                             "flex flex-col items-center gap-2 shrink-0 group",
@@ -347,8 +347,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         </div>
                                     </button>
                                     {players.map(player => (
-                                        <button 
-                                            key={player.id} 
+                                        <button
+                                            key={player.id}
                                             onClick={() => handleAssistChange(player.id)}
                                             disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
@@ -376,7 +376,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     </span>
                                 </div>
                                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button 
+                                    <button
                                         onClick={() => handlePreAssistChange("none")}
                                         className={cn(
                                             "flex flex-col items-center gap-2 shrink-0 group",
@@ -391,8 +391,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         </div>
                                     </button>
                                     {players.map(player => (
-                                        <button 
-                                            key={player.id} 
+                                        <button
+                                            key={player.id}
                                             onClick={() => handlePreAssistChange(player.id)}
                                             disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
@@ -419,7 +419,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                     <span className="text-[10px] text-primary/60 font-medium">예시: 1Q 메시골 호날두어시</span>
                                 </div>
                                 <div className="relative group">
-                                    <textarea 
+                                    <textarea
                                         className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-gray-700 relative z-10 scrollbar-hide"
                                         placeholder="입력 예시:&#10;1Q 메시골 호날두어시 이니에스타기점&#10;2Q&#10;음바페득점 벨링엄어시 손흥민기점"
                                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -434,7 +434,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">파싱 미리보기</label>
-                                        <button 
+                                        <button
                                             onClick={() => setShowLocalSummary(true)}
                                             className="px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] text-primary font-black hover:bg-primary/20 transition-all shadow-sm"
                                         >
@@ -532,15 +532,15 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                         <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
                             취소
                         </button>
-                        <button 
-                            onClick={() => { 
+                        <button
+                            onClick={() => {
                                 if (mode === "SELECT") {
-                                    onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist }); 
+                                    onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist });
                                 } else {
                                     onSaveText(parsedSummary);
                                 }
-                                onClose(); 
-                            }} 
+                                onClose();
+                            }}
                             className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
                         >
                             저장
@@ -562,7 +562,8 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const [viewMode, setViewMode] = useState<"RECORD" | "IN_HOUSE">("RECORD");
     const [showFullSummary, setShowFullSummary] = useState(false);
     const [logToDelete, setLogToDelete] = useState<{ matchId: string; quarter: number; logId: string; description: string } | null>(null);
-    
+    const [matchToDelete, setMatchToDelete] = useState<{ id: string; description: string } | null>(null);
+
     // 실제 팀 멤버 데이터 매핑
     const teamPlayers: Player[] = React.useMemo(() => (playersData.findManyTeamMember.members || []).map((m: any) => ({
         id: String(m.id),
@@ -585,8 +586,8 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
             date: m.matchDate ? new Date(m.matchDate).toLocaleDateString() : "-",
             opponent: m.opponentTeam?.name || m.teamName || "상대팀 미정",
             score: savedData.score,
-            result: (savedData.score.home > savedData.score.away ? "win" : 
-                    savedData.score.home < savedData.score.away ? "loss" : "draw") as "win" | "draw" | "loss",
+            result: (savedData.score.home > savedData.score.away ? "win" :
+                savedData.score.home < savedData.score.away ? "loss" : "draw") as "win" | "draw" | "loss",
             expanded: false,
             logs: savedData.logs,
         };
@@ -629,8 +630,8 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
             if (m.id === id) {
                 const updated = updater(m);
                 // 결과 자동 계산
-                const result = updated.score.home > updated.score.away ? "win" : 
-                               updated.score.home < updated.score.away ? "loss" : "draw";
+                const result = updated.score.home > updated.score.away ? "win" :
+                    updated.score.home < updated.score.away ? "loss" : "draw";
                 return { ...updated, result };
             }
             return m;
@@ -657,7 +658,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                 const updates = Array.from(changedIds).map(id => {
                     const match = matches.find(m => m.id === id);
                     if (!match) return Promise.resolve();
-                    
+
                     const recordData = JSON.stringify({
                         score: match.score,
                         logs: match.logs
@@ -695,9 +696,9 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
             <div className="flex items-center justify-between">
                 <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
                 <div className="flex items-center gap-3">
-                    <Button 
-                        variant="primary" 
-                        size="s" 
+                    <Button
+                        variant="primary"
+                        size="s"
                         className="bg-primary text-black font-black flex items-center gap-1.5 px-4 shadow-xl shadow-primary/10"
                         onClick={() => setViewMode("IN_HOUSE")}
                     >
@@ -713,7 +714,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                 ) : visibleMatches.map((match) => (
                     <div key={match.id} className="flex flex-col">
                         {/* 헤더 카드 */}
-                        <div 
+                        <div
                             onClick={() => toggleExpand(match.id)}
                             className={cn(
                                 "bg-[#1a1a1a] border border-white/5 p-4 md:p-6 flex items-center justify-between hover:bg-white/3 transition-all cursor-pointer",
@@ -737,7 +738,19 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                 <button className="p-2 text-gray-500 hover:text-white transition-colors">
                                     <Edit2 size={18} />
                                 </button>
-                                <button 
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setMatchToDelete({
+                                            id: match.id,
+                                            description: `${match.date} vs ${match.opponent}`
+                                        });
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                                <button
                                     className={cn("p-2 text-gray-500 hover:text-white transition-all", match.expanded && "rotate-180")}
                                 >
                                     <ChevronDown size={18} />
@@ -783,7 +796,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Match Logs ({selectedQuarter}Q)</span>
                                             <div className="flex gap-2">
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         setActiveMatchId(match.id);
                                                         setIsModalOpen(true);
@@ -792,7 +805,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                 >
                                                     <Plus size={12} /> 득점 추가
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         const newLogs = { ...match.logs };
                                                         newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), { id: crypto.randomUUID(), type: "conceded" }];
@@ -836,7 +849,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 setActiveMatchId(match.id);
@@ -847,16 +860,16 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                                                         >
                                                             <Edit2 size={13} />
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const parts = [];
                                                                 if (log.player) parts.push(`${log.player.name}골`);
                                                                 else if (log.type === "conceded") parts.push("실점");
-                                                                
+
                                                                 if (log.assist) parts.push(`${log.assist.name}어시`);
                                                                 if (log.preAssist) parts.push(`${log.preAssist.name}기점`);
-                                                                
+
                                                                 setLogToDelete({
                                                                     matchId: match.id,
                                                                     quarter: selectedQuarter,
@@ -883,22 +896,22 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                 ))}
             </div>
 
-            <PlayerSelectModal 
-                isOpen={isModalOpen} 
+            <PlayerSelectModal
+                isOpen={isModalOpen}
                 onClose={() => {
                     setIsModalOpen(false);
                     setActiveMatchId(null);
-                }} 
+                }}
                 players={teamPlayers}
                 currentQuarter={selectedQuarter}
                 onShowSummary={() => setShowFullSummary(true)}
                 onSave={(saveData) => {
                     if (!activeMatchId) return;
-                    
+
                     const goalPlayer = teamPlayers.find(p => p.id === saveData.goalId);
                     const assistPlayer = teamPlayers.find(p => p.id === saveData.assistId);
                     const preAssistPlayer = teamPlayers.find(p => p.id === saveData.preAssistId);
-                    
+
                     const newLog: ScoreLog = {
                         id: crypto.randomUUID(),
                         type: "goal",
@@ -910,20 +923,20 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                     updateMatchData(activeMatchId, m => {
                         const newLogs = { ...m.logs };
                         newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), newLog];
-                        return { 
-                            ...m, 
-                            logs: newLogs, 
-                            score: { ...m.score, home: m.score.home + 1 } 
+                        return {
+                            ...m,
+                            logs: newLogs,
+                            score: { ...m.score, home: m.score.home + 1 }
                         };
                     });
-                }} 
+                }}
                 onSaveText={(parsedLogs) => {
                     if (!activeMatchId) return;
-                    
+
                     updateMatchData(activeMatchId, m => {
                         const newLogs = { ...m.logs };
                         let homeScoreAdd = 0;
-                        
+
                         parsedLogs.forEach(log => {
                             const { quarter, ...logData } = log;
                             newLogs[quarter] = [...(newLogs[quarter] || []), logData];
@@ -999,19 +1012,19 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                             정말로 이 기록을 삭제하시겠습니까?
                         </p>
                         <div className="flex gap-3 w-full">
-                            <button 
+                            <button
                                 onClick={() => setLogToDelete(null)}
                                 className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 text-sm font-bold hover:bg-white/10 transition-all"
                             >
                                 취소
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     updateMatchData(logToDelete.matchId, m => {
                                         const newLogs = { ...m.logs };
                                         const removedLog = newLogs[logToDelete.quarter]?.find(l => l.id === logToDelete.logId);
                                         newLogs[logToDelete.quarter] = (newLogs[logToDelete.quarter] || []).filter(l => l.id !== logToDelete.logId);
-                                        
+
                                         // 스코어 차감
                                         let { home, away } = m.score;
                                         if (removedLog?.type === "goal") home = Math.max(0, home - 1);
@@ -1030,24 +1043,59 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                 </div>
             )}
 
+            {/* 경기 전체 삭제 확인 모달 */}
+            {matchToDelete && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+                    <div className="w-full max-w-sm bg-[#1a1a1a] rounded-[2.5rem] border border-white/10 shadow-2xl p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 rounded-3xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6">
+                            <Trash2 size={32} strokeWidth={2.5} />
+                        </div>
+                        <h3 className="text-lg font-black text-white mb-2">경기 기록 삭제 확인</h3>
+                        <p className="text-sm text-gray-500 leading-relaxed mb-8">
+                            <span className="text-white font-bold bg-white/5 px-2 py-1 rounded-lg">{matchToDelete.description}</span>
+                            <br /><br />
+                            해당 경기를 기록에서 완전히 삭제하시겠습니까?
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setMatchToDelete(null)}
+                                className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 text-sm font-bold hover:bg-white/10 transition-all"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setPendingDeletes(prev => [...prev, matchToDelete.id]);
+                                    setHasChanges(true);
+                                    setMatchToDelete(null);
+                                }}
+                                className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                            >
+                                삭제하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* 하단 저장 바 - 변경사항이 있을 때만 노출 */}
             {hasChanges && (
-                <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/5 p-4 flex items-center justify-between px-6 md:px-12 animate-in slide-in-from-bottom duration-300">
-                    <p className="text-xs md:text-sm text-gray-400 font-medium">
+                <div className="fixed bottom-20 md:bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/5 p-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 px-6 md:px-12 animate-in slide-in-from-bottom duration-300">
+                    <p className="text-xs md:text-sm text-gray-400 font-medium whitespace-nowrap md:whitespace-normal">
                         변경사항이 있습니다. 저장하지 않으면 사라집니다.
                     </p>
-                    <div className="flex gap-3">
-                        <button 
+                    <div className="flex w-full md:w-auto gap-3">
+                        <button
                             disabled={isSavingChanges}
                             onClick={handleReset}
-                            className="px-5 py-2.5 rounded-xl border border-white/10 text-white text-xs md:text-sm font-bold hover:bg-white/5 transition-colors disabled:opacity-50"
+                            className="flex-1 md:flex-none px-5 py-2.5 rounded-xl border border-white/10 text-white text-xs md:text-sm font-bold hover:bg-white/5 transition-colors disabled:opacity-50"
                         >
                             초기화
                         </button>
-                        <button 
+                        <button
                             disabled={isSavingChanges}
                             onClick={handleSaveChanges}
-                            className="px-5 py-2.5 rounded-xl bg-primary text-black text-xs md:text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+                            className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-primary text-black text-xs md:text-sm font-bold hover:opacity-90 transition-opacity flex justify-center items-center gap-2 disabled:opacity-50"
                         >
                             {isSavingChanges ? "저장 중..." : "저장하기"}
                         </button>
