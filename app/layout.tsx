@@ -19,6 +19,7 @@ import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
 import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
 import { TEAM_REQUIRED_ROUTES, isTeamManagementPath } from "@/lib/routes";
 import { canUseTeamManagementStaffFeatures } from "@/lib/permissions/teamMemberRole";
+import { errorMessageRequiresSessionClear } from "@/lib/auth/graphqlSessionClear";
 import { redirect } from "next/navigation";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -87,7 +88,8 @@ export default async function RootLayout({
       const message = e instanceof Error ? e.message : String(e);
       if (
         message.includes("Unauthorized") ||
-        message.toLowerCase().includes("unauthorized")
+        message.toLowerCase().includes("unauthorized") ||
+        errorMessageRequiresSessionClear(message)
       ) {
         redirect("/api/auth/clear-session?redirect=/");
       }

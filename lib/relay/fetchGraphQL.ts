@@ -5,6 +5,10 @@ import {
   type UploadableMap,
   type Variables,
 } from "relay-runtime";
+import {
+  graphqlErrorsRequireSessionClear,
+  STALE_AUTH_SESSION_ERROR,
+} from "@/lib/auth/graphqlSessionClear";
 import { GraphQLHttpError } from "./GraphQLHttpError";
 
 /** SSR 시 fetch에 쓸 오리진 (Node에는 base URL이 없어 상대 URL 사용 불가) */
@@ -142,6 +146,15 @@ export const fetchQuery = async (
   if (typeof window !== "undefined" && hasUnauthorizedError) {
     window.location.href = "/api/auth/clear-session?redirect=/";
     throw new Error("Unauthorized"); // Relay에 에러 payload 반환하지 않기 위해
+  }
+
+  // 삭제된 유저 등: 토큰은 남아 있으나 findUserById가 non-null 위반으로 실패하는 경우
+  if (
+    typeof window !== "undefined" &&
+    graphqlErrorsRequireSessionClear(errorPayload?.errors)
+  ) {
+    window.location.href = "/api/auth/clear-session?redirect=/";
+    throw new Error(STALE_AUTH_SESSION_ERROR);
   }
 
   // HTTP 비성공 시 Relay에 넘기기 전에 에러 throw (로컬/프록시 오류 등에서 빈 body 올 수 있음)

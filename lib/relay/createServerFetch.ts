@@ -8,9 +8,22 @@ import type {
 import { env } from "@/lib/env";
 import { postBackendSSR } from "@/utils/ssrBackendFetch";
 import { ensureUniqueDataIds } from "./fetchGraphQL";
+import {
+  graphqlErrorsRequireSessionClear,
+  STALE_AUTH_SESSION_ERROR,
+} from "@/lib/auth/graphqlSessionClear";
 import { GraphQLHttpError } from "./GraphQLHttpError";
 import { refreshAccessToken } from "@/lib/auth/refreshToken";
 import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
+
+function assertNoStaleSessionGraphQLErrors(payload: GraphQLResponse): void {
+  const withErrors = payload as {
+    errors?: Array<{ message?: string }> | undefined;
+  };
+  if (graphqlErrorsRequireSessionClear(withErrors.errors)) {
+    throw new Error(STALE_AUTH_SESSION_ERROR);
+  }
+}
 
 /** GraphQL 응답에 Unauthorized 에러가 포함되어 있는지 확인 */
 function hasUnauthorizedError(raw: unknown): boolean {
@@ -93,6 +106,7 @@ export function createServerFetch(
               errorPayload?.errors,
             );
           }
+          assertNoStaleSessionGraphQLErrors(retryPayload);
           return retryPayload;
         }
       }
@@ -102,6 +116,7 @@ export function createServerFetch(
         throw new GraphQLHttpError(res.status, errorPayload?.errors);
       }
 
+      assertNoStaleSessionGraphQLErrors(payload);
       return payload;
     };
 
