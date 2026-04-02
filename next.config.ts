@@ -1,5 +1,9 @@
 import { env } from "./lib/env";
 
+const assetCdn = new URL(
+  env.NEXT_PUBLIC_ASSET_CDN_ORIGIN.replace(/\/$/, ""),
+);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   compiler: {
@@ -12,6 +16,16 @@ const nextConfig = {
   images: {
     qualities: [50, 75, 100],
     formats: ["image/webp"],
+    // next/image 최적화용 허용 출처 (서버→CloudFront 페치, 브라우저는 동일 출처로 수신 → rewrite·브라우저 CORS 불필요)
+    remotePatterns: [
+      {
+        protocol: assetCdn.protocol === "https:" ? "https" : "http",
+        hostname: assetCdn.hostname,
+        port: assetCdn.port,
+        pathname: "/**",
+        search: "",
+      },
+    ],
   },
   turbopack: {
     rules: {

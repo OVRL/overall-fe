@@ -19,6 +19,26 @@ type BackgroundRemovalModel {
   image: String!
 }
 
+type BestElevenModel {
+  """베스트 일레븐 ID"""
+  id: Int!
+  team: TeamModel
+
+  """팀 ID"""
+  teamId: Int!
+
+  """유저 ID"""
+  userId: Int!
+}
+
+input CreateBestElevenInput {
+  """팀 ID"""
+  teamId: Int!
+
+  """유저 ID"""
+  userId: Int!
+}
+
 type CreateInviteCodeModel {
   code: String!
   createdAt: GraphQLDateTime!
@@ -246,11 +266,13 @@ enum MemberType {
 }
 
 type Mutation {
+  createBestEleven(input: CreateBestElevenInput!): BestElevenModel!
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
   createMatch(input: CreateMatchInput!): MatchModel!
   createMatchAttendance(input: CreateMatchAttendanceInput!): MatchAttendanceModel!
   createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
+  deleteBestEleven(id: Int!): Boolean!
   deleteMatch(id: Int!): Boolean!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
@@ -259,12 +281,13 @@ type Mutation {
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
   removeBackground(image: Upload!): BackgroundRemovalModel!
+  updateBestEleven(input: UpdateBestElevenInput!): BestElevenModel!
   updateMatch(input: UpdateMatchInput!): MatchModel!
   updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
   updateMatchFormation(input: UpdateMatchFormationInput!): MatchFormationModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
-  updateUser(input: UpdateUserInput!, profileImage: Upload!): UserModel!
+  updateUser(input: UpdateUserInput!, profileImage: Upload): UserModel!
 }
 
 type OverallModel {
@@ -352,6 +375,7 @@ enum Position {
 }
 
 type Query {
+  findBestEleven(teamId: Int!): [BestElevenModel!]!
   findInviteCode(code: String!): InviteCodeModel
   findInviteCodeByTeam(teamId: Int!): InviteCodeModel
   findManyInviteCode(limit: Int! = 10, offset: Int! = 0): InviteCodeArrayModel!
@@ -468,6 +492,14 @@ enum UniformDesign {
   STRIPE_YELLOW
 }
 
+input UpdateBestElevenInput {
+  """베스트 일레븐 ID"""
+  id: Int!
+
+  """유저 ID"""
+  userId: Int!
+}
+
 input UpdateMatchAttendanceInput {
   """참석 여부 (attend: 참석, absent: 불참)"""
   attendanceStatus: AttendanceStatus!
@@ -548,9 +580,9 @@ input UpdateUserInput {
   gender: Gender
   id: Float!
   mainPosition: Position
-  name: String!
+  name: String
   password: String
-  phone: String!
+  phone: String
   preferredNumber: Float
   provider: String
   subPositions: [Position!]
