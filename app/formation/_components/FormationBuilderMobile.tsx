@@ -140,8 +140,19 @@ export default function FormationBuilderMobile({
     return (playerId: number): number[] => {
       return quarters
         .filter((q) => {
-          const lineup = q.lineup ?? {};
-          return Object.values(lineup).some((p) => p?.id === playerId);
+          if (q.type === "IN_HOUSE") {
+            const inA = Object.values(q.teamA ?? {}).some(
+              (p) => p?.id === playerId,
+            );
+            const inB = Object.values(q.teamB ?? {}).some(
+              (p) => p?.id === playerId,
+            );
+            const inL = Object.values(q.lineup ?? {}).some(
+              (p) => p?.id === playerId,
+            );
+            return inA || inB || inL;
+          }
+          return Object.values(q.lineup ?? {}).some((p) => p?.id === playerId);
         })
         .map((q) => q.id)
         .sort((a, b) => a - b);

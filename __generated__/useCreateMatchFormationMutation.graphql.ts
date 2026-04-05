@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9b6cc2003ee2952a700dc0e735cb2002>>
+ * @generated SignedSource<<fd2387c664fcc2f51c5750c8a6bcc3e9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,31 +9,30 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
-export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
-export type CreateMatchAttendanceInput = {
-  attendanceStatus?: AttendanceStatus | null | undefined;
+export type CreateMatchFormationInput = {
   matchId: number;
-  memberType: MemberType;
-  name?: string | null | undefined;
+  quarter: number;
+  tactics?: any | null | undefined;
   teamId: number;
   userId: number;
 };
-export type useCreateMatchAttendanceMutation$variables = {
-  input: CreateMatchAttendanceInput;
+export type useCreateMatchFormationMutation$variables = {
+  input: CreateMatchFormationInput;
 };
-export type useCreateMatchAttendanceMutation$data = {
-  readonly createMatchAttendance: {
-    readonly attendanceStatus: AttendanceStatus | null | undefined;
+export type useCreateMatchFormationMutation$data = {
+  readonly createMatchFormation: {
     readonly id: number;
+    readonly isDraft: boolean;
     readonly matchId: number;
+    readonly quarter: number;
+    readonly tactics: any | null | undefined;
     readonly teamId: number;
-    readonly userId: number;
+    readonly updatedAt: any;
   };
 };
-export type useCreateMatchAttendanceMutation = {
-  response: useCreateMatchAttendanceMutation$data;
-  variables: useCreateMatchAttendanceMutation$variables;
+export type useCreateMatchFormationMutation = {
+  response: useCreateMatchFormationMutation$data;
+  variables: useCreateMatchFormationMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -54,9 +53,9 @@ v1 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "MatchAttendanceModel",
+    "concreteType": "MatchFormationModel",
     "kind": "LinkedField",
-    "name": "createMatchAttendance",
+    "name": "createMatchFormation",
     "plural": false,
     "selections": [
       {
@@ -70,7 +69,21 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
+        "name": "isDraft",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
         "name": "matchId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "quarter",
         "storageKey": null
       },
       {
@@ -84,14 +97,14 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "userId",
+        "name": "tactics",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "attendanceStatus",
+        "name": "updatedAt",
         "storageKey": null
       }
     ],
@@ -103,7 +116,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateMatchFormationMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -112,20 +125,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateMatchFormationMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "55d4bcafbb7f2779b356124c17773cbb",
+    "cacheID": "6de78a4e90ac31eae4c4ed08335248d7",
     "id": null,
     "metadata": {},
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    matchId\n    teamId\n    userId\n    attendanceStatus\n  }\n}\n"
+    "text": "mutation useCreateMatchFormationMutation(\n  $input: CreateMatchFormationInput!\n) {\n  createMatchFormation(input: $input) {\n    id\n    isDraft\n    matchId\n    quarter\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e439c3a8ea1b33b42b21a60b38850bf7";
+(node as any).hash = "f7b9f69e1cc337988aa1ae2830535a79";
 
 export default node;

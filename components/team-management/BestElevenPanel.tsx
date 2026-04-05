@@ -22,16 +22,18 @@ import FormationBoardList from "@/components/formation/board/FormationBoardList"
 import PositionChip from "@/components/PositionChip";
 import Dropdown from "@/components/ui/Dropdown";
 import { QuarterData, Player } from "@/types/formation";
-import { Position } from "@/types/position";
+import type { Position } from "@/types/position";
 import { FORMATION_OPTIONS } from "@/constants/formations";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Edit2, X, Check, Loader2 } from "lucide-react";
 import useModal from "@/hooks/useModal";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useBestElevenQuery, BEST_ELEVEN_MATCH_ID } from "./hooks/useBestElevenQuery";
-import { useUpdateMatchFormationMutation } from "./hooks/useUpdateMatchFormationMutation";
+import { useCreateBestElevenMutation } from "./hooks/useCreateBestElevenMutation";
 import { Suspense } from "react";
 import { MatchFormationTacticsSingle } from "@/types/matchFormationTactics";
+import { FORMATIONS, type FormationType } from "@/constants/formation";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { getValidImageSrc, cn } from "@/lib/utils";
 
 /**
@@ -197,7 +199,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
   // API Data
   const data = useBestElevenQuery(teamId);
-  const { executeMutation: updateFormation, isInFlight: isSaving } = useUpdateMatchFormationMutation();
+  const { executeMutation: createBestEleven, isInFlight: isSaving } =
+    useCreateBestElevenMutation();
 
   // 선수 목록 변환 (TeamMemberModel -> Player) - 참조 무결성 유지를 위해 useMemo 사용
   const allPlayers: Player[] = React.useMemo(() => (data.findManyTeamMember?.members || []).map((m: any) => ({
@@ -340,34 +343,61 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     if (player && quarterId != null && positionIndex !== undefined) assignPlayer(quarterId, positionIndex, player);
   };
 
-  // 저장 로직
+  // 저장 로직 — `createBestEleven` (슬롯당 1회, 포지션·팀·유저 ID)
   const handleSave = async () => {
-    if (!formationData?.id) {
-      alert("포메이션 데이터를 찾을 수 없습니다.");
-      return;
+    const formation = quarters[0].formation as FormationType;
+    const board = FORMATIONS[formation];
+    const lineup = quarters[0].lineup ?? {};
+    const members = data.findManyTeamMember?.members ?? [];
+
+    const memberByTeamMemberId = new Map<number, (typeof members)[number]>();
+    for (const m of members) {
+      const tid =
+        parseNumericIdFromRelayGlobalId(m.id) ?? Number(String(m.id));
+      if (Number.isFinite(tid)) memberByTeamMemberId.set(tid, m);
     }
 
     try {
-      // QuarterData.lineup -> MatchFormationTacticsSingle.lineup
-      const currentLineup = quarters[0].lineup;
-      const tacticsLineup: Record<string, { teamMemberId: number }> = {};
-      Object.entries(currentLineup || {}).forEach(([slot, player]) => {
-        if (player) {
-          tacticsLineup[slot] = { teamMemberId: player.id };
+      const tasks: Promise<unknown>[] = [];
+      for (let slot = 1; slot <= 11; slot += 1) {
+        const player = lineup[slot];
+        if (player == null) continue;
+        const cell = board[slot as keyof typeof board];
+        if (cell == null) continue;
+        const position = cell.role as Position;
+        const member = memberByTeamMemberId.get(player.id);
+        const uid =
+          member?.user != null
+            ? parseNumericIdFromRelayGlobalId(member.user.id) ??
+              Number(String(member.user.id))
+            : null;
+        if (uid == null || Number.isNaN(uid)) {
+          console.warn(
+            "[BestEleven] 슬롯에 연결된 teamMember.userId 없음",
+            slot,
+            player.id,
+          );
+          continue;
         }
-      });
+        tasks.push(
+          createBestEleven({
+            position,
+            teamId,
+            userId: uid,
+          }),
+        );
+      }
 
-      const updatedTactics: MatchFormationTacticsSingle = {
-        schemaVersion: 1,
-        formation: quarters[0].formation as any,
-        lineup: tacticsLineup,
-      };
+      if (tasks.length === 0) {
+        alert("저장할 배치된 선수가 없거나 유저 정보를 찾을 수 없습니다.");
+        return;
+      }
 
-      await updateFormation(Number(formationData.id), updatedTactics);
+      await Promise.all(tasks);
       setHasChanges(false);
       alert("베스트 11이 저장되었습니다.");
     } catch (error) {
-      console.error("Failed to save formation:", error);
+      console.error("Failed to save best eleven:", error);
       alert("저장 중 오류가 발생했습니다.");
     }
   };
