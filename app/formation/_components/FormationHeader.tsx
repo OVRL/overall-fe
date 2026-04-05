@@ -8,7 +8,11 @@ import matchLineup from "@/public/icons/title_matchlineup.svg";
 
 type FormationHeaderProps = {
   onBack?: () => void;
-  onSave?: () => void;
+  /** 확정 저장 — `createMatchFormation` 등 (모바일 우측 「저장」과 동일) */
+  onSaveConfirm?: () => void;
+  isSaveConfirmPending?: boolean;
+  onSaveDraft?: () => void;
+  isSaveDraftPending?: boolean;
   onReset?: () => void;
 };
 
@@ -21,6 +25,8 @@ const FormationHeader = (props: FormationHeaderProps) => {
         variant="mobile"
         onBack={props.onBack}
         onReset={props.onReset}
+        onSaveDraft={props.onSaveDraft}
+        isSaveDraftPending={props.isSaveDraftPending}
         leftAction={{
           icon: arrowBack,
           alt: "뒤로 가기",
@@ -31,12 +37,23 @@ const FormationHeader = (props: FormationHeaderProps) => {
           </div>
         }
         rightLabel="저장"
-        onRightClick={props.onSave ?? (() => {})}
+        saveConfirmDisabled={props.onSaveConfirm == null}
+        isSaveConfirmPending={props.isSaveConfirmPending}
+        onRightClick={props.onSaveConfirm ?? (() => {})}
       />
     );
   }
 
-  return <Header onBack={props.onBack} onReset={props.onReset} />;
+  return (
+    <Header
+      onBack={props.onBack}
+      onReset={props.onReset}
+      onSaveDraft={props.onSaveDraft}
+      isSaveDraftPending={props.isSaveDraftPending}
+      onSaveConfirm={props.onSaveConfirm}
+      isSaveConfirmPending={props.isSaveConfirmPending}
+    />
+  );
 };
 
 export default FormationHeader;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect, Children, isValidElement, cloneElement } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useLazyLoadQuery } from "react-relay";
 import { FormationMatchAttendanceQuery } from "@/lib/relay/queries/formationMatchAttendanceQuery";
@@ -9,11 +9,41 @@ import { FormationMatchPlayersProvider } from "../../_context/FormationMatchPlay
 import { FormationMatchContext } from "../../_context/FormationMatchContext";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import { FormationMatchPageLoadingShell } from "../../_components/FormationMatchPageLoadingShell";
+import type { FormationMatchPageSnapshot } from "@/types/formationMatchPageSnapshot";
+
+/**
+ * RSC가 `children` 클라이언트 컴포넌트에 넘기는 `savedInitialQuarters`가
+ * 페이로드 경로상 누락·지연되는 경우가 있어, 이미 부모 props로 안정 전달된
+ * `ssrSnapshot.initialQuarters`를 동일 트리에서 주입합니다.
+ */
+function mergeSsrInitialQuartersIntoChildren(
+  children: React.ReactNode,
+  ssrSnapshot: FormationMatchPageSnapshot,
+): React.ReactNode {
+  const ssrQuarters = ssrSnapshot.initialQuarters;
+  const useSsrQuarters =
+    ssrQuarters != null && ssrQuarters.length > 0 ? ssrQuarters : null;
+
+  return Children.map(children, (child) => {
+    if (!isValidElement(child)) return child;
+    if (useSsrQuarters == null) return child;
+    const prev = child.props as Record<string, unknown>;
+    return cloneElement(child, {
+      ...prev,
+      savedInitialQuarters: useSsrQuarters,
+    } as Record<string, unknown>);
+  });
+}
 
 interface Props {
   matchId: number;
   teamId: number;
   children: React.ReactNode;
+  /**
+   * 서버에서 프리로드한 스냅샷이 있으면 Relay 재요청·마운트 게이트 없이 즉시 공급합니다.
+   * (횡단: 로딩 전략 / 종단: 명단·포메이션 DTO는 서버 모듈에서 조합)
+   */
+  ssrSnapshot?: FormationMatchPageSnapshot | null;
 }
 
 /**
@@ -48,6 +78,7 @@ export default function FormationMatchDataLoader({
   matchId,
   teamId,
   children,
+  ssrSnapshot = null,
 }: Props) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -56,23 +87,35 @@ export default function FormationMatchDataLoader({
     setIsMounted(true);
   }, []);
 
+  const errorFallback = (
+    <div className="p-8 text-center bg-surface-card border border-border-card rounded-xl mx-4 my-8">
+      <p className="text-text-primary font-medium mb-2">
+        데이터를 불러오지 못했습니다.
+      </p>
+      <p className="text-text-secondary text-sm">
+        잠시 후 다시 시도해 주세요.
+      </p>
+    </div>
+  );
+
+  if (ssrSnapshot != null) {
+    return (
+      <ErrorBoundary fallback={errorFallback}>
+        <FormationMatchContext.Provider value={{ matchId, teamId }}>
+          <FormationMatchPlayersProvider players={ssrSnapshot.players}>
+            {mergeSsrInitialQuartersIntoChildren(children, ssrSnapshot)}
+          </FormationMatchPlayersProvider>
+        </FormationMatchContext.Provider>
+      </ErrorBoundary>
+    );
+  }
+
   if (!isMounted) {
     return <FormationMatchPageLoadingShell />;
   }
 
   return (
-    <ErrorBoundary
-      fallback={
-        <div className="p-8 text-center bg-surface-card border border-border-card rounded-xl mx-4 my-8">
-          <p className="text-text-primary font-medium mb-2">
-            데이터를 불러오지 못했습니다.
-          </p>
-          <p className="text-text-secondary text-sm">
-            잠시 후 다시 시도해 주세요.
-          </p>
-        </div>
-      }
-    >
+    <ErrorBoundary fallback={errorFallback}>
       <Suspense fallback={<FormationMatchPageLoadingShell />}>
         <FormationMatchContext.Provider value={{ matchId, teamId }}>
           <DataFetcher matchId={matchId} teamId={teamId}>
