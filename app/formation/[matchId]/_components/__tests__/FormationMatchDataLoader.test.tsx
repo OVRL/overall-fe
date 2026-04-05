@@ -107,6 +107,37 @@ describe("FormationMatchDataLoader", () => {
     expect(screen.queryByText("불참자")).not.toBeInTheDocument();
   });
 
+  it("ssrSnapshot이 있으면 마운트 대기 없이 프리로드 명단을 바로 공급한다", () => {
+    render(
+      <RelayEnvironmentProvider environment={environment}>
+        <FormationMatchDataLoader
+          matchId={123}
+          teamId={456}
+          ssrSnapshot={{
+            players: [
+              {
+                id: 1,
+                name: "SSR선수",
+                position: "ST",
+                number: 10,
+                overall: 70,
+              },
+            ],
+            initialQuarters: null,
+          }}
+        >
+          <TestChild />
+        </FormationMatchDataLoader>
+      </RelayEnvironmentProvider>,
+    );
+
+    expect(
+      screen.queryByRole("status", { name: "포메이션 로딩 중" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("player-count")).toHaveTextContent("1");
+    expect(screen.getByText("SSR선수")).toBeInTheDocument();
+  });
+
   it("데이터 로드 실패 시 ErrorBoundary의 폴백 UI를 보여준다", async () => {
     // console.error를 잠깐 비워 테스트 출력을 깔끔하게 함 (React ErrorBoundary 로그 제외)
     const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});

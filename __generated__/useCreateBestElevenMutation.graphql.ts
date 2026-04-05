@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9b6cc2003ee2952a700dc0e735cb2002>>
+ * @generated SignedSource<<476497b3e55318f645b20af8f78f193b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,31 +9,26 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
-export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
-export type CreateMatchAttendanceInput = {
-  attendanceStatus?: AttendanceStatus | null | undefined;
-  matchId: number;
-  memberType: MemberType;
-  name?: string | null | undefined;
+export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
+export type CreateBestElevenInput = {
+  position: Position;
   teamId: number;
   userId: number;
 };
-export type useCreateMatchAttendanceMutation$variables = {
-  input: CreateMatchAttendanceInput;
+export type useCreateBestElevenMutation$variables = {
+  input: CreateBestElevenInput;
 };
-export type useCreateMatchAttendanceMutation$data = {
-  readonly createMatchAttendance: {
-    readonly attendanceStatus: AttendanceStatus | null | undefined;
+export type useCreateBestElevenMutation$data = {
+  readonly createBestEleven: {
     readonly id: number;
-    readonly matchId: number;
+    readonly position: Position;
     readonly teamId: number;
     readonly userId: number;
   };
 };
-export type useCreateMatchAttendanceMutation = {
-  response: useCreateMatchAttendanceMutation$data;
-  variables: useCreateMatchAttendanceMutation$variables;
+export type useCreateBestElevenMutation = {
+  response: useCreateBestElevenMutation$data;
+  variables: useCreateBestElevenMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -54,9 +49,9 @@ v1 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "MatchAttendanceModel",
+    "concreteType": "BestElevenModel",
     "kind": "LinkedField",
-    "name": "createMatchAttendance",
+    "name": "createBestEleven",
     "plural": false,
     "selections": [
       {
@@ -70,7 +65,7 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "matchId",
+        "name": "position",
         "storageKey": null
       },
       {
@@ -86,13 +81,6 @@ v1 = [
         "kind": "ScalarField",
         "name": "userId",
         "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "attendanceStatus",
-        "storageKey": null
       }
     ],
     "storageKey": null
@@ -103,7 +91,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateBestElevenMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -112,20 +100,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateBestElevenMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "55d4bcafbb7f2779b356124c17773cbb",
+    "cacheID": "afbc4ba5d18fb976f43f7e6f2ed0ecb3",
     "id": null,
     "metadata": {},
-    "name": "useCreateMatchAttendanceMutation",
+    "name": "useCreateBestElevenMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    matchId\n    teamId\n    userId\n    attendanceStatus\n  }\n}\n"
+    "text": "mutation useCreateBestElevenMutation(\n  $input: CreateBestElevenInput!\n) {\n  createBestEleven(input: $input) {\n    id\n    position\n    teamId\n    userId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e439c3a8ea1b33b42b21a60b38850bf7";
+(node as any).hash = "6fe80a5a926ec257576afabd5615b8cd";
 
 export default node;
