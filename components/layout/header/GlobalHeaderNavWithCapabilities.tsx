@@ -9,6 +9,7 @@ import { MobileNavDropdown } from "@/components/layout/header/MobileNavDropdown"
 import { useTeamManagementCapabilitiesForUser } from "@/hooks/useTeamManagementCapabilitiesForUser";
 import {
   filterMenuItemsForStaffTeamManagement,
+  isHeaderNavItemActive,
   type NavMenuItem,
 } from "@/lib/navigation/filterMenuItemsByTeamRole";
 
@@ -54,7 +55,7 @@ export function GlobalHeaderNavWithCapabilities({
         <ul className="hidden lg:flex items-center gap-8 text-[0.9375rem]">
           {showRegisterGame ? <RegisterGameButton /> : null}
           {visibleMenuItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isHeaderNavItemActive(pathname, item.href);
             return (
               <li key={item.label}>
                 <Link

@@ -30,6 +30,7 @@ type MobileNavDropdownProps = {
  */
 export function MobileNavDropdown({
   menuItems,
+  currentPathname,
   onLinkClick,
   id,
   showRegisterGame = true,
@@ -100,6 +101,9 @@ export function MobileNavDropdown({
               <Link
                 href={item.href}
                 onClick={onLinkClick}
+                aria-current={
+                  currentPathname === item.href ? "page" : undefined
+                }
                 className="group inline-flex items-center justify-center gap-4 py-2 text-[24px] font-bold text-white transition-all active:scale-95"
               >
                 <span>{item.label}</span>
