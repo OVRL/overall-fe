@@ -88,6 +88,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
     const [showLocalSummary, setShowLocalSummary] = useState(false);
+    const scrollRef = React.useRef<HTMLDivElement>(null);
 
     // 모바일 지원: ResizeObserver & Pretext 연동 textarea 동적 높이
     const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -130,14 +131,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         const assistPlayer = players.find(p => p.id === selectedAssist)?.name;
         const preAssistPlayer = players.find(p => p.id === selectedPreAssist)?.name;
 
-        if (!goalPlayer && selectedGoal !== "own-goal") {
-            setTextInput("");
-            return;
-        }
-
         const parts = [];
-        if (selectedGoal === "own-goal") parts.push("자책골");
-        else if (goalPlayer) parts.push(`${goalPlayer}골`);
+        if (goalPlayer) parts.push(`${goalPlayer}골`);
 
         if (assistPlayer) parts.push(`${assistPlayer}어시`);
         if (preAssistPlayer) parts.push(`${preAssistPlayer}기점`);
@@ -206,29 +201,6 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         setSelectedSuggestionIndex(0);
     }, [textInput, mode, players]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (mode === "TEXT") {
-            if (suggestions.length > 0) {
-                if (e.key === "Tab" || e.key === "Enter") {
-                    e.preventDefault();
-                    const toApply = suggestions[selectedSuggestionIndex] || suggestions[0];
-                    setTextInput(prev => prev + toApply.value);
-                    setTimeout(() => {
-                        inputRef.current?.focus();
-                    }, 0);
-                } else if (e.key === "ArrowRight") {
-                    e.preventDefault();
-                    setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length);
-                } else if (e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
-                }
-            } else if (e.key === "Tab") {
-                e.preventDefault();
-            }
-        }
-    };
-
     // 텍스트 파싱 로직
     const parsedSummary = React.useMemo(() => {
         if (!textInput.trim()) return [];
@@ -276,15 +248,43 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         return results;
     }, [textInput, players]);
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (mode === "TEXT") {
+            if (suggestions.length > 0) {
+                if (e.key === "Tab" || e.key === "Enter") {
+                    e.preventDefault();
+                    const toApply = suggestions[selectedSuggestionIndex] || suggestions[0];
+                    setTextInput(prev => prev + toApply.value);
+                    setTimeout(() => {
+                        inputRef.current?.focus();
+                    }, 0);
+                } else if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length);
+                } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                }
+            } else if (e.key === "Tab") {
+                e.preventDefault();
+            }
+        }
+    };
+
+    // 파싱 미리보기 자동 스크롤
+    React.useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [parsedSummary.length]);
+
     const handleGoalChange = (id: string) => {
         setSelectedGoal(id);
-        if (id === "own-goal") {
-            setSelectedAssist("none");
-            setSelectedPreAssist("none");
-        } else {
-            if (selectedAssist === id) setSelectedAssist("none");
-            if (selectedPreAssist === id) setSelectedPreAssist("none");
-        }
+        if (selectedAssist === id) setSelectedAssist("none");
+        if (selectedPreAssist === id) setSelectedPreAssist("none");
     };
 
     const handleAssistChange = (id: string) => {
@@ -349,40 +349,26 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         {selectedGoal === "own-goal" ? "자책골" : players.find(p => p.id === selectedGoal)?.name}
                                     </span>
                                 </div>
-                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button
-                                        onClick={() => handleGoalChange("own-goal")}
-                                        className={cn(
-                                            "flex flex-col items-center gap-2 shrink-0 group",
-                                            selectedGoal === "own-goal" ? "opacity-100" : "opacity-60"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
-                                            selectedGoal === "own-goal" ? "border-red-500 scale-105" : "border-transparent"
-                                        )}>
-                                            <span className={cn("text-xs font-bold", selectedGoal === "own-goal" ? "text-red-500" : "text-gray-500")}>자책골</span>
-                                        </div>
-                                    </button>
-                                    {players.map(player => (
-                                        <button
-                                            key={player.id}
-                                            onClick={() => handleGoalChange(player.id)}
-                                            className="flex flex-col items-center gap-2 shrink-0 group"
-                                        >
-                                            <div className={cn(
-                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
-                                                selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
-                                            )}>
-                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
-                                            </div>
-                                            <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>
-                                                {player.name}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
+                                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                        {players.map(player => (
+                                            <button
+                                                key={player.id}
+                                                onClick={() => handleGoalChange(player.id)}
+                                                className="flex flex-col items-center gap-2 shrink-0 group"
+                                            >
+                                                <div className={cn(
+                                                    "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
+                                                    selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
+                                                )}>
+                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                                </div>
+                                                <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>
+                                                    {player.name}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
 
                             {/* 도움 섹션 */}
                             <section>
@@ -411,7 +397,6 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         <button
                                             key={player.id}
                                             onClick={() => handleAssistChange(player.id)}
-                                            disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
                                         >
                                             <div className={cn(
@@ -455,7 +440,6 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         <button
                                             key={player.id}
                                             onClick={() => handlePreAssistChange(player.id)}
-                                            disabled={selectedGoal === "own-goal"}
                                             className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
                                         >
                                             <div className={cn(
@@ -513,7 +497,10 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                         전체보기
                                     </button>
                                 </div>
-                                <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2 max-h-[120px]">
+                                <div 
+                                    ref={scrollRef}
+                                    className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2 max-h-[120px]"
+                                >
                                     {parsedSummary.length === 0 ? (
                                         <div className="flex items-center justify-center h-full text-[11px] text-gray-600 font-medium italic">
                                             입력된 득점 이벤트가 없습니다.
@@ -623,6 +610,10 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                         <button
                             onClick={() => {
                                 if (mode === "SELECT") {
+                                    if (selectedGoal === "none") {
+                                        alert("득점자를 선택해주세요.");
+                                        return;
+                                    }
                                     onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist });
                                 } else {
                                     onSaveText(parsedSummary);
@@ -954,17 +945,19 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
 
                                                                     {/* Edit/Delete Actions */}
                                                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setSelectedQuarter(q);
-                                                                                setActiveMatchId(match.id);
-                                                                                setIsModalOpen(true);
-                                                                            }}
-                                                                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
-                                                                        >
-                                                                            <Edit2 size={12} />
-                                                                        </button>
+                                                                        {log.type === "goal" && (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setSelectedQuarter(q);
+                                                                                    setActiveMatchId(match.id);
+                                                                                    setIsModalOpen(true);
+                                                                                }}
+                                                                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                                                                            >
+                                                                                <Edit2 size={12} />
+                                                                            </button>
+                                                                        )}
                                                                         <button
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
