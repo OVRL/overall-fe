@@ -352,7 +352,7 @@ function OngoingCard({ match }: { match: MatchCard }) {
           match={match} 
           rightContent={
             <div className="flex items-center justify-between w-full md:w-auto mt-2 md:mt-0 gap-6">
-              <span className="text-[14px] font-bold text-white md:hidden">{(match as any).score}</span>
+              <span className="text-[14px] font-bold text-white md:hidden whitespace-nowrap">{(match as any).score}</span>
               <div className="flex items-center gap-6 justify-end w-full md:w-auto">
                   <div className="flex flex-col items-end">
                     <span className="text-[14px] font-semibold text-white">{match.totalVotes}표</span>
@@ -439,7 +439,7 @@ function CompletedCard({ match }: { match: MatchCard }) {
           {/* 모바일 뷰 전용 최종 스코어 */}
           <div className="md:hidden flex items-center justify-between mb-4 border-b border-[#3e3e3e] pb-4">
              <span className="text-[13px] text-gray-400">최종 스코어</span>
-             <span className="text-[16px] font-bold text-white">{match.score}</span>
+             <span className="text-[16px] font-bold text-white whitespace-nowrap">{match.score}</span>
           </div>
           <p className="text-[14px] font-bold text-white mb-4">전체 투표 결과</p>
           <div className="grid gap-4">

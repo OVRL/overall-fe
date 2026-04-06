@@ -11,8 +11,8 @@ export type TeamManagementMenu =
     | "players"
     | "best-eleven"
     | "invitation"
-    | "mom-vote"
-    | "deleted-players";
+    | "invitation"
+    | "mom-vote";
 
 interface MenuItem {
     id: TeamManagementMenu;
@@ -52,7 +52,7 @@ const menuItems: MenuItem[] = [
     },
     {
         id: "invitation",
-        label: "가입 신청 관리",
+        label: "선수 입단 관리",
         icon: null,
         href: "/team-management/invitation",
     },
@@ -68,12 +68,6 @@ const menuItems: MenuItem[] = [
         icon: null,
         href: "/team-management/best11",
     },
-    {
-        id: "deleted-players",
-        label: "방출 명단 관리",
-        icon: null,
-        href: "/team-management/deleted-players",
-    },
 ];
 
 const getIcon = (id: TeamManagementMenu, active: boolean) => {
@@ -84,7 +78,6 @@ const getIcon = (id: TeamManagementMenu, active: boolean) => {
         case "mom-vote": return <MOMIcon active={active} />;
         case "best-eleven": return <BestElevenIcon active={active} />;
         case "invitation": return <InvitationIcon active={active} />;
-        case "deleted-players": return <PlayersIcon active={active} />; // 기존 선수 아이콘 재활용 또는 별도 아이콘
     }
 };
 
