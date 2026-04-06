@@ -9,6 +9,7 @@ import { useDeleteMatchMutation } from "./hooks/useDeleteMatchMutation";
 import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
 import { useUpdateMatchMutation } from "./hooks/useUpdateMatchMutation";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { prepare, layout } from '@chenglou/pretext';
 
 interface Player {
     id: string;
@@ -77,6 +78,39 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
     const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
     const [showLocalSummary, setShowLocalSummary] = useState(false);
+
+    // 모바일 지원: ResizeObserver & Pretext 연동 textarea 동적 높이
+    const inputRef = React.useRef<HTMLTextAreaElement>(null);
+    const [textareaHeight, setTextareaHeight] = useState(192);
+
+    React.useEffect(() => {
+        if (mode !== "TEXT" || !inputRef.current) return;
+
+        const updateHeight = () => {
+            if (!inputRef.current) return;
+            const width = inputRef.current.clientWidth - 32; // p-4 (여백 32px)
+            try {
+                // 모바일 기기를 고려하여 안전한 폰트 스택과 넉넉한 줄단차(24) 적용
+                const prepared = prepare(textInput || ' ', '14px ui-sans-serif, system-ui, sans-serif', { whiteSpace: 'pre-wrap' });
+                const { height } = layout(prepared, Math.max(width, 100), 24); 
+                // 최소 192px 유지 및 터치 하단 가림 방지를 위한 +40 여유분
+                setTextareaHeight(Math.max(192, height + 40));
+            } catch (error) {
+                console.error("Reflow calc error", error);
+            }
+        };
+
+        const observer = new ResizeObserver(() => {
+            updateHeight();
+        });
+
+        observer.observe(inputRef.current);
+        updateHeight(); // 트리거 (textInput 변경 등) 보정
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [textInput, mode]);
 
     // 선택 모드와 텍스트 모드 동기화 로직
     React.useEffect(() => {
@@ -420,9 +454,10 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                 </div>
                                 <div className="relative group">
                                     <textarea 
-                                        className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors placeholder:text-gray-700 relative z-10 scrollbar-hide"
+                                        ref={inputRef}
+                                        className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-gray-700 relative z-10 scrollbar-hide"
                                         placeholder="입력 예시:&#10;1Q 메시골 호날두어시 이니에스타기점&#10;2Q&#10;음바페득점 벨링엄어시 손흥민기점"
-                                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', height: `${textareaHeight}px` }}
                                         value={textInput}
                                         onChange={(e) => setTextInput(e.target.value)}
                                         onKeyDown={handleKeyDown}

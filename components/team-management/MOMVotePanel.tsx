@@ -306,11 +306,19 @@ function InfoModal({ onClose }: { onClose: () => void }) {
 // ──────────────────────────────────────────────
 function CardHeader({ match, rightContent }: { match: MatchCard, rightContent?: React.ReactNode }) {
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full relative">
-      <div className="flex items-center gap-4">
-        <span className="text-[13px] text-[#a6a5a5]">{match.date}</span>
-        <div className="flex items-center gap-3">
-          <span className="text-[16px] font-bold text-white">vs {match.opponent}</span>
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full relative gap-4 md:gap-0">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full">
+        <div className="flex items-center justify-between w-full md:w-auto">
+            <div className="flex items-center gap-4">
+               <span className="text-[13px] text-[#a6a5a5] whitespace-nowrap">{match.date}</span>
+               <span className="text-[16px] font-bold text-white truncate max-w-[140px] md:max-w-none">vs {match.opponent}</span>
+            </div>
+            {/* 모바일에서만 노출하는 상태 배지 (PC에선 우측 스코어 옆에 노출) */}
+            <div className="flex items-center md:hidden">
+                <StatusBadge status={match.status} />
+            </div>
+        </div>
+        <div className="items-center gap-3 hidden md:flex">
           <span className="text-[16px] font-bold text-[#d6d6d5]">{match.score}</span>
           <StatusBadge status={match.status} />
         </div>
@@ -343,13 +351,16 @@ function OngoingCard({ match }: { match: MatchCard }) {
         <CardHeader 
           match={match} 
           rightContent={
-            <div className="flex items-center gap-6 w-full md:w-auto mt-4 md:mt-0 justify-end">
-              <div className="flex flex-col items-end">
-                <span className="text-[14px] font-semibold text-white">{match.totalVotes}표</span>
-                <span className="text-[11px] text-[#a6a5a5] font-regular">{match.deadline}</span>
-              </div>
-              <div className="w-[24px] h-[24px] text-gray-400">
-                {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+            <div className="flex items-center justify-between w-full md:w-auto mt-2 md:mt-0 gap-6">
+              <span className="text-[14px] font-bold text-white md:hidden">{(match as any).score}</span>
+              <div className="flex items-center gap-6 justify-end w-full md:w-auto">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[14px] font-semibold text-white">{match.totalVotes}표</span>
+                    <span className="text-[11px] text-[#a6a5a5] font-regular">{match.deadline}</span>
+                  </div>
+                  <div className="w-[24px] h-[24px] text-gray-400">
+                    {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  </div>
               </div>
             </div>
           }
@@ -399,22 +410,23 @@ function CompletedCard({ match }: { match: MatchCard }) {
         <CardHeader 
           match={match} 
           rightContent={
-            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 justify-end">
-              <div className="flex items-center gap-[12px]">
+            <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto mt-2 md:mt-0">
+              <span className="text-[14px] font-bold text-[#d6d6d5] md:hidden">결과: {match.score}</span>
+              <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide py-1">
                 {match.top3?.map((p, i) => (
-                  <div key={i} className="flex items-center gap-[12px] px-[13px] py-[9px] rounded-[8px] border border-[#252525]">
-                      <Trophy size={20} className="text-white" />
-                      <div className="flex flex-col gap-[4px] items-start leading-none">
-                        <div className="flex items-start gap-[4px] font-semibold text-[14px] text-white">
+                  <div key={i} className="flex items-center shrink-0 gap-[8px] md:gap-[12px] px-2 md:px-[13px] py-1 md:py-[9px] rounded-[8px] border border-[#252525]">
+                      <Trophy size={16} className="text-white md:w-5 md:h-5" />
+                      <div className="flex flex-col gap-1 md:gap-[4px] items-start leading-none">
+                        <div className="flex items-start gap-[4px] font-semibold text-[12px] md:text-[14px] text-white">
                           <span>{p.backNumber}.</span>
                           <span>{p.name}</span>
                         </div>
-                        <span className="text-[11px] text-[#a6a5a5]">{p.votes}표</span>
+                        <span className="text-[10px] md:text-[11px] text-[#a6a5a5]">{p.votes}표</span>
                       </div>
                   </div>
                 ))}
               </div>
-              <div className="w-[24px] h-[24px] ml-2 text-gray-400">
+              <div className="w-[24px] h-[24px] ml-1 md:ml-2 text-gray-400 shrink-0">
                 {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
               </div>
             </div>
@@ -424,6 +436,11 @@ function CompletedCard({ match }: { match: MatchCard }) {
 
       {expanded && (
         <div className="px-6 py-6 border-t border-[#3e3e3e] bg-[#1a1a1a]">
+          {/* 모바일 뷰 전용 최종 스코어 */}
+          <div className="md:hidden flex items-center justify-between mb-4 border-b border-[#3e3e3e] pb-4">
+             <span className="text-[13px] text-gray-400">최종 스코어</span>
+             <span className="text-[16px] font-bold text-white">{match.score}</span>
+          </div>
           <p className="text-[14px] font-bold text-white mb-4">전체 투표 결과</p>
           <div className="grid gap-4">
             {match.liveVotes?.sort((a,b)=>b.votes-a.votes).map((lv, i) => (

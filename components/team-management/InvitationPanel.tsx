@@ -98,17 +98,24 @@ export default function InvitationPanel() {
             {/* 신청 리스트 */}
             <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-white/10">
                 {filteredRequests.map((req) => (
-                    <div key={req.id} className={cn("bg-[#1a1a1a] border border-[#3e3e3e] rounded-[12px] px-[24px] py-[13px] h-[80px] flex flex-wrap md:flex-nowrap items-center justify-between", req.status === "rejected" && "opacity-80")}>
-                        <div className="flex items-center gap-[16px] w-full">
-                            <span className="text-[13px] text-[#a6a5a5] whitespace-nowrap">{req.requestedAt}</span>
-                            <div className="flex flex-wrap md:flex-nowrap items-center gap-[12px] text-[14px]">
+                    <div key={req.id} className={cn("bg-[#1a1a1a] border border-[#3e3e3e] rounded-[12px] p-4 md:px-[24px] md:py-[13px] min-h-[80px] flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0", req.status === "rejected" && "opacity-80")}>
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-[16px] w-full">
+                            <div className="flex items-center justify-between w-full md:w-auto">
+                                <span className="text-[13px] text-[#a6a5a5] whitespace-nowrap">{req.requestedAt}</span>
+                                {req.status === "pending" && (
+                                   <div className="md:hidden">
+                                     <span className="text-[11px] text-[#b8ff12] font-bold">확인 대기</span>
+                                   </div>
+                                )}
+                            </div>
+                            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-[12px] text-[14px]">
                                 <span className="text-white font-bold">{req.name}</span>
-                                <span className="text-[#d6d6d5] font-medium">{req.email}</span>
-                                <span className="text-[#d6d6d5] font-medium">{req.phone}</span>
+                                <span className="text-[#a6a5a5] font-medium text-xs md:text-[14px] md:text-[#d6d6d5] hidden md:inline">{req.email}</span>
+                                <span className="text-[#a6a5a5] font-medium text-xs md:text-[14px] md:text-[#d6d6d5]">{req.phone}</span>
                             </div>
                         </div>
 
-                        <div className="flex shrink-0 ml-4 mt-4 md:mt-0">
+                        <div className="flex shrink-0 w-full md:w-auto justify-end md:ml-4 border-t border-white/5 pt-3 md:border-0 md:pt-0 mt-2 md:mt-0">
                             {req.status === "pending" ? (
                                 <div className="flex gap-2">
                                     <button 
