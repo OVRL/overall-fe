@@ -11,8 +11,8 @@ export type TeamManagementMenu =
     | "players"
     | "best-eleven"
     | "invitation"
-    | "invitation"
-    | "mom-vote";
+    | "mom-vote"
+    | "deleted-players";
 
 interface MenuItem {
     id: TeamManagementMenu;
@@ -21,7 +21,7 @@ interface MenuItem {
     href: string;
 }
 
-import { Settings, ClipboardList, Users, UserPlus, FileCheck, Award } from "lucide-react";
+import { Settings, ClipboardList, Users, UserPlus, FileCheck, Award, UserMinus } from "lucide-react";
 
 // SVG 아이콘 컴포넌트들 대신 Lucide-react 아이콘을 사용하도록 래핑
 const SettingsIcon = ({ active }: { active: boolean }) => <Settings size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
@@ -30,6 +30,7 @@ const MOMIcon = ({ active }: { active: boolean }) => <FileCheck size={20} stroke
 const BestElevenIcon = ({ active }: { active: boolean }) => <Award size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 const InvitationIcon = ({ active }: { active: boolean }) => <UserPlus size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 const MatchRecordIcon = ({ active }: { active: boolean }) => <ClipboardList size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
+const DeletedPlayersIcon = ({ active }: { active: boolean }) => <UserMinus size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 
 const menuItems: MenuItem[] = [
     {
@@ -49,6 +50,12 @@ const menuItems: MenuItem[] = [
         label: "선수 관리",
         icon: null,
         href: "/team-management/players",
+    },
+    {
+        id: "deleted-players",
+        label: "방출 명단 관리",
+        icon: null,
+        href: "/team-management/deleted-players",
     },
     {
         id: "invitation",
@@ -78,6 +85,7 @@ const getIcon = (id: TeamManagementMenu, active: boolean) => {
         case "mom-vote": return <MOMIcon active={active} />;
         case "best-eleven": return <BestElevenIcon active={active} />;
         case "invitation": return <InvitationIcon active={active} />;
+        case "deleted-players": return <DeletedPlayersIcon active={active} />;
     }
 };
 

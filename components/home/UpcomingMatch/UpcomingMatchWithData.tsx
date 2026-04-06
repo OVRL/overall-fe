@@ -32,7 +32,7 @@ function NoMatchContent({
 }
 
 /**
- * Relay 스토어에서 findMatch를 읽어 다가오는 경기 1건을 표시합니다.
+ * Relay 스토어에서 findMatch를 읽어 다가오는 경기 1건을 표시
  * 경기 없을 때 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch.
  */
 export default function UpcomingMatchWithData() {

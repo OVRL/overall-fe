@@ -19,6 +19,7 @@ const menuItems: MenuItem[] = [
     { id: "settings", label: "팀 설정", icon: "⚙️", href: "/team-management/settings" },
     { id: "match-record", label: "경기기록 관리", icon: "📝", href: "/team-management/match-record" },
     { id: "players", label: "선수 관리", icon: "👥", href: "/team-management/players" },
+    { id: "deleted-players", label: "방출 명단", icon: "🚫", href: "/team-management/deleted-players" },
     { id: "best-eleven", label: "베스트 11", icon: "⭐", href: "/team-management/best11" },
     { id: "invitation", label: "선수 입단 관리", icon: "📨", href: "/team-management/invitation" },
     { id: "mom-vote", label: "MOM 투표", icon: "🏆", href: "/team-management/mom" },
