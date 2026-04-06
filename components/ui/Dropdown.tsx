@@ -162,7 +162,7 @@ const Dropdown = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-50 mt-1 w-39.5 bg-Fill_Quatiary border border-transparent rounded-[0.625rem] shadow-lg overflow-hidden py-2"
+            className="absolute z-50 mt-1 w-full bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2"
           >
             <div
               className="flex flex-col gap-1 p-2 max-h-60 overflow-y-auto custom-scrollbar overscroll-contain"
@@ -178,11 +178,11 @@ const Dropdown = ({
                   aria-selected={value === option.value}
                   tabIndex={-1} // Manage focus manually
                   className={cn(
-                    "w-full text-left px-3 py-2 text-sm rounded-[0.625rem] transition-all outline-none border border-transparent",
+                    "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none",
                     value === option.value
                       ? "text-Fill_AccentPrimary"
-                      : "text-Label-Secondary",
-                    focusedIndex === index && "border-Fill_AccentPrimary",
+                      : "text-white/60",
+                    focusedIndex === index && "bg-white/10",
                   )}
                   onMouseEnter={() => {
                     isKeyboardActionRef.current = false;

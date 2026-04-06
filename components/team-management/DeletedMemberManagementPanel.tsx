@@ -143,10 +143,10 @@ function DeletedMemberManagementPanelInner({ teamId }: { teamId: number }) {
   return (
     <div className="flex flex-col h-full bg-surface-primary">
       {/* 헤더 */}
-      <div className="px-4 md:px-6 pt-6 pb-5 border-b border-white/5">
+      <div className="px-4 md:px-6 pt-6 pb-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">방출 명단 관리</h1>
+            <h1 className="text-xl font-bold text-white">방출 명단 관리</h1>
             <p className="text-xs text-gray-500 mt-1">팀을 떠난 멤버들의 사유와 기록을 관리합니다.</p>
           </div>
           <div className="relative w-full md:w-64 group">
@@ -163,7 +163,7 @@ function DeletedMemberManagementPanelInner({ teamId }: { teamId: number }) {
       </div>
 
       {/* 목록 영역 */}
-      <div className="flex-1 overflow-auto p-4 md:p-6 scrollbar-thin">
+      <div className="flex-1 overflow-auto px-4 md:px-6 pb-6 scrollbar-thin">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((player) => (
             <div key={player.id} className="bg-[#1e1e1e] border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all group relative overflow-hidden">

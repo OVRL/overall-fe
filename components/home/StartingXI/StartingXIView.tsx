@@ -39,7 +39,7 @@ export default function StartingXIView({
       >
         <motion.div
           variants={startingXISectionVariants}
-          className="flex items-center justify-between mb-4 md:mb-5 sm:px-4"
+          className="flex items-center justify-between mb-4 md:mb-5 px-4 md:px-0"
         >
           <Icon src={bestXI} alt="Best XI" width={95} height={34} nofill />
           <SelectedTeamBadge />

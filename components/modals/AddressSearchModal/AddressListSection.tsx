@@ -12,7 +12,7 @@ const AddressListSection = ({
   onSelect: (address: string, code: string) => void;
   selectedCode?: string | null;
 }) => (
-  <div className="flex flex-col pl-3">
+  <div className="flex flex-col px-3">
     <span className="font-semibold text-sm leading-4 text-Label-Primary mb-2">
       {keyword ? "검색 결과" : "추천"}
     </span>

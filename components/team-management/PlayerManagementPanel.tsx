@@ -389,8 +389,8 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
   return (
     <div className={`flex flex-col ${hasUnsaved ? "pb-16" : ""}`}>
       {/* ── 헤더 ── */}
-      <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5">
-        <h1 className="text-[20px] font-bold text-white mb-4 md:mb-5">선수 관리</h1>
+      <div className="px-4 md:px-6 pt-6 pb-4">
+        <h1 className="text-xl font-bold text-white mb-4">선수 관리</h1>
 
         {/* 검색 바 */}
         <div className="flex items-center gap-2 max-w-[380px]">
@@ -401,11 +401,11 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && searchInputRef.current?.blur()}
             placeholder="선수 검색"
-            className="flex-1 bg-[#1c1c1c] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-300 outline-none placeholder:text-gray-600 focus:border-white/20 transition-colors"
+            className="flex-1 h-10 bg-[#1c1c1c] border border-white/10 rounded-xl px-4 text-sm text-gray-300 outline-none placeholder:text-gray-600 focus:border-white/20 transition-colors"
           />
           <button
             onClick={() => searchInputRef.current?.focus()}
-            className="bg-[#2a2a2a] hover:bg-[#333] border border-white/10 text-gray-300 text-xs px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+            className="h-10 bg-[#2a2a2a] hover:bg-[#333] border border-white/10 text-gray-300 text-sm px-5 rounded-xl transition-colors whitespace-nowrap"
           >
             검색
           </button>

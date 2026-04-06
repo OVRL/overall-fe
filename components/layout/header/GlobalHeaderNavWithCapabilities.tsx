@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo } from "react";
+import { AnimatePresence } from "motion/react";
 import Link from "@/components/Link";
 import RegisterGameButton from "@/components/layout/header/RegisterGameButton";
 import { MobileNavDropdown } from "@/components/layout/header/MobileNavDropdown";
@@ -49,7 +50,7 @@ export function GlobalHeaderNavWithCapabilities({
 
   return (
     <>
-      <div className="flex items-center gap-6 lg:gap-10">
+      <div className="flex items-center gap-6 lg:gap-8">
         <ul className="hidden lg:flex items-center gap-8 text-[0.9375rem]">
           {showRegisterGame ? <RegisterGameButton /> : null}
           {visibleMenuItems.map((item) => {
@@ -74,15 +75,17 @@ export function GlobalHeaderNavWithCapabilities({
         {hamburger}
       </div>
 
-      {isMenuOpen ? (
-        <MobileNavDropdown
-          menuItems={visibleMenuItems}
-          currentPathname={pathname}
-          onLinkClick={onMobileMenuClose}
-          id={mobileMenuId}
-          showRegisterGame={showRegisterGame}
-        />
-      ) : null}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <MobileNavDropdown
+            menuItems={visibleMenuItems}
+            currentPathname={pathname}
+            onLinkClick={onMobileMenuClose}
+            id={mobileMenuId}
+            showRegisterGame={showRegisterGame}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

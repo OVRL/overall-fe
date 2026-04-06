@@ -158,9 +158,9 @@ export default async function RootLayout({
                   }
                   initialIsSoloTeam={layoutState.initialIsSoloTeam}
                 >
-                  <div id="modal-root"></div>
-                  <PageTransition>{children}</PageTransition>
                   <GlobalPortalProvider>
+                    <div id="modal-root"></div>
+                    <PageTransition>{children}</PageTransition>
                     <Modals />
                   </GlobalPortalProvider>
                   <Toaster />

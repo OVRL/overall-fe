@@ -42,15 +42,18 @@ export default function InvitationPanel() {
     };
 
     return (
-        <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
-            <div className="flex items-center gap-2 mb-8">
-                <h3 className="text-[20px] font-bold text-white">가입 신청 관리</h3>
+        <>
+        <div className="px-4 md:px-6 pt-6 pb-4">
+            <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-white">가입 신청 관리</h1>
                 {pendingCount > 0 && (
                     <span className="w-5 h-5 bg-[#fb2c36] rounded-full flex items-center justify-center text-[11px] text-white font-bold">
                         {pendingCount}
                     </span>
                 )}
             </div>
+        </div>
+        <div className="px-4 md:px-6 pb-8 flex flex-col h-full overflow-hidden">
 
             {/* 필터 탭 */}
             <div className="flex gap-[8px] mb-6">
@@ -182,5 +185,6 @@ export default function InvitationPanel() {
                 </div>
             )}
         </div>
+    </>
     );
 }

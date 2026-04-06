@@ -691,34 +691,32 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const visibleMatches = matches.filter(m => !pendingDeletes.includes(m.id));
 
     return (
-        <div className="p-4 md:p-8 max-w-5xl mx-auto flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
-                <div className="flex items-center gap-3">
-                    <Button 
-                        variant="primary" 
-                        size="s" 
-                        className="bg-primary text-black font-black flex items-center gap-1.5 px-4 shadow-xl shadow-primary/10"
-                        onClick={() => setViewMode("IN_HOUSE")}
-                    >
-                        <Plus size={16} strokeWidth={3} />
-                        내전 등록
-                    </Button>
-                </div>
-            </div>
+    <>
+    <div className="px-4 md:px-6 pt-6 pb-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
+        <div className="flex items-center gap-3">
+            <Button 
+                variant="primary" 
+                size="s" 
+                className="bg-primary text-black font-black flex items-center gap-1.5 px-4 shadow-xl shadow-primary/10"
+                onClick={() => setViewMode("IN_HOUSE")}
+            >
+                <Plus size={16} strokeWidth={3} />
+                내전 등록
+            </Button>
+        </div>
+    </div>
+    <div className="px-4 md:px-6 pb-6 flex flex-col gap-6">
 
             <div className="flex flex-col gap-3">
                 {visibleMatches.length === 0 ? (
                     <div className="py-20 text-center text-gray-500">등록된 경기 기록이 없습니다.</div>
                 ) : visibleMatches.map((match) => (
-                    <div key={match.id} className="flex flex-col">
+                    <div key={match.id} className="flex flex-col bg-[#1a1a1a] border border-[#3e3e3e] rounded-[12px] overflow-hidden">
                         {/* 헤더 카드 */}
                         <div 
                             onClick={() => toggleExpand(match.id)}
-                            className={cn(
-                                "bg-[#1a1a1a] border border-white/5 p-4 md:p-6 flex items-center justify-between hover:bg-white/3 transition-all cursor-pointer",
-                                match.expanded ? "rounded-t-2xl border-b-transparent" : "rounded-2xl"
-                            )}
+                            className="p-4 md:p-6 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-2 md:gap-8 min-w-0">
                                 <span className="text-[10px] md:text-xs text-gray-500 font-mono shrink-0">{match.date}</span>
@@ -747,134 +745,161 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
 
                         {/* 확장된 상세 정보 */}
                         {match.expanded && (
-                            <div className="bg-[#1a1a1a] border border-white/5 border-t-transparent rounded-b-2xl p-4 md:p-6 flex flex-col gap-8">
-                                {/* 쿼터 탭 */}
-                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                                    {[1, 2, 3, 4].map(q => (
-                                        <button
-                                            key={q}
-                                            onClick={() => setSelectedQuarter(q)}
-                                            className={cn(
-                                                "px-4 py-2 rounded-xl text-xs font-bold transition-all",
-                                                selectedQuarter === q ? "bg-primary text-black" : "bg-white/5 text-gray-500 hover:text-white"
-                                            )}
-                                        >
-                                            {q}쿼터
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* 스코어보드 */}
-                                <div className="flex flex-col items-center gap-6 py-4">
-                                    <div className="flex items-center gap-8 md:gap-16">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-xs text-gray-500 font-bold">HOME</span>
-                                            <span className="text-4xl md:text-5xl font-black text-white">{match.score.home}</span>
-                                        </div>
-                                        <div className="text-2xl md:text-3xl font-black text-gray-700">:</div>
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-xs text-gray-500 font-bold">AWAY</span>
-                                            <span className="text-4xl md:text-5xl font-black text-white">{match.score.away}</span>
+                            <div className="px-4 md:px-6 pb-4 md:px-6 md:pb-6">
+                                <div className="bg-[#131312] rounded-[12px] p-4 md:p-6 flex flex-col gap-8 w-full">
+                                    {/* 쿼터별 스코어 그리드 */}
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <h4 className="text-[14px] font-bold text-white">쿼터별 스코어</h4>
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                                            {[1, 2, 3, 4].map(q => {
+                                                const qLogs = match.logs[q] || [];
+                                                const homeGoals = qLogs.filter(l => l.type === "goal").length;
+                                                const awayGoals = qLogs.filter(l => l.type === "conceded").length;
+                                                return (
+                                                    <div key={`grid-${q}`} className="border border-[#3e3e3e] flex flex-col gap-2 p-3 rounded-[10px]">
+                                                        <p className="text-[12px] text-[#666] font-medium">{q}쿼터</p>
+                                                        <p className="text-[20px] text-white font-black">{homeGoals} - {awayGoals}</p>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
-                                    {/* 로그 리스트 */}
-                                    <div className="w-full max-w-md space-y-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Match Logs ({selectedQuarter}Q)</span>
-                                            <div className="flex gap-2">
-                                                <button 
-                                                    onClick={() => {
-                                                        setActiveMatchId(match.id);
-                                                        setIsModalOpen(true);
-                                                    }}
-                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold hover:bg-emerald-500/20 transition-all"
-                                                >
-                                                    <Plus size={12} /> 득점 추가
-                                                </button>
-                                                <button 
-                                                    onClick={() => {
-                                                        const newLogs = { ...match.logs };
-                                                        newLogs[selectedQuarter] = [...(newLogs[selectedQuarter] || []), { id: crypto.randomUUID(), type: "conceded" }];
-                                                        updateMatchData(match.id, m => ({
-                                                            ...m,
-                                                            logs: newLogs,
-                                                            score: { ...m.score, away: m.score.away + 1 }
-                                                        }));
-                                                    }}
-                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold hover:bg-red-500/20 transition-all"
-                                                >
-                                                    <Plus size={12} /> 실점 추가
-                                                </button>
-                                            </div>
-                                        </div>
+                                    {/* 타임라인 목록 */}
+                                    <div className="relative pl-6 pt-2 pb-4 space-y-6">
+                                        {/* 중앙 대시 라인 */}
+                                        <div className="absolute left-[39px] top-4 bottom-2 w-[1px] border-l border-dashed border-[#3e3e3e] z-0" />
 
-                                        <div className="space-y-2">
-                                            {(match.logs[selectedQuarter] || []).map(log => (
-                                                <div key={log.id} className="flex items-center justify-between bg-[#222] border border-white/5 rounded-xl px-4 py-3 group">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={cn(
-                                                            "w-1.5 h-1.5 rounded-full",
-                                                            log.type === "goal" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                                                        )} />
-                                                        <div className="flex flex-col">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs font-bold text-white">
-                                                                    {log.type === "goal" ? "득점" : "실점"}
-                                                                </span>
-                                                                {log.player && (
-                                                                    <div className="w-5 h-5 rounded-md overflow-hidden bg-white/5 border border-white/10">
-                                                                        <Image src={getValidImageSrc(log.player.profileImage)} alt={log.player.name} width={20} height={20} className="object-cover" />
-                                                                    </div>
-                                                                )}
+                                        {[1, 2, 3, 4].map(q => {
+                                            const qLogs = match.logs[q] || [];
+                                            
+                                            return (
+                                                <div key={`timeline-${q}`} className="flex flex-col gap-4 relative z-10">
+                                                    {/* Q Indicator & Add Buttons */}
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-4 -ml-6">
+                                                            <div className="flex items-center justify-center w-[44px] h-[44px] bg-black border border-[#2a2a2a] rounded-full text-[14px] font-bold text-white shrink-0">
+                                                                {q}Q
                                                             </div>
-                                                            {log.player && (
-                                                                <span className="text-[10px] text-gray-500 mt-0.5">
-                                                                    {log.player.name} {log.assist && <span className="opacity-60 text-[9px] ml-1">(도움: {log.assist.name})</span>}
-                                                                </span>
-                                                            )}
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button 
+                                                                onClick={() => {
+                                                                    setSelectedQuarter(q);
+                                                                    setActiveMatchId(match.id);
+                                                                    setIsModalOpen(true);
+                                                                }}
+                                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold hover:bg-emerald-500/20 transition-all"
+                                                            >
+                                                                <Plus size={10} /> 득점
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const newLogs = { ...match.logs };
+                                                                    newLogs[q] = [...(newLogs[q] || []), { id: crypto.randomUUID(), type: "conceded" }];
+                                                                    updateMatchData(match.id, m => ({
+                                                                        ...m,
+                                                                        logs: newLogs,
+                                                                        score: { ...m.score, away: m.score.away + 1 }
+                                                                    }));
+                                                                }}
+                                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold hover:bg-red-500/20 transition-all"
+                                                            >
+                                                                <Plus size={10} /> 실점
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <button 
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setActiveMatchId(match.id);
-                                                                setIsModalOpen(true);
-                                                                // TODO: 실제 수정을 위해 기존 정보를 모달에 세팅하는 로직은 향후 고도화 가능
-                                                            }}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-primary hover:bg-primary/10 transition-all"
-                                                        >
-                                                            <Edit2 size={13} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const parts = [];
-                                                                if (log.player) parts.push(`${log.player.name}골`);
-                                                                else if (log.type === "conceded") parts.push("실점");
+
+                                                    {/* Logs for this Q */}
+                                                    <div className="flex flex-col gap-2 pl-8">
+                                                        {qLogs.map(log => (
+                                                            <div key={log.id} className="flex gap-3 items-start justify-between p-2 rounded-xl group hover:bg-white/5 transition-colors -ml-2">
+                                                                <div className="flex gap-3">
+                                                                    <div className="shrink-0 mt-0.5 relative">
+                                                                        {log.type === "conceded" && (
+                                                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-black rounded-full flex items-center justify-center z-10 border border-[#222]">
+                                                                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="w-5 h-5 rounded-full overflow-hidden bg-[#222] border border-[#3e3e3e]">
+                                                                            <Image 
+                                                                                src={getValidImageSrc(log.player?.profileImage)} 
+                                                                                alt={log.player?.name || "알 수 없음"} 
+                                                                                width={20} height={20} 
+                                                                                className="object-cover w-full h-full" 
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-0.5">
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <span className={cn("text-[12px] font-bold", log.type === "goal" ? "text-gray-300" : "text-red-400")}>
+                                                                                {log.type === "goal" ? "득점" : "실점"}
+                                                                            </span>
+                                                                            <span className="text-[14px] font-semibold text-white">
+                                                                                {log.type === "goal" ? log.player?.name : (log.player?.name || match.opponent)}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-[2px]">
+                                                                            {log.assist && (
+                                                                                <div className="flex items-center gap-1.5 text-[11px]">
+                                                                                    <span className="text-gray-500 font-medium">도움</span>
+                                                                                    <span className="text-[#a6a5a5]">{log.assist.name}</span>
+                                                                                </div>
+                                                                            )}
+                                                                            {log.preAssist && (
+                                                                                <div className="flex items-center gap-1.5 text-[11px]">
+                                                                                    <span className="text-gray-500 font-medium">기점</span>
+                                                                                    <span className="text-[#a6a5a5]">{log.preAssist.name}</span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                                 
-                                                                if (log.assist) parts.push(`${log.assist.name}어시`);
-                                                                if (log.preAssist) parts.push(`${log.preAssist.name}기점`);
-                                                                
-                                                                setLogToDelete({
-                                                                    matchId: match.id,
-                                                                    quarter: selectedQuarter,
-                                                                    logId: log.id,
-                                                                    description: `${selectedQuarter}Q ${parts.join(" ")}`
-                                                                });
-                                                            }}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all"
-                                                        >
-                                                            <Trash2 size={13} />
-                                                        </button>
+                                                                {/* Edit/Delete Actions */}
+                                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedQuarter(q);
+                                                                            setActiveMatchId(match.id);
+                                                                            setIsModalOpen(true);
+                                                                        }}
+                                                                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                                                                    >
+                                                                        <Edit2 size={12} />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const parts = [];
+                                                                            if (log.player) parts.push(`${log.player.name}골`);
+                                                                            else if (log.type === "conceded") parts.push("실점");
+                                                                            if (log.assist) parts.push(`${log.assist.name}어시`);
+                                                                            
+                                                                            setLogToDelete({
+                                                                                matchId: match.id,
+                                                                                quarter: q,
+                                                                                logId: log.id,
+                                                                                description: `${q}Q ${parts.join(" ")}`
+                                                                            });
+                                                                        }}
+                                                                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-all"
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        {qLogs.length === 0 && (
+                                                            <div className="py-2 text-[10px] text-gray-600/50 uppercase tracking-widest pl-2">
+                                                                No Logs
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            ))}
-                                            {(match.logs[selectedQuarter] || []).length === 0 && (
-                                                <div className="py-8 text-center text-[10px] text-gray-700 font-bold bg-white/2 rounded-xl border border-dashed border-white/5 uppercase tracking-widest">No logs for this quarter</div>
-                                            )}
-                                        </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -1056,6 +1081,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
             )}
             <div className="h-24" />
         </div>
+    </>
     );
 }
 
