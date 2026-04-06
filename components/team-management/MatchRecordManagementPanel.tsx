@@ -77,6 +77,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     const [selectedAssist, setSelectedAssist] = useState<string>("none");
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
     const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
+    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
     const [showLocalSummary, setShowLocalSummary] = useState(false);
 
     // 모바일 지원: ResizeObserver & Pretext 연동 textarea 동적 높이
@@ -143,6 +144,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
     React.useEffect(() => {
         if (mode !== "TEXT" || !textInput.trim()) {
             setSuggestions([]);
+            setSelectedSuggestionIndex(0);
             return;
         }
 
@@ -192,13 +194,29 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
         }
 
         setSuggestions(newSuggestions.slice(0, 3));
+        setSelectedSuggestionIndex(0);
     }, [textInput, mode, players]);
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (mode === "TEXT" && e.key === " " && suggestions.length > 0) {
-            // 스페이스바 입력 시 첫 번째 제안 적용 (기존 동작 유지하되 힌트는 제거)
-            e.preventDefault();
-            setTextInput(prev => prev + suggestions[0].value);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (mode === "TEXT") {
+            if (suggestions.length > 0) {
+                if (e.key === "Tab" || e.key === "Enter") {
+                    e.preventDefault();
+                    const toApply = suggestions[selectedSuggestionIndex] || suggestions[0];
+                    setTextInput(prev => prev + toApply.value);
+                    setTimeout(() => {
+                        inputRef.current?.focus();
+                    }, 0);
+                } else if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length);
+                } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                }
+            } else if (e.key === "Tab") {
+                e.preventDefault();
+            }
         }
     };
 
@@ -448,8 +466,17 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                     ) : (
                         <div className="space-y-6">
                             <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">텍스트 입력 (카톡 스타일)</label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">텍스트 입력 (카톡 스타일)</label>
+                                        <div className="group relative flex items-center justify-center cursor-help">
+                                            <div className="w-4 h-4 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-black border border-primary/30">!</div>
+                                            <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[280px] bg-[#333] text-white text-[11px] font-medium p-3 rounded-xl shadow-2xl z-[100] transition-all border border-white/10 leading-relaxed pointer-events-none">
+                                                <span className="text-primary font-bold">Tab</span> 이나 <span className="text-primary font-bold">Enter</span> 키를 누르면 자동으로 입력됩니다.<br/>
+                                                검색 결과가 여러 명일 경우 <span className="text-primary font-bold">방향키(좌/우)</span>로 선택할 수 있습니다.
+                                            </div>
+                                        </div>
+                                    </div>
                                     <span className="text-[10px] text-primary/60 font-medium">예시: 1Q 메시골 호날두어시</span>
                                 </div>
                                 <div className="relative group">
@@ -465,19 +492,25 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                 </div>
                             </div>
 
-                            {parsedSummary.length > 0 && (
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">파싱 미리보기</label>
-                                        <button 
-                                            onClick={() => setShowLocalSummary(true)}
-                                            className="px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] text-primary font-black hover:bg-primary/20 transition-all shadow-sm"
-                                        >
-                                            전체보기
-                                        </button>
-                                    </div>
-                                    <div className="space-y-2 max-h-40 overflow-y-auto pr-2 scrollbar-hide">
-                                        {parsedSummary.map((item, idx) => (
+                            {/* 파싱 미리보기 - 높이 고정으로 점핑 방지 */}
+                            <div className="space-y-4 bg-black/20 p-4 rounded-2xl border border-white/5 min-h-[160px] flex flex-col">
+                                <div className="flex items-center justify-between shrink-0">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">파싱 미리보기</label>
+                                    <button 
+                                        onClick={() => setShowLocalSummary(true)}
+                                        className="px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] text-primary font-black hover:bg-primary/20 transition-all shadow-sm"
+                                        disabled={parsedSummary.length === 0}
+                                    >
+                                        전체보기
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2 max-h-[120px]">
+                                    {parsedSummary.length === 0 ? (
+                                        <div className="flex items-center justify-center h-full text-[11px] text-gray-600 font-medium italic">
+                                            입력된 득점 이벤트가 없습니다.
+                                        </div>
+                                    ) : (
+                                        parsedSummary.map((item, idx) => (
                                             <div key={idx} className="bg-white/5 border border-white/5 rounded-xl px-4 py-3 flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-[10px] font-black text-primary">{item.quarter}Q</span>
@@ -489,10 +522,10 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
+                                        ))
+                                    )}
                                 </div>
-                            )}
+                            </div>
 
                             {/* 로컬 파싱 요약 모달 */}
                             {showLocalSummary && (
@@ -548,20 +581,31 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary,
                 </div>
 
                 <div className="px-6 space-y-4">
-                    {/* 자동완성 제안 바 - 모바일 최우선 배치 */}
-                    {mode === "TEXT" && suggestions.length > 0 && (
-                        <div className="flex gap-2 p-2 bg-black/40 rounded-xl border border-white/5 overflow-x-auto scrollbar-hide animate-in fade-in slide-in-from-bottom-2">
+                    {/* 자동완성 제안 바 - 모바일 최우선 배치 (높이 고정으로 점핑 완벽 방지) */}
+                    <div className={cn(
+                        "h-[40px] flex items-center transition-all",
+                        mode === "TEXT" && suggestions.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none h-[0px] md:h-[40px] overflow-hidden" 
+                    )}>
+                        <div className="flex gap-2 w-full p-2 bg-black/40 rounded-xl border border-white/5 overflow-x-auto scrollbar-hide">
                             {suggestions.map((s, idx) => (
                                 <button
                                     key={idx}
-                                    onClick={() => setTextInput(prev => prev + s.value)}
-                                    className="px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-bold whitespace-nowrap active:bg-primary active:text-black transition-all"
+                                    onClick={() => {
+                                        setTextInput(prev => prev + s.value);
+                                        inputRef.current?.focus();
+                                    }}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all",
+                                        selectedSuggestionIndex === idx 
+                                            ? "bg-primary text-black scale-105 shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]" 
+                                            : "bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20"
+                                    )}
                                 >
                                     {s.label}
                                 </button>
                             ))}
                         </div>
-                    )}
+                    </div>
 
                     <div className="flex gap-3 pb-6">
                         <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">

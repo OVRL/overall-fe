@@ -388,7 +388,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
             {/* 좌측: 보드 */}
             <div className="flex-1 p-6 md:p-8 flex flex-col gap-4">
               <div className="relative flex-1 bg-[#121212] rounded-3xl border border-white/5 p-4 md:p-6 lg:p-8 flex flex-col">
-                <div className="absolute top-6 left-8 right-8 z-20 flex items-center justify-between">
+                <div className="absolute top-4 left-4 right-4 md:top-6 md:left-8 md:right-8 z-20 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 italic">
                     <span className="text-2xl font-black tracking-tighter">BEST</span>
                     <span className="text-2xl font-black tracking-tighter text-primary">XI</span>
@@ -405,7 +405,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   />
                 </div>
 
-                <div className="flex-1 relative mt-12 mb-4 overflow-hidden">
+                <div className="flex-1 relative mt-20 md:mt-12 mb-4 overflow-hidden">
                   <FormationBoardList
                     quarters={quarters}
                     selectedPlayer={selectedPlayer}
