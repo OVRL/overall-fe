@@ -51,12 +51,12 @@ const menuItems: MenuItem[] = [
         icon: null,
         href: "/team-management/players",
     },
-    {
-        id: "deleted-players",
-        label: "방출 명단 관리",
-        icon: null,
-        href: "/team-management/deleted-players",
-    },
+    // {
+    //     id: "deleted-players",
+    //     label: "방출 명단 관리",
+    //     icon: null,
+    //     href: "/team-management/deleted-players",
+    // },
     {
         id: "invitation",
         label: "선수 입단 관리",
