@@ -80,6 +80,13 @@ const FormationVenueMapModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const PlayerSearchModal = dynamic(
+  () => import("./team-management/PlayerSearchModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -97,4 +104,5 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   FORMATION_VENUE_MAP: FormationVenueMapModal,
   CONFIRM: GlobalConfirmModal,
   EDIT_GAME: EditGameModal,
+  PLAYER_SEARCH: PlayerSearchModal,
 } as ModalComponentMap;
