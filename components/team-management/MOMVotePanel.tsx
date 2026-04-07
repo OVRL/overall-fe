@@ -309,17 +309,16 @@ function CardHeader({ match, rightContent }: { match: MatchCard, rightContent?: 
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full relative gap-4 md:gap-0">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full">
         <div className="flex items-center justify-between w-full md:w-auto">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                <span className="text-[13px] text-[#a6a5a5] whitespace-nowrap">{match.date}</span>
-               <span className="text-[16px] font-bold text-white truncate max-w-[140px] md:max-w-none">vs {match.opponent}</span>
+               <span className="text-[16px] font-bold text-white truncate max-w-[120px] md:max-w-none">vs {match.opponent}</span>
             </div>
-            {/* 모바일에서만 노출하는 상태 배지 (PC에선 우측 스코어 옆에 노출) */}
-            <div className="flex items-center md:hidden">
+            {/* 모바일/태블릿에서 노출하는 상태 배지 (PC(lg)에선 우측 스코어 옆에 노출) */}
+            <div className="flex items-center lg:hidden shrink-0">
                 <StatusBadge status={match.status} />
             </div>
         </div>
-        <div className="items-center gap-3 hidden md:flex">
-          <span className="text-[16px] font-bold text-[#d6d6d5]">{match.score}</span>
+        <div className="items-center gap-3 hidden lg:flex">
           <StatusBadge status={match.status} />
         </div>
       </div>
@@ -352,7 +351,6 @@ function OngoingCard({ match }: { match: MatchCard }) {
           match={match} 
           rightContent={
             <div className="flex items-center justify-between w-full md:w-auto mt-2 md:mt-0 gap-6">
-              <span className="text-[14px] font-bold text-white md:hidden whitespace-nowrap">{(match as any).score}</span>
               <div className="flex items-center gap-6 justify-end w-full md:w-auto">
                   <div className="flex flex-col items-end">
                     <span className="text-[14px] font-semibold text-white">{match.totalVotes}표</span>
@@ -410,18 +408,17 @@ function CompletedCard({ match }: { match: MatchCard }) {
         <CardHeader 
           match={match} 
           rightContent={
-            <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto mt-2 md:mt-0">
-              <span className="text-[14px] font-bold text-[#d6d6d5] md:hidden">결과: {match.score}</span>
-              <div className="flex items-center gap-[12px] overflow-x-auto scrollbar-hide py-1">
+            <div className="flex items-center justify-between lg:justify-end gap-2 md:gap-4 w-full md:w-auto mt-2 md:mt-0 overflow-x-auto lg:overflow-x-visible scrollbar-hide">
+              <div className="flex items-center gap-[6px] md:gap-[10px] py-1">
                 {match.top3?.map((p, i) => (
-                  <div key={i} className="flex items-center shrink-0 gap-[8px] md:gap-[12px] px-2 md:px-[13px] py-1 md:py-[9px] rounded-[8px] border border-[#252525]">
-                      <Trophy size={16} className="text-white md:w-5 md:h-5" />
-                      <div className="flex flex-col gap-1 md:gap-[4px] items-start leading-none">
-                        <div className="flex items-start gap-[4px] font-semibold text-[12px] md:text-[14px] text-white">
+                  <div key={i} className="flex items-center shrink-0 gap-[6px] md:gap-[8px] px-2 md:px-[12px] py-1 md:py-[8px] rounded-[8px] border border-[#252525] bg-[#1a1a1a]">
+                      <Trophy size={14} className="text-white md:w-4 md:h-4 shrink-0" />
+                      <div className="flex flex-col gap-0.5 md:gap-[2px] items-start leading-none">
+                        <div className="flex items-start gap-[4px] font-semibold text-[11px] md:text-[14px] text-white whitespace-nowrap">
                           <span>{p.backNumber}.</span>
                           <span>{p.name}</span>
                         </div>
-                        <span className="text-[10px] md:text-[11px] text-[#a6a5a5]">{p.votes}표</span>
+                        <span className="text-[9px] md:text-[11px] text-[#a6a5a5] whitespace-nowrap">{p.votes}표</span>
                       </div>
                   </div>
                 ))}
@@ -437,9 +434,10 @@ function CompletedCard({ match }: { match: MatchCard }) {
       {expanded && (
         <div className="px-6 py-6 border-t border-[#3e3e3e] bg-[#1a1a1a]">
           {/* 모바일 뷰 전용 최종 스코어 */}
+          {/* 모바일 뷰 전용 최종 결과 (스코어 제외) */}
           <div className="md:hidden flex items-center justify-between mb-4 border-b border-[#3e3e3e] pb-4">
-             <span className="text-[13px] text-gray-400">최종 스코어</span>
-             <span className="text-[16px] font-bold text-white whitespace-nowrap">{match.score}</span>
+             <span className="text-[13px] text-gray-400">경기 결과</span>
+             <span className="text-[16px] font-bold text-white whitespace-nowrap">투표 마감</span>
           </div>
           <p className="text-[14px] font-bold text-white mb-4">전체 투표 결과</p>
           <div className="grid gap-4">
