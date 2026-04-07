@@ -125,6 +125,7 @@ export function useAttendanceVoteSubmitActions(
       variables: {
         input: {
           id: recordId,
+          teamId: createdTeamId,
           attendanceStatus,
         },
       },

@@ -6,6 +6,23 @@ import {
 const INVALID_INVITE_SERVER_MESSAGE = "유효하지 않은 초대 코드입니다.";
 const EXPIRED_INVITE_USER_MESSAGE = "유효기간이 만료된 코드입니다.";
 
+/** GraphQL 엔진(BAD_USER_INPUT 등)이 내려주는 영문 검증 메시지를 사용자용 한국어로 통일 */
+const BAD_USER_INPUT_USER_MESSAGE =
+  "요청 형식이 올바르지 않습니다. 잠시 후 다시 시도해 주세요.";
+
+function isBadUserInputError(
+  item: GraphQLResponseErrorItem | undefined,
+): boolean {
+  const code = item?.extensions?.code;
+  if (code === "BAD_USER_INPUT") return true;
+  const msg = typeof item?.message === "string" ? item.message : "";
+  return (
+    /Variable "\$[a-zA-Z0-9_]+" got invalid value/i.test(msg) ||
+    /Field "[^"]+" of required type/i.test(msg) ||
+    /was not provided\.?$/i.test(msg.trim())
+  );
+}
+
 /**
  * Nest 등에서 내려주는 extensions(INTERNAL_SERVER_ERROR + 404 + originalError)일 때
  * 만료 안내 문구로 통일합니다.
@@ -34,8 +51,13 @@ function shouldRewriteExpiredInviteCode(
 
 /** HTTP 실패 응답의 GraphQL errors 배열에서 사용자용 문장을 만듭니다. */
 function formatGraphQLHttpErrors(
-  errors: ReadonlyArray<{ message?: string }>,
+  errors: ReadonlyArray<GraphQLResponseErrorItem>,
 ): string {
+  const first = errors[0];
+  if (isBadUserInputError(first)) {
+    return BAD_USER_INPUT_USER_MESSAGE;
+  }
+
   const messages = errors
     .map((e) => (typeof e.message === "string" ? e.message.trim() : ""))
     .filter((m) => m.length > 0);
@@ -93,7 +115,11 @@ export function getGraphQLErrorMessage(
     return EXPIRED_INVITE_USER_MESSAGE;
   }
 
-  const firstMessage = sourceErrors?.[0]?.message;
+  const firstErr = sourceErrors?.[0];
+  if (isBadUserInputError(firstErr)) {
+    return BAD_USER_INPUT_USER_MESSAGE;
+  }
+  const firstMessage = firstErr?.message;
   if (typeof firstMessage === "string" && firstMessage.trim().length > 0) {
     return firstMessage.trim();
   }
