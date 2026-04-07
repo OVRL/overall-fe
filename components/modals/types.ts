@@ -40,6 +40,8 @@ export interface ModalPropsMap {
     excludeMercenaries?: boolean;
     isTeamSearch?: boolean;
     teamPlayers?: Player[];
+    targetPosition?: string | null;
+    title?: string;
   };
   TEAM_SEARCH: {
     onComplete: (result: TeamSearchResult) => void;

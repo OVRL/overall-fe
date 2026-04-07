@@ -17,7 +17,7 @@ interface FormationBoardListProps {
   /** 포지션 클릭 시 호출 (선택 시 포지션 지정 모달 등에 사용) */
   onPositionSelect?: (pos: PositionSelectPayload) => void;
   /** 선택된 선수를 해당 포지션에 배치 */
-  onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
+  onPlaceSelectedPlayer?: (quarterId: number, index: number, label: string) => void;
   showBoardHeader?: boolean;
   boardClassName?: string;
 }

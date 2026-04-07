@@ -10,6 +10,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  TouchSensor,
   rectIntersection,
   CollisionDetection,
   useDraggable,
@@ -265,14 +266,19 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     image: getValidImageSrc(initialManagerMember?.user?.profileImage) 
   });
 
-  // DnD 설정
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  // DnD 설정: PC는 PointerSensor, 모바일은 TouchSensor(장압으로 드래그, 탭은 클릭으로 통과)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
   
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState<Player | null>(null);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  // 모바일: 탭으로 선택된 포지션 슬롯
+  const [mobilePositionSlot, setMobilePositionSlot] = useState<{ quarterId: number; positionIndex: number; label: string } | null>(null);
 
   // 자동 스크롤 로직
   useEffect(() => {
@@ -445,7 +451,23 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                     setCurrentQuarterId={setCurrentQuarterId}
                     showBoardHeader={false}
                     boardClassName="p-0 border-0 bg-transparent h-full min-h-[400px]"
-                    onPlaceSelectedPlayer={(qId, idx) => { if (selectedPlayer) assignPlayer(qId, idx, selectedPlayer); }}
+                    onPlaceSelectedPlayer={(qId, idx, label) => {
+                      if (isMobile) {
+                        // 모바일: 포지션 탭 시 통합 선수 검색 모달 오픈
+                        openModal({
+                          onComplete: (player: Player) => {
+                            assignPlayer(qId, idx, player);
+                          },
+                          teamPlayers: allPlayers,
+                          excludeMercenaries: true,
+                          targetPosition: label,
+                          title: `${label} 선수 검색`
+                        });
+                      } else {
+                        // PC: 선택된 선수가 있으면 배치
+                        if (selectedPlayer) assignPlayer(qId, idx, selectedPlayer);
+                      }
+                    }}
                   />
                 </div>
 
@@ -465,6 +487,21 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                       isTeamSearch: true,
                       teamPlayers: allPlayers
                     })}
+                    onTouchEnd={(e) => {
+                      // 모바일: DnD TouchSensor delay 없이 즉시 모달 오픈
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openModal({
+                        onComplete: (player: Player) => {
+                          setManager({ name: player.name, image: getValidImageSrc(player.image) });
+                          setHasChanges(true);
+                        },
+                        excludeMercenaries: true,
+                        isTeamSearch: true,
+                        teamPlayers: allPlayers,
+                        title: "감독 수정"
+                      });
+                    }}
                     className="flex items-center gap-4 pr-10 border-r border-white/10 hover:opacity-80 transition-all text-left"
                   >
                     <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-900 border border-white/10 group-hover:border-primary/30 transition-colors shadow-lg">

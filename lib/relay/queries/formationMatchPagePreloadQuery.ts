@@ -32,7 +32,6 @@ export const FormationMatchPagePreloadQuery = graphql`
     findMatchFormation(matchId: $matchId, teamId: $teamId) {
       id
       isDraft
-      quarter
       tactics
       updatedAt
     }
