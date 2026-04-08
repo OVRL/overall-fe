@@ -19,7 +19,6 @@ export type useUpdateMatchFormationMutation$variables = {
 export type useUpdateMatchFormationMutation$data = {
   readonly updateMatchFormation: {
     readonly id: number;
-    readonly quarter: number;
     readonly tactics: any | null | undefined;
   };
 };
@@ -62,13 +61,6 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "quarter",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "tactics",
         "storageKey": null
       }
@@ -94,16 +86,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "d61d46917182a6cf545c63ac52e6e5c5",
+    "cacheID": "08c4ac3d89d833d0bef2d79998e6c1db",
     "id": null,
     "metadata": {},
     "name": "useUpdateMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchFormationMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    quarter\n    tactics\n  }\n}\n"
+    "text": "mutation useUpdateMatchFormationMutation($input: UpdateMatchFormationInput!) {\n  updateMatchFormation(input: $input) {\n    id\n    tactics\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "46995eab1fda6492b97b0e94d86c9a95";
+(node as any).hash = "d729675f2ebddd63d61a9e2c92991d81";
 
 export default node;

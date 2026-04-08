@@ -30,7 +30,7 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
       <header className="mb-8">
         <div className="flex items-center gap-4">
           <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
-            팀 데이터
+            선수 기록
           </h1>
         </div>
       </header>

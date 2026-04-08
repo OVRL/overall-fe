@@ -1,10 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { AnimatePresence } from "motion/react";
 import Link from "@/components/Link";
 import { MobileNavDropdown } from "@/components/layout/header/MobileNavDropdown";
 import {
   filterMenuItemsForStaffTeamManagement,
+  isHeaderNavItemActive,
   type NavMenuItem,
 } from "@/lib/navigation/filterMenuItemsByTeamRole";
 
@@ -36,10 +38,10 @@ export function GlobalHeaderNavGuest({
 
   return (
     <>
-      <div className="flex items-center gap-6 lg:gap-10">
+      <div className="flex items-center gap-6 lg:gap-8">
         <ul className="hidden lg:flex items-center gap-8 text-[0.9375rem]">
           {visibleMenuItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isHeaderNavItemActive(pathname, item.href);
             return (
               <li key={item.label}>
                 <Link
@@ -60,15 +62,17 @@ export function GlobalHeaderNavGuest({
         {hamburger}
       </div>
 
-      {isMenuOpen ? (
-        <MobileNavDropdown
-          menuItems={visibleMenuItems}
-          currentPathname={pathname}
-          onLinkClick={onMobileMenuClose}
-          id={mobileMenuId}
-          showRegisterGame={false}
-        />
-      ) : null}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <MobileNavDropdown
+            menuItems={visibleMenuItems}
+            currentPathname={pathname}
+            onLinkClick={onMobileMenuClose}
+            id={mobileMenuId}
+            showRegisterGame={false}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

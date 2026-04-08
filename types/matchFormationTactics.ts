@@ -3,8 +3,8 @@ import type { FormationType } from "@/constants/formation";
 /**
  * GraphQL `MatchFormationModel.tactics` / `UpdateMatchFormationInput.tactics`에 넣는 JSON 계약.
  *
- * - `findMatchFormation` / `updateMatchFormation`는 행 단위로 `quarter`, `teamId`를 갖고,
- *   이 페이로드는 그 한 행에 대응하는 보드 상태만 담습니다(쿼터 번호는 상위 필드에 있음).
+ * - `findMatchFormation` / `updateMatchFormation`는 팀·매치 단위 행으로 `teamId`·`matchId` 등을 갖고,
+ *   이 페이로드는 그 한 행에 대응하는 보드 상태만 담습니다.
  * - 좌표·슬롯 라벨(role)은 저장하지 않고 `FORMATIONS[formation][slot]`에서만 해석합니다.
  *
  * @see schema.graphql — MatchFormationModel, UpdateMatchFormationInput

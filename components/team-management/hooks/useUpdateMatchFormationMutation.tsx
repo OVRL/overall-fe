@@ -5,7 +5,6 @@ const updateMatchFormationMutation = graphql`
   mutation useUpdateMatchFormationMutation($input: UpdateMatchFormationInput!) {
     updateMatchFormation(input: $input) {
       id
-      quarter
       tactics
     }
   }

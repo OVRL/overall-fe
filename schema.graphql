@@ -22,6 +22,9 @@ type BackgroundRemovalModel {
 type BestElevenModel {
   """베스트 일레븐 ID"""
   id: Int!
+
+  """포지션"""
+  position: Position!
   team: TeamModel
 
   """팀 ID"""
@@ -32,6 +35,9 @@ type BestElevenModel {
 }
 
 input CreateBestElevenInput {
+  """포지션"""
+  position: Position!
+
   """팀 ID"""
   teamId: Int!
 
@@ -55,10 +61,28 @@ input CreateMatchAttendanceInput {
   matchId: Int!
   memberType: MemberType!
 
+  """참석자 이름"""
+  name: String
+
   """팀 ID"""
   teamId: Int!
 
   """유저 ID"""
+  userId: Int!
+}
+
+"""매치 포메이션 생성"""
+input CreateMatchFormationInput {
+  """매치 ID"""
+  matchId: Int!
+
+  """전술 정보 (JSON)"""
+  tactics: JSONObject = null
+
+  """팀 ID"""
+  teamId: Int!
+
+  """최종 수정자 유저 ID"""
   userId: Int!
 }
 
@@ -202,6 +226,9 @@ type MatchAttendanceModel {
   match: MatchModel
   matchId: Int!
   memberType: MemberType
+
+  """참석자 이름"""
+  name: String
   teamId: Int!
 
   """팀 멤버 정보"""
@@ -211,23 +238,42 @@ type MatchAttendanceModel {
   """유저 정보"""
   user: UserModel
   userId: Int!
-  voteDeadlineAt: GraphQLDateTime!
 }
 
+"""매치 포메이션"""
 type MatchFormationModel {
+  """생성일"""
   createdAt: DateTime!
+
+  """포메이션 ID"""
   id: Int!
+
+  """임시 저장 여부 (true: 임시저장, false: 확정)"""
+  isDraft: Boolean!
 
   """경기 정보"""
   match: MatchModel
+
+  """매치 ID"""
   matchId: Int!
-  quarter: Int!
+
+  """전술 정보 (JSON)"""
   tactics: JSONObject
 
   """팀 정보"""
   team: TeamModel
+
+  """팀 ID"""
   teamId: Int!
+
+  """수정일"""
   updatedAt: DateTime!
+
+  """최종 수정자 유저 정보"""
+  user: UserModel
+
+  """최종 수정자 유저 ID"""
+  userId: Int!
 }
 
 type MatchModel {
@@ -237,6 +283,9 @@ type MatchModel {
   description: String
   endTime: String!
   id: Int!
+
+  """포메이션 임시저장 여부"""
+  isFormationDraft: Boolean
   matchDate: Date!
   matchType: MatchType!
   opponentTeam: TeamModel
@@ -266,14 +315,20 @@ enum MemberType {
 }
 
 type Mutation {
+  """임시저장 포메이션 확정 (선택한 draft 승격, 기존 확정본 덮어쓰기, 나머지 draft 삭제)"""
+  confirmMatchFormation(draftId: Int!, userId: Int!): MatchFormationModel!
   createBestEleven(input: CreateBestElevenInput!): BestElevenModel!
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
   createMatch(input: CreateMatchInput!): MatchModel!
   createMatchAttendance(input: CreateMatchAttendanceInput!): MatchAttendanceModel!
+
+  """매치 포메이션 생성 (isDraft=false 확정 상태로 저장)"""
+  createMatchFormation(input: CreateMatchFormationInput!): MatchFormationModel!
   createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteBestEleven(id: Int!): Boolean!
   deleteMatch(id: Int!): Boolean!
+  deleteMatchAttendance(id: Int!, teamId: Int!): MatchAttendanceModel!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
   deleteUser(id: Int!): Boolean!
@@ -281,9 +336,13 @@ type Mutation {
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
   removeBackground(image: Upload!): BackgroundRemovalModel!
-  updateBestEleven(input: UpdateBestElevenInput!): BestElevenModel!
+
+  """매치 포메이션 임시저장 (새 draft 레코드 생성)"""
+  saveMatchFormationDraft(input: SaveMatchFormationDraftInput!): MatchFormationModel!
   updateMatch(input: UpdateMatchInput!): MatchModel!
   updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
+
+  """매치 포메이션 전술 수정"""
   updateMatchFormation(input: UpdateMatchFormationInput!): MatchFormationModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
@@ -386,6 +445,8 @@ type Query {
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findMatch(createdTeamId: Int!): [MatchModel!]!
   findMatchAttendance(matchId: Int!, teamId: Int!): [MatchAttendanceModel!]!
+
+  """확정된 매치 포메이션 조회 (isDraft=false)"""
   findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
   findTeam(name: String!): TeamModel
   findTeamMember(userId: Int!): [TeamMemberModel!]!
@@ -414,6 +475,21 @@ enum Role {
   COACH
   MANAGER
   PLAYER
+}
+
+"""매치 포메이션 임시저장"""
+input SaveMatchFormationDraftInput {
+  """매치 ID"""
+  matchId: Int!
+
+  """전술 정보 (JSON)"""
+  tactics: JSONObject = null
+
+  """팀 ID"""
+  teamId: Int!
+
+  """최종 수정자 유저 ID"""
+  userId: Int!
 }
 
 type TeamArrayModel {
@@ -492,25 +568,27 @@ enum UniformDesign {
   STRIPE_YELLOW
 }
 
-input UpdateBestElevenInput {
-  """베스트 일레븐 ID"""
-  id: Int!
-
-  """유저 ID"""
-  userId: Int!
-}
-
 input UpdateMatchAttendanceInput {
   """참석 여부 (attend: 참석, absent: 불참)"""
   attendanceStatus: AttendanceStatus!
 
   """참석 투표 ID"""
   id: Int!
+
+  """팀 ID"""
+  teamId: Int!
 }
 
+"""매치 포메이션 수정"""
 input UpdateMatchFormationInput {
+  """포메이션 ID"""
   id: Int!
+
+  """전술 정보 (JSON)"""
   tactics: JSONObject!
+
+  """최종 수정자 유저 ID"""
+  userId: Int!
 }
 
 input UpdateMatchInput {

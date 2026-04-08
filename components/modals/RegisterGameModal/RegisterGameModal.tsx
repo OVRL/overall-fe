@@ -125,12 +125,21 @@ function RegisterGameFormContent() {
 
             <MemoSection control={control} />
 
-            <div className="flex gap-3 pt-2 pl-3">
+            <div className="flex gap-3 pt-4 w-full">
+              <Button
+                type="button"
+                variant="ghost"
+                size="xl"
+                className="flex-1 font-bold rounded-[4px]"
+                onClick={onClose}
+              >
+                취소
+              </Button>
               <Button
                 type="submit"
                 variant="primary"
                 size="xl"
-                className="flex-1"
+                className="flex-1 font-bold rounded-[4px]"
                 disabled={isInFlight}
               >
                 {isInFlight ? (
@@ -138,15 +147,6 @@ function RegisterGameFormContent() {
                 ) : (
                   "등록"
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="xl"
-                className="flex-1"
-                onClick={onClose}
-              >
-                취소
               </Button>
             </div>
           </form>

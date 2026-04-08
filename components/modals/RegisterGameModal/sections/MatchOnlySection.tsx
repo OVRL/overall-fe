@@ -35,16 +35,16 @@ export function MatchOnlySection({
             name="opponentName"
             control={control}
             render={({ field }) => (
-              <TextField
-                label="상대팀"
-                placeholder="상대팀 명을 입력하세요"
-                className="text-Fill_Primary"
-                showBorderBottom={false}
-                value={field.value ?? ""}
-                name={field.name}
-                onChange={(e) => field.onChange(e.target.value)}
-                onBlur={field.onBlur}
-              />
+                <TextField
+                  label="상대팀"
+                  placeholder="상대팀 명을 입력하세요"
+                  className="text-Fill_Primary mb-8"
+                  showBorderBottom={false}
+                  value={field.value ?? ""}
+                  name={field.name}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                />
             )}
           />
           <FormSection label="유니폼">

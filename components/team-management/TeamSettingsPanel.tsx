@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, Suspense } from "react";
+import { X, Copy, Check, Settings } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
+import Dropdown from "@/components/ui/Dropdown";
 import { getValidImageSrc, cn } from "@/lib/utils";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
@@ -14,6 +16,8 @@ import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation
 import { useDeleteTeamMemberMutation } from "./hooks/useDeleteTeamMemberMutation";
 import useModal from "@/hooks/useModal";
 import locationIcon from "@/public/icons/location.svg";
+import closeIcon from "@/public/icons/close.svg";
+import Icon from "@/components/ui/Icon";
 import TextField from "@/components/ui/TextField";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { useUserId, parseUserId } from "@/hooks/useUserId";
@@ -73,12 +77,17 @@ const RoleDropdown = ({
     <div className="relative inline-block">
       <button
         onClick={() => !disabled && setOpen((p) => !p)}
-        className={`flex items-center gap-1 rounded-md bg-[#2a2a2a] border border-white/10 px-2.5 py-1.5 text-xs text-white min-w-[68px] ${disabled ? "opacity-50 cursor-default" : "hover:bg-[#333] cursor-pointer"
-          }`}
+        className={`flex items-center justify-between gap-1 rounded-md bg-[#252526] border border-transparent px-2.5 py-1.5 text-xs text-white min-w-[72px] transition-all ${
+          disabled
+            ? "opacity-50 cursor-default"
+            : open 
+              ? "border-Fill_AccentPrimary" 
+              : "hover:bg-[#2d2d2e] cursor-pointer"
+        }`}
       >
         <span className="flex-1 text-left">{value}</span>
         {!disabled && (
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={cn("transition-transform duration-200", open && "rotate-180")}>
             <path
               d="M1 1l4 4 4-4"
               stroke="#888"
@@ -93,13 +102,19 @@ const RoleDropdown = ({
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-20 min-w-[90px] rounded-lg bg-[#2a2a2a] border border-white/10 shadow-xl overflow-hidden">
+          <div className="absolute right-0 top-full mt-1.5 z-20 min-w-[100px] rounded-[0.625rem] bg-[#1a1a1b] border border-white/5 shadow-2xl overflow-hidden py-1.5">
             {availableRoles.map((r) => (
               <button
                 key={r}
-                onClick={() => { onChange(r); setOpen(false); }}
-                className={`w-full px-4 py-2.5 text-left text-xs transition-colors ${r === value ? "bg-primary/20 text-primary font-bold" : "text-white hover:bg-white/10"
-                  }`}
+                onClick={() => {
+                  onChange(r);
+                  setOpen(false);
+                }}
+                className={`w-full px-4 py-2 text-left text-[13px] transition-colors ${
+                  r === value
+                    ? "text-Fill_AccentPrimary"
+                    : "text-white/60 hover:text-white hover:bg-white/10"
+                }`}
               >
                 {r}
               </button>
@@ -207,35 +222,36 @@ function TeamInfoModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-md bg-[#1e1e1e] rounded-2xl shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto scrollbar-thin">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 pb-20 md:pb-4">
+      <div className="relative w-full max-w-md bg-[#1e1e1e] rounded-2xl shadow-2xl border border-white/10 max-h-[75vh] md:max-h-[90vh] overflow-y-auto scrollbar-thin">
         {/* 헤더 */}
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#1e1e1e] px-6 py-5 border-b border-white/10">
-          <h2 className="text-base font-bold text-white">팀 정보 설정</h2>
+        <div className="sticky top-0 z-10 bg-[#1e1e1e] px-6 py-5">
+          <h2 className="pt-2 w-full text-center text-lg font-semibold text-white">
+            팀 정보 설정
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-xl leading-none"
+            className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1"
           >
-            ×
+            <Icon src={closeIcon} alt="close" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* 클럽 이름 */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400">클럽 이름</label>
-            <input
-              value={teamName}
-              readOnly
-              className="w-full bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-500 outline-none cursor-not-allowed"
-            />
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">클럽 이름</label>
+            <div className="w-full bg-[#1a1a1a] border border-white/5 rounded-xl px-4 py-3 text-base text-gray-500">
+              {teamName}
+            </div>
           </div>
 
           {/* 주요 활동 지역 - ADDRESS_SEARCH 모달 */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">주요 활동지역</label>
             <button
               type="button"
-              className="w-full cursor-pointer text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+              className="w-full cursor-pointer text-left outline-none"
               onClick={() =>
                 openModal({
                   onComplete: ({ address, code }) => {
@@ -245,44 +261,38 @@ function TeamInfoModal({
                 })
               }
             >
-              <TextField
-                label="주요 활동지역"
-                placeholder="클릭해서 주요 활동 장소를 찾아보세요"
-                type="text"
-                showBorderBottom={false}
-                leftIcon={locationIcon}
-                leftIconClassName="text-white/50"
-                value={locationName}
-                readOnly
-                className="pointer-events-none"
-                onChange={() => {}}
-              />
+              <div className="w-full flex items-center gap-2.5 py-2">
+                <Image src={locationIcon} alt="location" width={20} height={20} className="opacity-50" />
+                <span className={cn("text-base truncate", locationName ? "text-white" : "text-gray-400")}>
+                  {locationName || "클릭해서 주요 활동 장소를 찾아보세요"}
+                </span>
+              </div>
             </button>
           </div>
 
           {/* 클럽 창단일 */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400">클럽 창단일</label>
-            <div className="flex items-center gap-2.5 bg-[#2a2a2a] border border-white/10 rounded-xl px-4 py-3">
-              <span className="text-gray-500">📅</span>
-              <span className="text-sm text-gray-400">{foundedDate}</span>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">클럽 창단일</label>
+            <div className="flex items-center gap-2.5 bg-[#2a2a2a] border border-white/10 rounded-xl px-4 py-3 text-base text-gray-400">
+              <span>📅</span>
+              <span>{foundedDate}</span>
             </div>
           </div>
 
           {/* 클럽 소개 */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400">클럽 소개</label>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">클럽 소개</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full bg-[#2a2a2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-primary/60 transition-colors resize-none"
+              className="w-full bg-[#2a2a2a] border border-white/10 rounded-xl px-4 py-3 text-base text-white outline-none focus:border-primary/60 transition-colors resize-none"
             />
           </div>
 
           {/* 클럽 엠블럼 - 실제 파일 선택 */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400">클럽 엠블럼</label>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">클럽 엠블럼</label>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0">
                 <Image
@@ -312,20 +322,20 @@ function TeamInfoModal({
           </div>
 
           {/* 홈 유니폼 - 실제 이미지 */}
-          <div className="space-y-3">
-            <label className="text-xs font-semibold text-gray-400">홈 유니폼</label>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">홈 유니폼</label>
             <UniformGrid selected={homeDesign} onSelect={setHomeDesign} />
           </div>
 
           {/* 어웨이 유니폼 - 실제 이미지 */}
-          <div className="space-y-3">
-            <label className="text-xs font-semibold text-gray-400">어웨이 유니폼</label>
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-gray-400">어웨이 유니폼</label>
             <UniformGrid selected={awayDesign} onSelect={setAwayDesign} />
           </div>
         </div>
 
         {/* 저장 버튼 */}
-        <div className="sticky bottom-0 bg-[#1e1e1e] px-6 py-4 border-t border-white/10">
+        <div className="sticky bottom-0 bg-[#1e1e1e] px-6 py-4">
           <Button
             variant="primary"
             size="m"
@@ -336,6 +346,67 @@ function TeamInfoModal({
           >
             저장
           </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
+// 초대 링크 모달
+// ──────────────────────────────────────────────
+function InviteLinkModal({ inviteLink, onClose }: { inviteLink: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteLink).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 pb-20 md:pb-4">
+      <div className="relative w-full max-w-md bg-[#1a1a1a] rounded-2xl shadow-2xl border border-white/10 max-h-[75vh] md:max-h-none overflow-y-auto">
+        {/* 헤더 */}
+        <div className="bg-[#1a1a1a] px-6 py-5">
+          <h2 className="pt-2 w-full text-center text-lg font-semibold text-white">
+            초대 링크
+          </h2>
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors p-1"
+          >
+            <Icon src={closeIcon} alt="close" />
+          </button>
+        </div>
+
+        {/* 내용 */}
+        <div className="px-6 py-6 space-y-4">
+          <p className="text-sm text-gray-400 leading-relaxed">
+            아래 링크를 공유하면 새로운 팀원을 초대할 수 있습니다.
+          </p>
+          {/* 링크 박스 */}
+          <div className="bg-[#111] border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-2">
+            <span className="flex-1 text-sm text-gray-300 font-medium truncate select-all">
+              {inviteLink}
+            </span>
+          </div>
+          {/* 복사 버튼 */}
+          <button
+            onClick={handleCopy}
+            className={cn(
+              "w-full h-[52px] flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all",
+              copied
+                ? "bg-green-500/20 border border-green-500/40 text-green-400"
+                : "bg-[#b8ff12] text-black hover:bg-[#c8ff32] active:bg-[#a0e000]"
+            )}
+          >
+            {copied ? (
+              <><Check size={16} /> 복사 완료!</>
+            ) : (
+              <><Copy size={16} /> 링크 복사하기</>
+            )}
+          </button>
         </div>
       </div>
     </div>
@@ -437,15 +508,16 @@ function KickModal({
           {/* 사유 선택 */}
           <div className="space-y-2">
             <label className="text-xs text-gray-400">방출 사유</label>
-            <select 
+            <Dropdown
+              options={[
+                { label: "이사", value: "이사" },
+                { label: "개인적인 이유", value: "개인적인 이유" },
+                { label: "기타", value: "기타" },
+              ]}
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full bg-[#1c1c1c] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-white/20"
-            >
-              <option value="이사">이사</option>
-              <option value="개인적인 이유">개인적인 이유</option>
-              <option value="기타">기타</option>
-            </select>
+              onChange={(val: string) => setReason(val)}
+              triggerClassName="h-10 text-xs bg-[#1c1c1c] border-white/10"
+            />
           </div>
 
           {/* 블랙리스트 */}
@@ -584,6 +656,7 @@ function TeamSettingsPanelInner({
 
   // 상태는 뮤테이션 처리를 위한 임시 상태로만 존재 (UI 표시는 Relay Store 데이터 기반)
   const inviteLink = "https://ovr-log.com/invite/abc123xyz"; // 백업용 (차후 구현 여부에 따라 변경)
+  const [showInviteModal, setShowInviteModal] = useState(false);
   
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [roleModal, setRoleModal] = useState<{
@@ -743,97 +816,94 @@ function TeamSettingsPanelInner({
             onSave={handleInfoSave}
           />
         )}
-      <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-4xl mx-auto w-full">
-        {/* 페이지 제목 */}
+        {showInviteModal && (
+          <InviteLinkModal
+            inviteLink={inviteLink}
+            onClose={() => setShowInviteModal(false)}
+          />
+        )}
+      <div className="px-4 md:px-6 pt-6 pb-4">
         <h1 className="text-xl font-bold text-white">팀 설정</h1>
+      </div>
+      <div className="px-4 md:px-6 pb-6 space-y-4 md:space-y-6">
 
         {/* ──── 팀 정보 카드 ──── */}
         <section className="bg-[#1a1a1a] rounded-2xl border border-white/8 overflow-hidden">
-          <div className="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5 pb-3">
-            <h2 className="text-sm font-semibold text-white">팀 정보</h2>
-            {isActualManager && (
+          <div className="flex items-center justify-between px-4 md:px-6 pt-6 pb-2">
+            <h2 className="text-[20px] font-bold text-white">팀 정보</h2>
+            <div className="flex items-center gap-2">
+              {/* 초대 링크 버튼 */}
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="h-[36px] flex items-center gap-2 bg-[#3e3e3e] rounded-[8px] px-3 hover:bg-[#4a4a4a] transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="#D6D6D5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="#D6D6D5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-[14px] font-semibold text-[#d6d6d5]">초대 링크</span>
+              </button>
+              {/* 팀 정보 설정 버튼 */}
               <button
                 onClick={() => setShowInfoModal(true)}
-                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/15 rounded-lg px-3 py-1.5 hover:bg-white/5 transition-colors"
+                className="h-[36px] flex items-center gap-2 bg-[#3e3e3e] rounded-[8px] px-3 hover:bg-[#4a4a4a] transition-colors"
               >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                팀 정보 설정
+                <Settings size={18} className="text-[#d6d6d5]" />
+                <span className="text-[14px] font-semibold text-[#d6d6d5]">팀 정보 설정</span>
               </button>
-            )}
+            </div>
           </div>
 
-          <div className="px-4 md:px-6 pb-4 md:pb-6 flex sm:flex-row flex-col gap-4 md:gap-5 items-start">
+          <div className="px-4 md:px-8 pb-10 mt-6 flex sm:flex-row flex-col gap-8 md:gap-12 items-start">
             {/* 팀 엠블럼 */}
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-[#2a2a2a] border-2 border-white/15 shrink-0">
+            <div className="w-[84px] h-[84px] md:w-[100px] md:h-[100px] rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0">
               <Image
                 src={getValidImageSrc(emblemSrc, "/images/teamemblum_default.webp")}
                 alt="Team Logo"
-                width={64}
-                height={64}
+                width={100}
+                height={100}
                 className="object-cover w-full h-full"
               />
             </div>
 
             {/* 팀 정보 */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-white mb-1">{teamName}</h3>
-              <p className="text-xs text-gray-500 mb-4 leading-relaxed">{description}</p>
+            <div className="flex-1 min-w-0 w-full">
+              <h3 className="text-2xl md:text-[28px] font-bold text-white mb-1 md:mb-2 tracking-tight">{teamName}</h3>
+              <p className="text-[16px] text-[#e0e0e0] mb-4 leading-relaxed">
+                {description || "열정과 실력을 겸비한 아마추어 축구팀입니다."}
+              </p>
 
-              <div className="space-y-1.5">
+              <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-[10px] text-gray-600 mb-0.5">주요 활동 지역</p>
-                  <p className="text-sm font-semibold text-white">{locationName}</p>
+                  <p className="text-xs md:text-sm font-semibold text-[#8b8b8b] mb-2">주요 활동 지역</p>
+                  <p className="text-sm md:text-base font-normal text-white">{locationName}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-600 mb-0.5">창단일</p>
-                  <p className="text-sm font-semibold text-white">{foundedDate}</p>
+                  <p className="text-xs md:text-sm font-semibold text-[#8b8b8b] mb-1">창단일</p>
+                  <p className="text-sm md:text-base font-normal text-white">{foundedDate}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-600 mb-0.5">유니폼</p>
-                  <div className="flex items-center gap-4 mt-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-gray-600">홈</span>
-                      <Image src={getValidImageSrc(homeImagePath)} alt="홈 유니폼" width={32} height={32} className="object-contain" />
+                  <p className="text-xs md:text-sm font-semibold text-[#8b8b8b] mb-2">유니폼</p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="w-[57px] flex flex-col items-center gap-2">
+                      <Image src={getValidImageSrc(homeImagePath)} alt="Home uniform" width={53} height={52} className="object-contain" />
+                      <span className="text-[15px] font-normal text-white">Home</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-gray-600">어웨이</span>
-                      <Image src={getValidImageSrc(awayImagePath)} alt="어웨이 유니폼" width={32} height={32} className="object-contain" />
+                    <div className="w-[57px] flex flex-col items-center gap-2">
+                      <Image src={getValidImageSrc(awayImagePath)} alt="Away uniform" width={53} height={52} className="object-contain" />
+                      <span className="text-[15px] font-normal text-white">Away</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* 초대 링크 */}
-          <div className="mx-4 md:mx-6 mb-4 md:mb-6 bg-[#111] rounded-xl border border-white/8 p-3 md:p-4">
-            <p className="text-xs font-semibold text-gray-400 mb-2 md:mb-3">초대 링크</p>
-            <div className="flex gap-2">
-              <div className="flex-1 bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-500 truncate">
-                {inviteLink}
-              </div>
-              <button
-                onClick={handleCopyLink}
-                className="bg-primary text-black text-xs font-bold px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
-              >
-                링크 복사
-              </button>
-            </div>
-          </div>
         </section>
 
         {/* ──── 선수단 테이블 ──── */}
         <section className="bg-[#1a1a1a] rounded-2xl border border-white/8 overflow-hidden">
-          <div className="px-4 md:px-6 pt-4 md:pt-5 pb-3">
-            <h2 className="text-sm font-semibold text-white">선수단</h2>
+          <div className="px-4 md:px-6 pt-6 pb-4">
+            <h2 className="text-[20px] font-bold text-white">선수단</h2>
           </div>
 
           <div className="overflow-x-auto scrollbar-hide">

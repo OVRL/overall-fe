@@ -33,7 +33,6 @@ const bestElevenQuery = graphql`
     }
     findMatchFormation(matchId: $matchId, teamId: $teamId) {
       id
-      quarter
       tactics
     }
   }

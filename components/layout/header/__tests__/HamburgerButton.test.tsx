@@ -63,7 +63,7 @@ describe("HamburgerButton", () => {
     expect(screen.getByTestId("hamburger-menu-content")).toBeInTheDocument();
     expect(defaultProps.onToggle).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: /메뉴 닫기/i }));
+    fireEvent.click(screen.getByRole("button", { name: /내 정보 닫기/i }));
     expect(screen.queryByTestId("hamburger-menu-content")).not.toBeInTheDocument();
   });
 
@@ -76,7 +76,7 @@ describe("HamburgerButton", () => {
   it("PC에서 툴팁 내 닫기 클릭 시 툴팁이 사라진다", () => {
     useMediaQuery.mockReturnValue(true);
     render(<HamburgerButton {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /메뉴 열기/i }));
+    fireEvent.click(screen.getByRole("button", { name: /내 정보 보기/i }));
     const content = screen.getByTestId("hamburger-menu-content");
     fireEvent.click(within(content).getByRole("button", { name: /닫기/i }));
     expect(screen.queryByTestId("hamburger-menu-content")).not.toBeInTheDocument();

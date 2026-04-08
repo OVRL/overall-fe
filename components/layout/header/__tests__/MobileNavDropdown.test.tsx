@@ -1,6 +1,12 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MobileNavDropdown } from "../MobileNavDropdown";
 
+jest.mock("@/components/GlobalPortal/GlobalPortal", () => ({
+  GlobalPortalConsumer: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 jest.mock("../RegisterGameButton", () => {
   return function MockRegisterGameButton() {
     return <li data-testid="register-game-button">경기 등록하기</li>;
@@ -44,7 +50,7 @@ describe("MobileNavDropdown", () => {
 
   it("nav가 id와 aria-label로 렌더링된다", () => {
     render(<MobileNavDropdown {...defaultProps} />);
-    const nav = screen.getByRole("navigation", { name: /모바일 네비게이션/i });
+    const nav = screen.getByRole("navigation", { name: /모바일 전체 메뉴/i });
     expect(nav).toHaveAttribute("id", "mobile-dropdown-menu");
   });
 

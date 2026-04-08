@@ -103,7 +103,7 @@ const DetailAddressSearchModal = ({
           value={inputValue}
           onChange={setInputValue}
         />
-        <div className="flex-1 overflow-y-auto w-full flex flex-col">
+        <div className="flex-1 overflow-y-auto w-full flex flex-col px-3">
           <span className="font-semibold text-sm leading-4 text-Label-Primary mb-2">
             검색 결과
           </span>

@@ -93,11 +93,11 @@ const PlayerListBoard = ({
         선수 목록 및 검색
       </h2>
 
-      <div className="hidden md:flex justify-start gap-2 mt-6">
+      <div className="hidden md:flex justify-start mt-3">
         <label htmlFor="playerSearch" className="sr-only">
           선수명 검색
         </label>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 w-full max-w-[380px]">
           <input
             id="playerSearch"
             name="playerSearch"
@@ -107,12 +107,12 @@ const PlayerListBoard = ({
             onKeyDown={handleKeyDown}
             placeholder="선수명 검색"
             autoComplete="off"
-            className="w-35 bg-surface-card rounded-[0.625rem] px-4 py-1.5 text-white text-sm focus:outline-none transition-colors placeholder:text-Label-Secondary placeholder:text-sm"
+            className="flex-1 h-10 bg-surface-card border border-white/5 rounded-xl px-4 text-white text-sm focus:outline-none focus:border-white/20 transition-colors placeholder:text-Label-Secondary"
           />
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-Fill_Quatiary py-1 px-3 h-7.5 rounded-[0.625rem] text-Label-Tertiary text-xs hover:text-white transition-colors"
+            className="h-10 bg-Fill_Quatiary px-5 rounded-xl text-Label-Tertiary text-sm font-medium hover:text-white transition-colors whitespace-nowrap"
             aria-label="입력한 이름으로 선수 검색"
           >
             검색

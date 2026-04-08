@@ -479,13 +479,13 @@ export default function InHouseMatchPanel({ onBack }: { onBack: () => void }) {
                                         <div className="relative">
                                             <button onClick={() => setShowTeamMenu(!showTeamMenu)} className="p-2 text-gray-400 hover:text-white transition-all bg-white/5 rounded-full"><Menu size={20} /></button>
                                             {showTeamMenu && (
-                                                <div className="absolute right-0 top-12 w-48 bg-[#222] border border-white/10 rounded-2xl p-2 shadow-2xl z-40 overflow-hidden">
+                                                <div className="absolute right-0 top-12 w-48 bg-[#1a1a1b] border border-white/5 rounded-xl p-2 shadow-2xl z-40 overflow-hidden">
                                                     <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
                                                         <span className="text-[10px] font-bold text-gray-500">팀 변경 (선택된 선수)</span>
                                                         <button onClick={() => setShowTeamMenu(false)}><X size={12} className="text-gray-500" /></button>
                                                     </div>
                                                     {(["A", "B", "C"] as TeamType[]).filter(t => t !== selectedTeam && (t !== "C" || matchMode === "3WAY")).map(team => (
-                                                        <button key={team} onClick={() => handleReassignSelectedPlayer(team)} className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 rounded-xl transition-all flex items-center gap-2">
+                                                        <button key={team} onClick={() => handleReassignSelectedPlayer(team)} className="w-full text-left px-3 py-2.5 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2">
                                                             <span className={cn("w-2 h-2 rounded-full", team === "A" ? "bg-red-500" : team === "B" ? "bg-yellow-500" : "bg-blue-500")} />{team}팀으로 바꾸기
                                                         </button>
                                                     ))}

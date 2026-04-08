@@ -55,7 +55,9 @@ function UniformOption({
           aria-hidden
         />
       )}
-      <span className="text-Label-Tertiary">{label}</span>
+      <span className={cn(isSelected ? "text-white" : "text-Label-Tertiary")}>
+        {label}
+      </span>
     </button>
   );
 }

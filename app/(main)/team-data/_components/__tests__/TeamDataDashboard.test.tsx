@@ -61,7 +61,7 @@ describe("TeamDataDashboard 컴포넌트", () => {
   it("제목과 하위 컴포넌트들을 정상적으로 렌더링해야 한다", () => {
     render(<TeamDataDashboard initialPlayers={mockInitialPlayers} />);
 
-    expect(screen.getByText("팀 데이터")).toBeInTheDocument();
+    expect(screen.getByText("선수 기록")).toBeInTheDocument();
     expect(screen.getByTestId("ranking-carousel")).toBeInTheDocument();
     expect(screen.getByTestId("player-list-board")).toBeInTheDocument();
   });

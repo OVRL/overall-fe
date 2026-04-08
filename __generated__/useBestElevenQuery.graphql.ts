@@ -46,7 +46,6 @@ export type useBestElevenQuery$data = {
   };
   readonly findMatchFormation: ReadonlyArray<{
     readonly id: number;
-    readonly quarter: number;
     readonly tactics: any | null | undefined;
   }>;
 };
@@ -273,13 +272,6 @@ v5 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "quarter",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "tactics",
         "storageKey": null
       }
@@ -311,16 +303,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "3cf87bfaa8975da4ad61d2101d99b05b",
+    "cacheID": "88f390a4fad87920f7355db68972c222",
     "id": null,
     "metadata": {},
     "name": "useBestElevenQuery",
     "operationKind": "query",
-    "text": "query useBestElevenQuery(\n  $teamId: Int!\n  $matchId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    quarter\n    tactics\n  }\n}\n"
+    "text": "query useBestElevenQuery($teamId: Int!, $matchId: Int!) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    tactics\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3bea3281e92d732cc8dfb8a1e3abe1e0";
+(node as any).hash = "e6cbd976f5f6bd789c39b792d4b4e683";
 
 export default node;

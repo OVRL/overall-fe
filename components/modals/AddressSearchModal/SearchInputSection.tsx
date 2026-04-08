@@ -11,14 +11,12 @@ const SearchInputSection = ({
   value: string;
   onChange: (value: string) => void;
 }) => (
-  <div className="flex flex-col gap-3.75">
+  <div className="flex flex-col gap-3.75 px-3">
     <span className="font-semibold text-sm leading-4 text-Label-Primary">
       주소 검색
     </span>
-    <div className="relative text-Fill_Primary">
-      <div className="absolute bottom-3.25 left-0 p-0.75">
-        <Icon src={search} width={24} height={24} />
-      </div>
+    <div className="flex items-center border-b border-white/20 pb-3.75 gap-2 text-Fill_Primary">
+      <Icon src={search} width={24} height={24} className="shrink-0" />
       <input
         type="text"
         id={id}
@@ -26,7 +24,7 @@ const SearchInputSection = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder="지역이나 동네로 검색하기"
         className={cn(
-          "w-full bg-transparent pb-3.75 text-base text-Label-Tertiary placeholder:text-Label-Tertiary outline-none border-b border-Fill_Tertiary transition-colors pl-7.25",
+          "flex-1 bg-transparent text-base text-Label-Tertiary placeholder:text-Label-Tertiary outline-none",
         )}
       />
     </div>
