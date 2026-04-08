@@ -37,7 +37,7 @@ const useProfileImageCanvas = ({
           vertical: false,
         },
         "image/webp",
-        { width: 200, height: 200 },
+        { width: 500, height: 500 },
       );
       return croppedImage;
     } catch (e) {

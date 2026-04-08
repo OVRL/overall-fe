@@ -61,7 +61,7 @@ describe("useProfileImageCanvas", () => {
       0, // rotation
       { horizontal: false, vertical: false }, // flip
       "image/webp", // type
-      { width: 200, height: 200 }, // targetSize
+      { width: 500, height: 500 }, // targetSize
     );
   });
 
