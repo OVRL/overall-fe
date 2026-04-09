@@ -36,6 +36,12 @@ type DesktopHeaderProps = {
   isSaveDraftPending?: boolean;
   onSaveConfirm?: () => void;
   isSaveConfirmPending?: boolean;
+  /** 확정 버튼 비활성 (쿼터 미완성 등) — `onSaveConfirm`이 있어도 적용 */
+  saveConfirmDisabled?: boolean;
+  /** 좌측 뒤로가기 옆 안내 문구 */
+  hintText?: string;
+  /** 확정 버튼 라벨 */
+  confirmLabel?: string;
 };
 
 export type HeaderProps = MobileHeaderProps | DesktopHeaderProps;
@@ -128,28 +134,40 @@ const Header = (props?: HeaderProps) => {
     isSaveDraftPending: desktopSaveDraftPending,
     onSaveConfirm: desktopOnSaveConfirm,
     isSaveConfirmPending: desktopSaveConfirmPending,
+    saveConfirmDisabled: desktopSaveConfirmDisabled,
+    hintText: desktopHintText,
+    confirmLabel: desktopConfirmLabel,
   } = p;
   const handleBack = () => {
     if (onBack) onBack();
     else router.back();
   };
 
+  const desktopHint =
+    desktopHintText ??
+    "쿼터별로 선수를 배정한 뒤 확정해 주세요.";
+  const desktopConfirm = desktopConfirmLabel ?? "확정";
+  const desktopConfirmBlocked =
+    desktopSaveConfirmPending === true ||
+    desktopOnSaveConfirm == null ||
+    desktopSaveConfirmDisabled === true;
+
   return (
-    <header className="flex items-center justify-between p-4">
-      <div className="flex items-center">
+    <header className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex min-w-0 flex-1 items-start gap-1 md:items-center">
         <button
           type="button"
           onClick={handleBack}
-          className="p-3 transition-all cursor-pointer hover:bg-gray-100/10 active:scale-95"
+          className="shrink-0 p-3 transition-all cursor-pointer hover:bg-gray-100/10 active:scale-95"
           aria-label="뒤로 가기"
         >
           <Icon src={arrowBack} alt="뒤로 가기" width={24} height={24} />
         </button>
-        <p className="text-[#F7F8F8] font-semibold leading-6">
-          모든 변경사항은 저장 버튼을 눌러야 반영됩니다.
+        <p className="text-text-primary min-w-0 pt-2 text-sm font-semibold leading-snug md:pt-0 md:text-base md:leading-6">
+          {desktopHint}
         </p>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 md:gap-4">
         <Button
           variant="line"
           size="m"
@@ -175,12 +193,10 @@ const Header = (props?: HeaderProps) => {
           variant="primary"
           size="m"
           className="w-fit p-3 font-semibold"
-          disabled={
-            desktopSaveConfirmPending === true || desktopOnSaveConfirm == null
-          }
+          disabled={desktopConfirmBlocked}
           onClick={() => desktopOnSaveConfirm?.()}
         >
-          포메이션 저장하기
+          {desktopConfirm}
         </Button>
       </div>
     </header>

@@ -22,6 +22,14 @@ import {
   getTeamMemberProfileImageRawUrl,
 } from "@/lib/playerPlaceholderImage";
 import { parseMatchIdForApi } from "@/utils/match/parseMatchIdForApi";
+import { toast } from "@/lib/toast";
+import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
+
+/** 용병 UI 표시명(`이름 (용병)`)에서 API용 참석자 이름만 추출 */
+function mercenaryNameForApi(displayName: string): string {
+  const trimmed = displayName.replace(/\s*\(용병\)\s*$/u, "").trim();
+  return trimmed.length > 0 ? trimmed : displayName.trim();
+}
 
 interface UsePlayerSearchProps {
   matchId: number;
@@ -270,6 +278,9 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
                   userId: player.userId,
                   attendanceStatus: targetStatus,
                   memberType: player.memberType,
+                  ...(player.memberType === "MERCENARY"
+                    ? { name: mercenaryNameForApi(player.name) }
+                    : {}),
                 },
               },
               onCompleted: resolve,
@@ -295,7 +306,12 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
       hideModal();
     } catch (err) {
       console.error("Failed to commit match attendance changes", err);
-      // Handle error gracefully
+      toast.error(
+        getGraphQLErrorMessage(
+          err,
+          "참석 변경을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }

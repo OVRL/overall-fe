@@ -2,9 +2,9 @@ import { useRouter as useNextRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 /**
- * 이제 RN 웹뷰 단일 스택 구조를 사용하므로, 
- * ROUTE_CHANGE 이벤트 없이 순수 Next.js 라우터 그대로를 반환하거나 
- * 필요 시 래핑하여 사용합니다.
+ * RN 웹뷰·일반 웹 공통으로 Next.js App Router 인스턴스를 씁니다.
+ * 포메이션 등 일부 화면에서는 `FormationNavigationGuardProvider`와
+ * `useFormationLeaveNavigationGuard`로 감싼 인스턴스를 쓰는 것이 안전합니다.
  */
 export const useBridgeRouter = (): AppRouterInstance => {
   const router = useNextRouter();

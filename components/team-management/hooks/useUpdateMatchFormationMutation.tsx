@@ -13,18 +13,12 @@ const updateMatchFormationMutation = graphql`
 export const useUpdateMatchFormationMutation = () => {
   const [commit, isInFlight] = useMutation<MutationType>(updateMatchFormationMutation);
 
-  const executeMutation = (
-    id: number,
-    quarter: number,
-    userId: number,
-    tactics: any,
-  ) => {
+  const executeMutation = (id: number, userId: number, tactics: unknown) => {
     return new Promise((resolve, reject) => {
       commit({
         variables: {
           input: {
             id,
-            quarter,
             userId,
             tactics,
           },

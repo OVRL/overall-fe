@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c8c2198f192dbebe1ca65a550a39d3d6>>
+ * @generated SignedSource<<43e24782fc35aa03f808493414469775>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -303,12 +303,12 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "88f390a4fad87920f7355db68972c222",
+    "cacheID": "06672e278a92aa17697a995c957048fc",
     "id": null,
     "metadata": {},
     "name": "useBestElevenQuery",
     "operationKind": "query",
-    "text": "query useBestElevenQuery($teamId: Int!, $matchId: Int!) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    tactics\n  }\n}\n"
+    "text": "query useBestElevenQuery(\n  $teamId: Int!\n  $matchId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    tactics\n  }\n}\n"
   }
 };
 })();

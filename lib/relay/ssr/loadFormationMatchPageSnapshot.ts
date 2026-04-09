@@ -1,6 +1,6 @@
 import { fetchQuery } from "relay-runtime";
 import type { formationMatchPagePreloadQuery$data } from "@/__generated__/formationMatchPagePreloadQuery.graphql";
-import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarterDataFromTacticsDocument";
+import { buildFormationMatchPageSnapshot } from "@/lib/formation/buildFormationMatchPageSnapshot";
 import { pickPrimaryMatchFormationRow } from "@/lib/formation/pickPrimaryMatchFormationRow";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import type {
@@ -14,6 +14,7 @@ import { observableToPromise } from "@/lib/relay/observableToPromise";
 export type {
   FormationMatchPageSnapshot,
   FormationMatchQuarterSpec,
+  FormationMatchInitialBoardSource,
 } from "@/types/formationMatchPageSnapshot";
 
 /** 개발용: 터미널에서 구조가 한눈에 보이도록 pretty JSON으로 출력 */
@@ -55,20 +56,11 @@ function deriveSnapshot(
   const players = matchAttendanceRowsToAttendingPlayers(
     data.findMatchAttendance ?? [],
   );
-  const byId = new Map(players.map((p) => [p.id, p] as const));
-  const resolve = (teamMemberId: number) => byId.get(teamMemberId) ?? null;
-
-  const primary = pickPrimaryMatchFormationRow(data.findMatchFormation);
-  if (primary == null || primary.tactics == null) {
-    return { players, initialQuarters: null };
-  }
-
-  const initialQuarters = buildQuarterDataFromTacticsDocument(
-    primary.tactics,
+  return buildFormationMatchPageSnapshot({
+    players,
+    formationRows: data.findMatchFormation,
     quarterSpec,
-    resolve,
-  );
-  return { players, initialQuarters };
+  });
 }
 
 export async function loadFormationMatchPageSnapshotSSR(options: {
@@ -112,7 +104,6 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
         allRowIds: formationRows.map((r) => ({
           id: r.id,
           isDraft: r.isDraft,
-          quarter: r.quarter,
           updatedAt: r.updatedAt,
         })),
         primaryFormationRowIdUsedForInitialQuarters:
@@ -121,7 +112,11 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
       });
       devPrettyFormationPreloadLog("derived snapshot (full)", {
         matchFormation: {
-          primaryRowId: primaryFormationRow?.id ?? null,
+          boardRowId: snapshot.boardRowId,
+          initialBoardSource: snapshot.initialBoardSource,
+          confirmedFormationId: snapshot.confirmedFormationId,
+          draftFormationId: snapshot.draftFormationId,
+          primaryRowIdLegacy: primaryFormationRow?.id ?? null,
           allIds: formationRows.map((r) => r.id),
         },
         attendingPlayerCount: snapshot.players.length,

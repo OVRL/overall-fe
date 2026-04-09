@@ -31,6 +31,31 @@ jest.mock("@/hooks/useUserId", () => ({
 jest.mock("@/hooks/useIsMobile", () => ({
   useIsMobile: jest.fn(() => false), // 데스크톱 분기로 테스트
 }));
+jest.mock("@/hooks/bridge/useBridgeRouter", () => ({
+  useBridgeRouter: () => ({
+    back: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
+jest.mock("@/app/formation/_hooks/useConfirmMatchFormationMutation", () => ({
+  useConfirmMatchFormationMutation: () => ({
+    commit: jest.fn(),
+    isInFlight: false,
+  }),
+}));
+jest.mock(
+  "@/components/team-management/hooks/useUpdateMatchFormationMutation",
+  () => ({
+    useUpdateMatchFormationMutation: () => ({
+      executeMutation: jest.fn(() => Promise.resolve({})),
+      isInFlight: false,
+    }),
+  }),
+);
 
 // 데스크톱 분기: dynamic으로 로드되는 FormationBuilderDesktopWithDnd 모킹
 jest.mock("next/dynamic", () => ({
@@ -86,11 +111,20 @@ describe("FormationBuilder 컴포넌트", () => {
   );
 
   const mockManager = {
-    quarters: [{ id: 1, formation: "4-3-3", lineup: {} }],
+    quarters: [
+      {
+        id: 1,
+        type: "MATCHING" as const,
+        formation: "4-3-3" as const,
+        lineup: {},
+        matchup: { home: "A", away: "B" },
+      },
+    ],
     setQuarters: jest.fn(),
     addQuarter: jest.fn(),
     assignPlayer: jest.fn(),
     removePlayer: jest.fn(),
+    resetQuarters: jest.fn(),
   };
 
   beforeEach(() => {

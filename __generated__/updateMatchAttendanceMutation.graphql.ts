@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<12c0c8fc7f575bc4e047f22cacc753c3>>
+ * @generated SignedSource<<be8ae53e5393fd246286e4f03c420dc1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,6 +14,7 @@ export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type UpdateMatchAttendanceInput = {
   attendanceStatus: AttendanceStatus;
   id: number;
+  teamId: number;
 };
 export type updateMatchAttendanceMutation$variables = {
   input: UpdateMatchAttendanceInput;

@@ -9,8 +9,8 @@ const updateMatchFormationForDraftMutation = graphql`
   ) {
     updateMatchFormation(input: $input) {
       id
-      quarter
       tactics
+      updatedAt
     }
   }
 `;

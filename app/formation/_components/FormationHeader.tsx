@@ -8,12 +8,16 @@ import matchLineup from "@/public/icons/title_matchlineup.svg";
 
 type FormationHeaderProps = {
   onBack?: () => void;
-  /** 확정 저장 — `createMatchFormation` 등 (모바일 우측 「저장」과 동일) */
+  /** 확정 — 드래프트 있으면 confirm, 없으면 create */
   onSaveConfirm?: () => void;
   isSaveConfirmPending?: boolean;
+  /** 쿼터 미완성 등으로 확정 비활성 */
+  saveConfirmDisabled?: boolean;
   onSaveDraft?: () => void;
   isSaveDraftPending?: boolean;
   onReset?: () => void;
+  hintText?: string;
+  confirmLabel?: string;
 };
 
 const FormationHeader = (props: FormationHeaderProps) => {
@@ -36,8 +40,10 @@ const FormationHeader = (props: FormationHeaderProps) => {
             <Icon src={matchLineup} alt="로고" nofill />
           </div>
         }
-        rightLabel="저장"
-        saveConfirmDisabled={props.onSaveConfirm == null}
+        rightLabel={props.confirmLabel ?? "확정"}
+        saveConfirmDisabled={
+          props.onSaveConfirm == null || props.saveConfirmDisabled === true
+        }
         isSaveConfirmPending={props.isSaveConfirmPending}
         onRightClick={props.onSaveConfirm ?? (() => {})}
       />
@@ -52,6 +58,9 @@ const FormationHeader = (props: FormationHeaderProps) => {
       isSaveDraftPending={props.isSaveDraftPending}
       onSaveConfirm={props.onSaveConfirm}
       isSaveConfirmPending={props.isSaveConfirmPending}
+      saveConfirmDisabled={props.saveConfirmDisabled}
+      hintText={props.hintText}
+      confirmLabel={props.confirmLabel}
     />
   );
 };

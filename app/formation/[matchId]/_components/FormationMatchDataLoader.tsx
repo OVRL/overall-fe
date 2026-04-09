@@ -12,11 +12,10 @@ import { FormationMatchPageLoadingShell } from "../../_components/FormationMatch
 import type { FormationMatchPageSnapshot } from "@/types/formationMatchPageSnapshot";
 
 /**
- * RSC가 `children` 클라이언트 컴포넌트에 넘기는 `savedInitialQuarters`가
- * 페이로드 경로상 누락·지연되는 경우가 있어, 이미 부모 props로 안정 전달된
- * `ssrSnapshot.initialQuarters`를 동일 트리에서 주입합니다.
+ * RSC가 `children`으로 넘긴 props가 Flight 경로에서 누락·지연될 수 있어,
+ * 서버에서 이미 확정된 `ssrSnapshot`을 클라이언트 트리 안에서 다시 주입합니다.
  */
-function mergeSsrInitialQuartersIntoChildren(
+function mergeSsrFormationSnapshotIntoChildren(
   children: React.ReactNode,
   ssrSnapshot: FormationMatchPageSnapshot,
 ): React.ReactNode {
@@ -26,12 +25,17 @@ function mergeSsrInitialQuartersIntoChildren(
 
   return Children.map(children, (child) => {
     if (!isValidElement(child)) return child;
-    if (useSsrQuarters == null) return child;
     const prev = child.props as Record<string, unknown>;
-    return cloneElement(child, {
+    const patch: Record<string, unknown> = {
       ...prev,
-      savedInitialQuarters: useSsrQuarters,
-    } as Record<string, unknown>);
+      ssrDraftFormationId: ssrSnapshot.draftFormationId,
+      ssrInitialBoardSource: ssrSnapshot.initialBoardSource,
+      ssrConfirmedFormationId: ssrSnapshot.confirmedFormationId,
+    };
+    if (useSsrQuarters != null) {
+      patch.savedInitialQuarters = useSsrQuarters;
+    }
+    return cloneElement(child, patch as Record<string, unknown>);
   });
 }
 
@@ -103,7 +107,7 @@ export default function FormationMatchDataLoader({
       <ErrorBoundary fallback={errorFallback}>
         <FormationMatchContext.Provider value={{ matchId, teamId }}>
           <FormationMatchPlayersProvider players={ssrSnapshot.players}>
-            {mergeSsrInitialQuartersIntoChildren(children, ssrSnapshot)}
+            {mergeSsrFormationSnapshotIntoChildren(children, ssrSnapshot)}
           </FormationMatchPlayersProvider>
         </FormationMatchContext.Provider>
       </ErrorBoundary>

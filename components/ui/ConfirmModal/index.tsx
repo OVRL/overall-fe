@@ -11,7 +11,7 @@ export function ConfirmModal({ children, className }: ConfirmModalProps) {
   return (
     <div
       className={cn(
-        "w-[90vw] max-w-[340px] md:max-w-100 bg-surface-card border border-border-card rounded-xl p-5 md:p-6 flex flex-col gap-6 shadow-xl",
+        "w-[90vw] max-w-93 bg-gray-1200 rounded-[1.25rem] pt-12 pb-3 flex flex-col gap-3",
         className,
       )}
       onClick={(e) => e.stopPropagation()} // Prevent closing via backdrop mapping
@@ -31,7 +31,7 @@ function Title({
   return (
     <h2
       className={cn(
-        "text-white text-lg md:text-xl font-semibold text-center whitespace-pre-wrap",
+        "text-white text-[1.4375rem] font-semibold text-center whitespace-pre-wrap",
         className,
       )}
     >
@@ -50,7 +50,7 @@ function Description({
   return (
     <p
       className={cn(
-        "text-Label-Tertiary text-sm md:text-base text-center whitespace-pre-wrap mt-2",
+        "text-gray-400 text-center whitespace-pre-wrap font-semibold text-center",
         className,
       )}
     >
@@ -66,7 +66,11 @@ function Actions({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("flex gap-3 w-full", className)}>{children}</div>;
+  return (
+    <div className={cn("flex gap-3 px-6 pt-10 pb-6 w-full", className)}>
+      {children}
+    </div>
+  );
 }
 
 function CancelButton({

@@ -124,6 +124,10 @@ describe("FormationMatchDataLoader", () => {
               },
             ],
             initialQuarters: null,
+            initialBoardSource: "empty",
+            boardRowId: null,
+            confirmedFormationId: null,
+            draftFormationId: null,
           }}
         >
           <TestChild />

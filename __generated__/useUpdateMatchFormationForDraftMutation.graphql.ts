@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4e4ef93d6d4dfa8167629bbf68d25645>>
+ * @generated SignedSource<<2dce3382467ee6473e1acc44d00a0b31>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,6 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type UpdateMatchFormationInput = {
   id: number;
-  quarter: number;
   tactics: any;
   userId: number;
 };
@@ -21,8 +20,8 @@ export type useUpdateMatchFormationForDraftMutation$variables = {
 export type useUpdateMatchFormationForDraftMutation$data = {
   readonly updateMatchFormation: {
     readonly id: number;
-    readonly quarter: number;
     readonly tactics: any | null | undefined;
+    readonly updatedAt: any;
   };
 };
 export type useUpdateMatchFormationForDraftMutation = {
@@ -64,14 +63,14 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "quarter",
+        "name": "tactics",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "tactics",
+        "name": "updatedAt",
         "storageKey": null
       }
     ],
@@ -96,16 +95,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "04586e49cadaf47c7f7c8ef25802dbe2",
+    "cacheID": "93eb58cf1df095bfbb113ef0a774014f",
     "id": null,
     "metadata": {},
     "name": "useUpdateMatchFormationForDraftMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchFormationForDraftMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    quarter\n    tactics\n  }\n}\n"
+    "text": "mutation useUpdateMatchFormationForDraftMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "349019aca7b0f4e21f325e1d0192136a";
+(node as any).hash = "fdd89a765f6d5de1c9b551c83e7e608c";
 
 export default node;

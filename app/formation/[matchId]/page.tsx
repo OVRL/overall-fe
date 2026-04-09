@@ -120,6 +120,9 @@ export default async function FormationMatchPage({
         savedInitialQuarters={
           formationSsrSnapshot?.initialQuarters ?? undefined
         }
+        ssrDraftFormationId={formationSsrSnapshot?.draftFormationId}
+        ssrInitialBoardSource={formationSsrSnapshot?.initialBoardSource}
+        ssrConfirmedFormationId={formationSsrSnapshot?.confirmedFormationId}
       />
     </FormationMatchDataLoader>
   );
