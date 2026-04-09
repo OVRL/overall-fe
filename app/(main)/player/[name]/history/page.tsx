@@ -88,6 +88,11 @@ function PlayerHistoryDataView() {
   );
   const stats = playerMember?.overall;
   const isDebutExpected = !stats || stats.appearances === 0;
+  const getPartnerAvatarUrl = (partnerName: string) => {
+    if (!partnerName || partnerName === '기록 없음') return '/icons/logo_OVR.svg';
+    const member = queryData?.findManyTeamMember?.members?.find((m: any) => m.user?.name === partnerName);
+    return member?.user?.profileImage ? getValidImageSrc(member.user.profileImage) : '/icons/logo_OVR.svg';
+  };
 
   const [loading, setLoading] = useState(true);
   const [showOpening, setShowOpening] = useState(false);
@@ -354,15 +359,14 @@ function PlayerHistoryDataView() {
              <h3 className="text-[18px] md:text-xl font-bold text-Label-Primary m-0">올타임 통합 기록 (통산)</h3>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
             {[
               { label: "통산 출장수", val: `${stats?.appearances || 0}경기` },
               { label: "통산 득점", val: `${stats?.goals || 0}골` },
               { label: "통산 도움", val: `${stats?.assists || 0}도움` },
               { label: "통산 공격포인트", val: `${stats?.attackPoints || 0}포인트` },
               { label: "통산 클린시트", val: `${stats?.cleanSheets || 0}회` },
-              { label: "MOM TOP 3", val: `${stats?.mom3 || 0}회` },
-              { label: "MOM TOP 8", val: `${stats?.mom8 || 0}회` },
+              { label: "MOM", val: `${(stats?.mom3 || 0) + (stats?.mom8 || 0)}회` },
             ].map((s, i) => (
               <div key={i} className="bg-white dark:bg-surface-secondary rounded-2xl p-4 md:p-5 flex flex-col gap-1 md:gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-Label-Tertiary/10 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(0,0,0,0.06)]">
                 <span className="text-[12px] md:text-[13px] font-semibold tracking-tight text-Label-Tertiary">{s.label}</span>
@@ -384,8 +388,8 @@ function PlayerHistoryDataView() {
                <table className="w-full text-left min-w-[800px] border-collapse">
                  <thead>
                    <tr>
-                     {["연도", "득점", "도움", "클린시트", "출장", "승/무/패", "승률", "개인승점", "MOM점수", "TOP 3", "TOP 8"].map((h, i) => (
-                       <th key={h} className={`py-3 md:py-4 px-3 text-center text-[12px] md:text-sm font-bold text-Label-Tertiary uppercase border-b border-Label-Tertiary/10 bg-gray-50/50 dark:bg-surface-secondary/50 whitespace-nowrap ${i === 0 ? 'text-left pl-4 md:pl-5' : ''} ${i === 10 ? 'pr-4 md:pr-5' : ''}`}>
+                     {["연도", "득점", "도움", "클린시트", "출장", "승/무/패", "승률", "개인승점", "MOM"].map((h, i) => (
+                       <th key={h} className={`py-3 md:py-4 px-3 text-center text-[12px] md:text-sm font-bold text-Label-Tertiary uppercase border-b border-Label-Tertiary/10 bg-gray-50/50 dark:bg-surface-secondary/50 whitespace-nowrap ${i === 0 ? 'text-left pl-4 md:pl-5 sticky left-0 z-20 bg-white dark:bg-background border-r border-Label-Tertiary/10 dark:border-transparent drop-shadow-[2px_0_4px_rgba(0,0,0,0.02)]' : ''} ${i === 8 ? 'pr-4 md:pr-5' : ''}`}>
                          {h}
                        </th>
                      ))}
@@ -394,7 +398,7 @@ function PlayerHistoryDataView() {
                  <tbody className="divide-y divide-Label-Tertiary/5">
                    {historyData.map((r, idx) => (
                      <tr key={r.year} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                       <td className="py-4 md:py-5 px-3 pl-4 md:pl-5 font-black tracking-tight text-[14px] md:text-[15px] whitespace-nowrap">
+                       <td className="py-4 md:py-5 px-3 pl-4 md:pl-5 font-black tracking-tight text-[14px] md:text-[15px] whitespace-nowrap sticky left-0 z-10 bg-white dark:bg-background border-r border-Label-Tertiary/10 dark:border-transparent drop-shadow-[2px_0_4px_rgba(0,0,0,0.02)]">
                          <span className={idx === 0 ? "text-blue-500" : "text-Label-Primary"}>{r.year} {idx === 0 && '(현재)'}</span>
                        </td>
                        <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] text-Label-Primary">{r.goals}</td>
@@ -408,9 +412,7 @@ function PlayerHistoryDataView() {
                        </td>
                        <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] text-Label-Primary">{r.winRate}%</td>
                        <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] text-Label-Primary">{r.personalPoints}</td>
-                       <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] text-Label-Primary">{r.momScore}</td>
-                       <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] text-Label-Primary">{r.momTop3Count}</td>
-                       <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] pr-4 md:pr-5 text-Label-Primary">{stats?.mom8 || 0}</td>
+                       <td className="py-4 md:py-5 px-3 text-center font-bold tracking-tight text-[14px] md:text-[15px] pr-4 md:pr-5 text-Label-Primary">{r.momTop3Count + (stats?.mom8 || 0)}</td>
                      </tr>
                    ))}
                  </tbody>
@@ -466,6 +468,10 @@ function PlayerHistoryDataView() {
                         { value: 'attackPoints', label: '공격포인트', color: '#fcc419' },
                         { value: 'cleanSheets', label: '클린시트', color: '#00e5a0' },
                         { value: 'matches', label: '출장수', color: '#3182f6' },
+                        { value: 'personalPoints', label: '개인승점', color: '#a855f7' },
+                        { value: 'winRate', label: '승률', color: '#4cc9f0' },
+                        { value: 'ovr', label: '오버롤', color: '#ff9f1c' },
+                        { value: 'momTop3Count', label: 'MOM', color: '#f72585' },
                       ].map(opt => (
                         <button
                           key={opt.value}
@@ -512,9 +518,9 @@ function PlayerHistoryDataView() {
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} />
                         <Tooltip content={<CustomTooltip />} />
                         <Legend verticalAlign="top" align="right" height={36} wrapperStyle={{ fontSize: '13px', fontWeight: 600 }} />
-                        <Line type="monotone" dataKey="win" name="승리" stroke="#3182f6" strokeWidth={2.5} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="draw" name="무승부" stroke="#adb5bd" strokeWidth={2.5} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="lose" name="패배" stroke="#f04452" strokeWidth={2.5} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="win" name="승" stroke="#3182f6" strokeWidth={2.5} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="draw" name="무" stroke="#adb5bd" strokeWidth={2.5} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="lose" name="패" stroke="#f04452" strokeWidth={2.5} dot={{ r: 4 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -547,14 +553,14 @@ function PlayerHistoryDataView() {
            
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
              {[
-               { id: 1, title: '가장 많이 함께 뛴 동료', name: '기록 없음', value: '0쿼터', avatarUrl: '/mom.png' },
-               { id: 2, title: '나의 도움으로 득점한 선수', name: '기록 없음', value: '0골', avatarUrl: '/mom.png' },
-               { id: 3, title: '가장 많은 도움을 준 선수', name: '기록 없음', value: '0도움', avatarUrl: '/mom.png' },
-               { id: 4, title: '함께 클린시트를 만든 선수', name: '기록 없음', value: '0회', avatarUrl: '/mom.png' }
+               { id: 1, title: '가장 많이 함께 뛴 동료', name: '기록 없음', value: '0쿼터' },
+               { id: 2, title: '나의 도움으로 득점한 선수', name: '기록 없음', value: '0골' },
+               { id: 3, title: '가장 많은 도움을 준 선수', name: '기록 없음', value: '0도움' },
+               { id: 4, title: '함께 클린시트를 만든 선수', name: '기록 없음', value: '0회' }
              ].map(opt => (
                <div key={opt.id} className="bg-white dark:bg-surface-secondary rounded-[20px] p-4 md:p-5 flex flex-row items-center gap-4 shadow-[0_4px_16px_rgba(0,0,0,0.03)] dark:shadow-none border border-Label-Tertiary/10 transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_12px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 group">
                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-Label-Tertiary/10 bg-gray-50 dark:bg-surface-elevated flex-shrink-0 overflow-hidden relative flex items-center justify-center">
-                    <img src={opt.avatarUrl} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110 opacity-50 dark:opacity-20" />
+                    <img src={getPartnerAvatarUrl(opt.name)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110 opacity-50 dark:opacity-20" />
                   </div>
                   <div className="flex flex-col gap-0.5 w-full overflow-hidden">
                     <span className="text-[11px] md:text-[12px] font-bold text-Label-Tertiary truncate leading-tight">{opt.title}</span>
