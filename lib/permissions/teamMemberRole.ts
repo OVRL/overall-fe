@@ -11,6 +11,11 @@ export type TeamMemberRole = "COACH" | "MANAGER" | "PLAYER";
  * 알 수 없는 enum 값은 최소 권한(PLAYER)으로 처리합니다.
  */
 export function teamMemberRoleFromGraphQL(role: Role): TeamMemberRole {
+  // 백엔드/DB 마이그레이션 과도기용 하위 호환: 구 명칭 TEAM_MANAGER가 들어오면 MANAGER로 취급
+  if ((role as string) === "TEAM_MANAGER") {
+    return "MANAGER";
+  }
+
   switch (role) {
     case "COACH":
       return "COACH";
