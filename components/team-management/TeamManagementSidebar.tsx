@@ -32,6 +32,10 @@ const InvitationIcon = ({ active }: { active: boolean }) => <UserPlus size={20} 
 const MatchRecordIcon = ({ active }: { active: boolean }) => <ClipboardList size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 const DeletedPlayersIcon = ({ active }: { active: boolean }) => <UserMinus size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 
+// Pretext context initialization (if needed for more complex layouts, 
+// but here we primarily use it for the tablet horizontal menu logic as requested)
+import { prepare, layout } from '@chenglou/pretext';
+
 const menuItems: MenuItem[] = [
     {
         id: "settings",

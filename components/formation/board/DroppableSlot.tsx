@@ -94,6 +94,12 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
               : "bg-surface-card/80",
           )}
           onClick={onPositionSelect}
+          onTouchEnd={(e) => {
+            // \ubaa8\ubc14\uc77c: 250ms TouchSensor delay \uc5c6\uc774 \uc989\uc2dc \ud074\ub9ad \ucc98\ub9ac
+            e.preventDefault();
+            e.stopPropagation();
+            onPositionSelect();
+          }}
           aria-label={
             selectedPlayer
               ? `${selectedPlayer.name}을(를) ${positionName} 포지션에 배치`

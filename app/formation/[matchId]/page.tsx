@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 
 // Components
 import MatchScheduleCard from "@/components/formation/MatchScheduleCard/MatchScheduleCardClientOnly";
@@ -7,6 +8,7 @@ import { matchToScheduleCardData } from "@/lib/formation/matchToScheduleCardProp
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { verifyFormationMatchAccessSSR } from "@/utils/verifyFormationMatchAccessSSR";
 import FormationMatchDataLoader from "./_components/FormationMatchDataLoader";
+import { loadFormationMatchPageSnapshotSSR } from "@/lib/relay/ssr/loadFormationMatchPageSnapshot";
 
 type FormationMatchPageProps = {
   params: Promise<{ matchId: string }>;
@@ -73,6 +75,20 @@ export default async function FormationMatchPage({
     notFound();
   }
 
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken")?.value ?? null;
+
+  const formationSsrSnapshot = await loadFormationMatchPageSnapshotSSR({
+    accessToken: access.accessToken,
+    refreshToken,
+    matchId: numericMatchId,
+    teamId: access.createdTeamId,
+    quarterSpec: {
+      quarterCount: access.match.quarterCount,
+      matchType: access.match.matchType,
+    },
+  });
+
   const scheduleProps = matchToScheduleCardData(access.match);
   const scheduleCard = (
     <MatchScheduleCard
@@ -92,6 +108,7 @@ export default async function FormationMatchPage({
     <FormationMatchDataLoader
       matchId={numericMatchId}
       teamId={access.createdTeamId}
+      ssrSnapshot={formationSsrSnapshot ?? undefined}
     >
       <FormationBuilder
         scheduleCard={scheduleCard}
@@ -100,6 +117,9 @@ export default async function FormationMatchPage({
           quarterDurationMinutes: access.match.quarterDuration,
           matchType: access.match.matchType,
         }}
+        savedInitialQuarters={
+          formationSsrSnapshot?.initialQuarters ?? undefined
+        }
       />
     </FormationMatchDataLoader>
   );

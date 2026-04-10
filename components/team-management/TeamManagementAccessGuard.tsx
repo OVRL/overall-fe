@@ -3,6 +3,7 @@
 import { Suspense, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useUserId } from "@/hooks/useUserId";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useTeamManagementCapabilitiesForUser } from "@/hooks/useTeamManagementCapabilitiesForUser";
 
 type TeamManagementAccessGuardProps = {
@@ -45,15 +46,17 @@ function TeamManagementAccessGuardInner({
   userId: number;
   children: ReactNode;
 }) {
+  const { selectedTeamId } = useSelectedTeamId();
   const { canAccessTeamManagementRoute } =
     useTeamManagementCapabilitiesForUser(userId);
   const router = useRouter();
 
   useEffect(() => {
-    if (!canAccessTeamManagementRoute) {
+    // selectedTeamId가 아직 null이면 (로딩 중) 리다이렉트하지 않음
+    if (selectedTeamId && !canAccessTeamManagementRoute) {
       router.replace("/home");
     }
-  }, [canAccessTeamManagementRoute, router]);
+  }, [canAccessTeamManagementRoute, selectedTeamId, router]);
 
   if (!canAccessTeamManagementRoute) {
     return null;

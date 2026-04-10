@@ -9,46 +9,76 @@ const defaultQuarter: QuarterData = {
   lineup: {},
 };
 
+/** 내전(IN_HOUSE)일 때 어느 팀 슬롯을 수정할지 (저장 시 tactics.teams.A|B와 동기화) */
+export type InHouseSubTeam = "A" | "B";
+
+export type FormationSlotAssignOptions = {
+  inHouseSubTeam?: InHouseSubTeam;
+};
+
+function applyAssignToSlotRecord(
+  base: Record<number, Player | null> | undefined,
+  positionIndex: number,
+  player: Player,
+): Record<number, Player | null> {
+  const slots = { ...(base || {}) };
+  let sourceIndex: number | undefined;
+
+  Object.keys(slots).forEach((key) => {
+    const k = Number(key);
+    if (slots[k]?.id === player.id) {
+      sourceIndex = k;
+      delete slots[k];
+    }
+  });
+
+  const targetPlayer = slots[positionIndex];
+  if (sourceIndex !== undefined && targetPlayer) {
+    slots[sourceIndex] = targetPlayer;
+  }
+
+  slots[positionIndex] = player;
+  return slots;
+}
+
 export const useFormationManager = (initialQuarters?: QuarterData[]) => {
   const [quarters, setQuarters] = useState<QuarterData[]>(
     initialQuarters?.length ? initialQuarters : [defaultQuarter],
   );
 
   const assignPlayer = useCallback(
-    (quarterId: number, positionIndex: number, player: Player) => {
+    (
+      quarterId: number,
+      positionIndex: number,
+      player: Player,
+      options?: FormationSlotAssignOptions,
+    ) => {
       setQuarters((prev) =>
         prev.map((q) => {
-          if (q.id === quarterId) {
-            const currentLineup = { ...(q.lineup || {}) };
-            let sourceIndex: number | undefined;
+          if (q.id !== quarterId) return q;
 
-            // 드래그한 선수가 이미 이 쿼터의 다른 포지션에 배치되어 있는지 확인하고,
-            // 중복 배치를 방지하기 위해 기존 위치에서 먼저 제거합니다.
-            Object.keys(currentLineup).forEach((key) => {
-              const k = Number(key);
-              if (currentLineup[k]?.id === player.id) {
-                sourceIndex = k;
-                delete currentLineup[k];
-              }
-            });
-
-            // 타겟 포지션에 이미 다른 선수가 배치되어 있고,
-            // 현재 드래그 중인 선수가 같은 쿼터의 다른 위치에서 이동해온 경우라면,
-            // 타겟 위치에 있던 선수를 드래그 중인 선수의 기존 위치로 옮겨서 상호 교체(Swap)합니다.
-            const targetPlayer = currentLineup[positionIndex];
-            if (sourceIndex !== undefined && targetPlayer) {
-              currentLineup[sourceIndex] = targetPlayer;
-            }
-
-            return {
-              ...q,
-              lineup: {
-                ...currentLineup,
-                [positionIndex]: player,
-              },
-            };
+          if (q.type === "MATCHING") {
+            const next = applyAssignToSlotRecord(
+              q.lineup,
+              positionIndex,
+              player,
+            );
+            return { ...q, lineup: next };
           }
-          return q;
+
+          const sub: InHouseSubTeam =
+            options?.inHouseSubTeam === "B" ? "B" : "A";
+          const teamKey = sub === "B" ? "teamB" : "teamA";
+          const nextTeam = applyAssignToSlotRecord(
+            q[teamKey],
+            positionIndex,
+            player,
+          );
+          return {
+            ...q,
+            [teamKey]: nextTeam,
+            lineup: nextTeam,
+          };
         }),
       );
     },
@@ -56,15 +86,31 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
   );
 
   const removePlayer = useCallback(
-    (quarterId: number, positionIndex: number) => {
+    (
+      quarterId: number,
+      positionIndex: number,
+      options?: FormationSlotAssignOptions,
+    ) => {
       setQuarters((prev) =>
         prev.map((q) => {
-          if (q.id === quarterId) {
-            const newLineup = { ...q.lineup };
+          if (q.id !== quarterId) return q;
+
+          if (q.type === "MATCHING") {
+            const newLineup = { ...(q.lineup || {}) };
             delete newLineup[positionIndex];
             return { ...q, lineup: newLineup };
           }
-          return q;
+
+          const sub: InHouseSubTeam =
+            options?.inHouseSubTeam === "B" ? "B" : "A";
+          const teamKey = sub === "B" ? "teamB" : "teamA";
+          const newTeam = { ...(q[teamKey] || {}) };
+          delete newTeam[positionIndex];
+          return {
+            ...q,
+            [teamKey]: newTeam,
+            lineup: newTeam,
+          };
         }),
       );
     },
@@ -75,11 +121,21 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
     (playerId: number) => {
       const assignedQuarterIds: number[] = [];
       quarters.forEach((q) => {
+        if (q.type === "IN_HOUSE") {
+          const inA = Object.values(q.teamA ?? {}).some(
+            (p) => p && p.id === playerId,
+          );
+          const inB = Object.values(q.teamB ?? {}).some(
+            (p) => p && p.id === playerId,
+          );
+          const inLineup = Object.values(q.lineup ?? {}).some(
+            (p) => p && p.id === playerId,
+          );
+          if (inA || inB || inLineup) assignedQuarterIds.push(q.id);
+          return;
+        }
         const lineup = q.lineup || {};
-        const isAssigned = Object.values(lineup).some(
-          (p) => p && p.id === playerId,
-        );
-        if (isAssigned) {
+        if (Object.values(lineup).some((p) => p && p.id === playerId)) {
           assignedQuarterIds.push(q.id);
         }
       });

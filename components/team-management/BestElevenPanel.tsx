@@ -10,6 +10,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  TouchSensor,
   rectIntersection,
   CollisionDetection,
   useDraggable,
@@ -22,16 +23,18 @@ import FormationBoardList from "@/components/formation/board/FormationBoardList"
 import PositionChip from "@/components/PositionChip";
 import Dropdown from "@/components/ui/Dropdown";
 import { QuarterData, Player } from "@/types/formation";
-import { Position } from "@/types/position";
+import type { Position } from "@/types/position";
 import { FORMATION_OPTIONS } from "@/constants/formations";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Edit2, X, Check, Loader2 } from "lucide-react";
 import useModal from "@/hooks/useModal";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useBestElevenQuery, BEST_ELEVEN_MATCH_ID } from "./hooks/useBestElevenQuery";
-import { useUpdateMatchFormationMutation } from "./hooks/useUpdateMatchFormationMutation";
+import { useCreateBestElevenMutation } from "./hooks/useCreateBestElevenMutation";
 import { Suspense } from "react";
 import { MatchFormationTacticsSingle } from "@/types/matchFormationTactics";
+import { FORMATIONS, type FormationType } from "@/constants/formation";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { getValidImageSrc, cn } from "@/lib/utils";
 
 /**
@@ -197,7 +200,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
   // API Data
   const data = useBestElevenQuery(teamId);
-  const { executeMutation: updateFormation, isInFlight: isSaving } = useUpdateMatchFormationMutation();
+  const { executeMutation: createBestEleven, isInFlight: isSaving } =
+    useCreateBestElevenMutation();
 
   // 선수 목록 변환 (TeamMemberModel -> Player) - 참조 무결성 유지를 위해 useMemo 사용
   const allPlayers: Player[] = React.useMemo(() => (data.findManyTeamMember?.members || []).map((m: any) => ({
@@ -262,14 +266,19 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     image: getValidImageSrc(initialManagerMember?.user?.profileImage) 
   });
 
-  // DnD 설정
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  // DnD 설정: PC는 PointerSensor, 모바일은 TouchSensor(장압으로 드래그, 탭은 클릭으로 통과)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
   
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState<Player | null>(null);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  // 모바일: 탭으로 선택된 포지션 슬롯
+  const [mobilePositionSlot, setMobilePositionSlot] = useState<{ quarterId: number; positionIndex: number; label: string } | null>(null);
 
   // 자동 스크롤 로직
   useEffect(() => {
@@ -340,34 +349,61 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     if (player && quarterId != null && positionIndex !== undefined) assignPlayer(quarterId, positionIndex, player);
   };
 
-  // 저장 로직
+  // 저장 로직 — `createBestEleven` (슬롯당 1회, 포지션·팀·유저 ID)
   const handleSave = async () => {
-    if (!formationData?.id) {
-      alert("포메이션 데이터를 찾을 수 없습니다.");
-      return;
+    const formation = quarters[0].formation as FormationType;
+    const board = FORMATIONS[formation];
+    const lineup = quarters[0].lineup ?? {};
+    const members = data.findManyTeamMember?.members ?? [];
+
+    const memberByTeamMemberId = new Map<number, (typeof members)[number]>();
+    for (const m of members) {
+      const tid =
+        parseNumericIdFromRelayGlobalId(m.id) ?? Number(String(m.id));
+      if (Number.isFinite(tid)) memberByTeamMemberId.set(tid, m);
     }
 
     try {
-      // QuarterData.lineup -> MatchFormationTacticsSingle.lineup
-      const currentLineup = quarters[0].lineup;
-      const tacticsLineup: Record<string, { teamMemberId: number }> = {};
-      Object.entries(currentLineup || {}).forEach(([slot, player]) => {
-        if (player) {
-          tacticsLineup[slot] = { teamMemberId: player.id };
+      const tasks: Promise<unknown>[] = [];
+      for (let slot = 1; slot <= 11; slot += 1) {
+        const player = lineup[slot];
+        if (player == null) continue;
+        const cell = board[slot as keyof typeof board];
+        if (cell == null) continue;
+        const position = cell.role as Position;
+        const member = memberByTeamMemberId.get(player.id);
+        const uid =
+          member?.user != null
+            ? parseNumericIdFromRelayGlobalId(member.user.id) ??
+              Number(String(member.user.id))
+            : null;
+        if (uid == null || Number.isNaN(uid)) {
+          console.warn(
+            "[BestEleven] 슬롯에 연결된 teamMember.userId 없음",
+            slot,
+            player.id,
+          );
+          continue;
         }
-      });
+        tasks.push(
+          createBestEleven({
+            position,
+            teamId,
+            userId: uid,
+          }),
+        );
+      }
 
-      const updatedTactics: MatchFormationTacticsSingle = {
-        schemaVersion: 1,
-        formation: quarters[0].formation as any,
-        lineup: tacticsLineup,
-      };
+      if (tasks.length === 0) {
+        alert("저장할 배치된 선수가 없거나 유저 정보를 찾을 수 없습니다.");
+        return;
+      }
 
-      await updateFormation(Number(formationData.id), updatedTactics);
+      await Promise.all(tasks);
       setHasChanges(false);
       alert("베스트 11이 저장되었습니다.");
     } catch (error) {
-      console.error("Failed to save formation:", error);
+      console.error("Failed to save best eleven:", error);
       alert("저장 중 오류가 발생했습니다.");
     }
   };
@@ -415,7 +451,23 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                     setCurrentQuarterId={setCurrentQuarterId}
                     showBoardHeader={false}
                     boardClassName="p-0 border-0 bg-transparent h-full min-h-[400px]"
-                    onPlaceSelectedPlayer={(qId, idx) => { if (selectedPlayer) assignPlayer(qId, idx, selectedPlayer); }}
+                    onPlaceSelectedPlayer={(qId, idx, label) => {
+                      if (isMobile) {
+                        // 모바일: 포지션 탭 시 통합 선수 검색 모달 오픈
+                        openModal({
+                          onComplete: (player: Player) => {
+                            assignPlayer(qId, idx, player);
+                          },
+                          teamPlayers: allPlayers,
+                          excludeMercenaries: true,
+                          targetPosition: label,
+                          title: `${label} 선수 검색`
+                        });
+                      } else {
+                        // PC: 선택된 선수가 있으면 배치
+                        if (selectedPlayer) assignPlayer(qId, idx, selectedPlayer);
+                      }
+                    }}
                   />
                 </div>
 
@@ -435,6 +487,21 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                       isTeamSearch: true,
                       teamPlayers: allPlayers
                     })}
+                    onTouchEnd={(e) => {
+                      // 모바일: DnD TouchSensor delay 없이 즉시 모달 오픈
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openModal({
+                        onComplete: (player: Player) => {
+                          setManager({ name: player.name, image: getValidImageSrc(player.image) });
+                          setHasChanges(true);
+                        },
+                        excludeMercenaries: true,
+                        isTeamSearch: true,
+                        teamPlayers: allPlayers,
+                        title: "감독 수정"
+                      });
+                    }}
                     className="flex items-center gap-4 pr-10 border-r border-white/10 hover:opacity-80 transition-all text-left"
                   >
                     <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-900 border border-white/10 group-hover:border-primary/30 transition-colors shadow-lg">

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<799adf57344496914dce63784fd5f63a>>
+ * @generated SignedSource<<f04e9e952074d87ef642b909d6cd5e4d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,9 +20,9 @@ export type UpdateUserInput = {
   gender?: Gender | null | undefined;
   id: number;
   mainPosition?: Position | null | undefined;
-  name: string;
+  name?: string | null | undefined;
   password?: string | null | undefined;
-  phone: string;
+  phone?: string | null | undefined;
   preferredNumber?: number | null | undefined;
   provider?: string | null | undefined;
   subPositions?: ReadonlyArray<Position> | null | undefined;

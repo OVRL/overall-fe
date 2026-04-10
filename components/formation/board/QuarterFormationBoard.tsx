@@ -12,6 +12,7 @@ import {
   getFieldCoordinates,
 } from "@/constants/formationCoordinates";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { motion } from "motion/react";
 
 interface QuarterFormationBoardProps {
@@ -25,7 +26,7 @@ interface QuarterFormationBoardProps {
   ) => void;
   onPositionRemove: (quarterId: number, index: number) => void;
   /** 모바일: 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치 */
-  onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
+  onPlaceSelectedPlayer?: (quarterId: number, index: number, label: string) => void;
   onFormationChange?: (formation: string) => void;
   showHeader?: boolean;
   boardClassName?: string;
@@ -46,6 +47,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
 }) => {
   const formationPositions = FORMATION_POSITIONS[quarter.formation] || [];
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isMobile = useIsMobile(1023);
 
   return (
     <article
@@ -130,18 +132,15 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
                     selectedPlayer={selectedPlayer}
                     isActive={isActive}
                     onPositionSelect={
-                      onPlaceSelectedPlayer && selectedPlayer && !player
-                        ? () => onPlaceSelectedPlayer(quarter.id, index)
-                        : () =>
-                            onPositionSelect(
-                              isActive
-                                ? null
-                                : {
-                                    quarterId: quarter.id,
-                                    index,
-                                    role: position,
-                                  },
-                            )
+                      onPlaceSelectedPlayer
+                        ? isMobile
+                          // 모바일: 항상 호출 (selectedPlayer 없어도 바텀시트 오픈)
+                          ? () => onPlaceSelectedPlayer(quarter.id, index, position)
+                          // PC: selectedPlayer 있고 빈 자리일 때만 호출
+                          : selectedPlayer && !player
+                            ? () => onPlaceSelectedPlayer(quarter.id, index, position)
+                            : () => onPositionSelect(isActive ? null : { quarterId: quarter.id, index, role: position })
+                        : () => onPositionSelect(isActive ? null : { quarterId: quarter.id, index, role: position })
                     }
                     onPlayerRemove={() => onPositionRemove(quarter.id, index)}
                   />

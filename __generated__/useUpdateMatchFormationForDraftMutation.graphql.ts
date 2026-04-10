@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<106fbec95f52511f40b1a06757c2d5df>>
+ * @generated SignedSource<<4e4ef93d6d4dfa8167629bbf68d25645>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,18 +15,19 @@ export type UpdateMatchFormationInput = {
   tactics: any;
   userId: number;
 };
-export type useUpdateMatchFormationMutation$variables = {
+export type useUpdateMatchFormationForDraftMutation$variables = {
   input: UpdateMatchFormationInput;
 };
-export type useUpdateMatchFormationMutation$data = {
+export type useUpdateMatchFormationForDraftMutation$data = {
   readonly updateMatchFormation: {
     readonly id: number;
+    readonly quarter: number;
     readonly tactics: any | null | undefined;
   };
 };
-export type useUpdateMatchFormationMutation = {
-  response: useUpdateMatchFormationMutation$data;
-  variables: useUpdateMatchFormationMutation$variables;
+export type useUpdateMatchFormationForDraftMutation = {
+  response: useUpdateMatchFormationForDraftMutation$data;
+  variables: useUpdateMatchFormationForDraftMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -63,6 +64,13 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
+        "name": "quarter",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
         "name": "tactics",
         "storageKey": null
       }
@@ -75,7 +83,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "useUpdateMatchFormationMutation",
+    "name": "useUpdateMatchFormationForDraftMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -84,20 +92,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "useUpdateMatchFormationMutation",
+    "name": "useUpdateMatchFormationForDraftMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "08c4ac3d89d833d0bef2d79998e6c1db",
+    "cacheID": "04586e49cadaf47c7f7c8ef25802dbe2",
     "id": null,
     "metadata": {},
-    "name": "useUpdateMatchFormationMutation",
+    "name": "useUpdateMatchFormationForDraftMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchFormationMutation($input: UpdateMatchFormationInput!) {\n  updateMatchFormation(input: $input) {\n    id\n    tactics\n  }\n}\n"
+    "text": "mutation useUpdateMatchFormationForDraftMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    quarter\n    tactics\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d729675f2ebddd63d61a9e2c92991d81";
+(node as any).hash = "349019aca7b0f4e21f325e1d0192136a";
 
 export default node;
