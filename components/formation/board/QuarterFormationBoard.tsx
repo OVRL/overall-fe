@@ -78,7 +78,7 @@ const QuarterFormationBoard: React.FC<QuarterFormationBoardProps> = ({
           />
         </div>
       )}
-      <div className="relative w-full rounded-lg overflow-hidden">
+      <div className="relative w-full rounded-lg pt-10 pb-10">
         <ObjectField
           type="full"
           className="w-full"
