@@ -597,7 +597,8 @@ function TeamSettingsPanelInner({
 
   const effectiveRoleRaw = currentUserMember?.role || userRole;
   const effectiveRole = String(effectiveRoleRaw).toUpperCase();
-  const isActualManager = effectiveRole === "MANAGER" || effectiveRole === "감독";
+  // 구 명칭 호환성: TEAM_MANAGER도 MANAGER로 간주
+  const isActualManager = effectiveRole === "MANAGER" || effectiveRole === "TEAM_MANAGER" || effectiveRole === "감독";
   const isActualCoach = effectiveRole === "COACH" || effectiveRole === "코치";
 
   // 팀 정보 (첫 번째 멤버의 team 정보를 통해 가져옴)
@@ -619,6 +620,7 @@ function TeamSettingsPanelInner({
   const members: TeamMember[] = teamMemberConnection.members.map((m) => {
     const roleMapping: Record<string, MemberRole> = {
       MANAGER: "감독",
+      TEAM_MANAGER: "감독",
       COACH: "코치",
       PLAYER: "선수"
     };

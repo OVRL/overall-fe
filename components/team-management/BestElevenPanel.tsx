@@ -319,7 +319,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
         else if (homeScore < awayScore) losses++;
         else draws++;
       } catch (e) {
-        console.error("Failed to parse match description:", e);
+        // 기존 단순 텍스트 데이터(예: "하늘색 유니폼...")일 경우 JSON 파싱에 실패함
+        // 렌더링 도중 console.error 호출 시 Next.js Dev Error Overlay가 떠서 UI가 중단되므로 무시합니다.
       }
     });
 
