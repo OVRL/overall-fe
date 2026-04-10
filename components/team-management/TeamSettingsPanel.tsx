@@ -705,8 +705,14 @@ function TeamSettingsPanelInner({
     }
 
     try {
+      const numericMemberId = parseNumericIdFromRelayGlobalId(roleModal.memberId);
+      if (!numericMemberId) {
+        alert("멤버 ID가 올바르지 않습니다.");
+        return;
+      }
+
       await updateMember({
-        id: Number(roleModal.memberId),
+        id: numericMemberId,
         role: targetRole
       });
       alert("권한이 성공적으로 변경되었습니다.");
@@ -722,8 +728,14 @@ function TeamSettingsPanelInner({
     if (!kickModal) return;
 
     try {
+      const numericMemberId = parseNumericIdFromRelayGlobalId(kickModal.memberId);
+      if (!numericMemberId) {
+        alert("멤버 ID가 올바르지 않습니다.");
+        return;
+      }
+      
       // API 호출 시 사유 데이터를 포함하도록 확장 (서버 지원 시 필드 반영)
-      await deleteMember(Number(kickModal.memberId));
+      await deleteMember(numericMemberId);
       console.log("Kick Data:", { memberId: kickModal.memberId, reason, type, isBlacklist });
       alert(`${kickModal.memberName}님이 ${type === "SELF" ? "이적" : "방출"} 처리되었습니다.${isBlacklist ? " (블랙리스트 등록 완료)" : ""}`);
     } catch (error) {
@@ -748,8 +760,14 @@ function TeamSettingsPanelInner({
       return;
     }
   
+    const numericTeamId = parseNumericIdFromRelayGlobalId(teamData.id);
+    if (!numericTeamId) {
+      alert("팀 ID가 올바르지 않습니다.");
+      return;
+    }
+
     const input = {
-      id: Number(teamData.id),
+      id: numericTeamId,
       name: newData.teamName,
       activityArea: newData.locationCode,
       description: newData.description,

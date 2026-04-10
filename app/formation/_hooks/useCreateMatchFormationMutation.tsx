@@ -9,7 +9,6 @@ const createMatchFormationMutation = graphql`
       id
       isDraft
       matchId
-      quarter
       teamId
       tactics
       updatedAt

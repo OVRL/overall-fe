@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<106fbec95f52511f40b1a06757c2d5df>>
+ * @generated SignedSource<<508acfeb4e3be66b49f0eafed743fef0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,6 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type UpdateMatchFormationInput = {
   id: number;
-  quarter: number;
   tactics: any;
   userId: number;
 };
@@ -88,12 +87,12 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "08c4ac3d89d833d0bef2d79998e6c1db",
+    "cacheID": "ff494e75ebcadff9647dd0fb62aff3d2",
     "id": null,
     "metadata": {},
     "name": "useUpdateMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchFormationMutation($input: UpdateMatchFormationInput!) {\n  updateMatchFormation(input: $input) {\n    id\n    tactics\n  }\n}\n"
+    "text": "mutation useUpdateMatchFormationMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    tactics\n  }\n}\n"
   }
 };
 })();

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<65ab7cb34411e90d522114b53c4d7e91>>
+ * @generated SignedSource<<8c1d515ade66f69193aa87c4b4d6f504>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -43,7 +43,6 @@ export type formationMatchPagePreloadQuery$data = {
   readonly findMatchFormation: ReadonlyArray<{
     readonly id: number;
     readonly isDraft: boolean;
-    readonly quarter: number;
     readonly tactics: any | null | undefined;
     readonly updatedAt: any;
   }>;
@@ -226,13 +225,6 @@ v4 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "quarter",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "tactics",
         "storageKey": null
       },
@@ -265,16 +257,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "99d8745077a346d12f13708bd54d17a7",
+    "cacheID": "3c0590d2f1a7ef60e196d21c3c422842",
     "id": null,
     "metadata": {},
     "name": "formationMatchPagePreloadQuery",
     "operationKind": "query",
-    "text": "query formationMatchPagePreloadQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      backNumber\n      position\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    isDraft\n    quarter\n    tactics\n    updatedAt\n  }\n}\n"
+    "text": "query formationMatchPagePreloadQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      backNumber\n      position\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    isDraft\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0eb05e5382eb678e96b0f2448cc0d925";
+(node as any).hash = "7e033fe3cada4e9f48ad80b99f28c224";
 
 export default node;
