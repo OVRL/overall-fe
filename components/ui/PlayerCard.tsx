@@ -3,6 +3,7 @@ import { cn, MOCK_IMAGE_SRC } from "@/lib/utils";
 import ImgPlayer from "./ImgPlayer";
 import Icon from "@/components/ui/Icon";
 import close from "@/public/icons/close.svg";
+import { prepareWithSegments, layoutWithLines } from "@chenglou/pretext";
 
 const cardVariants = cva("relative flex shrink-0", {
   variants: {
@@ -59,7 +60,22 @@ const PlayerCard = ({
       {isXS && onDelete && (
         <button
           onClick={onDelete}
-          className="absolute top-0 right-0 z-10 text-Fill_Primary cursor-pointer hover:scale-110 transition-transform"
+          className={cn(
+            "absolute z-10 text-Fill_Primary cursor-pointer hover:scale-110 transition-transform",
+            // pretext를 이용한 이름 너비 측정 및 버튼 위치 동적 조정 (사용자 요청 반영)
+            (() => {
+              try {
+                const prepared = prepareWithSegments(playerName, "600 0.6875rem Inter, system-ui, sans-serif");
+                // 아주 넓은 공간에 배치하여 실제 텍스트 너비를 얻음
+                const { lines } = layoutWithLines(prepared, 200, 16);
+                const textWidth = lines[0]?.width || 0;
+                // 이름이 길어 겹칠 우려가 있으면 위치를 상단으로 조금 더 올리거나 우측 끝으로 밀착
+                return textWidth > 58 ? "-top-1 -right-1" : "top-0 right-0";
+              } catch (e) {
+                return "top-0 right-0";
+              }
+            })()
+          )}
         >
           <Icon src={close} alt="close-icon" width={16} height={16} />
         </button>

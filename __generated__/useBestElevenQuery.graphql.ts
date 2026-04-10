@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<852ef139ec02b9b795730e3b68371b16>>
+ * @generated SignedSource<<e40073be73c3b94358b07c02fef2caf1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -49,6 +49,11 @@ export type useBestElevenQuery$data = {
       } | null | undefined;
     }>;
   };
+  readonly findMatch: ReadonlyArray<{
+    readonly description: string | null | undefined;
+    readonly id: number;
+    readonly matchDate: any;
+  }>;
 };
 export type useBestElevenQuery = {
   response: useBestElevenQuery$data;
@@ -279,6 +284,38 @@ v5 = [
       }
     ],
     "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "createdTeamId",
+        "variableName": "teamId"
+      }
+    ],
+    "concreteType": "MatchModel",
+    "kind": "LinkedField",
+    "name": "findMatch",
+    "plural": true,
+    "selections": [
+      (v3/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "description",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchDate",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
 ];
 return {
@@ -299,16 +336,16 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "7eca17a343f8380034176bc7641c83f9",
+    "cacheID": "f6a0b0e542e634900e1134c9b3799ff2",
     "id": null,
     "metadata": {},
     "name": "useBestElevenQuery",
     "operationKind": "query",
-    "text": "query useBestElevenQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findBestEleven(teamId: $teamId) {\n    id\n    position\n    teamId\n    userId\n  }\n}\n"
+    "text": "query useBestElevenQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findBestEleven(teamId: $teamId) {\n    id\n    position\n    teamId\n    userId\n  }\n  findMatch(createdTeamId: $teamId) {\n    id\n    description\n    matchDate\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e4c04150900d6b77b316d5ac492cfb22";
+(node as any).hash = "3865c229743e4c71a40baa35d2588b87";
 
 export default node;
