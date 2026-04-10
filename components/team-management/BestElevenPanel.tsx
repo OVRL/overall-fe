@@ -33,6 +33,7 @@ import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId"
 import { useBestElevenQuery } from "./hooks/useBestElevenQuery";
 import { useCreateBestElevenMutation } from "./hooks/useCreateBestElevenMutation";
 import { useDeleteBestElevenMutation } from "./hooks/useDeleteBestElevenMutation";
+import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
 import { Suspense } from "react";
 import { FORMATIONS, type FormationType } from "@/constants/formation";
 import { getValidImageSrc, cn } from "@/lib/utils";
@@ -203,6 +204,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const { executeMutation: createBestEleven, isInFlight: isSaving } =
     useCreateBestElevenMutation();
   const { executeMutation: deleteBestEleven } = useDeleteBestElevenMutation();
+  const { executeMutation: updateMember } = useUpdateTeamMemberMutation();
 
   // 선수 목록 변환 (TeamMemberModel -> Player) - 참조 무결성 유지를 위해 useMemo 사용
   const allPlayers: Player[] = React.useMemo(() => (data.findManyTeamMember?.members || []).map((m: any) => ({
@@ -294,19 +296,27 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
   // 상태 초기화
   const [quarters, setQuarters] = useState<QuarterData[]>(getInitialQuarters);
-  
-  // 데이터 로딩 후 초기화 (릴레이 데이터 변경 시)
-  useEffect(() => {
-    setQuarters(getInitialQuarters());
-    setHasChanges(false);
-  }, [getInitialQuarters]);
 
-  // 감독 정보 찾기
+  // 감독 정보 찾기 (정적 변수들 먼저 선언)
   const initialManagerMember = data.findManyTeamMember?.members?.find((m: any) => m.role === "MANAGER");
+  const initialManagerId = initialManagerMember?.id ? String(initialManagerMember.id) : null;
+  
   const [manager, setManager] = useState({ 
+    memberId: initialManagerId,
     name: initialManagerMember?.user?.name || "설정되지 않음", 
     image: getValidImageSrc(initialManagerMember?.user?.profileImage) 
   });
+
+  // 데이터 로딩 후 초기화 (릴레이 데이터 변경 시)
+  useEffect(() => {
+    setQuarters(getInitialQuarters());
+    setManager({
+      memberId: initialManagerId,
+      name: initialManagerMember?.user?.name || "설정되지 않음",
+      image: getValidImageSrc(initialManagerMember?.user?.profileImage),
+    });
+    setHasChanges(false);
+  }, [getInitialQuarters, initialManagerId, initialManagerMember]);
 
   // DnD 설정: PC는 PointerSensor, 모바일은 TouchSensor(장압으로 드래그, 탭은 클릭으로 통과)
   const sensors = useSensors(
@@ -430,20 +440,42 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     }
 
     try {
-      const currentBestEleven = data.findBestEleven ?? [];
-      // 1단계: 기존 항목 삭제 (안정성을 위해 순차 처리 고려 가능하나 우선 병렬 유지하되 ID 파싱 강화)
-      if (currentBestEleven.length > 0) {
-        await Promise.all(
-          currentBestEleven.map(async (entry: any) => {
-            const numericId = parseNumericIdFromRelayGlobalId(entry.id);
-            if (numericId != null) {
-              await deleteBestEleven(numericId);
-            }
-          })
-        );
+      // 1단계: 감독 변경 사항 반영
+      const newManagerMemberId = manager.memberId;
+      if (newManagerMemberId !== initialManagerId) {
+        // 기존 감독 강등 (있었을 경우)
+        if (initialManagerId) {
+          const oldManagerNumId = parseNumericIdFromRelayGlobalId(initialManagerId);
+          if (oldManagerNumId) {
+            await updateMember({ id: oldManagerNumId, role: "PLAYER" as any });
+          }
+        }
+        // 신규 감독 승급
+        if (newManagerMemberId) {
+          const newManagerNumId = parseNumericIdFromRelayGlobalId(newManagerMemberId);
+          if (newManagerNumId) {
+            await updateMember({ id: newManagerNumId, role: "MANAGER" as any });
+          }
+        }
       }
 
-      // 2단계: 신규 항목 생성
+      const currentBestEleven = data.findBestEleven ?? [];
+      // 2단계: 기존 베스트 11 항목 삭제 (순차 처리 + 에러 핸들링 강화)
+      if (currentBestEleven.length > 0) {
+        for (const entry of currentBestEleven) {
+          const numericId = parseNumericIdFromRelayGlobalId(entry.id);
+          if (numericId != null) {
+            try {
+              await deleteBestEleven(numericId);
+            } catch (err: any) {
+              // '베스트 일레븐을 찾을 수 없습니다' 에러는 무시하고 진행 (이미 없는 것과 같음)
+              console.warn(`[BestEleven] Delete failed for ID ${numericId}:`, err.message);
+            }
+          }
+        }
+      }
+
+      // 3단계: 신규 항목 생성
       await Promise.all(
         newEntries.map(async (entry) => {
           await createBestEleven(entry);
@@ -530,7 +562,11 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   <button 
                     onClick={() => openModal({ 
                       onComplete: (player) => {
-                        setManager({ name: player.name, image: getValidImageSrc(player.image) });
+                        setManager({ 
+                          memberId: String(player.id),
+                          name: player.name, 
+                          image: getValidImageSrc(player.image) 
+                        });
                         setHasChanges(true);
                       },
                       excludeMercenaries: true,
@@ -543,7 +579,11 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                       e.stopPropagation();
                       openModal({
                         onComplete: (player: Player) => {
-                          setManager({ name: player.name, image: getValidImageSrc(player.image) });
+                          setManager({ 
+                            memberId: String(player.id),
+                            name: player.name, 
+                            image: getValidImageSrc(player.image) 
+                          });
                           setHasChanges(true);
                         },
                         excludeMercenaries: true,
@@ -701,14 +741,14 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
       {/* 하단 저장 바 */}
       {hasChanges && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 h-20 px-8 flex items-center justify-between">
-          <div className="text-sm font-bold text-white tracking-tight">
-             변경사항이 있습니다. 저장하지 않으면 사라집니다.
+        <div className="fixed bottom-16 md:bottom-20 xl:bottom-0 left-0 right-0 z-60 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 h-16 md:h-20 px-4 md:px-8 flex items-center justify-between gap-3 box-border">
+          <div className="text-[10px] md:text-sm font-bold text-white tracking-tight truncate max-w-[40%] sm:max-w-none">
+             변경사항이 있습니다.
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 flex-nowrap shrink-0">
             <button
-              onClick={() => window.location.reload()} // 초기화 시 페이지 새로고침으로 데이터 복구
-              className="px-8 py-2.5 rounded-xl border border-white/10 text-white text-xs font-black hover:bg-white/5 transition-all disabled:opacity-50"
+              onClick={() => window.location.reload()}
+              className="px-4 md:px-8 py-2 md:py-2.5 rounded-xl border border-white/10 text-white text-[10px] md:text-xs font-black hover:bg-white/5 transition-all disabled:opacity-50 whitespace-nowrap"
               disabled={isSaving}
             >
               초기화
@@ -716,9 +756,9 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
             <button 
               onClick={handleSave}
               disabled={isSaving}
-              className="px-8 py-2.5 rounded-xl bg-primary text-black text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:bg-gray-600 disabled:shadow-none"
+              className="px-4 md:px-8 py-2 md:py-2.5 rounded-xl bg-primary text-black text-[10px] md:text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:bg-gray-600 disabled:shadow-none whitespace-nowrap"
             >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "저장하기"}
+              {isSaving ? <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" /> : "저장하기"}
             </button>
           </div>
         </div>
