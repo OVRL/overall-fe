@@ -89,13 +89,13 @@ const StatCardItem = ({ icon, label, value }: { icon: string; label: string; val
 /**
  * 드래그 가능한 선수 리스트 로우 (이미지 기준 테이블 스타일)
  */
-const DraggablePlayerRow = ({ 
-  item, 
-  onClick, 
-  isSelected 
-}: { 
-  item: any; 
-  onClick?: () => void; 
+const DraggablePlayerRow = ({
+  item,
+  onClick,
+  isSelected
+}: {
+  item: any;
+  onClick?: () => void;
   isSelected?: boolean;
 }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -300,11 +300,11 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   // 감독 정보 찾기 (정적 변수들 먼저 선언)
   const initialManagerMember = data.findManyTeamMember?.members?.find((m: any) => m.role === "MANAGER");
   const initialManagerId = initialManagerMember?.id ? String(initialManagerMember.id) : null;
-  
-  const [manager, setManager] = useState({ 
+
+  const [manager, setManager] = useState({
     memberId: initialManagerId,
-    name: initialManagerMember?.user?.name || "설정되지 않음", 
-    image: getValidImageSrc(initialManagerMember?.user?.profileImage) 
+    name: initialManagerMember?.user?.name || "설정되지 않음",
+    image: getValidImageSrc(initialManagerMember?.user?.profileImage)
   });
 
   // 데이터 로딩 후 초기화 (릴레이 데이터 변경 시)
@@ -323,7 +323,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
   );
-  
+
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState<Player | null>(null);
@@ -384,6 +384,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       }
       return q;
     }));
+    setHasChanges(true); // 선수 삭제 시 변경사항 감지
   }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -434,14 +435,17 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       newEntries.push({ position, teamId, userId: uid });
     }
 
-    if (newEntries.length === 0) {
-      alert("저장할 배치된 선수가 없거나 유저 정보를 찾을 수 없습니다.");
+    const currentBestEleven = data.findBestEleven ?? [];
+    const newManagerMemberId = manager.memberId;
+
+    // 빈 엔트리 저장을 허용 (기존 항목 삭제를 위함)
+    if (newEntries.length === 0 && currentBestEleven.length === 0 && newManagerMemberId === initialManagerId) {
+      alert("변경사항이 없습니다.");
       return;
     }
 
     try {
       // 1단계: 감독 변경 사항 반영
-      const newManagerMemberId = manager.memberId;
       if (newManagerMemberId !== initialManagerId) {
         // 기존 감독 강등 (있었을 경우)
         if (initialManagerId) {
@@ -459,8 +463,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
         }
       }
 
-      const currentBestEleven = data.findBestEleven ?? [];
-      // 2단계: 기존 베스트 11 항목 삭제 (순차 처리 + 에러 핸들링 강화)
+      // 1단계: 감독 변경 사항 반영
       if (currentBestEleven.length > 0) {
         for (const entry of currentBestEleven) {
           const numericId = parseNumericIdFromRelayGlobalId(entry.id);
@@ -501,7 +504,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
       <div className="flex-1 px-4 md:px-6 pb-32">
         <div className="bg-[#0e0e0e] rounded-[32px] border border-white/5 overflow-hidden flex flex-col xl:flex-row min-h-[720px]">
-          
+
           <DndContext id={dndId} sensors={sensors} collisionDetection={customCollisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             {/* 좌측: 보드 */}
             <div className="flex-1 p-6 md:p-8 flex flex-col gap-4">
@@ -523,7 +526,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   />
                 </div>
 
-                <div className="flex-1 relative mt-20 md:mt-12 mb-4 overflow-hidden">
+                <div className="flex-1 relative mt-16 md:mt-12 mb-0">
                   <FormationBoardList
                     quarters={quarters}
                     selectedPlayer={selectedPlayer}
@@ -532,7 +535,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                     currentQuarterId={currentQuarterId}
                     setCurrentQuarterId={setCurrentQuarterId}
                     showBoardHeader={false}
-                    boardClassName="p-0 border-0 bg-transparent h-full min-h-[400px]"
+                    boardClassName="p-0 border-0 bg-transparent h-full md:min-h-[450px]"
                     onPlaceSelectedPlayer={(qId, idx, label) => {
                       if (isMobile) {
                         // 모바일: 포지션 탭 시 통합 선수 검색 모달 오픈
@@ -555,17 +558,17 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
                 {/* 감독 & 팀 스탯 - 겹침 방지를 위해 보드 외부에 배치되도록 조정 가능하지만, 
                     일단 내부에서 배경을 확실히 분리하고 z-index 조정 */}
-                <div 
+                <div
                   ref={managerSectionRef}
-                  className="mt-4 flex flex-wrap lg:flex-nowrap items-center gap-6 md:gap-10 px-6 md:px-8 py-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 relative z-30 group shrink-0"
+                  className="mt-2 md:mt-10 flex flex-wrap lg:flex-nowrap items-center gap-6 md:gap-10 px-6 md:px-8 py-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 relative z-30 group shrink-0"
                 >
-                  <button 
-                    onClick={() => openModal({ 
+                  <button
+                    onClick={() => openModal({
                       onComplete: (player) => {
-                        setManager({ 
+                        setManager({
                           memberId: String(player.id),
-                          name: player.name, 
-                          image: getValidImageSrc(player.image) 
+                          name: player.name,
+                          image: getValidImageSrc(player.image)
                         });
                         setHasChanges(true);
                       },
@@ -579,10 +582,10 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                       e.stopPropagation();
                       openModal({
                         onComplete: (player: Player) => {
-                          setManager({ 
+                          setManager({
                             memberId: String(player.id),
-                            name: player.name, 
-                            image: getValidImageSrc(player.image) 
+                            name: player.name,
+                            image: getValidImageSrc(player.image)
                           });
                           setHasChanges(true);
                         },
@@ -609,16 +612,18 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   </button>
                   <div className="flex flex-1 items-center justify-around">
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-500 font-bold">경기수</span>
-                      <span className="text-sm font-black">30</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">경기수</span>
+                      <span className="text-sm font-black">{initialManagerMember?.overall?.appearances || 0}</span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-500 font-bold">승/무/패</span>
-                      <span className="text-sm font-black">20 / 5 / 5</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">승/무/패</span>
+                      <span className="text-sm font-black italic">
+                        <span className="text-blue-400">20</span><span className="text-white/20 mx-1">/</span><span className="text-white/40">5</span><span className="text-white/20 mx-1">/</span><span className="text-red-400">5</span>
+                      </span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-500 font-bold">팀 승률</span>
-                      <span className="text-base font-black text-primary italic">60%</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">팀 승률</span>
+                      <span className="text-base font-black text-primary italic">{initialManagerMember?.overall?.winRate || "0%"}</span>
                     </div>
                   </div>
                 </div>
@@ -631,17 +636,17 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
               <div className="relative p-6 pt-10 overflow-hidden min-h-[340px] flex flex-col justify-between">
                 {/* 배경 이미지 (사용자 요청: normal-green.webp) */}
                 <div className="absolute inset-0 z-0">
-                  <Image 
-                    src={getValidImageSrc("/images/card-bgs/normal-green.webp")} 
-                    alt="Player Card Background" 
-                    fill 
-                    className="object-cover" 
+                  <Image
+                    src={getValidImageSrc("/images/card-bgs/normal-green.webp")}
+                    alt="Player Card Background"
+                    fill
+                    className="object-cover"
                   />
                   {/* 조명 효과와 그라데이션 추가하여 가독성 확보 */}
                   <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-black/20" />
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black to-transparent" />
                 </div>
-                
+
                 {/* 상단: 선수 기본 정보 */}
                 <div className="relative z-20 flex">
                   <div className="flex-1">
@@ -661,8 +666,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                     </h3>
                     <div className="flex gap-1.5 mb-6">
                       {(selectedPlayerDetail?.position ? [selectedPlayerDetail.position] : ["-"]).map((p: string, idx: number) => (
-                        <span 
-                          key={`${p}-${idx}`} 
+                        <span
+                          key={`${p}-${idx}`}
                           className={cn(
                             "px-2 py-0.5 rounded text-[11px] font-black uppercase tracking-tight shadow-sm",
                             idx === 0 ? "bg-[#4ade80] text-black" : "bg-[#60a5fa] text-black"
@@ -681,12 +686,12 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
                 {/* 중앙: 선수 이미지 (누끼 느낌으로 배경 위에 배치) */}
                 <div className="absolute top-0 right-0 w-[240px] h-[280px] z-10 pointer-events-none">
-                  <Image 
+                  <Image
                     key={selectedPlayerDetail?.id || 'default'}
-                    src={getValidImageSrc(selectedPlayerDetail?.image)} 
-                    alt="선수" 
-                    fill 
-                    className="object-contain object-bottom" 
+                    src={getValidImageSrc(selectedPlayerDetail?.image)}
+                    alt="선수"
+                    fill
+                    className="object-contain object-bottom"
                   />
                 </div>
 
@@ -711,13 +716,13 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                   {allPlayers.map(item => (
-                    <DraggablePlayerRow 
-                      key={item.id} 
+                    <DraggablePlayerRow
+                      key={item.id}
                       item={{
                         ...item,
                         number: item.number,
                         ovr: item.overall
-                      }} 
+                      }}
                       onClick={() => setSelectedPlayerDetail(item)}
                       isSelected={selectedPlayerDetail?.id === item.id}
                     />
@@ -743,7 +748,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       {hasChanges && (
         <div className="fixed bottom-16 md:bottom-20 xl:bottom-0 left-0 right-0 z-60 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 h-16 md:h-20 px-4 md:px-8 flex items-center justify-between gap-3 box-border">
           <div className="text-[10px] md:text-sm font-bold text-white tracking-tight truncate max-w-[40%] sm:max-w-none">
-             변경사항이 있습니다.
+            변경사항이 있습니다.
           </div>
           <div className="flex items-center gap-2 md:gap-3 flex-nowrap shrink-0">
             <button
@@ -753,7 +758,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
             >
               초기화
             </button>
-            <button 
+            <button
               onClick={handleSave}
               disabled={isSaving}
               className="px-4 md:px-8 py-2 md:py-2.5 rounded-xl bg-primary text-black text-[10px] md:text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:bg-gray-600 disabled:shadow-none whitespace-nowrap"

@@ -59,7 +59,7 @@ const PlayerCard = ({
       {isXS && onDelete && (
         <button
           onClick={onDelete}
-          className="absolute top-1 right-1 z-10 text-Fill_Primary cursor-pointer hover:scale-110 transition-transform"
+          className="absolute top-0 right-0 z-10 text-Fill_Primary cursor-pointer hover:scale-110 transition-transform"
         >
           <Icon src={close} alt="close-icon" width={16} height={16} />
         </button>
