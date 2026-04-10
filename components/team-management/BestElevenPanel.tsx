@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useId, useCallback, useRef, useEffect } from "react";
+import React, { useState, useId, useCallback, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   DndContext,
@@ -301,6 +301,34 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const initialManagerMember = data.findManyTeamMember?.members?.find((m: any) => m.role === "MANAGER");
   const initialManagerId = initialManagerMember?.id ? String(initialManagerMember.id) : null;
 
+  // 팀 전체 매치 기록 기반 승/무/패 산출
+  const teamStats = useMemo(() => {
+    let wins = 0;
+    let draws = 0;
+    let losses = 0;
+    const matches = data.findMatch || [];
+
+    matches.forEach((m: any) => {
+      try {
+        if (!m.description) return;
+        const savedData = JSON.parse(m.description);
+        const homeScore = savedData.score?.home ?? 0;
+        const awayScore = savedData.score?.away ?? 0;
+
+        if (homeScore > awayScore) wins++;
+        else if (homeScore < awayScore) losses++;
+        else draws++;
+      } catch (e) {
+        console.error("Failed to parse match description:", e);
+      }
+    });
+
+    const total = wins + draws + losses;
+    const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+    return { total, wins, draws, losses, winRate };
+  }, [data.findMatch]);
+
   const [manager, setManager] = useState({
     memberId: initialManagerId,
     name: initialManagerMember?.user?.name || "설정되지 않음",
@@ -535,7 +563,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                     currentQuarterId={currentQuarterId}
                     setCurrentQuarterId={setCurrentQuarterId}
                     showBoardHeader={false}
-                    boardClassName="p-0 border-0 bg-transparent h-full md:min-h-[450px]"
+                    boardClassName="p-0 border-0 bg-transparent h-full md:min-h-[450px] overflow-visible"
                     onPlaceSelectedPlayer={(qId, idx, label) => {
                       if (isMobile) {
                         // 모바일: 포지션 탭 시 통합 선수 검색 모달 오픈
@@ -613,17 +641,21 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   <div className="flex flex-1 items-center justify-around">
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">경기수</span>
-                      <span className="text-sm font-black">{initialManagerMember?.overall?.appearances || 0}</span>
+                      <span className="text-sm font-black text-white">{teamStats.total}</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">승/무/패</span>
                       <span className="text-sm font-black italic">
-                        <span className="text-blue-400">20</span><span className="text-white/20 mx-1">/</span><span className="text-white/40">5</span><span className="text-white/20 mx-1">/</span><span className="text-red-400">5</span>
+                        <span className="text-blue-400">{teamStats.wins}</span>
+                        <span className="text-white/20 mx-1">/</span>
+                        <span className="text-white/40">{teamStats.draws}</span>
+                        <span className="text-white/20 mx-1">/</span>
+                        <span className="text-red-400">{teamStats.losses}</span>
                       </span>
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">팀 승률</span>
-                      <span className="text-base font-black text-primary italic">{initialManagerMember?.overall?.winRate || "0%"}</span>
+                      <span className="text-base font-black text-primary italic">{teamStats.winRate}%</span>
                     </div>
                   </div>
                 </div>

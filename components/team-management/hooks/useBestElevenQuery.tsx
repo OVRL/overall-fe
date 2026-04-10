@@ -37,6 +37,11 @@ const bestElevenQuery = graphql`
       teamId
       userId
     }
+    findMatch(createdTeamId: $teamId) {
+      id
+      description
+      matchDate
+    }
   }
 `;
 
