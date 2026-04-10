@@ -503,7 +503,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
 
       {/* ── 고정 저장 바 ── */}
       {hasUnsaved && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between bg-[#0f0f0f] border-t border-white/10 px-4 md:px-6 py-3">
+        <div className="fixed bottom-16 md:bottom-20 xl:bottom-0 left-0 right-0 z-60 flex items-center justify-between bg-[#0f0f0f] border-t border-white/10 px-4 md:px-6 py-3">
           <span className="text-[10px] md:text-xs text-gray-500">
             변경사항이 있습니다. 저장하지 않으면 사라집니다.
           </span>
