@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c8c2198f192dbebe1ca65a550a39d3d6>>
+ * @generated SignedSource<<852ef139ec02b9b795730e3b68371b16>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,10 +12,15 @@ import { ConcreteRequest } from 'relay-runtime';
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type useBestElevenQuery$variables = {
-  matchId: number;
   teamId: number;
 };
 export type useBestElevenQuery$data = {
+  readonly findBestEleven: ReadonlyArray<{
+    readonly id: number;
+    readonly position: Position;
+    readonly teamId: number;
+    readonly userId: number;
+  }>;
   readonly findManyTeamMember: {
     readonly members: ReadonlyArray<{
       readonly __typename: "TeamMemberModel";
@@ -44,10 +49,6 @@ export type useBestElevenQuery$data = {
       } | null | undefined;
     }>;
   };
-  readonly findMatchFormation: ReadonlyArray<{
-    readonly id: number;
-    readonly tactics: any | null | undefined;
-  }>;
 };
 export type useBestElevenQuery = {
   response: useBestElevenQuery$data;
@@ -55,33 +56,37 @@ export type useBestElevenQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "matchId"
-},
+var v0 = [
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "teamId"
+  }
+],
 v1 = {
-  "defaultValue": null,
-  "kind": "LocalArgument",
-  "name": "teamId"
-},
-v2 = {
   "kind": "Variable",
   "name": "teamId",
   "variableName": "teamId"
 },
-v3 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v4 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "position",
   "storageKey": null
 },
 v5 = [
@@ -93,7 +98,7 @@ v5 = [
         "name": "limit",
         "value": 200
       },
-      (v2/*: any*/)
+      (v1/*: any*/)
     ],
     "concreteType": "TeamMemberArrayModel",
     "kind": "LinkedField",
@@ -108,8 +113,8 @@ v5 = [
         "name": "members",
         "plural": true,
         "selections": [
+          (v2/*: any*/),
           (v3/*: any*/),
-          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -117,13 +122,7 @@ v5 = [
             "name": "backNumber",
             "storageKey": null
           },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "position",
-            "storageKey": null
-          },
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -139,8 +138,8 @@ v5 = [
             "name": "user",
             "plural": false,
             "selections": [
+              (v2/*: any*/),
               (v3/*: any*/),
-              (v4/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -255,24 +254,27 @@ v5 = [
   {
     "alias": null,
     "args": [
-      {
-        "kind": "Variable",
-        "name": "matchId",
-        "variableName": "matchId"
-      },
-      (v2/*: any*/)
+      (v1/*: any*/)
     ],
-    "concreteType": "MatchFormationModel",
+    "concreteType": "BestElevenModel",
     "kind": "LinkedField",
-    "name": "findMatchFormation",
+    "name": "findBestEleven",
     "plural": true,
     "selections": [
+      (v3/*: any*/),
       (v4/*: any*/),
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "tactics",
+        "name": "teamId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "userId",
         "storageKey": null
       }
     ],
@@ -281,10 +283,7 @@ v5 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": [
-      (v0/*: any*/),
-      (v1/*: any*/)
-    ],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "useBestElevenQuery",
@@ -294,25 +293,22 @@ return {
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": [
-      (v1/*: any*/),
-      (v0/*: any*/)
-    ],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "useBestElevenQuery",
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "88f390a4fad87920f7355db68972c222",
+    "cacheID": "7eca17a343f8380034176bc7641c83f9",
     "id": null,
     "metadata": {},
     "name": "useBestElevenQuery",
     "operationKind": "query",
-    "text": "query useBestElevenQuery($teamId: Int!, $matchId: Int!) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findMatchFormation(matchId: $matchId, teamId: $teamId) {\n    id\n    tactics\n  }\n}\n"
+    "text": "query useBestElevenQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 200) {\n    members {\n      __typename\n      id\n      backNumber\n      position\n      role\n      user {\n        __typename\n        id\n        name\n        profileImage\n        birthDate\n      }\n      overall {\n        ovr\n        appearances\n        goals\n        assists\n        keyPasses\n        attackPoints\n        cleanSheets\n        mom3\n        mom8\n        winRate\n      }\n    }\n  }\n  findBestEleven(teamId: $teamId) {\n    id\n    position\n    teamId\n    userId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e6cbd976f5f6bd789c39b792d4b4e683";
+(node as any).hash = "e4c04150900d6b77b316d5ac492cfb22";
 
 export default node;

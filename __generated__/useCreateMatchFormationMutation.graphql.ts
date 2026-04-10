@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fd2387c664fcc2f51c5750c8a6bcc3e9>>
+ * @generated SignedSource<<df8b2e20d8ba449df6a7d4eb7ae67c97>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,6 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateMatchFormationInput = {
   matchId: number;
-  quarter: number;
   tactics?: any | null | undefined;
   teamId: number;
   userId: number;
@@ -24,7 +23,6 @@ export type useCreateMatchFormationMutation$data = {
     readonly id: number;
     readonly isDraft: boolean;
     readonly matchId: number;
-    readonly quarter: number;
     readonly tactics: any | null | undefined;
     readonly teamId: number;
     readonly updatedAt: any;
@@ -83,13 +81,6 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "quarter",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "teamId",
         "storageKey": null
       },
@@ -129,16 +120,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "6de78a4e90ac31eae4c4ed08335248d7",
+    "cacheID": "4efcc1fa93d495a6bce8df339e92d992",
     "id": null,
     "metadata": {},
     "name": "useCreateMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateMatchFormationMutation(\n  $input: CreateMatchFormationInput!\n) {\n  createMatchFormation(input: $input) {\n    id\n    isDraft\n    matchId\n    quarter\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
+    "text": "mutation useCreateMatchFormationMutation(\n  $input: CreateMatchFormationInput!\n) {\n  createMatchFormation(input: $input) {\n    id\n    isDraft\n    matchId\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f7b9f69e1cc337988aa1ae2830535a79";
+(node as any).hash = "6941df320f39b669fc27bd853ae84899";
 
 export default node;

@@ -359,8 +359,11 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
       });
 
       for (const p of changedWithBackNumber) {
+        const numericMemberId = parseNumericIdFromRelayGlobalId(p.id);
+        if (!numericMemberId) continue;
+
         await updateMember({
-          id: Number(p.id),
+          id: numericMemberId,
           backNumber: p.backNumber
         });
       }

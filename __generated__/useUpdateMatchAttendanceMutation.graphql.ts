@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<97818f5d3d0ddd8b44c3a9d9e70c4eb2>>
+ * @generated SignedSource<<52030d32948d1e7876a7887e1b56d62d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
 export type UpdateMatchAttendanceInput = {
   attendanceStatus: AttendanceStatus;
   id: number;
+  teamId: number;
 };
 export type useUpdateMatchAttendanceMutation$variables = {
   input: UpdateMatchAttendanceInput;

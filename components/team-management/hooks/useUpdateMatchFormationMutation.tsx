@@ -15,7 +15,6 @@ export const useUpdateMatchFormationMutation = () => {
 
   const executeMutation = (
     id: number,
-    quarter: number,
     userId: number,
     tactics: any,
   ) => {
@@ -24,7 +23,6 @@ export const useUpdateMatchFormationMutation = () => {
         variables: {
           input: {
             id,
-            quarter,
             userId,
             tactics,
           },
