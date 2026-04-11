@@ -247,6 +247,7 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
                 variables: {
                   input: {
                     id: attendanceRowId,
+                    teamId,
                     attendanceStatus: targetStatus,
                   },
                 },

@@ -112,7 +112,6 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
         allRowIds: formationRows.map((r) => ({
           id: r.id,
           isDraft: r.isDraft,
-          quarter: r.quarter,
           updatedAt: r.updatedAt,
         })),
         primaryFormationRowIdUsedForInitialQuarters:

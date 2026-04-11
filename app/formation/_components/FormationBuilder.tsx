@@ -14,7 +14,6 @@ import FormationBuilderMobile from "./FormationBuilderMobile";
 import { FormationBuilderContentSkeleton } from "./FormationBuilderContentSkeleton";
 import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import { buildMatchFormationTacticsDocumentFromQuarters } from "@/lib/formation/buildMatchFormationTacticsDocument";
-import { MATCH_FORMATION_DRAFT_QUARTER_PLACEHOLDER } from "@/lib/formation/matchFormationDraftConstants";
 import { toast } from "@/lib/toast";
 import { Player, type QuarterData } from "@/types/formation";
 import FormationHeader from "./FormationHeader";
@@ -162,7 +161,6 @@ export default function FormationBuilder({
         variables: {
           input: {
             id: draftId,
-            quarter: MATCH_FORMATION_DRAFT_QUARTER_PLACEHOLDER,
             userId,
             tactics,
           },
@@ -180,7 +178,6 @@ export default function FormationBuilder({
           matchId,
           teamId,
           userId,
-          quarter: MATCH_FORMATION_DRAFT_QUARTER_PLACEHOLDER,
           tactics,
         },
       },
@@ -221,7 +218,6 @@ export default function FormationBuilder({
           matchId,
           teamId,
           userId,
-          quarter: MATCH_FORMATION_DRAFT_QUARTER_PLACEHOLDER,
           tactics,
         },
       },

@@ -162,6 +162,7 @@ describe("useAttendanceVoteSubmitActions", () => {
     expect(mockExecuteUpdate).toHaveBeenCalledTimes(1);
     expect(mockExecuteUpdate.mock.calls[0][0].variables.input).toMatchObject({
       id: 100,
+      teamId: 10,
       attendanceStatus: "ATTEND",
     });
     expect(onRevoteComplete).toHaveBeenCalledTimes(1);

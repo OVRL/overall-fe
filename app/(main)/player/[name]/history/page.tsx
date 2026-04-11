@@ -3,34 +3,28 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Trophy, Users, BarChart2, History, Target, Star, Activity, Award, TrendingUp, Calendar, Zap, ShieldCheck } from "lucide-react";
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell 
-} from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
+import AttackContributionLineChart, {
+  LineChartTooltipContent,
+} from "@/components/charts/AttackContributionLineChart";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBestElevenQuery } from "@/components/team-management/hooks/useBestElevenQuery";
 import { Suspense } from "react";
 import { getValidImageSrc } from "@/lib/utils";
-
-// Custom Tooltip Component
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#111] border border-white/10 p-4 rounded-2xl shadow-2xl backdrop-blur-xl">
-        <p className="text-white/40 text-[10px] font-black uppercase mb-2 tracking-widest">{label} SEASON</p>
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
-            <p className="text-sm font-bold text-white">
-              {entry.name}: <span className="text-[#00e5a0]">{entry.value}</span>
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 export default function PlayerHistoryPage() {
   return (
@@ -421,7 +415,7 @@ function PlayerHistoryDataView() {
           </div>
         </section>
 
-        {/* Section: 종항 공격 기여도 & 성장 추이 */}
+        {/* Section: 종합 공격 기여도 & 성장 추이 */}
         <section className="flex flex-col gap-3 md:gap-4 animate-in fade-in duration-500 delay-200">
            <div className="flex items-center gap-2 mb-1.5 md:mb-2">
              <Activity className="w-5 md:w-6 h-5 md:h-6 text-blue-500" />
@@ -429,20 +423,7 @@ function PlayerHistoryDataView() {
            </div>
            
            <div className="bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.04)] dark:shadow-none p-4 md:p-8">
-             <div className="w-full h-[250px] md:h-[400px]">
-               <ResponsiveContainer width="100%" height="100%">
-                 <LineChart data={historyData} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(150,150,150,0.15)" />
-                    <XAxis dataKey="year" stroke="var(--color-Label-Tertiary)" style={{ fontSize: '12px', fontWeight: 600 }} axisLine={false} tickLine={false} dy={10} />
-                    <YAxis stroke="var(--color-Label-Tertiary)" style={{ fontSize: '12px', fontWeight: 600 }} axisLine={false} tickLine={false} dx={-10} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px', fontWeight: 600 }} />
-                    <Line type="monotone" dataKey="goals" stroke="#3182f6" strokeWidth={2.5} name="득점" dot={{ r: 4, fill: '#fff', strokeWidth: 2, stroke: '#3182f6' }} activeDot={{ r: 6 }} />
-                    <Line type="monotone" dataKey="assists" stroke="#51cf66" strokeWidth={2.5} name="어시스트" dot={{ r: 4, fill: '#fff', strokeWidth: 2, stroke: '#51cf66' }} activeDot={{ r: 6 }} />
-                    <Line type="monotone" dataKey="attackPoints" stroke="#f04452" strokeWidth={2.5} name="공격포인트" dot={{ r: 4, fill: '#fff', strokeWidth: 2, stroke: '#f04452' }} activeDot={{ r: 6 }} />
-                 </LineChart>
-               </ResponsiveContainer>
-             </div>
+             <AttackContributionLineChart data={historyData} />
            </div>
         </section>
 
@@ -491,16 +472,25 @@ function PlayerHistoryDataView() {
                   <div className="w-full h-[250px] md:h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={historyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(150,150,150,0.1)" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="var(--color-chart-grid-soft)"
+                        />
                         <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} domain={[0, getMaxValue(selectedStat)]} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<LineChartTooltipContent />} />
                         <Line
                           type="monotone"
                           dataKey={selectedStat}
-                          stroke="#3182f6"
+                          stroke="var(--color-chart-series-goals)"
                           strokeWidth={3}
-                          dot={{ r: 5, fill: 'white', strokeWidth: 2, stroke: '#3182f6' }}
+                          dot={{
+                            r: 5,
+                            fill: "var(--color-white)",
+                            strokeWidth: 2,
+                            stroke: "var(--color-chart-series-goals)",
+                          }}
                           activeDot={{ r: 8, strokeWidth: 0 }}
                         />
                       </LineChart>
@@ -513,14 +503,48 @@ function PlayerHistoryDataView() {
                   <div className="w-full h-[250px] md:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={historyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(150,150,150,0.1)" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          vertical={false}
+                          stroke="var(--color-chart-grid-soft)"
+                        />
                         <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Legend verticalAlign="top" align="right" height={36} wrapperStyle={{ fontSize: '13px', fontWeight: 600 }} />
-                        <Line type="monotone" dataKey="win" name="승" stroke="#3182f6" strokeWidth={2.5} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="draw" name="무" stroke="#adb5bd" strokeWidth={2.5} dot={{ r: 4 }} />
-                        <Line type="monotone" dataKey="lose" name="패" stroke="#f04452" strokeWidth={2.5} dot={{ r: 4 }} />
+                        <Tooltip content={<LineChartTooltipContent />} />
+                        <Legend
+                          verticalAlign="top"
+                          align="right"
+                          height={36}
+                          wrapperStyle={{
+                            fontSize: "0.8125rem",
+                            fontWeight: 600,
+                            color: "var(--color-Label-Primary)",
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="win"
+                          name="승"
+                          stroke="var(--color-chart-series-goals)"
+                          strokeWidth={2.5}
+                          dot={{ r: 4 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="draw"
+                          name="무"
+                          stroke="var(--color-gray-500)"
+                          strokeWidth={2.5}
+                          dot={{ r: 4 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="lose"
+                          name="패"
+                          stroke="var(--color-chart-series-attack)"
+                          strokeWidth={2.5}
+                          dot={{ r: 4 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
