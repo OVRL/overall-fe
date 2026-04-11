@@ -73,7 +73,7 @@ const CreateTeamWrapper = () => {
       if (typeof sessionStorage !== "undefined") {
         sessionStorage.setItem(SHOW_TEAM_CREATED_MODAL_KEY, "1");
       }
-      router.replace("/home");
+      router.replace("/");
     },
   });
   const {

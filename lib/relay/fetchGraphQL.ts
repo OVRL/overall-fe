@@ -142,9 +142,9 @@ export const fetchQuery = async (
     );
 
   // 클라이언트: 토큰 만료 등으로 인증 실패 시 세션 삭제 후 로그인 페이지로
-  // (세션 삭제 없이 "/"로만 가면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+  // (세션 삭제 없이만 이동하면 proxy·쿠키 조합에서 리다이렉트 루프가 날 수 있음)
   if (typeof window !== "undefined" && hasUnauthorizedError) {
-    window.location.href = "/api/auth/clear-session?redirect=/";
+    window.location.href = "/api/auth/clear-session?redirect=/login/social";
     throw new Error("Unauthorized"); // Relay에 에러 payload 반환하지 않기 위해
   }
 
@@ -153,7 +153,7 @@ export const fetchQuery = async (
     typeof window !== "undefined" &&
     graphqlErrorsRequireSessionClear(errorPayload?.errors)
   ) {
-    window.location.href = "/api/auth/clear-session?redirect=/";
+    window.location.href = "/api/auth/clear-session?redirect=/login/social";
     throw new Error(STALE_AUTH_SESSION_ERROR);
   }
 

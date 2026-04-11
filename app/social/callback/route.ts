@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   if (!accessToken || !refreshToken) {
     // 토큰이 없는 경우 로그인 페이지로 리다이렉트 (에러 처리)
-    return redirect("/login");
+    return redirect("/login/social");
   }
 
   const cookieStore = await cookies();
@@ -51,5 +51,5 @@ export async function GET(request: NextRequest) {
     return redirect("/privacy-consent");
   }
 
-  return redirect("/home");
+  return redirect("/");
 }

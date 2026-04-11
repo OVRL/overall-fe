@@ -189,8 +189,8 @@ export async function proxy(request: NextRequest) {
   if (isGuestOnly) {
     const { isAuthenticated, newTokens } = await checkAuth();
     if (isAuthenticated) {
-      // 로그인 된 사용자가 접근 시 -> /home
-      const response = NextResponse.redirect(new URL("/home", request.url));
+      // 로그인 된 사용자가 접근 시 -> 앱 루트
+      const response = NextResponse.redirect(new URL("/", request.url));
       if (newTokens?.accessToken) {
         // 쿠키 갱신 (Silent Refresh가 일어났을 경우)
         response.cookies.set("accessToken", newTokens.accessToken, {
@@ -230,7 +230,7 @@ export async function proxy(request: NextRequest) {
         "/api/auth/clear-session",
         request.url,
       );
-      clearSessionUrl.searchParams.set("redirect", "/");
+      clearSessionUrl.searchParams.set("redirect", "/login/social");
       return NextResponse.redirect(clearSessionUrl);
     }
 

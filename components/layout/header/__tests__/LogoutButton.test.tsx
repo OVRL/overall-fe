@@ -27,7 +27,7 @@ describe("LogoutButton", () => {
   it("로그아웃 링크가 올바른 href와 텍스트로 렌더링된다", () => {
     render(<LogoutButton />);
     const link = screen.getByRole("link", { name: /로그아웃/i });
-    expect(link).toHaveAttribute("href", "/api/auth/logout?redirect=/");
+    expect(link).toHaveAttribute("href", "/api/auth/logout?redirect=/login/social");
     expect(link).toHaveTextContent("로그아웃");
   });
 

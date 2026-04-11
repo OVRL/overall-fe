@@ -36,7 +36,7 @@ const LandingStartForm = () => {
       },
       onCompleted: () => {
         try {
-          router.replace("/home");
+          router.replace("/");
         } catch (err) {
           // 프로덕션 빌드에서 Minified exception 대신 실제 에러 확인용
           console.error("[LandingStartForm] onCompleted 에러:", err);

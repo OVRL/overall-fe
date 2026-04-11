@@ -39,7 +39,7 @@ describe("MobileNavDropdown", () => {
       { label: "팀 관리", href: "/team-management" },
       { label: "선수 기록", href: "/team-data" },
     ],
-    currentPathname: "/home",
+    currentPathname: "/",
     onLinkClick: jest.fn(),
     id: "mobile-dropdown-menu",
   };

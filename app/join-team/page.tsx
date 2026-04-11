@@ -54,7 +54,7 @@ const paperlogy = localFont({
   variable: "--font-paperlogy",
 });
 
-export default function LandingPage() {
+export default function JoinTeamPage() {
   return (
     <main
       className={`h-dvh max-h-dvh pt-safe font-sans ${paperlogy.variable} ${paperlogy.className} flex min-h-0 flex-col w-full overflow-x-hidden overflow-y-hidden`}

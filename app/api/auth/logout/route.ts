@@ -12,11 +12,11 @@ const AUTH_COOKIE_KEYS = [
 
 /**
  * 백엔드 logout API 호출 후 인증 쿠키를 삭제하고 redirect 쿼리로 리다이렉트합니다.
- * GET /api/auth/logout?redirect=/
+ * GET /api/auth/logout?redirect=/login/social
  */
 export async function GET(request: NextRequest) {
   const redirectTo =
-    request.nextUrl.searchParams.get("redirect") ?? "/";
+    request.nextUrl.searchParams.get("redirect") ?? "/login/social";
 
   const refreshToken =
     request.cookies.get("refreshToken")?.value ??

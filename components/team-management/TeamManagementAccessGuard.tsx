@@ -22,7 +22,7 @@ export function TeamManagementAccessGuard({
 
   useEffect(() => {
     if (userId === null) {
-      router.replace("/");
+      router.replace("/login/social");
     }
   }, [userId, router]);
 
@@ -54,7 +54,7 @@ function TeamManagementAccessGuardInner({
   useEffect(() => {
     // selectedTeamId가 아직 null이면 (로딩 중) 리다이렉트하지 않음
     if (selectedTeamId && !canAccessTeamManagementRoute) {
-      router.replace("/home");
+      router.replace("/");
     }
   }, [canAccessTeamManagementRoute, selectedTeamId, router]);
 

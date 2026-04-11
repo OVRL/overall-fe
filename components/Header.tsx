@@ -120,7 +120,7 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
         {/* 로고 */}
         <div className="flex items-center gap-3 lg:gap-4">
           <Link
-            href="/home"
+            href="/"
             className="flex items-center"
             aria-label="홈으로 가기"
           >

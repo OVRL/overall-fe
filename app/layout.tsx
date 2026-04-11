@@ -84,14 +84,14 @@ export default async function RootLayout({
       layoutState = state;
     } catch (e) {
       // SSR에서 refresh 후에도 Unauthorized(토큰 만료 등)면 세션 삭제 후 로그인 페이지로
-      // (세션 삭제 없이 "/"로만 보내면 proxy가 쿠키로 인해 다시 /home으로 보내 리다이렉트 루프 발생)
+      // (세션 삭제 없이 "/"로만 보내면 proxy가 쿠키로 인해 앱 루트(/)로 순환 리다이렉트가 발생)
       const message = e instanceof Error ? e.message : String(e);
       if (
         message.includes("Unauthorized") ||
         message.toLowerCase().includes("unauthorized") ||
         errorMessageRequiresSessionClear(message)
       ) {
-        redirect("/api/auth/clear-session?redirect=/");
+        redirect("/api/auth/clear-session?redirect=/login/social");
       }
       throw e;
     }
@@ -103,14 +103,14 @@ export default async function RootLayout({
   /** 소속 팀 유무(다중 팀 + 쿠키 없음이면 initialSelectedTeamId는 null일 수 있음) */
   const hasTeam = layoutState.hasAnyTeamMembership;
 
-  // 로그인 + 소속 팀 없음 → 팀 필수 경로 접근 시 landing으로
+  // 로그인 + 소속 팀 없음 → 팀 필수 경로 접근 시 팀 가입 허브로
   if (
     isPrivateRoute &&
     isLoggedIn &&
     !hasTeam &&
     TEAM_REQUIRED_ROUTES.some((pattern) => pattern.test(pathname))
   ) {
-    redirect("/landing");
+    redirect("/join-team");
   }
 
   // player는 팀 관리(및 하위 경로) SSR 단계에서 차단 (직링크·북마크)
@@ -122,7 +122,7 @@ export default async function RootLayout({
     role != null &&
     !canUseTeamManagementStaffFeatures(role)
   ) {
-    redirect("/home");
+    redirect("/");
   }
 
   return (

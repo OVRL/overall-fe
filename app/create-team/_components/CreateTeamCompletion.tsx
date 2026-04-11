@@ -58,7 +58,7 @@ const CreateTeamCompletion = () => {
       </div>
 
       <Button
-        onClick={() => router.replace("/home")}
+        onClick={() => router.replace("/")}
         variant="primary"
         size="xl"
         className="w-full py-4 rounded-xl bg-[#CCFF00] text-black font-bold text-lg hover:bg-[#b3e600] transition-colors"

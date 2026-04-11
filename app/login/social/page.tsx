@@ -1,7 +1,7 @@
 import SocialButtons from "@/components/ui/SocialButtons";
 import LoginLogo from "@/components/login/LoginLogo";
 
-const LoginLanding = () => {
+export default function LoginSocialPage() {
   return (
     <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
       <div className="absolute inset-0 z-0 flex items-end justify-center">
@@ -15,6 +15,4 @@ const LoginLanding = () => {
       </div>
     </main>
   );
-};
-
-export default LoginLanding;
+}

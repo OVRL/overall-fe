@@ -11,11 +11,11 @@ const AUTH_COOKIE_KEYS = [
 /**
  * 인증 쿠키를 삭제한 뒤 redirect 쿼리로 리다이렉트합니다.
  * layout에서 Unauthorized 시 여기로 보내면 리다이렉트 루프를 막을 수 있습니다.
- * GET /api/auth/clear-session?redirect=/
+ * GET /api/auth/clear-session?redirect=/login/social
  */
 export async function GET(request: NextRequest) {
   const redirectTo =
-    request.nextUrl.searchParams.get("redirect") ?? "/";
+    request.nextUrl.searchParams.get("redirect") ?? "/login/social";
 
   const response = NextResponse.redirect(new URL(redirectTo, request.url));
 
