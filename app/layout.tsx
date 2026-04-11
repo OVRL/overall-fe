@@ -113,11 +113,6 @@ export default async function RootLayout({
     redirect("/landing");
   }
 
-  // 로그인 + 소속 팀 있음 → landing 접근 시 /home으로
-  if (isPrivateRoute && isLoggedIn && hasTeam && pathname === "/landing") {
-    redirect("/home");
-  }
-
   // player는 팀 관리(및 하위 경로) SSR 단계에서 차단 (직링크·북마크)
   const role = layoutState.initialSelectedTeamMemberRole;
   if (

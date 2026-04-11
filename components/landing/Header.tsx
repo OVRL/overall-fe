@@ -13,6 +13,14 @@ const Header = () => {
         >
           <Icon src={logoOvr} alt="OVR Logo" className="w-23 h-12" nofill />
         </Link>
+        <Link
+          href="/api/auth/logout?redirect=/"
+          prefetch={false}
+          className="inline-flex items-center justify-center rounded-[0.625rem] border border-white/20 bg-white/10 px-6 py-2.25 text-sm font-medium text-white transition-[transform,background-color,border-color] duration-200 ease-out hover:border-white/40 hover:bg-white/15 motion-safe:hover:scale-[1.02] active:motion-safe:scale-[0.98] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="로그아웃"
+        >
+          로그아웃
+        </Link>
       </nav>
     </header>
   );
