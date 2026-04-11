@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SocialButtons from "@/components/ui/SocialButtons";
 import LoginLogo from "@/components/login/LoginLogo";
 
@@ -6,15 +5,6 @@ const LoginLanding = () => {
   return (
     <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
       <div className="absolute inset-0 z-0 flex items-end justify-center">
-        <div className="relative w-full h-[60%] opacity-50">
-          <Image
-            src="/images/bg_zlatan.webp"
-            alt="Background"
-            fill
-            className="object-contain object-bottom"
-            priority
-          />
-        </div>
         <div className="absolute inset-0 bg-linear-to-br from-dark-olive/40 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/30" />
       </div>

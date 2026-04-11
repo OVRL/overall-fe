@@ -70,6 +70,13 @@ jest.mock("next/font/google", () => ({
   Racing_Sans_One: () => ({ className: "racing-sans" }),
 }));
 
+// ESM 전용 패키지(@chenglou/pretext) — Jest가 node_modules에서 import 구문을 파싱하지 못함
+jest.mock("@chenglou/pretext", () => ({
+  __esModule: true,
+  prepareWithSegments: jest.fn(() => ({})),
+  layoutWithLines: jest.fn(() => ({ lines: [{ width: 0 }] })),
+}));
+
 // 1. IntersectionObserver Mock
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
