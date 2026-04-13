@@ -689,7 +689,14 @@ function TeamSettingsPanelInner({
 
     const targetRole = reverseMapping[roleModal.newRole];
 
-    // 역할 제한 체크: 코치는 최대 4명, 감독은 1명
+    // 역할 제한 체크 (프론트엔드 UX용 차단): 
+    // 감독 -> 감독 중복 불가, 코치 -> 최대 4명 
+    // 단, 현재 멤버의 역할을 그대로 선택한 경우는 제외
+    if (targetRole === roleModal.currentRole) {
+      setRoleModal(null);
+      return;
+    }
+
     if (targetRole === "COACH") {
       const coachCount = teamMemberConnection.members.filter((m: any) => m.role === "COACH").length;
       if (coachCount >= 4) {
@@ -698,9 +705,13 @@ function TeamSettingsPanelInner({
         return;
       }
     } else if (targetRole === "MANAGER") {
-      const managerCount = teamMemberConnection.members.filter((m: any) => m.role === "MANAGER").length;
+      const managerCount = teamMemberConnection.members.filter((m: any) => m.role === "MANAGER" || m.role === "TEAM_MANAGER").length;
       if (managerCount >= 1) {
-        alert("감독은 이미 존재합니다. 한 팀에 감독은 1명만 가능합니다.");
+        // 본인이 감독이고 다른 사람을 감독으로 만들려는 상횡이면 '권한 위임' 성격이 강함
+        // 하지만 현재 백엔드 mutation 한 번에 두 명의 역할을 바꿀 순 없으므로,
+        // 기획상 한 명만 감독일 수 있다면 여기서 차단하거나 정책에 따라 안내해야 함.
+        // 여기서는 일단 기존 감독이 있는 경우 차단하는 로직을 유지하되, TEAM_MANAGER 체크를 추가함.
+        alert("이미 감독이 존재합니다. 한 팀에 감독은 1명만 가능합니다.");
         setRoleModal(null);
         return;
       }
@@ -708,7 +719,7 @@ function TeamSettingsPanelInner({
 
     try {
       const numericMemberId = parseNumericIdFromRelayGlobalId(roleModal.memberId);
-      if (!numericMemberId) {
+      if (numericMemberId === null) {
         alert("멤버 ID가 올바르지 않습니다.");
         return;
       }
