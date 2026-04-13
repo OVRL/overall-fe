@@ -4,7 +4,7 @@ import Link from "@/components/Link";
 
 const Header = () => {
   return (
-    <header className="border-b border-white/10 bg-black/10 backdrop-blur-[0.625rem] h-20.25 flex items-center justify-center">
+    <header className="absolute top-0 inset-x-0 z-50 border-b border-white/10 bg-black/10 backdrop-blur-[0.625rem] h-20.25 flex items-center justify-center">
       <nav className="px-6 py-4 flex justify-between w-full max-w-6xl">
         <Link
           href="/"
