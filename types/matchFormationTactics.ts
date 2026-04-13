@@ -48,7 +48,7 @@ export interface MatchFormationTacticsPlayerRef {
   teamMemberId: number;
   /** 조회 직후 표시용 비정규화 (선택) */
   displayName?: string;
-  /** 등번호 — TeamMemberModel.backNumber */
+  /** 표시용 번호 — TeamMemberModel.preferredNumber */
   backNumber?: number;
   /** `Position` enum 문자열 등, 표시·필터용 (선택) */
   position?: string;

@@ -9,8 +9,8 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
     attendanceStatus: "ATTEND",
     teamMember: {
       id: 1,
-      backNumber: 10,
-      position: "CM",
+      preferredNumber: 10,
+      preferredPosition: "CM",
       profileImg: null,
       overall: { ovr: 85 },
       user: {
@@ -57,8 +57,8 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
         attendanceStatus: "ATTEND",
         teamMember: {
           id: "TeamMember:555",
-          backNumber: 7,
-          position: "ST",
+          preferredNumber: 7,
+          preferredPosition: "ST",
           profileImg: null,
           overall: { ovr: 99 },
           user: {
@@ -78,14 +78,14 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
     expect(p.number).toBe(7);
   });
 
-  it("backNumber가 없으면 preferredNumber를 반올림해 등번호로 쓴다", () => {
+  it("팀 멤버 preferredNumber가 없으면 유저 preferredNumber를 반올림해 번호로 쓴다", () => {
     const rows: GenericMatchAttendanceRow[] = [
       {
         attendanceStatus: "ATTEND",
         teamMember: {
           id: 2,
-          backNumber: null,
-          position: null,
+          preferredNumber: null,
+          preferredPosition: null,
           profileImg: null,
           overall: null,
           user: {

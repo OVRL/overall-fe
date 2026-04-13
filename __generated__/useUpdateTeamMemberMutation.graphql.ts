@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<88b9abfe1a2b8c2fa8bb826a64d492ba>>
+ * @generated SignedSource<<d7ba48ad1ea5c0391c26876f61fd5727>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,12 +9,14 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Foot = "B" | "L" | "R" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type UpdateTeamMemberInput = {
-  backNumber?: number | null | undefined;
+  foot?: Foot | null | undefined;
   id: number;
-  position?: Position | null | undefined;
+  preferredNumber?: number | null | undefined;
+  preferredPosition?: Position | null | undefined;
   profileImg?: string | null | undefined;
   role?: Role | null | undefined;
 };
@@ -23,9 +25,10 @@ export type useUpdateTeamMemberMutation$variables = {
 };
 export type useUpdateTeamMemberMutation$data = {
   readonly updateTeamMember: {
-    readonly backNumber: number | null | undefined;
+    readonly foot: Foot | null | undefined;
     readonly id: number;
-    readonly position: Position | null | undefined;
+    readonly preferredNumber: number | null | undefined;
+    readonly preferredPosition: Position | null | undefined;
     readonly role: Role;
   };
 };
@@ -75,14 +78,21 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "backNumber",
+        "name": "foot",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "position",
+        "name": "preferredNumber",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "preferredPosition",
         "storageKey": null
       }
     ],
@@ -107,16 +117,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1a9c5b517e138d6b7e9faa16a4effa15",
+    "cacheID": "74f1560014ac3e96c7b4972fee0df5ab",
     "id": null,
     "metadata": {},
     "name": "useUpdateTeamMemberMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateTeamMemberMutation(\n  $input: UpdateTeamMemberInput!\n) {\n  updateTeamMember(input: $input) {\n    id\n    role\n    backNumber\n    position\n  }\n}\n"
+    "text": "mutation useUpdateTeamMemberMutation(\n  $input: UpdateTeamMemberInput!\n) {\n  updateTeamMember(input: $input) {\n    id\n    role\n    foot\n    preferredNumber\n    preferredPosition\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "857e6fc0635a388004a3fa56e529a010";
+(node as any).hash = "3d138348d39df8c6e90ce6d2906b367a";
 
 export default node;

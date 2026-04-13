@@ -10,6 +10,7 @@ import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import type { Role as GqlTeamMemberRole } from "@/__generated__/useUpdateTeamMemberMutation.graphql";
 import { useTeamSettingsQuery } from "./hooks/useTeamSettingsQuery";
 import { useUpdateTeamMutation } from "./hooks/useUpdateTeamMutation";
 import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
@@ -645,8 +646,8 @@ function TeamSettingsPanelInner({
           ? parseUserId((m.user as { id: number }).id) || 0
           : 0,
       name: m.user?.name ?? "알 수 없음",
-      number: m.backNumber ?? 0,
-      mainPos: m.position ?? "-",
+      number: m.preferredNumber ?? 0,
+      mainPos: m.preferredPosition ?? "-",
       subPos: "",
       age: calculateAge(m.user?.birthDate),
       joinedAt: m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : "-",
@@ -715,7 +716,7 @@ function TeamSettingsPanelInner({
 
       await updateMember({
         id: numericMemberId,
-        role: targetRole
+        role: targetRole as GqlTeamMemberRole,
       });
       alert("권한이 성공적으로 변경되었습니다.");
     } catch (error) {

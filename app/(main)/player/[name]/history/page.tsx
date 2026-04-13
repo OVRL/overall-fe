@@ -255,7 +255,7 @@ function PlayerHistoryDataView() {
                     className="text-2xl font-black text-white italic drop-shadow-md flex items-center gap-1"
                   >
                     <span className="text-[10px] uppercase font-black opacity-40 not-italic">NO.</span>
-                    {playerMember?.backNumber || '--'}
+                    {playerMember?.preferredNumber ?? '--'}
                   </motion.div>
                 </div>
               </motion.div>

@@ -14,8 +14,9 @@ export const FormationMatchPagePreloadQuery = graphql`
       teamMember {
         id
         __typename
-        backNumber
-        position
+        foot
+        preferredNumber
+        preferredPosition
         profileImg
         overall {
           ovr

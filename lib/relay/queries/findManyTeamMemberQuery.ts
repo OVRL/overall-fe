@@ -10,8 +10,9 @@ export const FindManyTeamMemberQuery = graphql`
       members {
         __typename
         id
-        position
-        backNumber
+        foot
+        preferredNumber
+        preferredPosition
         joinedAt
         profileImg
         user {

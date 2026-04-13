@@ -211,8 +211,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     id: m.id,
     name: m.user?.name || "알 수 없음",
     image: m.user?.profileImage || "/images/player/img_player_1.webp",
-    position: m.position || "-",
-    number: m.backNumber || 0,
+    position: m.preferredPosition || "-",
+    number: m.preferredNumber || 0,
     overall: m.overall?.ovr || 0,
     isMom: (m.overall?.mom3 || 0) > 0 || (m.overall?.mom8 || 0) > 0,
     joinDate: m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : "-",
@@ -480,14 +480,14 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
         if (initialManagerId) {
           const oldManagerNumId = parseNumericIdFromRelayGlobalId(initialManagerId);
           if (oldManagerNumId) {
-            await updateMember({ id: oldManagerNumId, role: "PLAYER" as any });
+            await updateMember({ id: oldManagerNumId, role: "PLAYER" });
           }
         }
         // 신규 감독 승급
         if (newManagerMemberId) {
           const newManagerNumId = parseNumericIdFromRelayGlobalId(newManagerMemberId);
           if (newManagerNumId) {
-            await updateMember({ id: newManagerNumId, role: "MANAGER" as any });
+            await updateMember({ id: newManagerNumId, role: "MANAGER" });
           }
         }
       }

@@ -1,13 +1,17 @@
 import { graphql, useMutation } from "react-relay";
-import type { useUpdateTeamMemberMutation as MutationType } from "../../../__generated__/useUpdateTeamMemberMutation.graphql";
+import type {
+  useUpdateTeamMemberMutation as MutationType,
+  UpdateTeamMemberInput,
+} from "../../../__generated__/useUpdateTeamMemberMutation.graphql";
 
 const updateTeamMemberMutation = graphql`
   mutation useUpdateTeamMemberMutation($input: UpdateTeamMemberInput!) {
     updateTeamMember(input: $input) {
       id
       role
-      backNumber
-      position
+      foot
+      preferredNumber
+      preferredPosition
     }
   }
 `;
@@ -15,7 +19,7 @@ const updateTeamMemberMutation = graphql`
 export const useUpdateTeamMemberMutation = () => {
   const [commit, isInFlight] = useMutation<MutationType>(updateTeamMemberMutation);
 
-  const executeMutation = (input: { id: number; role?: any; backNumber?: number; position?: any }) => {
+  const executeMutation = (input: UpdateTeamMemberInput) => {
     return new Promise((resolve, reject) => {
       commit({
         variables: { input },

@@ -7,8 +7,9 @@ const bestElevenQuery = graphql`
       members {
         __typename
         id
-        backNumber
-        position
+        foot
+        preferredNumber
+        preferredPosition
         role
         user {
           __typename

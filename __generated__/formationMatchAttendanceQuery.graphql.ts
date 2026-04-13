@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<27b1804fabe786d1f214b8e39e0f780c>>
+ * @generated SignedSource<<fdc759eb44c2fb1c4ee03d31b70eca07>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
+export type Foot = "B" | "L" | "R" | "%future added value";
 export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type formationMatchAttendanceQuery$variables = {
@@ -24,12 +25,13 @@ export type formationMatchAttendanceQuery$data = {
     readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
-      readonly backNumber: number | null | undefined;
+      readonly foot: Foot | null | undefined;
       readonly id: number;
       readonly overall: {
         readonly ovr: number;
       } | null | undefined;
-      readonly position: Position | null | undefined;
+      readonly preferredNumber: number | null | undefined;
+      readonly preferredPosition: Position | null | undefined;
       readonly profileImg: string | null | undefined;
       readonly user: {
         readonly __typename: "UserModel";
@@ -73,7 +75,14 @@ v2 = {
   "name": "__typename",
   "storageKey": null
 },
-v3 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "preferredNumber",
+  "storageKey": null
+},
+v4 = [
   {
     "alias": null,
     "args": [
@@ -123,14 +132,15 @@ v3 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "backNumber",
+            "name": "foot",
             "storageKey": null
           },
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "position",
+            "name": "preferredPosition",
             "storageKey": null
           },
           {
@@ -175,13 +185,7 @@ v3 = [
                 "name": "name",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "preferredNumber",
-                "storageKey": null
-              },
+              (v3/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -205,7 +209,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "formationMatchAttendanceQuery",
-    "selections": (v3/*: any*/),
+    "selections": (v4/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -214,19 +218,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "formationMatchAttendanceQuery",
-    "selections": (v3/*: any*/)
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "90711be753a77e892a60cc7bd21b9aaa",
+    "cacheID": "17c1107da434ebdfde8bf3c14fec0503",
     "id": null,
     "metadata": {},
     "name": "formationMatchAttendanceQuery",
     "operationKind": "query",
-    "text": "query formationMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      backNumber\n      position\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
+    "text": "query formationMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d322b74ec0ee192c9bc7fefecb264259";
+(node as any).hash = "2d1d6019db70bc150f850ac746750998";
 
 export default node;

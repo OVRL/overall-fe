@@ -55,9 +55,9 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
       <div className="absolute top-5.5 left-5.5 w-28 h-34 flex flex-col z-10">
         <span
           className="h-8 w-9.75 truncate font-bold text-3xl leading-8 text-white mb-3"
-          aria-label={`등번호 ${member.backNumber}`}
+          aria-label={`등번호 ${member.preferredNumber}`}
         >
-          {member.backNumber ?? "-"}
+          {member.preferredNumber ?? "-"}
         </span>
         <h3 className="w-23.5 h-6 truncate font-bold text-lg leading-6 mb-1 text-white">
           {name}
@@ -68,7 +68,7 @@ const PlayerProfileHeader = ({ member }: PlayerProfileHeaderProps) => {
               <PositionChip key={pos} position={pos as Position} />
             ))
           ) : (
-            <PositionChip position={(member.position ?? "MF") as Position} />
+            <PositionChip position={(member.preferredPosition ?? "MF") as Position} />
           )}
         </div>
         <dl className="flex flex-col gap-1 text-gray-500 text-[0.6875rem]">

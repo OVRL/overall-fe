@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a1c765e662d6e7a7a1e6a69ed912c93d>>
+ * @generated SignedSource<<8f80228ff266c013506bb593f3286ee8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
+export type Foot = "B" | "L" | "R" | "%future added value";
 export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type CreateMatchAttendanceInput = {
@@ -31,12 +32,13 @@ export type createMatchAttendanceMutation$data = {
     readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
-      readonly backNumber: number | null | undefined;
+      readonly foot: Foot | null | undefined;
       readonly id: number;
       readonly overall: {
         readonly ovr: number;
       } | null | undefined;
-      readonly position: Position | null | undefined;
+      readonly preferredNumber: number | null | undefined;
+      readonly preferredPosition: Position | null | undefined;
       readonly profileImg: string | null | undefined;
       readonly user: {
         readonly __typename: "UserModel";
@@ -75,7 +77,14 @@ v2 = {
   "name": "__typename",
   "storageKey": null
 },
-v3 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "preferredNumber",
+  "storageKey": null
+},
+v4 = [
   {
     "alias": null,
     "args": [
@@ -120,14 +129,15 @@ v3 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "backNumber",
+            "name": "foot",
             "storageKey": null
           },
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "position",
+            "name": "preferredPosition",
             "storageKey": null
           },
           {
@@ -172,13 +182,7 @@ v3 = [
                 "name": "name",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "preferredNumber",
-                "storageKey": null
-              },
+              (v3/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -202,7 +206,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "createMatchAttendanceMutation",
-    "selections": (v3/*: any*/),
+    "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -211,19 +215,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "createMatchAttendanceMutation",
-    "selections": (v3/*: any*/)
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "1971e7ee67ec9ffa20361a4192718fe8",
+    "cacheID": "c414f9b107723d1f505ce8947116e9ae",
     "id": null,
     "metadata": {},
     "name": "createMatchAttendanceMutation",
     "operationKind": "mutation",
-    "text": "mutation createMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      backNumber\n      position\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
+    "text": "mutation createMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "88f0fccab29e9e4e449f91d24e6a16dc";
+(node as any).hash = "4f5a89235083b8cb6b822b8b629bbaab";
 
 export default node;

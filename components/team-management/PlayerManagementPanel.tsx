@@ -261,11 +261,11 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
     
     return {
       id: String(m.id),
-      backNumber: m.backNumber ?? 0,
+      backNumber: m.preferredNumber ?? 0,
       name: m.user?.name ?? "알 수 없음",
       profileImage: getTeamMemberProfileImageRawUrl(memberForImage as any),
       fallbackImage: getTeamMemberProfileImageFallbackUrl(memberForImage as any),
-      position: m.position ?? "-",
+      position: m.preferredPosition ?? "-",
       attendance: m.overall?.appearances ?? 0,
       goals: m.overall?.goals ?? 0,
       assists: m.overall?.assists ?? 0,
@@ -364,7 +364,7 @@ function PlayerManagementPanelInner({ teamId }: { teamId: number }) {
 
         await updateMember({
           id: numericMemberId,
-          backNumber: p.backNumber
+          preferredNumber: p.backNumber,
         });
       }
 

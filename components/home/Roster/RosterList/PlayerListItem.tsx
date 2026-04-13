@@ -32,12 +32,12 @@ const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
         <div className="flex items-center">
           <div className="w-12.25 flex justify-center">
             <PositionChip
-              position={(member.position ?? "MF") as Position}
+              position={(member.preferredPosition ?? "MF") as Position}
               variant="outline"
             />
           </div>
           <span className="w-9.75 text-Label-Primary text-center text-sm md:text-base">
-            {member.backNumber ?? "-"}
+            {member.preferredNumber ?? "-"}
           </span>
         </div>
       </div>
@@ -69,7 +69,7 @@ const PlayerListItem = ({ member, onClick, priority }: PlayerListItemProps) => {
 
       <div className="absolute inset-x-0 bottom-0 h-px z-10 bg-[#252525]" />
       <PlayerListItemGradation
-        position={(member.position ?? "MF") as Position}
+        position={(member.preferredPosition ?? "MF") as Position}
       />
     </div>
   );

@@ -7,8 +7,9 @@ const mockMembers: readonly RosterMember[] = [
   {
     __typename: "TeamMemberModel",
     id: 1,
-    position: "FW",
-    backNumber: 10,
+    foot: null,
+    preferredPosition: "FW",
+    preferredNumber: 10,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {
@@ -36,8 +37,9 @@ const mockMembers: readonly RosterMember[] = [
   {
     __typename: "TeamMemberModel",
     id: 2,
-    position: "MF",
-    backNumber: 8,
+    foot: null,
+    preferredPosition: "MF",
+    preferredNumber: 8,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {

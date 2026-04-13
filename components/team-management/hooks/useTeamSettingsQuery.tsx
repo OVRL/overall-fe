@@ -6,8 +6,9 @@ const teamSettingsQuery = graphql`
     findManyTeamMember(teamId: $teamId, limit: 100) {
       members {
         id
-        backNumber
-        position
+        foot
+        preferredNumber
+        preferredPosition
         role
         joinedAt
         profileImg

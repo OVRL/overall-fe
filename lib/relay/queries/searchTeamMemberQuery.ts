@@ -5,8 +5,9 @@ export const SearchTeamMemberQuery = graphql`
     searchTeamMember(name: $name, teamId: $teamId) {
       id
       __typename
-      backNumber
-      position
+      foot
+      preferredNumber
+      preferredPosition
       profileImg
       overall {
         ovr

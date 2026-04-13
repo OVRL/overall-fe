@@ -23,6 +23,15 @@ import {
 } from "@/lib/playerPlaceholderImage";
 import { parseMatchIdForApi } from "@/utils/match/parseMatchIdForApi";
 
+const MERCENARY_NAME_SUFFIX = " (용병)";
+
+/** UI 표시용 접미사를 제거한 참석자 이름(createMatchAttendance `name` 입력용) */
+function mercenaryNameForAttendanceInput(displayName: string): string {
+  return displayName.endsWith(MERCENARY_NAME_SUFFIX)
+    ? displayName.slice(0, -MERCENARY_NAME_SUFFIX.length).trim()
+    : displayName.trim();
+}
+
 interface UsePlayerSearchProps {
   matchId: number;
   teamId: number;
@@ -43,12 +52,16 @@ function mapTeamMemberToPlayerProps(
   tm: any,
 ): Omit<PendingPlayerItem, "currentStatus" | "originalStatus"> {
   const user = tm.user;
-  const back = tm.backNumber;
-  const preferred = user?.preferredNumber;
+  const memberPref = tm.preferredNumber;
+  const userPref = user?.preferredNumber;
   const number =
-    back != null ? back : preferred != null ? Math.round(preferred) : 0;
+    memberPref != null
+      ? memberPref
+      : userPref != null
+        ? Math.round(userPref)
+        : 0;
   const name = user?.name?.trim() || "이름 없음";
-  const position = tm.position ?? "ST";
+  const position = tm.preferredPosition ?? "ST";
   const overall = tm.overall?.ovr ?? 0;
 
   const profileRaw = getTeamMemberProfileImageRawUrl({
@@ -186,9 +199,9 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
     return {
       id: tmId,
       teamMemberId: tmId,
-      userId: 0, // Wait, if userId is 0 it might throw error in createMatchAttendance??
+      userId: 0,
       memberType: "MERCENARY",
-      name: `${inputValue.trim()} (용병)`,
+      name: `${inputValue.trim()}${MERCENARY_NAME_SUFFIX}`,
       position: "용병",
       number: 0,
       overall: 0,
@@ -270,6 +283,9 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
                   userId: player.userId,
                   attendanceStatus: targetStatus,
                   memberType: player.memberType,
+                  ...(player.memberType === "MERCENARY" && {
+                    name: mercenaryNameForAttendanceInput(player.name),
+                  }),
                 },
               },
               onCompleted: resolve,

@@ -7,8 +7,9 @@ const playerManagementQuery = graphql`
       members {
         __typename
         id
-        backNumber
-        position
+        foot
+        preferredNumber
+        preferredPosition
         user {
           __typename
           id

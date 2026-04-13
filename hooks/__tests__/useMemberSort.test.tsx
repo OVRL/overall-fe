@@ -6,15 +6,15 @@ describe("useMemberSort", () => {
   const members = [
     {
       id: 1,
-      position: "ST",
-      backNumber: 2,
+      preferredPosition: "ST",
+      preferredNumber: 2,
       user: { name: "나" },
       overall: { ovr: 70 },
     },
     {
       id: 2,
-      position: "ST",
-      backNumber: 1,
+      preferredPosition: "ST",
+      preferredNumber: 1,
       user: { name: "가" },
       overall: { ovr: 70 },
     },

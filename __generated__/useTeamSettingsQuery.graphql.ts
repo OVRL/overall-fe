@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a4dca458100dc3d1a3f2c6fe651991ca>>
+ * @generated SignedSource<<52b3909a1d878e20befd4f4c1700ee5f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Foot = "B" | "L" | "R" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type UniformDesign = "DEFAULT" | "SOLID_BLACK" | "SOLID_BLUE" | "SOLID_PURPLE" | "SOLID_RED" | "SOLID_WHITE" | "STRIPE_BLUE" | "STRIPE_RED" | "STRIPE_WHITE" | "STRIPE_YELLOW" | "%future added value";
@@ -18,10 +19,11 @@ export type useTeamSettingsQuery$variables = {
 export type useTeamSettingsQuery$data = {
   readonly findManyTeamMember: {
     readonly members: ReadonlyArray<{
-      readonly backNumber: number | null | undefined;
+      readonly foot: Foot | null | undefined;
       readonly id: number;
       readonly joinedAt: any;
-      readonly position: Position | null | undefined;
+      readonly preferredNumber: number | null | undefined;
+      readonly preferredPosition: Position | null | undefined;
       readonly profileImg: string | null | undefined;
       readonly role: Role;
       readonly team: {
@@ -108,14 +110,21 @@ v3 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "backNumber",
+            "name": "foot",
             "storageKey": null
           },
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "position",
+            "name": "preferredNumber",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "preferredPosition",
             "storageKey": null
           },
           {
@@ -272,16 +281,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "6800054f8906ac91d9523247a2bb52df",
+    "cacheID": "1a41023ba369a1436ebb41cdb3870d5e",
     "id": null,
     "metadata": {},
     "name": "useTeamSettingsQuery",
     "operationKind": "query",
-    "text": "query useTeamSettingsQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 100) {\n    members {\n      id\n      backNumber\n      position\n      role\n      joinedAt\n      profileImg\n      user {\n        id\n        name\n        profileImage\n        birthDate\n      }\n      team {\n        id\n        name\n        emblem\n        activityArea\n        description\n        historyStartDate\n        homeUniform\n        awayUniform\n        region {\n          code\n          name\n        }\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query useTeamSettingsQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 100) {\n    members {\n      id\n      foot\n      preferredNumber\n      preferredPosition\n      role\n      joinedAt\n      profileImg\n      user {\n        id\n        name\n        profileImage\n        birthDate\n      }\n      team {\n        id\n        name\n        emblem\n        activityArea\n        description\n        historyStartDate\n        homeUniform\n        awayUniform\n        region {\n          code\n          name\n        }\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a3a73199851f8c818dfe24f7358d10f2";
+(node as any).hash = "233627a793834c615b6a9773f0ede10f";
 
 export default node;

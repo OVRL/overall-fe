@@ -183,6 +183,52 @@ type InviteCodeModel {
   teamId: Float!
 }
 
+"""팀 가입 신청 정보"""
+type JoinRequestModel {
+  """신청 일시"""
+  createdAt: GraphQLDateTime!
+
+  """가입 신청 ID"""
+  id: Int!
+
+  """사용한 초대 코드 ID"""
+  inviteCodeId: Int!
+
+  """가입 신청 메시지"""
+  message: String
+
+  """거절 사유"""
+  rejectedReason: String
+
+  """승인/거절 일시"""
+  reviewedAt: GraphQLDateTime
+
+  """승인/거절한 관리자 ID"""
+  reviewedBy: Int
+
+  """신청 상태 (pending, approved, rejected)"""
+  status: JoinRequestStatus!
+
+  """팀 정보"""
+  team: TeamModel
+
+  """팀 ID"""
+  teamId: Int!
+
+  """수정 일시"""
+  updatedAt: GraphQLDateTime!
+
+  """신청자 ID"""
+  userId: Int!
+}
+
+"""가입 신청 상태 (pending: 대기중, approved: 승인됨, rejected: 거절됨)"""
+enum JoinRequestStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
 input JoinTeamInput {
   """유저 이메일"""
   email: String!
@@ -315,6 +361,9 @@ enum MemberType {
 }
 
 type Mutation {
+  """본인의 팀 가입 신청을 취소합니다. PENDING 상태의 신청만 취소 가능합니다."""
+  cancelJoinRequest(joinRequestId: Int!, userId: Int!): Boolean!
+
   """임시저장 포메이션 확정 (선택한 draft 승격, 기존 확정본 덮어쓰기, 나머지 draft 삭제)"""
   confirmMatchFormation(draftId: Int!, userId: Int!): MatchFormationModel!
   createBestEleven(input: CreateBestElevenInput!): BestElevenModel!
@@ -335,7 +384,13 @@ type Mutation {
   login(email: String!, password: String!): LoginResponseModel!
   logout(refreshToken: String!): Boolean!
   refresh(refreshToken: String!): LoginResponseModel!
+
+  """팀 가입 신청을 거절합니다. PENDING 상태의 신청만 거절 가능하며, 신청 이력은 유지됩니다."""
+  rejectJoinRequest(joinRequestId: Int!, rejectedReason: String): JoinRequestModel!
   removeBackground(image: Upload!): BackgroundRemovalModel!
+
+  """초대 코드를 입력하여 팀 가입을 신청합니다. 관리자의 승인이 필요합니다."""
+  requestJoinTeam(input: RequestJoinTeamInput!): JoinRequestModel!
 
   """매치 포메이션 임시저장 (새 draft 레코드 생성)"""
   saveMatchFormationDraft(input: SaveMatchFormationDraftInput!): MatchFormationModel!
@@ -448,6 +503,9 @@ type Query {
 
   """확정된 매치 포메이션 조회 (isDraft=false)"""
   findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
+
+  """본인의 팀 가입 신청 이력을 조회합니다. 모든 상태(pending/approved/rejected)가 포함됩니다."""
+  findMyJoinRequestList(userId: Int!): [JoinRequestModel!]!
   findTeam(name: String!): TeamModel
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
@@ -468,6 +526,18 @@ type RegionSearchModel {
   riName: String
   sidoName: String!
   siggName: String
+}
+
+"""팀 가입 신청 입력"""
+input RequestJoinTeamInput {
+  """팀 초대 코드"""
+  inviteCode: String!
+
+  """가입 신청 메시지"""
+  message: String
+
+  """유저 ID"""
+  userId: Int!
 }
 
 """팀 권한"""
@@ -507,8 +577,8 @@ type TeamMemberArrayModel {
 }
 
 type TeamMemberModel {
-  """등번호"""
-  backNumber: Int
+  """주발"""
+  foot: Foot
 
   """팀 멤버 ID"""
   id: Int!
@@ -517,8 +587,11 @@ type TeamMemberModel {
   joinedAt: GraphQLDateTime!
   overall: OverallModel
 
-  """포지션"""
-  position: Position
+  """선호 번호"""
+  preferredNumber: Int
+
+  """선호 포지션"""
+  preferredPosition: Position
 
   """프로필 이미지"""
   profileImg: String
@@ -634,14 +707,17 @@ input UpdateTeamInput {
 }
 
 input UpdateTeamMemberInput {
-  """등번호 (선택)"""
-  backNumber: Int
+  """주발 (선택)"""
+  foot: Foot
 
   """팀 멤버 ID"""
   id: Int!
 
-  """포지션 (선택)"""
-  position: Position
+  """선호 번호 (선택)"""
+  preferredNumber: Int
+
+  """선호 포지션 (선택)"""
+  preferredPosition: Position
 
   """프로필 이미지 (선택)"""
   profileImg: String

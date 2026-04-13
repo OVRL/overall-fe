@@ -53,8 +53,8 @@ export function mapTeamMemberToPlayer(member: QueryMember): Player {
     value: 0,
     image: raw || undefined,
     imageFallbackUrl: getTeamMemberProfileImageFallbackUrl(member),
-    position: relayPositionToAppPosition(member.position),
-    backNumber: member.backNumber ?? 0,
+    position: relayPositionToAppPosition(member.preferredPosition),
+    backNumber: member.preferredNumber ?? 0,
     ovr,
     stats,
   };

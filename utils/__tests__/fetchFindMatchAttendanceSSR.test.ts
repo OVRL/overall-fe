@@ -22,7 +22,15 @@ describe("fetchFindMatchAttendanceSSR", () => {
     const rows = [
       {
         attendanceStatus: "ATTEND" as const,
-        teamMember: { id: 1, backNumber: 9, position: "ST", profileImg: null, overall: { ovr: 80 }, user: null },
+        teamMember: {
+          id: 1,
+          foot: null,
+          preferredNumber: 9,
+          preferredPosition: "ST",
+          profileImg: null,
+          overall: { ovr: 80 },
+          user: null,
+        },
       },
     ];
     mockedPost.mockResolvedValue({

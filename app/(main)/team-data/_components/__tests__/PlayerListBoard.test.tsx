@@ -12,8 +12,9 @@ const MOCK_MEMBERS: RosterMember[] = [
   {
     __typename: "TeamMemberModel" as const,
     id: 1,
-    position: "FW",
-    backNumber: 7,
+    foot: null,
+    preferredPosition: "FW",
+    preferredNumber: 7,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {
@@ -41,8 +42,9 @@ const MOCK_MEMBERS: RosterMember[] = [
   {
     __typename: "TeamMemberModel" as const,
     id: 2,
-    position: "MF",
-    backNumber: 10,
+    foot: null,
+    preferredPosition: "MF",
+    preferredNumber: 10,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {
@@ -70,8 +72,9 @@ const MOCK_MEMBERS: RosterMember[] = [
   {
     __typename: "TeamMemberModel" as const,
     id: 3,
-    position: "DF",
-    backNumber: 3,
+    foot: null,
+    preferredPosition: "DF",
+    preferredNumber: 3,
     joinedAt: "2023-09-03T00:00:00Z",
     profileImg: null,
     user: {

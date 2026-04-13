@@ -7,8 +7,9 @@ const FIND_MATCH_ATTENDANCE_QUERY = `
       attendanceStatus
       teamMember {
         id
-        backNumber
-        position
+        foot
+        preferredNumber
+        preferredPosition
         profileImg
         overall {
           ovr
@@ -29,8 +30,9 @@ export type MatchAttendanceRowSSR = {
   attendanceStatus: "ATTEND" | "ABSENT" | null;
   teamMember: {
     id: number;
-    backNumber: number | null;
-    position: string | null;
+    foot: string | null;
+    preferredNumber: number | null;
+    preferredPosition: string | null;
     profileImg: string | null;
     overall: { ovr: number } | null;
     user: {

@@ -35,8 +35,8 @@ export function useMemberSort(members: readonly RosterMember[]) {
       const factor = direction === "asc" ? 1 : -1;
 
       if (key === "position") {
-        const posA = (a.position ?? "") as Position;
-        const posB = (b.position ?? "") as Position;
+        const posA = (a.preferredPosition ?? "") as Position;
+        const posB = (b.preferredPosition ?? "") as Position;
         const orderA = POS_ORDER.indexOf(POSITION_CATEGORY_MAP[posA] ?? "");
         const orderB = POS_ORDER.indexOf(POSITION_CATEGORY_MAP[posB] ?? "");
         if (orderA !== orderB) return (orderA - orderB) * factor;
@@ -44,8 +44,8 @@ export function useMemberSort(members: readonly RosterMember[]) {
       }
 
       if (key === "number") {
-        const numA = a.backNumber ?? 0;
-        const numB = b.backNumber ?? 0;
+        const numA = a.preferredNumber ?? 0;
+        const numB = b.preferredNumber ?? 0;
         return (numA - numB) * factor;
       }
 

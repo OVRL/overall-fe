@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6ae5ed86c167371662cd52b114ca0d5d>>
+ * @generated SignedSource<<4db75120df67cd4637a1b2d782e685d4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Foot = "B" | "L" | "R" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type searchTeamMemberQuery$variables = {
   name: string;
@@ -17,12 +18,13 @@ export type searchTeamMemberQuery$variables = {
 export type searchTeamMemberQuery$data = {
   readonly searchTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
-    readonly backNumber: number | null | undefined;
+    readonly foot: Foot | null | undefined;
     readonly id: number;
     readonly overall: {
       readonly ovr: number;
     } | null | undefined;
-    readonly position: Position | null | undefined;
+    readonly preferredNumber: number | null | undefined;
+    readonly preferredPosition: Position | null | undefined;
     readonly profileImg: string | null | undefined;
     readonly teamId: number;
     readonly user: {
@@ -67,7 +69,14 @@ v2 = {
   "name": "__typename",
   "storageKey": null
 },
-v3 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "preferredNumber",
+  "storageKey": null
+},
+v4 = [
   {
     "alias": null,
     "args": [
@@ -93,14 +102,15 @@ v3 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "backNumber",
+        "name": "foot",
         "storageKey": null
       },
+      (v3/*: any*/),
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "position",
+        "name": "preferredPosition",
         "storageKey": null
       },
       {
@@ -145,13 +155,7 @@ v3 = [
             "name": "name",
             "storageKey": null
           },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "preferredNumber",
-            "storageKey": null
-          },
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -186,7 +190,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "searchTeamMemberQuery",
-    "selections": (v3/*: any*/),
+    "selections": (v4/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -195,19 +199,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "searchTeamMemberQuery",
-    "selections": (v3/*: any*/)
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "f3bc3f08418fb0a7bd711363d70134d9",
+    "cacheID": "cfba8fb418996730ed8c475a1e212e5d",
     "id": null,
     "metadata": {},
     "name": "searchTeamMemberQuery",
     "operationKind": "query",
-    "text": "query searchTeamMemberQuery(\n  $name: String!\n  $teamId: Int!\n) {\n  searchTeamMember(name: $name, teamId: $teamId) {\n    id\n    __typename\n    backNumber\n    position\n    profileImg\n    overall {\n      ovr\n    }\n    user {\n      id\n      __typename\n      name\n      preferredNumber\n      profileImage\n    }\n    teamId\n    userId\n  }\n}\n"
+    "text": "query searchTeamMemberQuery(\n  $name: String!\n  $teamId: Int!\n) {\n  searchTeamMember(name: $name, teamId: $teamId) {\n    id\n    __typename\n    foot\n    preferredNumber\n    preferredPosition\n    profileImg\n    overall {\n      ovr\n    }\n    user {\n      id\n      __typename\n      name\n      preferredNumber\n      profileImage\n    }\n    teamId\n    userId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0ddc420a5ff9aaad3b3be5ffce22dc9b";
+(node as any).hash = "5021871fe88357e7abf5006d45dd4ed0";
 
 export default node;

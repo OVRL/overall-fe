@@ -13,8 +13,8 @@ export interface GenericMatchAttendanceRow {
   readonly teamMember?: {
     /** GraphQL Int 또는 레거시 Relay `Type:id` 문자열 */
     readonly id: string | number;
-    readonly backNumber?: number | null;
-    readonly position?: string | null;
+    readonly preferredNumber?: number | null;
+    readonly preferredPosition?: string | null;
     readonly profileImg?: string | null;
     readonly overall?: {
       readonly ovr?: number | null;
@@ -43,17 +43,21 @@ export function matchAttendanceRowsToAttendingPlayers(
   return attending.map((row) => {
     const tm = row.teamMember!;
     const user = tm.user;
-    const back = tm.backNumber;
-    const preferred = user?.preferredNumber;
+    const memberPref = tm.preferredNumber;
+    const userPref = user?.preferredNumber;
 
     const numericId =
       parseNumericIdFromRelayGlobalId(tm.id) ?? Number(String(tm.id));
 
     const number =
-      back != null ? back : preferred != null ? Math.round(preferred) : 0;
+      memberPref != null
+        ? memberPref
+        : userPref != null
+          ? Math.round(userPref)
+          : 0;
 
     const name = user?.name?.trim() || "이름 없음";
-    const position = tm.position ?? "ST";
+    const position = tm.preferredPosition ?? "ST";
     const overall = tm.overall?.ovr ?? 0;
 
     const profileRaw = getTeamMemberProfileImageRawUrl({
