@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { TeamManagementMenu } from "./TeamManagementSidebar";
+import { useModalStore } from "@/contexts/ModalContext";
 
 interface TeamManagementFooterProps {
     activeMenu: TeamManagementMenu;
@@ -28,6 +30,15 @@ const menuItems: MenuItem[] = [
 export default function TeamManagementFooter({
     activeMenu,
 }: TeamManagementFooterProps) {
+    const modals = useModalStore((state) => state.modals);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        setIsModalOpen(modals.length > 0);
+    }, [modals]);
+
+    if (isModalOpen) return null;
+
     return (
         <nav className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-gray-800 flex items-center overflow-x-auto scrollbar-hide h-16 md:h-20 xl:hidden z-50 pb-safe">
             <div className="flex items-center min-w-full px-2 md:px-6 md:justify-around">
