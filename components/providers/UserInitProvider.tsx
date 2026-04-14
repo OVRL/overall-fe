@@ -26,19 +26,21 @@ export function UserInitProvider({
   initialUser,
   children,
 }: UserInitProviderProps) {
-  if (userId != null) {
-    return (
-      <>
-        {initialUser != null && (
-          <UserStoreHydrate initialUser={initialUser} />
-        )}
-        <UserFromRelaySync userId={userId} />
-        {children}
-      </>
-    );
-  }
-
-  return <UserIdNullSync initialUser={initialUser}>{children}</UserIdNullSync>;
+  return (
+    <>
+      {userId != null ? (
+        <>
+          {initialUser != null && (
+            <UserStoreHydrate initialUser={initialUser} />
+          )}
+          <UserFromRelaySync userId={userId} />
+        </>
+      ) : (
+        <UserIdNullSync initialUser={initialUser} />
+      )}
+      {children}
+    </>
+  );
 }
 
 /** SSR에서 내려준 initialUser를 스토어에 즉시 반영. 경기 등록 모달 등에서 Relay 완료 전에도 useUserId() 사용 가능 */
@@ -69,14 +71,12 @@ function UserFromRelaySync({ userId }: { userId: number }) {
 
 function UserIdNullSync({
   initialUser,
-  children,
 }: {
   initialUser: UserModel | null;
-  children: React.ReactNode;
 }) {
   useEffect(() => {
     useUserStore.setState({ user: initialUser });
   }, [initialUser]);
 
-  return <>{children}</>;
+  return null;
 }

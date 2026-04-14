@@ -1,18 +1,15 @@
-import Link from "@/components/Link";
-import arrowBack from "@/public/icons/arrow_back.svg";
-import Icon from "@/components/ui/Icon";
+import Footer from "@/components/ui/Footer";
+import PrivacyPolicyBackButton from "./_components/PrivacyPolicyBackButton";
 /**
  * 개인정보 처리방침 전문 페이지.
  * 법무 검토 후 본문을 교체해 주세요.
  */
 export default function PrivacyPolicyPage() {
   return (
-    <div className="flex min-h-dvh w-full min-w-0 flex-row justify-center bg-black text-Label-Primary pt-safe">
-      <main className="box-border w-full max-w-layout xl:max-w-[1336px] px-4 py-6 md:py-10">
+    <div className="flex min-h-dvh w-full min-w-0 flex-col bg-black text-Label-Primary pt-safe">
+      <main className="box-border mx-auto w-full max-w-layout flex-1 px-4 py-6 md:py-10 xl:max-w-[1336px]">
         <div className="mb-8">
-          <Link href="/privacy-consent" className="text-sm hover:opacity-90">
-            <Icon src={arrowBack} alt="back" />
-          </Link>
+          <PrivacyPolicyBackButton />
         </div>
         <article className="w-full rounded-2xl border border-[#252525] bg-[#151515] p-6 md:p-12 space-y-6">
           <h1 className="text-3xl font-bold text-white leading-9">
@@ -182,6 +179,7 @@ export default function PrivacyPolicyPage() {
           </footer>
         </article>
       </main>
+      <Footer />
     </div>
   );
 }

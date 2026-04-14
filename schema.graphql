@@ -9,6 +9,17 @@ directive @specifiedBy(
   url: String!
 ) on SCALAR
 
+input AddMatchMercenaryInput {
+  """경기 ID"""
+  matchId: Int!
+
+  """용병 이름"""
+  name: String!
+
+  """팀 ID"""
+  teamId: Int!
+}
+
 """참석 여부 (attend: 참석, absent: 불참)"""
 enum AttendanceStatus {
   ABSENT
@@ -54,15 +65,11 @@ type CreateInviteCodeModel {
 }
 
 input CreateMatchAttendanceInput {
-  """참석 여부 (attend: 참석, absent: 불참)"""
-  attendanceStatus: AttendanceStatus
+  """참석 여부 (ATTEND: 참석, ABSENT: 불참)"""
+  attendanceStatus: AttendanceStatus!
 
   """경기 ID"""
   matchId: Int!
-  memberType: MemberType!
-
-  """참석자 이름"""
-  name: String
 
   """팀 ID"""
   teamId: Int!
@@ -151,6 +158,14 @@ scalar Date
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeleteMatchMercenaryInput {
+  """용병 ID"""
+  id: Int!
+
+  """팀 ID"""
+  teamId: Int!
+}
 
 """주발"""
 enum Foot {
@@ -264,17 +279,14 @@ type LoginResponseModel {
 }
 
 type MatchAttendanceModel {
-  attendanceStatus: AttendanceStatus
+  """참석 상태"""
+  attendanceStatus: AttendanceStatus!
   createdAt: GraphQLDateTime!
   id: Int!
 
   """경기 정보"""
   match: MatchModel
   matchId: Int!
-  memberType: MemberType
-
-  """참석자 이름"""
-  name: String
   teamId: Int!
 
   """팀 멤버 정보"""
@@ -322,7 +334,32 @@ type MatchFormationModel {
   userId: Int!
 }
 
+type MatchMercenaryModel {
+  """생성일"""
+  createdAt: GraphQLDateTime!
+
+  """용병 ID"""
+  id: Int!
+
+  """경기 정보"""
+  match: MatchModel
+
+  """경기 ID"""
+  matchId: Int!
+
+  """용병 이름"""
+  name: String!
+
+  """팀 ID"""
+  teamId: Int!
+
+  """수정일"""
+  updatedAt: GraphQLDateTime!
+}
+
 type MatchModel {
+  """경기별 참석 투표 목록"""
+  attendances: [MatchAttendanceModel!]
   createdAt: GraphQLDateTime!
   createdTeam: TeamModel
   createdTeamId: Int!
@@ -334,6 +371,9 @@ type MatchModel {
   isFormationDraft: Boolean
   matchDate: Date!
   matchType: MatchType!
+
+  """경기별 용병 목록"""
+  mercenaries: [MatchMercenaryModel!]
   opponentTeam: TeamModel
   opponentTeamId: Int
   quarterCount: Int!
@@ -354,12 +394,6 @@ enum MatchType {
   MATCH
 }
 
-"""팀 멤버 유형 (member: 팀원, mercenary: 용병)"""
-enum MemberType {
-  MEMBER
-  MERCENARY
-}
-
 type Mutation {
   """본인의 팀 가입 신청을 취소합니다. PENDING 상태의 신청만 취소 가능합니다."""
   cancelJoinRequest(joinRequestId: Int!, userId: Int!): Boolean!
@@ -373,11 +407,17 @@ type Mutation {
 
   """매치 포메이션 생성 (isDraft=false 확정 상태로 저장)"""
   createMatchFormation(input: CreateMatchFormationInput!): MatchFormationModel!
+
+  """용병 추가 (코치/감독 전용)"""
+  createMatchMercenary(input: AddMatchMercenaryInput!): MatchMercenaryModel!
   createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteBestEleven(id: Int!): Boolean!
   deleteMatch(id: Int!): Boolean!
   deleteMatchAttendance(id: Int!, teamId: Int!): MatchAttendanceModel!
+
+  """용병 삭제 (코치/감독 전용)"""
+  deleteMatchMercenary(input: DeleteMatchMercenaryInput!): Boolean!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
   deleteUser(id: Int!): Boolean!
@@ -510,6 +550,12 @@ type Query {
   findTeamMember(userId: Int!): [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
+
+  """경기별 용병 목록 조회"""
+  matchMercenaries(
+    """경기 ID"""
+    matchId: Int!
+  ): [MatchMercenaryModel!]!
   searchTeamMember(name: String!, teamId: Int!): [TeamMemberModel!]!
 }
 
@@ -583,6 +629,9 @@ type TeamMemberModel {
   """팀 멤버 ID"""
   id: Int!
 
+  """자기소개"""
+  introduction: String
+
   """가입일"""
   joinedAt: GraphQLDateTime!
   overall: OverallModel
@@ -642,7 +691,7 @@ enum UniformDesign {
 }
 
 input UpdateMatchAttendanceInput {
-  """참석 여부 (attend: 참석, absent: 불참)"""
+  """참석 여부 (ATTEND: 참석, ABSENT: 불참)"""
   attendanceStatus: AttendanceStatus!
 
   """참석 투표 ID"""
@@ -712,6 +761,9 @@ input UpdateTeamMemberInput {
 
   """팀 멤버 ID"""
   id: Int!
+
+  """자기소개 (선택)"""
+  introduction: String
 
   """선호 번호 (선택)"""
   preferredNumber: Int

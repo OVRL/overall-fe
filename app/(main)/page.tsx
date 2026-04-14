@@ -1,6 +1,7 @@
 import UpcomingMatch from "@/components/home/UpcomingMatch";
 import SquadManager from "@/components/home/SquadManager";
 import TeamCreatedModalTrigger from "@/components/home/TeamCreatedModalTrigger";
+import Footer from "@/components/ui/Footer";
 import { INITIAL_PLAYERS } from "@/data/players";
 
 export default function HomePage() {
@@ -13,6 +14,7 @@ export default function HomePage() {
           upcomingMatchSlot={<UpcomingMatch />}
         />
       </main>
+      <Footer />
     </div>
   );
 }
