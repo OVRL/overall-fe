@@ -17,6 +17,7 @@ export interface MatchInfoDesktopProps extends MatchInfoProps {
 
 /**
  * 모바일용 매치 정보 (날짜 + 가로형 팀 정보)
+ * 포메이션 설정은 UpcomingMatchMobile 하단 CTA와 동일한 UI로 표시합니다.
  */
 export function MatchInfoMobile({ display }: MatchInfoProps) {
   const { formattedDateTime, homeTeam, awayTeam } = display;

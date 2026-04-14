@@ -7,18 +7,13 @@ import { useTeamManagementCapabilitiesForUser } from "@/hooks/useTeamManagementC
 import { useUserId } from "@/hooks/useUserId";
 import MatchHeader from "./MatchHeader";
 import { MatchInfoDesktop } from "./MatchInfo";
-import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
-import type { UpcomingMatchDisplay } from "./upcomingMatchDisplay";
+import {
+  formationHrefFromDisplay,
+  type UpcomingMatchDisplay,
+} from "./upcomingMatchDisplay";
 
 interface UpcomingMatchDesktopProps {
   display: UpcomingMatchDisplay;
-}
-
-function formationHrefFromDisplay(display: UpcomingMatchDisplay) {
-  const numericMatchId = parseNumericIdFromRelayGlobalId(display.matchId);
-  return numericMatchId != null
-    ? `/formation/${numericMatchId}`
-    : `/formation/${encodeURIComponent(display.matchId)}`;
 }
 
 /**

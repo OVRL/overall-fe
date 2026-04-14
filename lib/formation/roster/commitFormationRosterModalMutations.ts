@@ -40,7 +40,8 @@ export async function commitFormationRosterModalMutations(options: {
   >;
   pendingTeamMembers: readonly PendingTeamMemberMutation[];
   mercenaryNamesToCreate: readonly string[];
-  mercenaryIdsToDelete: readonly number[];
+  /** Relay가 `id`를 숫자 또는 `MatchMercenaryModel:1` 형 문자열로 줄 수 있음 */
+  mercenaryIdsToDelete: readonly (number | string)[];
 }): Promise<void> {
   const {
     environment,
@@ -130,13 +131,24 @@ export async function commitFormationRosterModalMutations(options: {
     );
   }
 
-  for (const id of mercenaryIdsToDelete) {
+  for (const rawMercenaryId of mercenaryIdsToDelete) {
+    const mercenaryId = parseMatchIdForApi(rawMercenaryId);
+    if (mercenaryId == null) {
+      tasks.push(
+        Promise.reject(
+          new Error(
+            `용병 ID를 숫자로 변환할 수 없습니다: ${String(rawMercenaryId)}`,
+          ),
+        ),
+      );
+      continue;
+    }
     tasks.push(
       new Promise<deleteMatchMercenaryMutation["response"]>((resolve, reject) => {
         commitMutation<deleteMatchMercenaryMutation>(environment, {
           mutation: DeleteMatchMercenaryMutation,
           variables: {
-            input: { id, teamId },
+            input: { id: mercenaryId, teamId },
           },
           onCompleted: resolve,
           onError: reject,

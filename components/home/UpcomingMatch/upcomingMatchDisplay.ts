@@ -1,3 +1,4 @@
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { formatMatchDateTime } from "@/utils/date/formatMatchDateTime";
 
 const DEFAULT_EMBLEM = "/images/ovr.png";
@@ -65,4 +66,12 @@ export function buildUpcomingMatchDisplay(
     homeTeam: { name: createdName, emblemUrl: createdEmblem },
     awayTeam: { name: opponentName, emblemUrl: opponentEmblem },
   };
+}
+
+/** 포메이션 페이지 경로 (Relay 글로벌 ID 또는 숫자 id 모두 처리) */
+export function formationHrefFromDisplay(display: UpcomingMatchDisplay): string {
+  const numericMatchId = parseNumericIdFromRelayGlobalId(display.matchId);
+  return numericMatchId != null
+    ? `/formation/${numericMatchId}`
+    : `/formation/${encodeURIComponent(display.matchId)}`;
 }

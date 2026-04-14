@@ -62,7 +62,6 @@
   /* 1920px */
   --max-width-layout: 45rem;
   --width-layout: 100%;
-
   --color-black: oklch(0% 0 0);
   --color-white: oklch(100% 0 89.9);
   --color-card-bg: oklch(0.145 0 0);
@@ -170,8 +169,16 @@
   --color-chart-series-goals: var(--color-blue-500);
   --color-chart-series-assists: var(--color-green-500);
   --color-chart-series-attack: var(--color-red-500);
-  --color-chart-grid-muted: color-mix(in oklch, var(--color-gray-500) 28%, transparent);
-  --color-chart-grid-soft: color-mix(in oklch, var(--color-gray-500) 18%, transparent);
+  --color-chart-grid-muted: color-mix(
+    in oklch,
+    var(--color-gray-500) 28%,
+    transparent
+  );
+  --color-chart-grid-soft: color-mix(
+    in oklch,
+    var(--color-gray-500) 18%,
+    transparent
+  );
 
   @keyframes shimmer {
     0% {
@@ -192,15 +199,13 @@
       transform: translateY(0);
     }
   }
-
 }
 
 /* 프로필: 뷰포트 진입 시 한 번만 전환 (transition — @keyframes 불필요) */
 .profile-reveal {
   opacity: 0;
   transform: translateY(0.25rem);
-  transition:
-    opacity 450ms cubic-bezier(0.33, 1, 0.68, 1),
+  transition: opacity 450ms cubic-bezier(0.33, 1, 0.68, 1),
     transform 450ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
@@ -276,4 +281,3 @@ body {
   background-color: var(--background);
   color: var(--foreground);
 }
-
