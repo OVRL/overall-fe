@@ -80,7 +80,7 @@ const RoleDropdown = ({
       <PopoverTrigger asChild>
         <button
           disabled={disabled}
-          className={`flex items-center justify-between gap-1 rounded-md bg-[#252526] border border-transparent px-2.5 py-1.5 text-xs text-white min-w-[72px] transition-all ${
+          className={`flex items-center justify-between gap-1 rounded-md bg-[#252526] border border-transparent px-3 py-1.5 text-xs text-white w-[84px] transition-all ${
             disabled
               ? "opacity-50 cursor-default"
               : open
@@ -1026,26 +1026,28 @@ function TeamSettingsPanelInner({
                     <td className="px-3 py-3 text-center text-gray-400">{member.age}세</td>
                     <td className="px-3 py-3 text-center text-gray-400">{member.joinedAt}</td>
                     <td className="px-3 py-3 text-center">
-                      <RoleDropdown
-                        value={member.role}
-                        disabled={
-                          (!isActualManager && !isActualCoach) || 
-                          (member.userId === currentUserId)
-                        }
-                        availableRoles={
-                          isActualManager || isActualCoach
-                            ? ["감독", "코치", "선수"] 
-                            : [member.role]
-                        }
-                        onChange={(newRole) => {
-                          setRoleModal({
-                            memberId: member.id,
-                            memberName: member.name,
-                            currentRole: member.role,
-                            newRole,
-                          });
-                        }}
-                      />
+                      <div className="flex justify-center">
+                        <RoleDropdown
+                          value={member.role}
+                          disabled={
+                            (!isActualManager && !isActualCoach) || 
+                            (member.userId === currentUserId)
+                          }
+                          availableRoles={
+                            isActualManager || isActualCoach
+                              ? ["감독", "코치", "선수"] 
+                              : [member.role]
+                          }
+                          onChange={(newRole) => {
+                            setRoleModal({
+                              memberId: member.id,
+                              memberName: member.name,
+                              currentRole: member.role,
+                              newRole,
+                            });
+                          }}
+                        />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-center">
                       {(isActualManager || isActualCoach) && member.role === "선수" ? (
