@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d7ba48ad1ea5c0391c26876f61fd5727>>
+ * @generated SignedSource<<c485961b20cdcecc2437c5a595140eea>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type UpdateTeamMemberInput = {
   foot?: Foot | null | undefined;
   id: number;
+  introduction?: string | null | undefined;
   preferredNumber?: number | null | undefined;
   preferredPosition?: Position | null | undefined;
   profileImg?: string | null | undefined;

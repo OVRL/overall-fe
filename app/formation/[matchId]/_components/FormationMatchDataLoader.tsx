@@ -8,6 +8,8 @@ import type { formationMatchAttendanceQuery } from "@/__generated__/formationMat
 import { FormationMatchPlayersProvider } from "../../_context/FormationMatchPlayersContext";
 import { FormationMatchContext } from "../../_context/FormationMatchContext";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
+import { matchMercenaryRowsToPlayers } from "@/lib/formation/roster/matchMercenaryRowsToPlayers";
+import { mergeAttendingMembersAndMercenaries } from "@/lib/formation/roster/mergeAttendingMembersAndMercenaries";
 import { FormationMatchPageLoadingShell } from "../../_components/FormationMatchPageLoadingShell";
 import type { FormationMatchPageSnapshot } from "@/types/formationMatchPageSnapshot";
 
@@ -57,8 +59,16 @@ function DataFetcher({ matchId, teamId, children }: Props) {
     { fetchPolicy: "store-or-network" },
   );
 
-  const attendingPlayers = matchAttendanceRowsToAttendingPlayers(
+  const attendingMembers = matchAttendanceRowsToAttendingPlayers(
     data.findMatchAttendance ?? [],
+  );
+  const mercenaryPlayers = matchMercenaryRowsToPlayers(
+    data.matchMercenaries ?? [],
+    teamId,
+  );
+  const attendingPlayers = mergeAttendingMembersAndMercenaries(
+    attendingMembers,
+    mercenaryPlayers,
   );
 
   return (
@@ -98,13 +108,26 @@ export default function FormationMatchDataLoader({
     </div>
   );
 
+  /**
+   * SSR 스냅샷이 있어도 명단은 Relay `useLazyLoadQuery`로 구독해야 합니다.
+   * (모달에서 `fetchQuery`로 갱신 시 스토어만 바뀌고, 정적 `ssrSnapshot.players` Provider면 좌측 명단이 안 바뀜)
+   * Suspense fallback 동안에는 SSR 선수 풀로 동일 UI를 유지합니다.
+   */
   if (ssrSnapshot != null) {
     return (
       <ErrorBoundary fallback={errorFallback}>
         <FormationMatchContext.Provider value={{ matchId, teamId }}>
-          <FormationMatchPlayersProvider players={ssrSnapshot.players}>
-            {mergeSsrInitialQuartersIntoChildren(children, ssrSnapshot)}
-          </FormationMatchPlayersProvider>
+          <Suspense
+            fallback={
+              <FormationMatchPlayersProvider players={ssrSnapshot.players}>
+                {mergeSsrInitialQuartersIntoChildren(children, ssrSnapshot)}
+              </FormationMatchPlayersProvider>
+            }
+          >
+            <DataFetcher matchId={matchId} teamId={teamId}>
+              {mergeSsrInitialQuartersIntoChildren(children, ssrSnapshot)}
+            </DataFetcher>
+          </Suspense>
         </FormationMatchContext.Provider>
       </ErrorBoundary>
     );

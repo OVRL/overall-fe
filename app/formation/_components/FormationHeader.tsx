@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import arrowBack from "@/public/icons/arrow_back.svg";
@@ -19,8 +20,14 @@ type FormationHeaderProps = {
 const FormationHeader = (props: FormationHeaderProps) => {
   const isMobile = useIsMobile(1023);
 
+  const stickyShell = (inner: ReactNode) => (
+    <div className="sticky top-0 z-20 shrink-0 bg-surface-primary">
+      {inner}
+    </div>
+  );
+
   if (isMobile) {
-    return (
+    return stickyShell(
       <Header
         variant="mobile"
         onBack={props.onBack}
@@ -40,11 +47,11 @@ const FormationHeader = (props: FormationHeaderProps) => {
         saveConfirmDisabled={props.onSaveConfirm == null}
         isSaveConfirmPending={props.isSaveConfirmPending}
         onRightClick={props.onSaveConfirm ?? (() => {})}
-      />
+      />,
     );
   }
 
-  return (
+  return stickyShell(
     <Header
       onBack={props.onBack}
       onReset={props.onReset}
@@ -52,7 +59,7 @@ const FormationHeader = (props: FormationHeaderProps) => {
       isSaveDraftPending={props.isSaveDraftPending}
       onSaveConfirm={props.onSaveConfirm}
       isSaveConfirmPending={props.isSaveConfirmPending}
-    />
+    />,
   );
 };
 

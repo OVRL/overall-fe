@@ -73,6 +73,7 @@ export function matchAttendanceRowsToAttendingPlayers(
 
     return {
       id: numericId,
+      rosterKind: "TEAM_MEMBER" as const,
       name,
       position,
       number,

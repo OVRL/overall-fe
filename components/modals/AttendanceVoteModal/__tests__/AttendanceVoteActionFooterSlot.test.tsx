@@ -73,7 +73,6 @@ describe("AttendanceVoteActionFooterSlot", () => {
                 {
                   __typename: "MatchAttendanceModel",
                   id: "MatchAttendance:1",
-                  memberType: "MEMBER",
                   userId: 1,
                   attendanceStatus: "ATTEND",
                   user: {
@@ -105,7 +104,6 @@ describe("AttendanceVoteActionFooterSlot", () => {
                 {
                   __typename: "MatchAttendanceModel",
                   id: "42",
-                  memberType: "MEMBER",
                   userId: 42,
                   attendanceStatus: "ATTEND",
                   user: {
@@ -139,7 +137,6 @@ describe("AttendanceVoteActionFooterSlot", () => {
                 {
                   __typename: "MatchAttendanceModel",
                   id: "42",
-                  memberType: "MEMBER",
                   userId: 42,
                   attendanceStatus: "ABSENT",
                   user: {

@@ -6,7 +6,6 @@ export const CreateMatchAttendanceMutation = graphql`
       id
       __typename
       attendanceStatus
-      memberType
       teamMember {
         id
         __typename

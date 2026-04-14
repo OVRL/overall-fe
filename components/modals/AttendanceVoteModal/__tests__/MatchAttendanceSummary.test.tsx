@@ -104,6 +104,61 @@ describe("MatchAttendanceSummarySlot", () => {
     ).toBeInTheDocument();
   });
 
+  it("같은 팀 용병은 참석 인원·명단에 포함하고 다른 팀 용병은 제외한다", async () => {
+    const { environment } = renderSummary({ teamId: 10 });
+
+    await act(async () => {
+      environment.mock.resolveMostRecentOperation(
+        (operation: OperationDescriptor) =>
+          MockPayloadGenerator.generate(operation, {
+            Query: () => ({
+              findMatchAttendance: [
+                {
+                  __typename: "MatchAttendanceModel",
+                  userId: 1,
+                  attendanceStatus: "ATTEND",
+                  user: {
+                    __typename: "UserModel",
+                    name: "팀원",
+                    profileImage: null,
+                  },
+                },
+              ],
+              matchMercenaries: [
+                {
+                  __typename: "MatchMercenaryModel",
+                  id: "100",
+                  name: "용병A",
+                  matchId: 1,
+                  teamId: 10,
+                },
+                {
+                  __typename: "MatchMercenaryModel",
+                  id: "101",
+                  name: "용병B",
+                  matchId: 1,
+                  teamId: 99,
+                },
+              ],
+            }),
+          }),
+      );
+    });
+
+    expect(
+      await screen.findByRole("button", { name: /2명 참석, 명단 보기/ }),
+    ).toBeInTheDocument();
+
+    const attendTrigger = screen.getByRole("button", {
+      name: /2명 참석, 명단 보기/,
+    });
+    fireEvent.click(attendTrigger);
+
+    expect(await screen.findByText("팀원")).toBeInTheDocument();
+    expect(screen.getByText("용병A")).toBeInTheDocument();
+    expect(screen.queryByText("용병B")).not.toBeInTheDocument();
+  });
+
   it("attendanceStatus가 없는 행은 참석·불참 집계에서 제외한다", async () => {
     const { environment } = renderSummary({});
 

@@ -21,10 +21,16 @@ const MatchAttendancePlayerModalContent = ({
     setInputValue,
     debouncedKeyword,
     searchResults,
-    pendingChanges,
-    mercenaryPlayer,
+    pendingTeamMembers,
+    pendingMercenaryCreates,
+    pendingMercenaryDeletes,
+    existingMercenaries,
+    mercenaryDraft,
+    totalPendingCount,
     isSearching,
-    handleToggleAttendance,
+    toggleTeamMemberAttendance,
+    toggleMercenaryDraftRegister,
+    toggleMercenaryExistingRemove,
     handleComplete,
   } = usePlayerSearch({ matchId, teamId });
 
@@ -41,20 +47,25 @@ const MatchAttendancePlayerModalContent = ({
             keyword={debouncedKeyword}
             isSearching={isSearching}
             results={searchResults}
-            mercenary={mercenaryPlayer}
-            pendingChanges={pendingChanges}
-            onToggle={handleToggleAttendance}
+            existingMercenaries={existingMercenaries}
+            mercenaryDraft={mercenaryDraft}
+            pendingTeamMembers={pendingTeamMembers}
+            pendingMercenaryCreates={pendingMercenaryCreates}
+            pendingMercenaryDeletes={pendingMercenaryDeletes}
+            onToggleTeamMember={toggleTeamMemberAttendance}
+            onToggleMercenaryDraft={toggleMercenaryDraftRegister}
+            onToggleMercenaryRemove={toggleMercenaryExistingRemove}
           />
         </div>
         <Button
           variant="primary"
           size="xl"
           onClick={handleComplete}
-          disabled={pendingChanges.size === 0}
+          disabled={totalPendingCount === 0}
           className="mt-auto"
         >
           완료{" "}
-          {pendingChanges.size > 0 ? `(${pendingChanges.size}명 변경)` : ""}
+          {totalPendingCount > 0 ? `(${totalPendingCount}건 변경)` : ""}
         </Button>
       </div>
     </>

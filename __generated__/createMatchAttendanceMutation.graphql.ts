@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8f80228ff266c013506bb593f3286ee8>>
+ * @generated SignedSource<<806a67c409756a7b045b5383f14c7db1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,13 +11,10 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
 export type Foot = "B" | "L" | "R" | "%future added value";
-export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type CreateMatchAttendanceInput = {
-  attendanceStatus?: AttendanceStatus | null | undefined;
+  attendanceStatus: AttendanceStatus;
   matchId: number;
-  memberType: MemberType;
-  name?: string | null | undefined;
   teamId: number;
   userId: number;
 };
@@ -27,9 +24,8 @@ export type createMatchAttendanceMutation$variables = {
 export type createMatchAttendanceMutation$data = {
   readonly createMatchAttendance: {
     readonly __typename: "MatchAttendanceModel";
-    readonly attendanceStatus: AttendanceStatus | null | undefined;
+    readonly attendanceStatus: AttendanceStatus;
     readonly id: number;
-    readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
       readonly foot: Foot | null | undefined;
@@ -106,13 +102,6 @@ v4 = [
         "args": null,
         "kind": "ScalarField",
         "name": "attendanceStatus",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "memberType",
         "storageKey": null
       },
       {
@@ -218,16 +207,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "c414f9b107723d1f505ce8947116e9ae",
+    "cacheID": "7dfd0f3027d13167d1a40116e569ed5e",
     "id": null,
     "metadata": {},
     "name": "createMatchAttendanceMutation",
     "operationKind": "mutation",
-    "text": "mutation createMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
+    "text": "mutation createMatchAttendanceMutation(\n  $input: CreateMatchAttendanceInput!\n) {\n  createMatchAttendance(input: $input) {\n    id\n    __typename\n    attendanceStatus\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4f5a89235083b8cb6b822b8b629bbaab";
+(node as any).hash = "5ebb02f6022d10f20c7228a58e0501af";
 
 export default node;

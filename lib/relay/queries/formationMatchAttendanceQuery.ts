@@ -6,7 +6,6 @@ export const FormationMatchAttendanceQuery = graphql`
       id
       __typename
       attendanceStatus
-      memberType
       teamMember {
         id
         __typename
@@ -25,6 +24,13 @@ export const FormationMatchAttendanceQuery = graphql`
           profileImage
         }
       }
+    }
+    matchMercenaries(matchId: $matchId) {
+      id
+      __typename
+      name
+      matchId
+      teamId
     }
   }
 `;

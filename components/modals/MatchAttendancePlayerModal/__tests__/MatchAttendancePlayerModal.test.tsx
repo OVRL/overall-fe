@@ -52,10 +52,16 @@ describe("MatchAttendancePlayerModal", () => {
       setInputValue: mockSetInputValue,
       debouncedKeyword: "",
       searchResults: [],
-      pendingChanges: new Map(),
-      mercenaryPlayer: null,
+      pendingTeamMembers: new Map(),
+      pendingMercenaryCreates: new Set(),
+      pendingMercenaryDeletes: new Set(),
+      existingMercenaries: [],
+      mercenaryDraft: null,
+      totalPendingCount: 0,
       isSearching: false,
-      handleToggleAttendance: jest.fn(),
+      toggleTeamMemberAttendance: jest.fn(),
+      toggleMercenaryDraftRegister: jest.fn(),
+      toggleMercenaryExistingRemove: jest.fn(),
       handleComplete: mockHandleComplete,
     });
   });
@@ -75,7 +81,7 @@ describe("MatchAttendancePlayerModal", () => {
     expect(screen.getByTestId("complete-btn")).toBeInTheDocument();
   });
 
-  it("pendingChanges가 비어있을 때 완료 버튼은 비활성화되고 텍스트는 '완료'여야 한다", () => {
+  it("변경 예정이 없을 때 완료 버튼은 비활성화되고 텍스트는 '완료'여야 한다", () => {
     render(<MatchAttendancePlayerModal {...defaultProps} />);
 
     const btn = screen.getByTestId("complete-btn");
@@ -83,7 +89,7 @@ describe("MatchAttendancePlayerModal", () => {
     expect(btn).toHaveTextContent("완료");
   });
 
-  it("pendingChanges에 데이터가 있을 때 완료 버튼은 활성화되고 변경된 인원 수를 표시해야 한다", () => {
+  it("변경 예정이 있을 때 완료 버튼은 활성화되고 건수를 표시해야 한다", () => {
     const changesMap = new Map();
     changesMap.set(1, { currentStatus: "ATTEND" });
     changesMap.set(2, { currentStatus: "ABSENT" });
@@ -93,10 +99,16 @@ describe("MatchAttendancePlayerModal", () => {
       setInputValue: mockSetInputValue,
       debouncedKeyword: "",
       searchResults: [],
-      pendingChanges: changesMap,
-      mercenaryPlayer: null,
+      pendingTeamMembers: changesMap,
+      pendingMercenaryCreates: new Set(),
+      pendingMercenaryDeletes: new Set(),
+      existingMercenaries: [],
+      mercenaryDraft: null,
+      totalPendingCount: 2,
       isSearching: false,
-      handleToggleAttendance: jest.fn(),
+      toggleTeamMemberAttendance: jest.fn(),
+      toggleMercenaryDraftRegister: jest.fn(),
+      toggleMercenaryExistingRemove: jest.fn(),
       handleComplete: mockHandleComplete,
     });
 
@@ -104,7 +116,7 @@ describe("MatchAttendancePlayerModal", () => {
 
     const btn = screen.getByTestId("complete-btn");
     expect(btn).not.toBeDisabled();
-    expect(btn).toHaveTextContent("완료 (2명 변경)");
+    expect(btn).toHaveTextContent("완료 (2건 변경)");
   });
 
   it("완료 버튼 클릭 시 handleComplete 콜백이 실행되어야 한다", () => {
@@ -116,10 +128,16 @@ describe("MatchAttendancePlayerModal", () => {
       setInputValue: mockSetInputValue,
       debouncedKeyword: "",
       searchResults: [],
-      pendingChanges: changesMap,
-      mercenaryPlayer: null,
+      pendingTeamMembers: changesMap,
+      pendingMercenaryCreates: new Set(),
+      pendingMercenaryDeletes: new Set(),
+      existingMercenaries: [],
+      mercenaryDraft: null,
+      totalPendingCount: 1,
       isSearching: false,
-      handleToggleAttendance: jest.fn(),
+      toggleTeamMemberAttendance: jest.fn(),
+      toggleMercenaryDraftRegister: jest.fn(),
+      toggleMercenaryExistingRemove: jest.fn(),
       handleComplete: mockHandleComplete,
     });
 

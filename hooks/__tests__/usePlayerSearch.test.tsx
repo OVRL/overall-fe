@@ -1,5 +1,6 @@
-import { renderHook, act } from "@testing-library/react";
-import { usePlayerSearch, PendingPlayerItem } from "../usePlayerSearch";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { usePlayerSearch } from "../usePlayerSearch";
+import type { PendingTeamMemberRow } from "@/types/formationRosterModal";
 import { useLazyLoadQuery } from "react-relay";
 
 jest.mock("react-relay", () => {
@@ -20,7 +21,7 @@ jest.mock("@/hooks/useModal", () => ({
 }));
 
 jest.mock("@toss/react", () => ({
-  useDebounce: (fn: any) => {
+  useDebounce: (fn: (value: string) => void) => {
     const { useCallback } = require("react");
     return useCallback(fn, []);
   },
@@ -37,10 +38,10 @@ describe("usePlayerSearch 훅", () => {
         {
           id: "100",
           attendanceStatus: "ATTEND",
-          memberType: "MEMBER",
           teamMember: { id: 1 },
         },
       ],
+      matchMercenaries: [],
     });
   });
 
@@ -49,11 +50,13 @@ describe("usePlayerSearch 훅", () => {
 
     expect(result.current.inputValue).toBe("");
     expect(result.current.searchResults).toEqual([]);
-    expect(result.current.pendingChanges.size).toBe(0);
-    expect(result.current.mercenaryPlayer).toBeNull();
+    expect(result.current.pendingTeamMembers.size).toBe(0);
+    expect(result.current.mercenaryDraft).toBeNull();
+    expect(result.current.pendingMercenaryCreates.size).toBe(0);
+    expect(result.current.pendingMercenaryDeletes.size).toBe(0);
   });
 
-  it("입력값이 변경되면 inputValue와 debouncedKeyword가 동기화되어야 한다", () => {
+  it("입력값이 변경되면 inputValue와 debouncedKeyword가 동기화되어야 한다", async () => {
     const { result } = renderHook(() => usePlayerSearch({ matchId, teamId }));
 
     act(() => {
@@ -61,19 +64,20 @@ describe("usePlayerSearch 훅", () => {
     });
 
     expect(result.current.inputValue).toBe("손흥민");
-    // useDebounce가 즉시 실행되도록 모킹했으므로 debouncedKeyword도 즉각 반영됨
-    expect(result.current.debouncedKeyword).toBe("손흥민");
+    await waitFor(() => {
+      expect(result.current.debouncedKeyword).toBe("손흥민");
+    });
   });
 
-  it("handleToggleAttendance를 호출하면 pendingChanges에 상태가 추가/토글되어야 한다", () => {
+  it("toggleTeamMemberAttendance를 호출하면 pendingTeamMembers에 상태가 추가/토글되어야 한다", () => {
     const { result } = renderHook(() => usePlayerSearch({ matchId, teamId }));
 
-    const dummyPlayer: PendingPlayerItem = {
+    const dummyPlayer: PendingTeamMemberRow = {
       id: 2,
       teamMemberId: 2,
       userId: 2,
+      rosterKind: "TEAM_MEMBER",
       name: "테스트선수",
-      memberType: "MEMBER",
       number: 10,
       overall: 80,
       position: "FW",
@@ -82,34 +86,36 @@ describe("usePlayerSearch 훅", () => {
     };
 
     act(() => {
-      // 첫 토글 (상태 없음 -> ATTEND)
-      result.current.handleToggleAttendance(dummyPlayer);
+      result.current.toggleTeamMemberAttendance(dummyPlayer);
     });
 
-    expect(result.current.pendingChanges.has(2)).toBe(true);
-    expect(result.current.pendingChanges.get(2)?.currentStatus).toBe("ATTEND");
+    expect(result.current.pendingTeamMembers.has(2)).toBe(true);
+    expect(result.current.pendingTeamMembers.get(2)?.currentStatus).toBe(
+      "ATTEND",
+    );
 
     act(() => {
-      // 두 번째 토글 (ATTEND -> ABSENT)
-      // originalStatus가 null이므로 ABSENT로 가면 pendingChanges에서 삭제(Revert)됨
-      result.current.handleToggleAttendance({
+      result.current.toggleTeamMemberAttendance({
         ...dummyPlayer,
         currentStatus: "ATTEND",
       });
     });
 
-    expect(result.current.pendingChanges.has(2)).toBe(false);
+    expect(result.current.pendingTeamMembers.has(2)).toBe(false);
   });
 
-  it("검색 결과가 없을 경우 (용병) 접미사가 붙은 용병 객체가 반환되어야 한다", () => {
+  it("검색 결과가 없을 경우 용병 초안(표시명 접미사)이 반환되어야 한다", async () => {
     const { result } = renderHook(() => usePlayerSearch({ matchId, teamId }));
 
     act(() => {
       result.current.setInputValue("새로운선수");
     });
 
-    expect(result.current.mercenaryPlayer).not.toBeNull();
-    expect(result.current.mercenaryPlayer?.name).toBe("새로운선수 (용병)");
-    expect(result.current.mercenaryPlayer?.memberType).toBe("MERCENARY");
+    await waitFor(() => {
+      expect(result.current.mercenaryDraft).not.toBeNull();
+    });
+    expect(result.current.mercenaryDraft?.displayName).toBe("새로운선수 (용병)");
+    expect(result.current.mercenaryDraft?.registerName).toBe("새로운선수");
+    expect(result.current.mercenaryDraft?.willRegister).toBe(false);
   });
 });

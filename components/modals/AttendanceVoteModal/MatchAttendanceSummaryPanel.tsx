@@ -30,9 +30,18 @@ import {
   partitionMatchAttendanceByStatus,
   type MatchAttendanceRow,
 } from "./partitionMatchAttendanceByStatus";
+import type { findMatchAttendanceQuery } from "@/__generated__/findMatchAttendanceQuery.graphql";
 
 export type { MatchAttendanceRow };
 export { partitionMatchAttendanceByStatus };
+
+export type MatchMercenarySummaryRow =
+  findMatchAttendanceQuery["response"]["matchMercenaries"][number];
+
+/** 팝오버 명단: 팀원 참석 행 또는 용병 (불참·미투표는 팀원 행만) */
+export type AttendanceSummaryPopoverRow =
+  | { kind: "team_member"; row: MatchAttendanceRow }
+  | { kind: "mercenary"; id: number; name: string };
 
 const HOVER_CAPABILITY_MQ = "(hover: hover) and (pointer: fine)";
 
@@ -65,11 +74,38 @@ const AttendanceMemberRow = memo(function AttendanceMemberRow({
   );
 });
 
+const AttendanceMercenaryRow = memo(function AttendanceMercenaryRow({
+  id,
+  name,
+}: {
+  id: number;
+  name: string;
+}) {
+  const displayName = name.trim() || "이름 없음";
+  const fallbackSrc = getPlayerPlaceholderSrc(`merc:${id}`);
+
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <ProfileAvatar
+        src={undefined}
+        fallbackSrc={fallbackSrc}
+        alt={displayName}
+        size={36}
+        className="shrink-0"
+      />
+
+      <span className="w-18.75 truncate text-sm h-8 text-Label-Primary flex items-center">
+        {displayName}
+      </span>
+    </div>
+  );
+});
+
 const AttendanceListPanel = memo(function AttendanceListPanel({
   rows,
   emptyMessage,
 }: {
-  rows: MatchAttendanceRow[];
+  rows: AttendanceSummaryPopoverRow[];
   emptyMessage: string;
 }) {
   if (rows.length === 0) {
@@ -82,9 +118,19 @@ const AttendanceListPanel = memo(function AttendanceListPanel({
 
   return (
     <ul className="max-h-42 list-none space-y-0.5 overflow-y-auto scrollbar-thin py-1">
-      {rows.map((row) => (
-        <li key={row.userId}>
-          <AttendanceMemberRow row={row} />
+      {rows.map((entry) => (
+        <li
+          key={
+            entry.kind === "mercenary"
+              ? `mercenary-${entry.id}`
+              : `member-${entry.row.userId}`
+          }
+        >
+          {entry.kind === "mercenary" ? (
+            <AttendanceMercenaryRow id={entry.id} name={entry.name} />
+          ) : (
+            <AttendanceMemberRow row={entry.row} />
+          )}
         </li>
       ))}
     </ul>
@@ -106,7 +152,7 @@ const AttendanceSummaryStatusRow = memo(function AttendanceSummaryStatusRow({
   kind: "attend" | "absent";
   count: number;
   totalVoters: number;
-  rows: MatchAttendanceRow[];
+  rows: AttendanceSummaryPopoverRow[];
   openKind: AttendancePopoverOpenKind;
   setOpenKind: Dispatch<SetStateAction<AttendancePopoverOpenKind>>;
   prefersHoverOpen: boolean;
@@ -229,19 +275,61 @@ const AttendanceSummaryStatusRow = memo(function AttendanceSummaryStatusRow({
 
 type Props = {
   rows: readonly MatchAttendanceRow[];
+  /** 해당 팀·경기 용병(라인업 후보). 참석 인원·명단에만 포함됩니다. */
+  mercenaryRows?: readonly MatchMercenarySummaryRow[];
 };
 
+function buildAttendPopoverRows(
+  attendMembers: readonly MatchAttendanceRow[],
+  mercenaries: readonly MatchMercenarySummaryRow[],
+): AttendanceSummaryPopoverRow[] {
+  const memberEntries: AttendanceSummaryPopoverRow[] = attendMembers.map(
+    (row) => ({ kind: "team_member", row }),
+  );
+  const sortedMercs = [...mercenaries].sort((a, b) => {
+    const byName = a.name.localeCompare(b.name, "ko");
+    if (byName !== 0) return byName;
+    return a.id - b.id;
+  });
+  const mercEntries: AttendanceSummaryPopoverRow[] = sortedMercs.map((m) => ({
+    kind: "mercenary",
+    id: m.id,
+    name: m.name,
+  }));
+  return [...memberEntries, ...mercEntries];
+}
+
+function toMemberOnlyPopoverRows(
+  members: readonly MatchAttendanceRow[],
+): AttendanceSummaryPopoverRow[] {
+  return members.map((row) => ({ kind: "team_member", row }));
+}
+
 /**
- * findMatchAttendance 응답 행만 받아 카드형 요약·진행 바·명단 팝오버를 그립니다.
+ * findMatchAttendance(+ matchMercenaries) 응답을 받아 카드형 요약·진행 바·명단 팝오버를 그립니다.
  * 데이터 페칭은 MatchAttendanceSummarySlot이 담당합니다.
  */
-export function MatchAttendanceSummaryPanel({ rows }: Props) {
+export function MatchAttendanceSummaryPanel({
+  rows,
+  mercenaryRows = [],
+}: Props) {
   const { attend, absent } = useMemo(
     () => partitionMatchAttendanceByStatus(rows),
     [rows],
   );
 
-  const totalVoters = attend.length + absent.length;
+  const attendPopoverRows = useMemo(
+    () => buildAttendPopoverRows(attend, mercenaryRows),
+    [attend, mercenaryRows],
+  );
+
+  const absentPopoverRows = useMemo(
+    () => toMemberOnlyPopoverRows(absent),
+    [absent],
+  );
+
+  const attendCount = attend.length + mercenaryRows.length;
+  const totalVoters = attendCount + absent.length;
 
   const prefersHoverRaw = useMediaQuery(HOVER_CAPABILITY_MQ);
   const prefersHoverOpen = prefersHoverRaw === true;
@@ -260,9 +348,9 @@ export function MatchAttendanceSummaryPanel({ rows }: Props) {
     >
       <AttendanceSummaryStatusRow
         kind="attend"
-        count={attend.length}
+        count={attendCount}
         totalVoters={totalVoters}
-        rows={attend}
+        rows={attendPopoverRows}
         openKind={openKind}
         setOpenKind={setOpenKind}
         prefersHoverOpen={prefersHoverOpen}
@@ -274,7 +362,7 @@ export function MatchAttendanceSummaryPanel({ rows }: Props) {
         kind="absent"
         count={absent.length}
         totalVoters={totalVoters}
-        rows={absent}
+        rows={absentPopoverRows}
         openKind={openKind}
         setOpenKind={setOpenKind}
         prefersHoverOpen={prefersHoverOpen}

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<52030d32948d1e7876a7887e1b56d62d>>
+ * @generated SignedSource<<e125f40abcc89e2aa20b95f0f6c4ad66>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,7 +20,7 @@ export type useUpdateMatchAttendanceMutation$variables = {
 };
 export type useUpdateMatchAttendanceMutation$data = {
   readonly updateMatchAttendance: {
-    readonly attendanceStatus: AttendanceStatus | null | undefined;
+    readonly attendanceStatus: AttendanceStatus;
     readonly id: number;
     readonly matchId: number;
     readonly teamId: number;

@@ -37,7 +37,6 @@ const myCommittedRow = {
   id: 100,
   userId: 42,
   attendanceStatus: "ATTEND" as const,
-  memberType: "MEMBER" as const,
   user: null,
 } as MatchAttendanceRow;
 
@@ -115,7 +114,6 @@ describe("useAttendanceVoteSubmitActions", () => {
       teamId: 10,
       userId: 42,
       attendanceStatus: "ATTEND",
-      memberType: "MEMBER",
     });
     expect(mockExecuteUpdate).not.toHaveBeenCalled();
   });

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fdc759eb44c2fb1c4ee03d31b70eca07>>
+ * @generated SignedSource<<1a980f9f8fae5fe89559790a05721ddd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,6 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
 export type Foot = "B" | "L" | "R" | "%future added value";
-export type MemberType = "MEMBER" | "MERCENARY" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type formationMatchAttendanceQuery$variables = {
   matchId: number;
@@ -20,9 +19,8 @@ export type formationMatchAttendanceQuery$variables = {
 export type formationMatchAttendanceQuery$data = {
   readonly findMatchAttendance: ReadonlyArray<{
     readonly __typename: "MatchAttendanceModel";
-    readonly attendanceStatus: AttendanceStatus | null | undefined;
+    readonly attendanceStatus: AttendanceStatus;
     readonly id: number;
-    readonly memberType: MemberType | null | undefined;
     readonly teamMember: {
       readonly __typename: "TeamMemberModel";
       readonly foot: Foot | null | undefined;
@@ -41,6 +39,13 @@ export type formationMatchAttendanceQuery$data = {
         readonly profileImage: string | null | undefined;
       } | null | undefined;
     } | null | undefined;
+  }>;
+  readonly matchMercenaries: ReadonlyArray<{
+    readonly __typename: "MatchMercenaryModel";
+    readonly id: number;
+    readonly matchId: number;
+    readonly name: string;
+    readonly teamId: number;
   }>;
 };
 export type formationMatchAttendanceQuery = {
@@ -62,35 +67,43 @@ var v0 = [
   }
 ],
 v1 = {
+  "kind": "Variable",
+  "name": "matchId",
+  "variableName": "matchId"
+},
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v3 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "preferredNumber",
   "storageKey": null
 },
-v4 = [
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v6 = [
   {
     "alias": null,
     "args": [
-      {
-        "kind": "Variable",
-        "name": "matchId",
-        "variableName": "matchId"
-      },
+      (v1/*: any*/),
       {
         "kind": "Variable",
         "name": "teamId",
@@ -102,8 +115,8 @@ v4 = [
     "name": "findMatchAttendance",
     "plural": true,
     "selections": [
-      (v1/*: any*/),
       (v2/*: any*/),
+      (v3/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -114,20 +127,13 @@ v4 = [
       {
         "alias": null,
         "args": null,
-        "kind": "ScalarField",
-        "name": "memberType",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
         "concreteType": "TeamMemberModel",
         "kind": "LinkedField",
         "name": "teamMember",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
           (v2/*: any*/),
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -135,7 +141,7 @@ v4 = [
             "name": "foot",
             "storageKey": null
           },
-          (v3/*: any*/),
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -176,16 +182,10 @@ v4 = [
             "name": "user",
             "plural": false,
             "selections": [
-              (v1/*: any*/),
               (v2/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "name",
-                "storageKey": null
-              },
               (v3/*: any*/),
+              (v5/*: any*/),
+              (v4/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -201,6 +201,36 @@ v4 = [
       }
     ],
     "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": [
+      (v1/*: any*/)
+    ],
+    "concreteType": "MatchMercenaryModel",
+    "kind": "LinkedField",
+    "name": "matchMercenaries",
+    "plural": true,
+    "selections": [
+      (v2/*: any*/),
+      (v3/*: any*/),
+      (v5/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "teamId",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
 ];
 return {
@@ -209,7 +239,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "formationMatchAttendanceQuery",
-    "selections": (v4/*: any*/),
+    "selections": (v6/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -218,19 +248,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "formationMatchAttendanceQuery",
-    "selections": (v4/*: any*/)
+    "selections": (v6/*: any*/)
   },
   "params": {
-    "cacheID": "17c1107da434ebdfde8bf3c14fec0503",
+    "cacheID": "11161975399250f8fcb50c9882d2e12c",
     "id": null,
     "metadata": {},
     "name": "formationMatchAttendanceQuery",
     "operationKind": "query",
-    "text": "query formationMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    memberType\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n}\n"
+    "text": "query formationMatchAttendanceQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    __typename\n    attendanceStatus\n    teamMember {\n      id\n      __typename\n      foot\n      preferredNumber\n      preferredPosition\n      profileImg\n      overall {\n        ovr\n      }\n      user {\n        id\n        __typename\n        name\n        preferredNumber\n        profileImage\n      }\n    }\n  }\n  matchMercenaries(matchId: $matchId) {\n    id\n    __typename\n    name\n    matchId\n    teamId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2d1d6019db70bc150f850ac746750998";
+(node as any).hash = "5828ee82fd6f4147c8383f2e15b4d312";
 
 export default node;

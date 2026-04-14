@@ -3,6 +3,9 @@ import type { formationMatchPagePreloadQuery$data } from "@/__generated__/format
 import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarterDataFromTacticsDocument";
 import { pickPrimaryMatchFormationRow } from "@/lib/formation/pickPrimaryMatchFormationRow";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
+import { matchMercenaryRowsToPlayers } from "@/lib/formation/roster/matchMercenaryRowsToPlayers";
+import { mergeAttendingMembersAndMercenaries } from "@/lib/formation/roster/mergeAttendingMembersAndMercenaries";
+import { createFormationLineupResolver } from "@/lib/formation/roster/createFormationLineupResolver";
 import type {
   FormationMatchPageSnapshot,
   FormationMatchQuarterSpec,
@@ -51,12 +54,20 @@ function devPrettyFormationPreloadFromRelayClone(label: string, raw: unknown) {
 function deriveSnapshot(
   data: formationMatchPagePreloadQuery$data,
   quarterSpec: FormationMatchQuarterSpec,
+  teamId: number,
 ): FormationMatchPageSnapshot {
-  const players = matchAttendanceRowsToAttendingPlayers(
+  const attendingMembers = matchAttendanceRowsToAttendingPlayers(
     data.findMatchAttendance ?? [],
   );
-  const byId = new Map(players.map((p) => [p.id, p] as const));
-  const resolve = (teamMemberId: number) => byId.get(teamMemberId) ?? null;
+  const mercenaryPlayers = matchMercenaryRowsToPlayers(
+    data.matchMercenaries ?? [],
+    teamId,
+  );
+  const players = mergeAttendingMembersAndMercenaries(
+    attendingMembers,
+    mercenaryPlayers,
+  );
+  const resolve = createFormationLineupResolver(players);
 
   const primary = pickPrimaryMatchFormationRow(data.findMatchFormation);
   if (primary == null || primary.tactics == null) {
@@ -90,7 +101,7 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
       ),
     )) as formationMatchPagePreloadQuery$data;
 
-    const snapshot = deriveSnapshot(data, quarterSpec);
+    const snapshot = deriveSnapshot(data, quarterSpec, teamId);
 
     try {
       devPrettyFormationPreloadLog("variables", {

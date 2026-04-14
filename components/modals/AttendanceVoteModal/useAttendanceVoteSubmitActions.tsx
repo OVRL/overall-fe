@@ -100,7 +100,6 @@ export function useAttendanceVoteSubmitActions(
             teamId: createdTeamId,
             userId,
             attendanceStatus,
-            memberType: "MEMBER",
           },
         },
         onCompleted: (response: CreateMatchAttendanceMutationType["response"]) => {

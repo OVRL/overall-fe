@@ -9,9 +9,13 @@ export function getFormationPlayerProfileAvatarUrls(player: Player): {
   fallbackSrc: string;
 } {
   const profileRawUrl = (player.image ?? "").trim();
+  const placeholderSeed =
+    player.rosterKind === "MERCENARY" && player.mercenaryId != null
+      ? `merc:${player.mercenaryId}`
+      : `m:${player.id}`;
   const profileFallbackSrc =
     (player.imageFallbackUrl ?? "").trim() ||
-    getPlayerPlaceholderSrc(`m:${player.id}`);
+    getPlayerPlaceholderSrc(placeholderSeed);
   return {
     src: profileRawUrl || undefined,
     fallbackSrc: profileFallbackSrc,

@@ -32,8 +32,13 @@ function MatchAttendanceSummaryLoaded({
   );
 
   const rows = data.findMatchAttendance ?? [];
+  const mercenaryRows = (data.matchMercenaries ?? []).filter(
+    (m) => m.teamId === teamId,
+  );
 
-  return <MatchAttendanceSummaryPanel rows={rows} />;
+  return (
+    <MatchAttendanceSummaryPanel rows={rows} mercenaryRows={mercenaryRows} />
+  );
 }
 
 /** Suspense: findMatchAttendance 로딩 중 카드형 스켈레톤 */

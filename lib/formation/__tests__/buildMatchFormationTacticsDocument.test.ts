@@ -38,9 +38,11 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     expect(q0.updatedAt).toBe(fixedNow.toISOString());
     expect(q0.formation).toBe("4-3-3");
     expect(q0.lineup["1"]).toEqual({
+      kind: "TEAM_MEMBER",
       teamMemberId: 101,
       displayName: "김정수",
       backNumber: 1,
+      position: "GK",
     });
   });
 
@@ -83,8 +85,14 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     if (q0.kind !== "IN_HOUSE") throw new Error("narrow");
     expect(q0.teams.A.formation).toBe("4-4-2");
     expect(q0.teams.B.formation).toBe("4-4-2");
-    expect(q0.teams.A.lineup["11"]?.teamMemberId).toBe(201);
-    expect(q0.teams.B.lineup["1"]?.teamMemberId).toBe(301);
+    expect(q0.teams.A.lineup["11"]).toMatchObject({
+      kind: "TEAM_MEMBER",
+      teamMemberId: 201,
+    });
+    expect(q0.teams.B.lineup["1"]).toMatchObject({
+      kind: "TEAM_MEMBER",
+      teamMemberId: 301,
+    });
   });
 
   it("IN_HOUSE에서 teamA/B가 비어 있고 lineup만 있으면 A팀 tactics로 폴백한다", () => {
@@ -112,7 +120,10 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     );
     const q0 = doc.quarters[0];
     if (q0.kind !== "IN_HOUSE") throw new Error("narrow");
-    expect(q0.teams.A.lineup["5"]?.teamMemberId).toBe(99);
+    expect(q0.teams.A.lineup["5"]).toMatchObject({
+      kind: "TEAM_MEMBER",
+      teamMemberId: 99,
+    });
     expect(Object.keys(q0.teams.B.lineup)).toHaveLength(0);
   });
 });

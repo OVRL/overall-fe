@@ -41,17 +41,35 @@ export const FORMATION_SLOT_KEYS: readonly FormationSlotKey[] = [
 ] as const;
 
 /**
- * 슬롯에 배치된 선수.
- * `teamMemberId`는 GraphQL `TeamMemberModel.id`와 맞춥니다.
+ * 슬롯에 배치된 선수 ref.
+ * - 팀원: `TeamMemberModel.id` — v2 문서는 `kind` 생략을 팀원으로 간주합니다.
+ * - 용병: `MatchMercenaryModel.id` — v3부터 `kind: "MERCENARY"`로 구분합니다.
  */
-export interface MatchFormationTacticsPlayerRef {
+export type MatchFormationTacticsPlayerRef =
+  | MatchFormationTacticsTeamMemberRef
+  | MatchFormationTacticsMercenaryRef;
+
+export interface MatchFormationTacticsTeamMemberRef {
+  /** 생략 시 팀원으로 해석 (레거시 v2) */
+  kind?: "TEAM_MEMBER";
   teamMemberId: number;
-  /** 조회 직후 표시용 비정규화 (선택) */
   displayName?: string;
-  /** 표시용 번호 — TeamMemberModel.preferredNumber */
   backNumber?: number;
-  /** `Position` enum 문자열 등, 표시·필터용 (선택) */
   position?: string;
+}
+
+export interface MatchFormationTacticsMercenaryRef {
+  kind: "MERCENARY";
+  mercenaryId: number;
+  displayName?: string;
+  backNumber?: number;
+  position?: string;
+}
+
+export function isMercenaryTacticsRef(
+  ref: MatchFormationTacticsPlayerRef,
+): ref is MatchFormationTacticsMercenaryRef {
+  return ref.kind === "MERCENARY";
 }
 
 /** 한 팀의 포메이션 + 라인업 (매칭 1팀 / 내전 한쪽) */

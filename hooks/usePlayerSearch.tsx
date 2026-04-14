@@ -1,98 +1,45 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDebounce } from "@toss/react";
 import useModal from "@/hooks/useModal";
-import { Player } from "@/types/formation";
 import {
   useRelayEnvironment,
   useLazyLoadQuery,
   fetchQuery,
-  commitMutation,
 } from "react-relay";
 import { FormationMatchAttendanceQuery } from "@/lib/relay/queries/formationMatchAttendanceQuery";
 import { SearchTeamMemberQuery } from "@/lib/relay/queries/searchTeamMemberQuery";
-import { CreateMatchAttendanceMutation } from "@/lib/relay/mutations/createMatchAttendanceMutation";
-import { UpdateMatchAttendanceMutation } from "@/lib/relay/mutations/updateMatchAttendanceMutation";
 import type { formationMatchAttendanceQuery } from "@/__generated__/formationMatchAttendanceQuery.graphql";
 import type { searchTeamMemberQuery } from "@/__generated__/searchTeamMemberQuery.graphql";
-import type { createMatchAttendanceMutation } from "@/__generated__/createMatchAttendanceMutation.graphql";
-import type { updateMatchAttendanceMutation } from "@/__generated__/updateMatchAttendanceMutation.graphql";
-
-import {
-  getTeamMemberProfileImageFallbackUrl,
-  getTeamMemberProfileImageRawUrl,
-} from "@/lib/playerPlaceholderImage";
-import { parseMatchIdForApi } from "@/utils/match/parseMatchIdForApi";
+import { mapSearchTeamMemberToRosterModalRow } from "@/lib/formation/roster/mapSearchTeamMemberToRosterModalRow";
+import { commitFormationRosterModalMutations } from "@/lib/formation/roster/commitFormationRosterModalMutations";
+import type {
+  MercenaryDraftRow,
+  MercenaryExistingRow,
+  PendingTeamMemberRow,
+  RosterModalAttendanceStatus,
+} from "@/types/formationRosterModal";
+import { toast } from "@/lib/toast";
+import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
 
 const MERCENARY_NAME_SUFFIX = " (용병)";
 
-/** UI 표시용 접미사를 제거한 참석자 이름(createMatchAttendance `name` 입력용) */
-function mercenaryNameForAttendanceInput(displayName: string): string {
-  return displayName.endsWith(MERCENARY_NAME_SUFFIX)
-    ? displayName.slice(0, -MERCENARY_NAME_SUFFIX.length).trim()
-    : displayName.trim();
-}
+export type { PendingTeamMemberRow } from "@/types/formationRosterModal";
 
 interface UsePlayerSearchProps {
   matchId: number;
   teamId: number;
 }
 
-export type AttendanceStatus = "ATTEND" | "ABSENT";
-
-export interface PendingPlayerItem extends Player {
-  teamMemberId: number;
-  userId: number;
-  memberType: "MEMBER" | "MERCENARY";
-  originalStatus?: AttendanceStatus | null;
-  currentStatus: AttendanceStatus | null; // null if neither
-}
-
-function mapTeamMemberToPlayerProps(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tm: any,
-): Omit<PendingPlayerItem, "currentStatus" | "originalStatus"> {
-  const user = tm.user;
-  const memberPref = tm.preferredNumber;
-  const userPref = user?.preferredNumber;
-  const number =
-    memberPref != null
-      ? memberPref
-      : userPref != null
-        ? Math.round(userPref)
-        : 0;
-  const name = user?.name?.trim() || "이름 없음";
-  const position = tm.preferredPosition ?? "ST";
-  const overall = tm.overall?.ovr ?? 0;
-
-  const profileRaw = getTeamMemberProfileImageRawUrl({
-    profileImg: tm.profileImg,
-    user: tm.user ?? undefined,
-  });
-  const imageFallbackUrl = getTeamMemberProfileImageFallbackUrl({
-    id: tm.id,
-    user: tm.user ?? undefined,
-  });
-
-  return {
-    id: tm.id,
-    teamMemberId: tm.id,
-    userId: Number(tm.userId ?? user.id),
-    memberType: "MEMBER",
-    name,
-    position,
-    number,
-    overall,
-    image: profileRaw || undefined,
-    imageFallbackUrl,
-  };
+function mercenaryDisplayName(registerName: string): string {
+  const t = registerName.trim();
+  return t ? `${t}${MERCENARY_NAME_SUFFIX}` : `용병${MERCENARY_NAME_SUFFIX}`;
 }
 
 export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
   const { hideModal } = useModal();
   const environment = useRelayEnvironment();
 
-  // Load current attendance from Relay local store / network
-  const attendanceData = useLazyLoadQuery<formationMatchAttendanceQuery>(
+  const rosterData = useLazyLoadQuery<formationMatchAttendanceQuery>(
     FormationMatchAttendanceQuery,
     { matchId, teamId },
     { fetchPolicy: "store-and-network" },
@@ -106,21 +53,45 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Map: teamMemberId -> Target AttendanceStatus
-  const [pendingChanges, setPendingChanges] = useState<
-    Map<number, PendingPlayerItem>
+  const [pendingTeamMembers, setPendingTeamMembers] = useState<
+    Map<number, PendingTeamMemberRow>
   >(new Map());
+  const [pendingMercenaryCreates, setPendingMercenaryCreates] = useState<
+    Set<string>
+  >(new Set());
+  const [pendingMercenaryDeletes, setPendingMercenaryDeletes] = useState<
+    Set<number>
+  >(new Set());
 
-  // Quick lookup for existing attendance
-  const attendanceMap = useMemo(() => {
-    const map = new Map();
-    attendanceData.findMatchAttendance?.forEach((att) => {
-      if (att && att.teamMember) {
+  const attendanceByTeamMemberId = useMemo(() => {
+    const map = new Map<
+      number,
+      NonNullable<
+        formationMatchAttendanceQuery["response"]["findMatchAttendance"]
+      >[number]
+    >();
+    rosterData.findMatchAttendance?.forEach((att) => {
+      if (att?.teamMember) {
         map.set(att.teamMember.id, att);
       }
     });
     return map;
-  }, [attendanceData]);
+  }, [rosterData]);
+
+  const existingMercenaries = useMemo((): MercenaryExistingRow[] => {
+    const rows = rosterData.matchMercenaries ?? [];
+    return rows
+      .filter(
+        (m): m is NonNullable<typeof m> =>
+          m != null && m.teamId === teamId,
+      )
+      .map((m) => ({
+        kind: "MERCENARY_EXISTING" as const,
+        mercenaryId: m.id,
+        name: m.name.trim() || "이름 없음",
+        pendingRemove: pendingMercenaryDeletes.has(m.id),
+      }));
+  }, [rosterData.matchMercenaries, teamId, pendingMercenaryDeletes]);
 
   const debouncedUpdate = useDebounce((value: string) => {
     setDebouncedKeyword(value.trim());
@@ -165,56 +136,43 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
     };
   }, [debouncedKeyword, environment, teamId]);
 
-  const searchResults = useMemo<PendingPlayerItem[]>(() => {
+  const searchResults = useMemo<PendingTeamMemberRow[]>(() => {
     return rawSearchResults.map((tm) => {
-      const base = mapTeamMemberToPlayerProps(tm);
-      const existing = attendanceMap.get(tm.id);
-      const targetStatus = pendingChanges.has(tm.id)
-        ? pendingChanges.get(tm.id)!.currentStatus
-        : ((existing?.attendanceStatus as AttendanceStatus | undefined) ??
+      const base = mapSearchTeamMemberToRosterModalRow(tm);
+      const existing = attendanceByTeamMemberId.get(tm.id);
+      const targetStatus = pendingTeamMembers.has(tm.id)
+        ? pendingTeamMembers.get(tm.id)!.currentStatus
+        : ((existing?.attendanceStatus as RosterModalAttendanceStatus | undefined) ??
           null);
 
       return {
         ...base,
         originalStatus: existing?.attendanceStatus as
-          | AttendanceStatus
+          | RosterModalAttendanceStatus
           | undefined,
         currentStatus: targetStatus,
       };
     });
-  }, [rawSearchResults, attendanceMap, pendingChanges]);
+  }, [rawSearchResults, attendanceByTeamMemberId, pendingTeamMembers]);
 
-  // Derived Mercenary logic
-  const mercenaryPlayer = useMemo(() => {
-    if (!inputValue.trim()) return null;
-    // Check if the exact name exists in search results to avoid duplicate mercenary adding
-    if (searchResults.some((p) => p.name === inputValue.trim())) return null;
-
-    // Use a negative ID to represent a new mercenary temporarily
-    const tmId = -1;
-    const currentStatus = pendingChanges.has(tmId)
-      ? pendingChanges.get(tmId)!.currentStatus
-      : null;
+  const mercenaryDraft = useMemo((): MercenaryDraftRow | null => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return null;
+    if (searchResults.some((p) => p.name === trimmed)) return null;
 
     return {
-      id: tmId,
-      teamMemberId: tmId,
-      userId: 0,
-      memberType: "MERCENARY",
-      name: `${inputValue.trim()}${MERCENARY_NAME_SUFFIX}`,
-      position: "용병",
-      number: 0,
-      overall: 0,
-      imageFallbackUrl: null,
-      currentStatus,
-      originalStatus: null,
-    } as PendingPlayerItem;
-  }, [inputValue, searchResults, pendingChanges]);
+      kind: "MERCENARY_DRAFT",
+      registerName: trimmed,
+      displayName: mercenaryDisplayName(trimmed),
+      willRegister: pendingMercenaryCreates.has(trimmed),
+    };
+  }, [inputValue, searchResults, pendingMercenaryCreates]);
 
-  const handleToggleAttendance = useCallback((player: PendingPlayerItem) => {
-    setPendingChanges((prev) => {
+  const toggleTeamMemberAttendance = useCallback((player: PendingTeamMemberRow) => {
+    setPendingTeamMembers((prev) => {
       const next = new Map(prev);
-      const newStatus = player.currentStatus === "ATTEND" ? "ABSENT" : "ATTEND";
+      const newStatus: RosterModalAttendanceStatus =
+        player.currentStatus === "ATTEND" ? "ABSENT" : "ATTEND";
 
       const isRevertedBackToOriginal = newStatus === player.originalStatus;
       const isNewRecordReverted =
@@ -230,88 +188,86 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
     });
   }, []);
 
+  const toggleMercenaryDraftRegister = useCallback((registerName: string) => {
+    const key = registerName.trim();
+    if (!key) return;
+    setPendingMercenaryCreates((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const toggleMercenaryExistingRemove = useCallback((mercenaryId: number) => {
+    setPendingMercenaryDeletes((prev) => {
+      const next = new Set(prev);
+      if (next.has(mercenaryId)) next.delete(mercenaryId);
+      else next.add(mercenaryId);
+      return next;
+    });
+  }, []);
+
+  const totalPendingCount =
+    pendingTeamMembers.size +
+    pendingMercenaryCreates.size +
+    pendingMercenaryDeletes.size;
+
   const handleComplete = async () => {
     setIsSubmitting(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const promises: Promise<any>[] = [];
-
-    for (const [teamMemberId, player] of Array.from(pendingChanges.entries())) {
-      const existing = attendanceMap.get(teamMemberId);
-      const targetStatus = player.currentStatus!;
-
-      if (existing) {
-        // Update existing attendance
-        if (existing.attendanceStatus !== targetStatus) {
-          const attendanceRowId = parseMatchIdForApi(existing.id);
-          if (attendanceRowId == null) {
-            promises.push(
-              Promise.reject(
-                new Error(
-                  `참석 레코드 ID를 숫자로 변환할 수 없습니다: ${String(existing.id)}`,
-                ),
-              ),
-            );
-            continue;
-          }
-          promises.push(
-            new Promise((resolve, reject) => {
-              commitMutation<updateMatchAttendanceMutation>(environment, {
-                mutation: UpdateMatchAttendanceMutation,
-                variables: {
-                  input: {
-                    id: attendanceRowId,
-                    teamId,
-                    attendanceStatus: targetStatus,
-                  },
-                },
-                onCompleted: resolve,
-                onError: reject,
-              });
-            }),
-          );
-        }
-      } else {
-        // Create new attendance
-        promises.push(
-          new Promise((resolve, reject) => {
-            commitMutation<createMatchAttendanceMutation>(environment, {
-              mutation: CreateMatchAttendanceMutation,
-              variables: {
-                input: {
-                  matchId,
-                  teamId,
-                  userId: player.userId,
-                  attendanceStatus: targetStatus,
-                  memberType: player.memberType,
-                  ...(player.memberType === "MERCENARY" && {
-                    name: mercenaryNameForAttendanceInput(player.name),
-                  }),
-                },
-              },
-              onCompleted: resolve,
-              onError: reject,
-            });
-          }),
-        );
-      }
-    }
-
     try {
-      if (promises.length > 0) {
-        await Promise.all(promises);
-        // Force refresh Relay's local store for findMatchAttendance
-        await fetchQuery(
-          environment,
-          FormationMatchAttendanceQuery,
-          { matchId, teamId },
-          { fetchPolicy: "network-only" },
-        ).toPromise();
+      const teamMemberCommits = Array.from(pendingTeamMembers.values()).filter(
+        (p): p is PendingTeamMemberRow & {
+          currentStatus: RosterModalAttendanceStatus;
+        } =>
+          p.currentStatus === "ATTEND" || p.currentStatus === "ABSENT",
+      );
+
+      await commitFormationRosterModalMutations({
+        environment,
+        matchId,
+        teamId,
+        attendanceByTeamMemberId,
+        pendingTeamMembers: teamMemberCommits,
+        mercenaryNamesToCreate: [...pendingMercenaryCreates],
+        mercenaryIdsToDelete: [...pendingMercenaryDeletes],
+      });
+
+      await fetchQuery(
+        environment,
+        FormationMatchAttendanceQuery,
+        { matchId, teamId },
+        { fetchPolicy: "network-only" },
+      ).toPromise();
+
+      const createdMerc = pendingMercenaryCreates.size;
+      const removedMerc = pendingMercenaryDeletes.size;
+      const memberChanges = teamMemberCommits.length;
+      if (createdMerc > 0 && removedMerc === 0 && memberChanges === 0) {
+        toast.success(
+          createdMerc === 1
+            ? "용병을 등록했습니다."
+            : `용병 ${createdMerc}명을 등록했습니다.`,
+        );
+      } else if (removedMerc > 0 && createdMerc === 0 && memberChanges === 0) {
+        toast.success(
+          removedMerc === 1
+            ? "용병을 명단에서 제거했습니다."
+            : `용병 ${removedMerc}명을 명단에서 제거했습니다.`,
+        );
+      } else {
+        toast.success("참석 선수 명단을 반영했습니다.");
       }
 
+      setPendingTeamMembers(new Map());
+      setPendingMercenaryCreates(new Set());
+      setPendingMercenaryDeletes(new Set());
       hideModal();
     } catch (err) {
-      console.error("Failed to commit match attendance changes", err);
-      // Handle error gracefully
+      console.error("Failed to commit formation roster changes", err);
+      toast.error(
+        getGraphQLErrorMessage(err, "변경 사항을 저장하지 못했습니다."),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -327,10 +283,16 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
     setInputValue,
     debouncedKeyword,
     searchResults,
-    pendingChanges,
-    mercenaryPlayer,
+    pendingTeamMembers,
+    pendingMercenaryCreates,
+    pendingMercenaryDeletes,
+    existingMercenaries,
+    mercenaryDraft,
+    totalPendingCount,
     isSearching: isLoading,
-    handleToggleAttendance,
+    toggleTeamMemberAttendance,
+    toggleMercenaryDraftRegister,
+    toggleMercenaryExistingRemove,
     handleComplete,
     hideModal,
   };

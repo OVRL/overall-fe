@@ -8,10 +8,21 @@ import {
 } from "@/types/matchFormationTacticsDocument";
 
 function playerToRef(p: Player): MatchFormationTacticsPlayerRef {
+  if (p.rosterKind === "MERCENARY" && p.mercenaryId != null) {
+    return {
+      kind: "MERCENARY",
+      mercenaryId: p.mercenaryId,
+      displayName: p.name,
+      backNumber: p.number,
+      position: p.position,
+    };
+  }
   return {
+    kind: "TEAM_MEMBER",
     teamMemberId: p.id,
     displayName: p.name,
     backNumber: p.number,
+    position: p.position,
   };
 }
 

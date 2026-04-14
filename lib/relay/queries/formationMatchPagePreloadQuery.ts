@@ -10,7 +10,6 @@ export const FormationMatchPagePreloadQuery = graphql`
       id
       __typename
       attendanceStatus
-      memberType
       teamMember {
         id
         __typename
@@ -29,6 +28,13 @@ export const FormationMatchPagePreloadQuery = graphql`
           profileImage
         }
       }
+    }
+    matchMercenaries(matchId: $matchId) {
+      id
+      __typename
+      name
+      matchId
+      teamId
     }
     findMatchFormation(matchId: $matchId, teamId: $teamId) {
       id

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6e861f047d1159196b98995740c0a495>>
+ * @generated SignedSource<<a2289f157bd12b94f64635a3d7423e3b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,25 +9,26 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type AttendanceStatus = "ABSENT" | "ATTEND" | "%future added value";
-export type UpdateMatchAttendanceInput = {
-  attendanceStatus: AttendanceStatus;
-  id: number;
+export type AddMatchMercenaryInput = {
+  matchId: number;
+  name: string;
   teamId: number;
 };
-export type updateMatchAttendanceMutation$variables = {
-  input: UpdateMatchAttendanceInput;
+export type createMatchMercenaryMutation$variables = {
+  input: AddMatchMercenaryInput;
 };
-export type updateMatchAttendanceMutation$data = {
-  readonly updateMatchAttendance: {
-    readonly __typename: "MatchAttendanceModel";
-    readonly attendanceStatus: AttendanceStatus;
+export type createMatchMercenaryMutation$data = {
+  readonly createMatchMercenary: {
+    readonly __typename: "MatchMercenaryModel";
     readonly id: number;
+    readonly matchId: number;
+    readonly name: string;
+    readonly teamId: number;
   };
 };
-export type updateMatchAttendanceMutation = {
-  response: updateMatchAttendanceMutation$data;
-  variables: updateMatchAttendanceMutation$variables;
+export type createMatchMercenaryMutation = {
+  response: createMatchMercenaryMutation$data;
+  variables: createMatchMercenaryMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -48,9 +49,9 @@ v1 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "MatchAttendanceModel",
+    "concreteType": "MatchMercenaryModel",
     "kind": "LinkedField",
-    "name": "updateMatchAttendance",
+    "name": "createMatchMercenary",
     "plural": false,
     "selections": [
       {
@@ -71,7 +72,21 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "attendanceStatus",
+        "name": "name",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "matchId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "teamId",
         "storageKey": null
       }
     ],
@@ -83,7 +98,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "updateMatchAttendanceMutation",
+    "name": "createMatchMercenaryMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -92,20 +107,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "updateMatchAttendanceMutation",
+    "name": "createMatchMercenaryMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "c8b2ee3f381c02bb2cba284a6de4957c",
+    "cacheID": "662db8e96fff2205d4fd0e9e2f916cee",
     "id": null,
     "metadata": {},
-    "name": "updateMatchAttendanceMutation",
+    "name": "createMatchMercenaryMutation",
     "operationKind": "mutation",
-    "text": "mutation updateMatchAttendanceMutation(\n  $input: UpdateMatchAttendanceInput!\n) {\n  updateMatchAttendance(input: $input) {\n    id\n    __typename\n    attendanceStatus\n  }\n}\n"
+    "text": "mutation createMatchMercenaryMutation(\n  $input: AddMatchMercenaryInput!\n) {\n  createMatchMercenary(input: $input) {\n    id\n    __typename\n    name\n    matchId\n    teamId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "59d538f49157e039282eb93cd9e15701";
+(node as any).hash = "147cb18c4a8267b1232cf25edc3f19a5";
 
 export default node;

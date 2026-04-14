@@ -7,7 +7,6 @@ function row(
 ): MatchAttendanceRow {
   return {
     id: "1",
-    memberType: "MEMBER",
     user: null,
     ...partial,
   } as MatchAttendanceRow;

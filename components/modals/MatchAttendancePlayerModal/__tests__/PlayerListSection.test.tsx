@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import PlayerListSection from "../PlayerListSection";
-import type { PendingPlayerItem } from "@/hooks/usePlayerSearch";
+import type { PendingTeamMemberRow } from "@/types/formationRosterModal";
+import type { MercenaryDraftRow } from "@/types/formationRosterModal";
 
-// Mocking child components for simplified testing
 jest.mock("../_components/PlayerItem", () => {
   return function MockPlayerItem({ player, isSelected, onSelect }: any) {
     return (
@@ -20,16 +20,25 @@ jest.mock("@/components/ui/SearchState", () => ({
   ),
 }));
 
+jest.mock("@/components/PositionChip", () => ({
+  __esModule: true,
+  default: ({ position }: { position: string }) => (
+    <span data-testid="position-chip">{position}</span>
+  ),
+}));
+
 describe("PlayerListSection", () => {
-  const mockOnToggle = jest.fn();
+  const mockToggleTeam = jest.fn();
+  const mockToggleDraft = jest.fn();
+  const mockToggleMercRemove = jest.fn();
 
   const createMockPlayer = (
-    overrides?: Partial<PendingPlayerItem>,
-  ): PendingPlayerItem => ({
+    overrides?: Partial<PendingTeamMemberRow>,
+  ): PendingTeamMemberRow => ({
     id: 1,
     teamMemberId: 1,
     userId: 1,
-    memberType: "MEMBER",
+    rosterKind: "TEAM_MEMBER",
     name: "손흥민",
     position: "FW",
     number: 7,
@@ -42,10 +51,15 @@ describe("PlayerListSection", () => {
   const defaultProps = {
     keyword: "",
     isSearching: false,
-    results: [],
-    mercenary: null,
-    pendingChanges: new Map<number, PendingPlayerItem>(),
-    onToggle: mockOnToggle,
+    results: [] as PendingTeamMemberRow[],
+    existingMercenaries: [],
+    mercenaryDraft: null as MercenaryDraftRow | null,
+    pendingTeamMembers: new Map<number, PendingTeamMemberRow>(),
+    pendingMercenaryCreates: new Set<string>(),
+    pendingMercenaryDeletes: new Set<number>(),
+    onToggleTeamMember: mockToggleTeam,
+    onToggleMercenaryDraft: mockToggleDraft,
+    onToggleMercenaryRemove: mockToggleMercRemove,
   };
 
   beforeEach(() => {
@@ -82,25 +96,24 @@ describe("PlayerListSection", () => {
     expect(items[1]).toHaveTextContent("선수2");
   });
 
-  it("mercenary가 존재하고 검색 중이 아니면 용병으로 추가 섹션이 렌더링되어야 한다", () => {
-    const mercenary = createMockPlayer({
-      id: -1,
-      teamMemberId: -1,
-      memberType: "MERCENARY",
-      name: "용병1",
-    });
+  it("mercenaryDraft가 있고 검색 중이 아니면 용병으로 추가 섹션이 렌더링되어야 한다", () => {
+    const draft: MercenaryDraftRow = {
+      kind: "MERCENARY_DRAFT",
+      registerName: "용병1",
+      displayName: "용병1 (용병)",
+      willRegister: false,
+    };
 
-    render(<PlayerListSection {...defaultProps} mercenary={mercenary} />);
+    render(<PlayerListSection {...defaultProps} mercenaryDraft={draft} />);
 
     expect(screen.getByText("용병으로 추가")).toBeInTheDocument();
     const items = screen.getAllByTestId("player-item");
-    // 용병 하나만 렌더링됨 (results는 비어있음)
     expect(items).toHaveLength(1);
-    expect(items[0]).toHaveTextContent("용병1");
+    expect(items[0]).toHaveTextContent("용병1 (용병)");
   });
 
-  it("pendingChanges가 존재하면 변경 사항 미리보기 섹션이 렌더링되어야 한다", () => {
-    const pendingChanges = new Map<number, PendingPlayerItem>();
+  it("pendingTeamMembers가 있으면 변경 사항 미리보기 섹션이 렌더링되어야 한다", () => {
+    const pending = new Map<number, PendingTeamMemberRow>();
     const pendingPlayer = createMockPlayer({
       id: 1,
       teamMemberId: 1,
@@ -108,19 +121,19 @@ describe("PlayerListSection", () => {
       position: "MF",
       currentStatus: "ATTEND",
     });
-    pendingChanges.set(1, pendingPlayer);
+    pending.set(1, pendingPlayer);
 
     render(
-      <PlayerListSection {...defaultProps} pendingChanges={pendingChanges} />,
+      <PlayerListSection {...defaultProps} pendingTeamMembers={pending} />,
     );
 
     expect(screen.getByText("변경 사항 미리보기")).toBeInTheDocument();
     expect(screen.getByText("추가될 선수")).toBeInTheDocument();
     expect(screen.getByText("참석 추가")).toBeInTheDocument();
-    expect(screen.getByText("MF")).toBeInTheDocument(); // PositionChip 렌더링 검증용
+    expect(screen.getByTestId("position-chip")).toHaveTextContent("MF");
   });
 
-  it("PlayerItem 클릭 시 onToggle 콜백이 호출되어야 한다", () => {
+  it("PlayerItem 클릭 시 onToggleTeamMember가 호출되어야 한다", () => {
     const player = createMockPlayer({ id: 1, teamMemberId: 1, name: "선수1" });
 
     render(
@@ -128,6 +141,6 @@ describe("PlayerListSection", () => {
     );
 
     fireEvent.click(screen.getByTestId("player-item"));
-    expect(mockOnToggle).toHaveBeenCalledWith(player);
+    expect(mockToggleTeam).toHaveBeenCalledWith(player);
   });
 });

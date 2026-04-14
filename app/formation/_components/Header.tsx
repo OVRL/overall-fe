@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
@@ -44,10 +45,23 @@ function isMobileHeaderProps(p: object): p is MobileHeaderProps {
   return "variant" in p && (p as MobileHeaderProps).variant === "mobile";
 }
 
+/** 연속 탭으로 `router.back()`이 두 번 호출되는 것을 막기 위한 최소 간격(ms) */
+const BACK_NAV_COOLDOWN_MS = 700;
+
 const Header = (props?: HeaderProps) => {
   const router = useRouter();
   const bridgeRouter = useBridgeRouter();
+  const lastBackNavigationAtRef = useRef(0);
   const p = props ?? {};
+
+  const guardNavigateBack = (navigate: () => void) => {
+    const now = Date.now();
+    if (now - lastBackNavigationAtRef.current < BACK_NAV_COOLDOWN_MS) {
+      return;
+    }
+    lastBackNavigationAtRef.current = now;
+    navigate();
+  };
 
   if (isMobileHeaderProps(p)) {
     const {
@@ -63,8 +77,10 @@ const Header = (props?: HeaderProps) => {
       saveConfirmDisabled: mobileSaveConfirmDisabled,
     } = p;
     const handleMobileBack = () => {
-      if (mobileOnBack) mobileOnBack();
-      else bridgeRouter.back();
+      guardNavigateBack(() => {
+        if (mobileOnBack) mobileOnBack();
+        else bridgeRouter.back();
+      });
     };
     const handleMobileReset = () => {
       mobileOnReset?.();
@@ -130,8 +146,10 @@ const Header = (props?: HeaderProps) => {
     isSaveConfirmPending: desktopSaveConfirmPending,
   } = p;
   const handleBack = () => {
-    if (onBack) onBack();
-    else router.back();
+    guardNavigateBack(() => {
+      if (onBack) onBack();
+      else router.back();
+    });
   };
 
   return (

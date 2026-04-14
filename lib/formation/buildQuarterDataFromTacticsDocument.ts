@@ -3,10 +3,13 @@ import type { Player, QuarterData } from "@/types/formation";
 import type { FormationSlotKey } from "@/types/matchFormationTactics";
 import {
   MATCH_FORMATION_TACTICS_DOCUMENT_VERSION,
+  MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY,
   type MatchFormationTacticsDocument,
 } from "@/types/matchFormationTacticsDocument";
 import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import type { FormationMatchQuarterSpec } from "@/types/formationMatchPageSnapshot";
+import { normalizeTacticsSlotPlayerRef } from "@/lib/formation/normalizeTacticsSlotPlayerRef";
+import type { FormationLineupResolver } from "@/lib/formation/roster/createFormationLineupResolver";
 
 function isFormationType(v: unknown): v is FormationType {
   return typeof v === "string" && v.length > 0;
@@ -15,22 +18,27 @@ function isFormationType(v: unknown): v is FormationType {
 function parseTacticsDocument(raw: unknown): MatchFormationTacticsDocument | null {
   if (raw == null || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
-  if (o.schemaVersion !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION) return null;
+  const ver = o.schemaVersion;
+  if (
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION &&
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY
+  ) {
+    return null;
+  }
   if (o.matchType !== "MATCH" && o.matchType !== "INTERNAL") return null;
   if (!Array.isArray(o.quarters)) return null;
   return raw as MatchFormationTacticsDocument;
 }
 
 function slotMapToLineup(
-  lineup: Partial<Record<FormationSlotKey, { teamMemberId?: number }>>,
-  resolve: (teamMemberId: number) => Player | null,
+  lineup: Partial<Record<FormationSlotKey, unknown>>,
+  resolve: FormationLineupResolver,
 ): Record<number, Player | null> {
   const out: Record<number, Player | null> = {};
   for (const key of Object.keys(lineup)) {
-    const ref = lineup[key as FormationSlotKey];
-    const id = ref?.teamMemberId;
-    if (id == null) continue;
-    const p = resolve(id);
+    const ref = normalizeTacticsSlotPlayerRef(lineup[key as FormationSlotKey]);
+    if (ref == null) continue;
+    const p = resolve(ref);
     if (p != null) out[Number(key)] = p;
   }
   return out;
@@ -43,7 +51,7 @@ function slotMapToLineup(
 export function buildQuarterDataFromTacticsDocument(
   tacticsRaw: unknown,
   spec: FormationMatchQuarterSpec,
-  resolvePlayer: (teamMemberId: number) => Player | null,
+  resolvePlayer: FormationLineupResolver,
 ): QuarterData[] {
   const doc = parseTacticsDocument(tacticsRaw);
   const base = buildQuartersFromMatch(spec.quarterCount, spec.matchType);

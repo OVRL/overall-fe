@@ -1,10 +1,12 @@
 import { buildQuarterDataFromTacticsDocument } from "../buildQuarterDataFromTacticsDocument";
+import { createFormationLineupResolver } from "../roster/createFormationLineupResolver";
 import { MATCH_FORMATION_TACTICS_DOCUMENT_VERSION } from "@/types/matchFormationTacticsDocument";
 import type { Player } from "@/types/formation";
 
 describe("buildQuarterDataFromTacticsDocument", () => {
   const p1: Player = {
     id: 101,
+    rosterKind: "TEAM_MEMBER",
     name: "김",
     position: "ST",
     number: 9,
@@ -37,10 +39,15 @@ describe("buildQuarterDataFromTacticsDocument", () => {
         },
       ],
     };
-    const out = buildQuarterDataFromTacticsDocument(doc, {
-      quarterCount: 1,
-      matchType: "MATCH",
-    }, (id) => (id === 101 ? p1 : null));
+    const resolve = createFormationLineupResolver([p1]);
+    const out = buildQuarterDataFromTacticsDocument(
+      doc,
+      {
+        quarterCount: 1,
+        matchType: "MATCH",
+      },
+      resolve,
+    );
     expect(out[0]?.type).toBe("MATCHING");
     expect(out[0]?.lineup?.[1]).toEqual(p1);
   });
@@ -66,10 +73,15 @@ describe("buildQuarterDataFromTacticsDocument", () => {
         },
       ],
     };
-    const out = buildQuarterDataFromTacticsDocument(doc, {
-      quarterCount: 1,
-      matchType: "INTERNAL",
-    }, (id) => (id === 101 ? p1 : null));
+    const resolve = createFormationLineupResolver([p1]);
+    const out = buildQuarterDataFromTacticsDocument(
+      doc,
+      {
+        quarterCount: 1,
+        matchType: "INTERNAL",
+      },
+      resolve,
+    );
     expect(out[0]?.type).toBe("IN_HOUSE");
     expect(out[0]?.formation).toBe("4-4-2");
     expect(out[0]?.teamA?.[11]).toEqual(p1);

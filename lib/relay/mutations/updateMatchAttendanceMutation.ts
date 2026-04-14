@@ -6,7 +6,6 @@ export const UpdateMatchAttendanceMutation = graphql`
       id
       __typename
       attendanceStatus
-      memberType
     }
   }
 `;

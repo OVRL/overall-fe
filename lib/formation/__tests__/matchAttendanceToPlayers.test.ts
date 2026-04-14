@@ -39,6 +39,7 @@ describe("matchAttendanceRowsToAttendingPlayers", () => {
     expect(players).toHaveLength(1);
     expect(players[0]).toEqual({
       id: 1,
+      rosterKind: "TEAM_MEMBER",
       name: "홍길동",
       position: "CM",
       number: 10,
