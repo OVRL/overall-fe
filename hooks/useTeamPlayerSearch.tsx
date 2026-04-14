@@ -46,7 +46,7 @@ export const useTeamPlayerSearch = ({ onComplete, teamPlayers = [] }: UseTeamPla
   }, [debouncedKeyword, teamPlayers]);
 
   const handleSelect = (player: Player) => {
-    setSelectedPlayer(player);
+    setSelectedPlayer((prev) => (prev?.id === player.id ? null : player));
   };
 
   const handleComplete = () => {

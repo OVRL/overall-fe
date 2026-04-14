@@ -28,6 +28,7 @@ import { FORMATION_OPTIONS } from "@/constants/formations";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Edit2, Loader2 } from "lucide-react";
 import useModal from "@/hooks/useModal";
+import { useModalStore } from "@/contexts/ModalContext";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { useBestElevenQuery } from "./hooks/useBestElevenQuery";
@@ -196,6 +197,13 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const isMobile = useIsMobile(1023);
   const dndId = useId();
   const { openModal } = useModal("PLAYER_SEARCH");
+  const modals = useModalStore((state) => state.modals);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setIsModalOpen(modals.length > 0);
+  }, [modals]);
+
   const searchParams = useSearchParams();
   const managerSectionRef = useRef<HTMLDivElement>(null);
 
@@ -435,6 +443,12 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const handleSave = async () => {
     const formation = quarters[0].formation as FormationType;
     const board = FORMATIONS[formation];
+    
+    if (!board) {
+      alert("지원하지 않는 포메이션입니다. 다른 포메이션으로 변경해 주세요.");
+      return;
+    }
+    
     const lineup = quarters[0].lineup ?? {};
     const members = data.findManyTeamMember?.members ?? [];
 
@@ -778,7 +792,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
 
       {/* 하단 저장 바 */}
-      {hasChanges && (
+      {hasChanges && !isModalOpen && (
         <div className="fixed bottom-16 md:bottom-20 xl:bottom-0 left-0 right-0 z-60 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 h-16 md:h-20 px-4 md:px-8 flex items-center justify-between gap-3 box-border">
           <div className="text-[10px] md:text-sm font-bold text-white tracking-tight truncate max-w-[40%] sm:max-w-none">
             변경사항이 있습니다.
