@@ -4,6 +4,7 @@ import QuarterButton from "../../ui/QuarterButton";
 import FormationPlayerImageThumbnail from "./FormationPlayerImageThumbnail";
 import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { Player } from "@/types/formation";
+import { isSameFormationRosterPlayer } from "@/lib/formation/roster/formationRosterPlayerKey";
 import { cn } from "@/lib/utils";
 
 interface DroppableSlotProps {
@@ -58,7 +59,11 @@ const DroppableSlot: React.FC<DroppableSlotProps> = ({
 
   // Provide visual feedback when a draggable item is hovering over this slot
   const isHovered = isOver && !player;
-  const isSelected = player?.id === selectedPlayer?.id;
+  /** 팀원·용병 PK가 숫자로 겹칠 수 있어 id 비교 대신 roster 키로 동일 인물 판별 */
+  const isSelected =
+    player != null &&
+    selectedPlayer != null &&
+    isSameFormationRosterPlayer(player, selectedPlayer);
 
   /** 보드 슬롯 썸네일: 명단·오버레이와 동일 플레이스홀더 규칙 */
   const slotProfile =

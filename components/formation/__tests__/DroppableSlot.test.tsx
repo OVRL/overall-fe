@@ -1,12 +1,17 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import DroppableSlot from "../board/DroppableSlot";
 import { DndContext } from "@dnd-kit/core";
+import type { Player } from "@/types/formation";
 
 // FormationPlayerImageThumbnail 컴포넌트 모킹
 jest.mock("../board/FormationPlayerImageThumbnail", () => {
   return function MockThumbnail(props: any) {
     return (
-      <div data-testid="player-thumbnail" onClick={() => props.onDelete?.()}>
+      <div
+        data-testid="player-thumbnail"
+        data-is-selected={props.isSelected ? "true" : "false"}
+        onClick={() => props.onDelete?.()}
+      >
         {props.playerName}
       </div>
     );
@@ -87,5 +92,37 @@ describe("DroppableSlot 컴포넌트", () => {
     const thumbnail = screen.getByTestId("player-thumbnail");
     fireEvent.click(thumbnail); // 모킹에서 click 시 onDelete 호출되도록 설정됨
     expect(mockOnPlayerRemove).toHaveBeenCalledTimes(1);
+  });
+
+  it("같은 숫자 id라도 팀원과 용병이면 선택 상태로 보지 않는다", () => {
+    const occupant = {
+      id: 5,
+      name: "용병",
+      position: "용병",
+      rosterKind: "MERCENARY",
+      mercenaryId: 5,
+    } as Player;
+    const selected = { id: 5, name: "팀원", position: "ST" } as Player;
+    setup({ player: occupant, selectedPlayer: selected });
+
+    expect(screen.getByTestId("player-thumbnail")).toHaveAttribute(
+      "data-is-selected",
+      "false",
+    );
+  });
+
+  it("roster가 같으면 선택 상태로 표시한다", () => {
+    const p = {
+      id: 5,
+      name: "팀원",
+      position: "ST",
+      rosterKind: "TEAM_MEMBER",
+    } as Player;
+    setup({ player: p, selectedPlayer: { ...p } as Player });
+
+    expect(screen.getByTestId("player-thumbnail")).toHaveAttribute(
+      "data-is-selected",
+      "true",
+    );
   });
 });

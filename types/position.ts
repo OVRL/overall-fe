@@ -32,6 +32,8 @@ export type Position =
   | "RB"
   | "LWB"
   | "RWB"
-  | "SW";
+  | "SW"
+  /** 포메이션 경기 용병 행 등 UI 표시용. GraphQL `Position` enum에는 없음 */
+  | "용병";
 
 export type MainPosition = "FW" | "MF" | "DF" | "GK";

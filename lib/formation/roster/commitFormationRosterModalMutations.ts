@@ -26,6 +26,15 @@ export type PendingTeamMemberMutation = Pick<
   readonly currentStatus: AttendanceStatus;
 };
 
+/** `Promise.allSettled` 집계 — 부분 실패 시에도 성공 건 수·대표 오류를 UI에 넘깁니다. */
+export type FormationRosterCommitResult = {
+  total: number;
+  succeeded: number;
+  failed: number;
+  /** 첫 실패 원인(토스트·로그). 전부 성공이면 `null`. */
+  firstRejection: unknown | null;
+};
+
 /**
  * 포메이션「참석 선수 관리」모달에서 확정 시 서버에 반영합니다.
  * (팀원 참석 CRUD + 용병 생성/삭제 — SRP: Relay 뮤테이션 오케스트레이션만)
@@ -42,7 +51,7 @@ export async function commitFormationRosterModalMutations(options: {
   mercenaryNamesToCreate: readonly string[];
   /** Relay가 `id`를 숫자 또는 `MatchMercenaryModel:1` 형 문자열로 줄 수 있음 */
   mercenaryIdsToDelete: readonly (number | string)[];
-}): Promise<void> {
+}): Promise<FormationRosterCommitResult> {
   const {
     environment,
     matchId,
@@ -157,5 +166,17 @@ export async function commitFormationRosterModalMutations(options: {
     );
   }
 
-  await Promise.all(tasks);
+  const settled = await Promise.allSettled(tasks);
+  const succeeded = settled.filter((r) => r.status === "fulfilled").length;
+  const failed = settled.filter((r) => r.status === "rejected").length;
+  const firstRejected = settled.find(
+    (r): r is PromiseRejectedResult => r.status === "rejected",
+  );
+
+  return {
+    total: settled.length,
+    succeeded,
+    failed,
+    firstRejection: firstRejected?.reason ?? null,
+  };
 }

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Player, QuarterData } from "@/types/formation";
+import { isSameFormationRosterPlayer } from "@/lib/formation/roster/formationRosterPlayerKey";
 
 const defaultQuarter: QuarterData = {
   id: 1,
@@ -16,6 +17,7 @@ export type FormationSlotAssignOptions = {
   inHouseSubTeam?: InHouseSubTeam;
 };
 
+/** 슬롯에 이미 같은 인물이 있으면 빈 칸으로 옮기기 전에 제거 — `id`만 비교하면 팀원·용병 PK 충돌 시 오판한다. */
 function applyAssignToSlotRecord(
   base: Record<number, Player | null> | undefined,
   positionIndex: number,
@@ -26,7 +28,11 @@ function applyAssignToSlotRecord(
 
   Object.keys(slots).forEach((key) => {
     const k = Number(key);
-    if (slots[k]?.id === player.id) {
+    const occupant = slots[k];
+    if (
+      occupant != null &&
+      isSameFormationRosterPlayer(occupant, player)
+    ) {
       sourceIndex = k;
       delete slots[k];
     }
@@ -118,24 +124,28 @@ export const useFormationManager = (initialQuarters?: QuarterData[]) => {
   );
 
   const getAssignedQuarters = useCallback(
-    (playerId: number) => {
+    (player: Player) => {
       const assignedQuarterIds: number[] = [];
       quarters.forEach((q) => {
         if (q.type === "IN_HOUSE") {
           const inA = Object.values(q.teamA ?? {}).some(
-            (p) => p && p.id === playerId,
+            (p) => p != null && isSameFormationRosterPlayer(p, player),
           );
           const inB = Object.values(q.teamB ?? {}).some(
-            (p) => p && p.id === playerId,
+            (p) => p != null && isSameFormationRosterPlayer(p, player),
           );
           const inLineup = Object.values(q.lineup ?? {}).some(
-            (p) => p && p.id === playerId,
+            (p) => p != null && isSameFormationRosterPlayer(p, player),
           );
           if (inA || inB || inLineup) assignedQuarterIds.push(q.id);
           return;
         }
         const lineup = q.lineup || {};
-        if (Object.values(lineup).some((p) => p && p.id === playerId)) {
+        if (
+          Object.values(lineup).some(
+            (p) => p != null && isSameFormationRosterPlayer(p, player),
+          )
+        ) {
           assignedQuarterIds.push(q.id);
         }
       });

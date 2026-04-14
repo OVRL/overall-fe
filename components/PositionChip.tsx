@@ -81,6 +81,25 @@ const PositionChip = ({
   className,
   ...props
 }: Props) => {
+  if (position === "용병") {
+    const mercenaryClasses =
+      variant === "outline"
+        ? "border-gray-300 text-gray-300 bg-transparent shadow-[0_2px_10px_0_rgba(0,0,0,0.15)]"
+        : "border-gray-300 text-gray-300 bg-gray-200/10 shadow-[0_2px_10px_0_rgba(0,0,0,0.15)]";
+    return (
+      <span
+        className={cn(
+          "py-0.5 px-1.5 inline-flex items-center justify-center rounded-sm text-xs font-semibold border leading-none transition-colors",
+          mercenaryClasses,
+          className,
+        )}
+        {...props}
+      >
+        용병
+      </span>
+    );
+  }
+
   const mainCategory = POSITION_CATEGORY_MAP[position];
 
   return (

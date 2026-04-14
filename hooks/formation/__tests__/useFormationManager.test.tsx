@@ -91,6 +91,65 @@ describe("useFormationManager", () => {
     expect(quarter.teamA?.[2]).toBeUndefined();
   });
 
+  it("팀원과 용병의 숫자 id가 같아도 슬롯 중복 제거·이동이 섞이지 않는다", () => {
+    const teamMember = {
+      id: 5,
+      name: "팀원",
+      rosterKind: "TEAM_MEMBER" as const,
+    } as Player;
+    const mercenary = {
+      id: 5,
+      name: "용병",
+      rosterKind: "MERCENARY" as const,
+      mercenaryId: 5,
+    } as Player;
+
+    const { result } = renderHook(() => useFormationManager());
+
+    act(() => {
+      result.current.assignPlayer(1, 0, teamMember);
+      result.current.assignPlayer(1, 1, mercenary);
+    });
+
+    act(() => {
+      result.current.assignPlayer(1, 2, mercenary);
+    });
+
+    const quarter = result.current.quarters.find((q) => q.id === 1);
+    expect(quarter?.lineup?.[0]).toEqual(teamMember);
+    expect(quarter?.lineup?.[1]).toBeUndefined();
+    expect(quarter?.lineup?.[2]).toEqual(mercenary);
+  });
+
+  it("getAssignedQuarters는 숫자 id가 같아도 roster가 다르면 다른 선수로 본다", () => {
+    const merc = {
+      id: 7,
+      name: "용병",
+      rosterKind: "MERCENARY" as const,
+      mercenaryId: 7,
+    } as Player;
+    const initialQuarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: { 0: merc },
+        teamA: { 0: merc },
+        teamB: {},
+      },
+    ];
+    const { result } = renderHook(() => useFormationManager(initialQuarters));
+
+    expect(result.current.getAssignedQuarters(merc)).toEqual([1]);
+    expect(
+      result.current.getAssignedQuarters({
+        id: 7,
+        name: "팀원",
+      } as Player),
+    ).toEqual([]);
+  });
+
   it("resetQuarters를 호출하면 초기 상태로 되돌아가야 한다", () => {
     // 임의의 초기 상태 설정
     const initialQuarters: QuarterData[] = [{

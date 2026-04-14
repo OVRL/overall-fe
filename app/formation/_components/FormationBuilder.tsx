@@ -3,7 +3,12 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 
+import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatchPlayersContext";
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
+import { useInHouseDraftTeamAssignments } from "@/hooks/formation/useInHouseDraftTeamAssignments";
+import { buildSubTeamDraftLineupOrderedPlayers } from "@/lib/formation/roster/buildSubTeamDraftLineup";
+import { filterPlayersForInHouseLineupTab } from "@/lib/formation/roster/filterPlayersForInHouseLineupTab";
+import { isSameFormationRosterPlayer } from "@/lib/formation/roster/formationRosterPlayerKey";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useUserId } from "@/hooks/useUserId";
 import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchContext";
@@ -16,6 +21,7 @@ import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import { buildMatchFormationTacticsDocumentFromQuarters } from "@/lib/formation/buildMatchFormationTacticsDocument";
 import { toast } from "@/lib/toast";
 import { Player, type QuarterData } from "@/types/formation";
+import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import FormationHeader from "./FormationHeader";
 
 /** 데스크톱 전용 DnD 번들을 모바일에서 로드하지 않도록 dynamic import */
@@ -79,6 +85,13 @@ export default function FormationBuilder({
 
   const { quarters, setQuarters, assignPlayer, removePlayer, resetQuarters } =
     useFormationManager(resolvedInitialQuarters);
+  const rosterPlayers = useFormationMatchPlayers();
+  const {
+    draftTeamByKey,
+    setDraftTeam,
+    getDraftTeam,
+    resetDraftAssignments,
+  } = useInHouseDraftTeamAssignments();
   const isLgOrBelow = useIsMobile(1023);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(null);
   const [selectedListPlayer, setSelectedListPlayer] = useState<Player | null>(
@@ -87,38 +100,82 @@ export default function FormationBuilder({
   const matchType = matchQuarterSpec?.matchType ?? "INTERNAL";
   const quarterDurationMinutes =
     matchQuarterSpec?.quarterDurationMinutes ?? 25;
+  const [formationRosterViewMode, setFormationRosterViewMode] =
+    useState<FormationRosterViewMode>("A");
   const [selectedSubTeam, setSelectedSubTeam] = useState<"A" | "B">("A");
+
+  const draftSubTeamLineups = useMemo(() => {
+    if (matchType !== "INTERNAL") {
+      return { A: [] as Player[], B: [] as Player[] };
+    }
+    return {
+      A: buildSubTeamDraftLineupOrderedPlayers(
+        rosterPlayers,
+        draftTeamByKey,
+        "A",
+      ),
+      B: buildSubTeamDraftLineupOrderedPlayers(
+        rosterPlayers,
+        draftTeamByKey,
+        "B",
+      ),
+    };
+  }, [matchType, rosterPlayers, draftTeamByKey]);
 
   const assignPlayerWithSubTeam = useCallback(
     (quarterId: number, positionIndex: number, player: Player) => {
+      if (formationRosterViewMode === "draft") return;
       assignPlayer(quarterId, positionIndex, player, {
         inHouseSubTeam: selectedSubTeam,
       });
+      // 내전 A/B 라인업에 올린 선수는 드래프트 소속과 동기화(명단 필터·다음 편집과 정합)
+      if (
+        matchType === "INTERNAL" &&
+        (formationRosterViewMode === "A" || formationRosterViewMode === "B")
+      ) {
+        setDraftTeam(player, formationRosterViewMode);
+      }
     },
-    [assignPlayer, selectedSubTeam],
+    [assignPlayer, selectedSubTeam, formationRosterViewMode, matchType, setDraftTeam],
   );
 
   const removePlayerWithSubTeam = useCallback(
     (quarterId: number, positionIndex: number) => {
+      if (formationRosterViewMode === "draft") return;
       removePlayer(quarterId, positionIndex, {
         inHouseSubTeam: selectedSubTeam,
       });
     },
-    [removePlayer, selectedSubTeam],
+    [removePlayer, selectedSubTeam, formationRosterViewMode],
   );
 
-  const handleSubTeamChange = useCallback(
-    (team: "A" | "B") => {
-      setSelectedSubTeam(team);
-      setQuarters((prev) =>
-        prev.map((q) => {
-          if (q.type !== "IN_HOUSE") return q;
-          const slots = team === "A" ? (q.teamA ?? {}) : (q.teamB ?? {});
-          return { ...q, lineup: { ...slots } };
-        }),
-      );
+  const handleFormationRosterViewModeChange = useCallback(
+    (mode: FormationRosterViewMode) => {
+      setFormationRosterViewMode(mode);
+      if (mode === "A" || mode === "B") {
+        setSelectedSubTeam(mode);
+        setQuarters((prev) =>
+          prev.map((q) => {
+            if (q.type !== "IN_HOUSE") return q;
+            const slots = mode === "A" ? (q.teamA ?? {}) : (q.teamB ?? {});
+            return { ...q, lineup: { ...slots } };
+          }),
+        );
+        // A/B 탭에서는 명단이 드래프트 배정으로 필터되므로, 목록에 없는 선택은 해제
+        setSelectedListPlayer((prev) => {
+          if (prev == null) return null;
+          const visible = filterPlayersForInHouseLineupTab(
+            rosterPlayers,
+            mode,
+            getDraftTeam,
+          );
+          return visible.some((p) => isSameFormationRosterPlayer(p, prev))
+            ? prev
+            : null;
+        });
+      }
     },
-    [setQuarters],
+    [setQuarters, rosterPlayers, getDraftTeam],
   );
 
   const commonProps = {
@@ -128,18 +185,28 @@ export default function FormationBuilder({
     setCurrentQuarterId,
     matchType,
     quarterDurationMinutes,
-    selectedSubTeam,
-    onSubTeamChange: handleSubTeamChange,
+    formationRosterViewMode,
+    onFormationRosterViewModeChange: handleFormationRosterViewModeChange,
     selectedPlayer: selectedListPlayer,
     setSelectedPlayer: setSelectedListPlayer,
     onPositionRemove: removePlayerWithSubTeam,
     assignPlayer: assignPlayerWithSubTeam,
+    ...(matchType === "INTERNAL"
+      ? {
+          draftSubTeamLineups,
+          getDraftTeam,
+          setDraftTeam,
+        }
+      : {}),
   };
 
   const handleReset = () => {
     resetQuarters();
     setCurrentQuarterId(null);
     setSelectedListPlayer(null);
+    setFormationRosterViewMode("A");
+    setSelectedSubTeam("A");
+    resetDraftAssignments();
   };
 
   const handleSaveDraft = useCallback(() => {
@@ -259,7 +326,7 @@ export default function FormationBuilder({
         onSaveConfirm={userId != null ? handleSaveConfirm : undefined}
         isSaveConfirmPending={isCreateFormationInFlight}
       />
-      <main className="flex-1 flex flex-col px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
+      <main className="flex-1 flex flex-col min-h-0 px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
         {content}
       </main>
     </div>

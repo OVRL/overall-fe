@@ -18,6 +18,10 @@ import FormationBuilderDesktop from "./FormationBuilderDesktop";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { QuarterData, Player } from "@/types/formation";
+import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
+import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
+import { validateInHouseListToBoardDnD } from "@/lib/formation/roster/validateInHouseListToBoardDnD";
+import { toast } from "@/lib/toast";
 
 /** 드래그 오버레이: 명단 행과 동일 `getFormationPlayerProfileAvatarUrls` */
 function DragOverlayPlayerAvatar({ player }: { player: Player }) {
@@ -43,8 +47,14 @@ export interface FormationBuilderDesktopWithDndProps {
   setCurrentQuarterId: (id: number | null) => void;
   matchType?: "MATCH" | "INTERNAL";
   quarterDurationMinutes?: number;
-  selectedSubTeam?: "A" | "B";
-  onSubTeamChange?: (team: "A" | "B") => void;
+  formationRosterViewMode: FormationRosterViewMode;
+  onFormationRosterViewModeChange: (mode: FormationRosterViewMode) => void;
+  draftSubTeamLineups?: {
+    A: Player[];
+    B: Player[];
+  };
+  getDraftTeam?: (player: Player) => InHouseDraftTeamChoice;
+  setDraftTeam?: (player: Player, team: InHouseDraftTeamChoice) => void;
   selectedPlayer: Player | null;
   setSelectedPlayer: (player: Player | null) => void;
   onPositionRemove: (quarterId: number, index: number) => void;
@@ -104,12 +114,28 @@ export default function FormationBuilderDesktopWithDnd(
     setActivePlayer(null);
     const { over } = event;
     if (!over) return;
+    if (props.formationRosterViewMode === "draft") return;
 
     const player = event.active.data.current?.player as Player;
+    if (!player) return;
+
+    const dragSourceType = event.active.data.current?.type as string | undefined;
+    const check = validateInHouseListToBoardDnD(
+      props.matchType,
+      props.formationRosterViewMode,
+      dragSourceType,
+      player,
+      props.getDraftTeam,
+    );
+    if (!check.allowed) {
+      toast.error(check.message);
+      return;
+    }
+
     const quarterId = over.data.current?.quarterId as number;
     const positionIndex = over.data.current?.positionIndex as number;
 
-    if (player && quarterId != null && positionIndex !== undefined) {
+    if (quarterId != null && positionIndex !== undefined) {
       props.assignPlayer(quarterId, positionIndex, player);
       props.setCurrentQuarterId(quarterId);
     }
@@ -131,8 +157,11 @@ export default function FormationBuilderDesktopWithDnd(
         setCurrentQuarterId={props.setCurrentQuarterId}
         matchType={props.matchType}
         quarterDurationMinutes={props.quarterDurationMinutes}
-        selectedSubTeam={props.selectedSubTeam}
-        onSubTeamChange={props.onSubTeamChange}
+        formationRosterViewMode={props.formationRosterViewMode}
+        onFormationRosterViewModeChange={props.onFormationRosterViewModeChange}
+        draftSubTeamLineups={props.draftSubTeamLineups}
+        getDraftTeam={props.getDraftTeam}
+        setDraftTeam={props.setDraftTeam}
         selectedPlayer={props.selectedPlayer}
         setSelectedPlayer={props.setSelectedPlayer}
         onPositionRemove={props.onPositionRemove}

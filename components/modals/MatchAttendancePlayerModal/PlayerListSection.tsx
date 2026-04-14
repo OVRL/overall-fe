@@ -185,9 +185,12 @@ const PlayerListSection = ({
                 key={`merc-create-${name}`}
                 className="flex justify-between items-center p-2 rounded-md"
               >
-                <span className="text-sm text-Label-Tertiary truncate max-w-[160px]">
-                  {name} (용병 등록)
-                </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-sm text-Label-Tertiary truncate max-w-[100px]">
+                    {name}
+                  </span>
+                  <PositionChip position="용병" variant="outline" />
+                </div>
                 <button
                   type="button"
                   onClick={() => onToggleMercenaryDraft(name)}
@@ -216,25 +219,33 @@ const PlayerListSection = ({
                   key={`merc-del-${id}`}
                   className="flex justify-between items-center p-2 rounded-md"
                 >
-                  <span className="text-sm text-Label-Tertiary truncate max-w-[160px]">
-                    {label} (명단 제거)
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onToggleMercenaryRemove(id)}
-                    className="flex items-center justify-center rounded-full p-1 cursor-pointer group hover:bg-surface-secondary transition-colors focus:outline-none focus:ring-offset-1 focus:ring-offset-surface-primary"
-                    aria-label="용병 제거 예약 취소"
-                    title="변경 취소"
-                  >
-                    <Icon
-                      src={closeCircle}
-                      alt="취소 아이콘"
-                      width={16}
-                      height={16}
-                      aria-hidden="true"
-                      className="text-Fill_Tertiary group-hover:text-red-500 transition-colors"
-                    />
-                  </button>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm text-Label-Tertiary truncate max-w-[100px]">
+                      {label}
+                    </span>
+                    <PositionChip position="용병" variant="outline" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-red-500">
+                      참석 취소
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onToggleMercenaryRemove(id)}
+                      className="flex items-center justify-center rounded-full p-1 cursor-pointer group hover:bg-surface-secondary transition-colors focus:outline-none focus:ring-offset-1 focus:ring-offset-surface-primary"
+                      aria-label={`${label}의 변경사항 취소`}
+                      title="변경 취소"
+                    >
+                      <Icon
+                        src={closeCircle}
+                        alt="취소 아이콘"
+                        width={16}
+                        height={16}
+                        aria-hidden="true"
+                        className="text-Fill_Tertiary group-hover:text-red-500 transition-colors"
+                      />
+                    </button>
+                  </div>
                 </div>
               );
             })}

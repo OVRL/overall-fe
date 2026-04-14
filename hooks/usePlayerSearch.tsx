@@ -223,7 +223,7 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
           p.currentStatus === "ATTEND" || p.currentStatus === "ABSENT",
       );
 
-      await commitFormationRosterModalMutations({
+      const commitResult = await commitFormationRosterModalMutations({
         environment,
         matchId,
         teamId,
@@ -233,16 +233,60 @@ export const usePlayerSearch = ({ matchId, teamId }: UsePlayerSearchProps) => {
         mercenaryIdsToDelete: [...pendingMercenaryDeletes],
       });
 
-      await fetchQuery(
-        environment,
-        FormationMatchAttendanceQuery,
-        { matchId, teamId },
-        { fetchPolicy: "network-only" },
-      ).toPromise();
-
       const createdMerc = pendingMercenaryCreates.size;
       const removedMerc = pendingMercenaryDeletes.size;
       const memberChanges = teamMemberCommits.length;
+
+      if (commitResult.total === 0) {
+        setPendingTeamMembers(new Map());
+        setPendingMercenaryCreates(new Set());
+        setPendingMercenaryDeletes(new Set());
+        hideModal();
+        return;
+      }
+
+      if (commitResult.succeeded > 0) {
+        await fetchQuery(
+          environment,
+          FormationMatchAttendanceQuery,
+          { matchId, teamId },
+          { fetchPolicy: "network-only" },
+        ).toPromise();
+      }
+
+      if (commitResult.failed > 0) {
+        if (commitResult.succeeded > 0) {
+          const detail = getGraphQLErrorMessage(
+            commitResult.firstRejection,
+            "서버에서 일부 요청을 거절했습니다.",
+          );
+          console.error(
+            "Formation roster partial commit failure",
+            commitResult.firstRejection,
+          );
+          toast.warning(
+            `${commitResult.succeeded}건은 저장되었고 ${commitResult.failed}건은 실패했습니다.`,
+            { description: detail },
+          );
+          setPendingTeamMembers(new Map());
+          setPendingMercenaryCreates(new Set());
+          setPendingMercenaryDeletes(new Set());
+          hideModal();
+        } else {
+          console.error(
+            "Formation roster commit failed",
+            commitResult.firstRejection,
+          );
+          toast.error(
+            getGraphQLErrorMessage(
+              commitResult.firstRejection,
+              "변경 사항을 저장하지 못했습니다.",
+            ),
+          );
+        }
+        return;
+      }
+
       if (createdMerc > 0 && removedMerc === 0 && memberChanges === 0) {
         toast.success(
           createdMerc === 1

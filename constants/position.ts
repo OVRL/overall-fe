@@ -34,4 +34,5 @@ export const POSITION_CATEGORY_MAP: Record<Position, MainPosition> = {
   SW: "DF",
   DF: "DF",
   GK: "GK",
+  용병: "MF",
 };

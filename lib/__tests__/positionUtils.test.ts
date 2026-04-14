@@ -30,6 +30,10 @@ describe("positionUtils", () => {
       expect(getMainPositionFromRole("gk")).toBe("GK");
     });
 
+    it("경기 용병(용병)은 MF로 반환한다", () => {
+      expect(getMainPositionFromRole("용병")).toBe("MF");
+    });
+
     it("매핑되지 않은 포지션은 전체를 반환한다", () => {
       expect(getMainPositionFromRole("UNKNOWN")).toBe("전체");
       expect(getMainPositionFromRole("")).toBe("전체");

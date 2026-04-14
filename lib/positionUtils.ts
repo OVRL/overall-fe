@@ -39,6 +39,8 @@ const POSITION_TO_MAIN: Record<string, MainPosition> = {
  * @returns "FW" | "MF" | "DF" | "GK" | "전체" (매핑 없으면 "전체")
  */
 export function getMainPositionFromRole(role: string): MainPosition | "전체" {
+  // 경기 용병 행 — `constants/position`의 POSITION_CATEGORY_MAP(용병→MF)과 동일
+  if (role === "용병") return "MF";
   const main = POSITION_TO_MAIN[role.toUpperCase()];
   return main ?? "전체";
 }
