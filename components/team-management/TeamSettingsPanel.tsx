@@ -11,6 +11,7 @@ import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/unif
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import type { Role as GqlTeamMemberRole } from "@/__generated__/useUpdateTeamMemberMutation.graphql";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/shadcn/popover";
 import { useTeamSettingsQuery } from "./hooks/useTeamSettingsQuery";
 import { useUpdateTeamMutation } from "./hooks/useUpdateTeamMutation";
 import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
@@ -75,55 +76,62 @@ const RoleDropdown = ({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative inline-block">
-      <button
-        onClick={() => !disabled && setOpen((p) => !p)}
-        className={`flex items-center justify-between gap-1 rounded-md bg-[#252526] border border-transparent px-2.5 py-1.5 text-xs text-white min-w-[72px] transition-all ${
-          disabled
-            ? "opacity-50 cursor-default"
-            : open 
-              ? "border-Fill_AccentPrimary" 
-              : "hover:bg-[#2d2d2e] cursor-pointer"
-        }`}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          disabled={disabled}
+          className={`flex items-center justify-between gap-1 rounded-md bg-[#252526] border border-transparent px-2.5 py-1.5 text-xs text-white min-w-[72px] transition-all ${
+            disabled
+              ? "opacity-50 cursor-default"
+              : open
+                ? "border-Fill_AccentPrimary"
+                : "hover:bg-[#2d2d2e] cursor-pointer"
+          }`}
+        >
+          <span className="flex-1 text-left">{value}</span>
+          {!disabled && (
+            <svg
+              width="10"
+              height="6"
+              viewBox="0 0 10 6"
+              fill="none"
+              className={cn("transition-transform duration-200", open && "rotate-180")}
+            >
+              <path
+                d="M1 1l4 4 4-4"
+                stroke="#888"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-[100px] p-1.5 bg-[#1a1a1b] border-white/5 shadow-2xl rounded-[0.625rem]"
       >
-        <span className="flex-1 text-left">{value}</span>
-        {!disabled && (
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={cn("transition-transform duration-200", open && "rotate-180")}>
-            <path
-              d="M1 1l4 4 4-4"
-              stroke="#888"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-      </button>
-
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1.5 z-20 min-w-[100px] rounded-[0.625rem] bg-[#1a1a1b] border border-white/5 shadow-2xl overflow-hidden py-1.5">
-            {availableRoles.map((r) => (
-              <button
-                key={r}
-                onClick={() => {
-                  onChange(r);
-                  setOpen(false);
-                }}
-                className={`w-full px-4 py-2 text-left text-[13px] transition-colors ${
-                  r === value
-                    ? "text-Fill_AccentPrimary"
-                    : "text-white/60 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+        <div className="flex flex-col">
+          {availableRoles.map((r) => (
+            <button
+              key={r}
+              onClick={() => {
+                onChange(r);
+                setOpen(false);
+              }}
+              className={`w-full px-4 py-2 text-left text-[13px] transition-colors rounded-md ${
+                r === value
+                  ? "text-Fill_AccentPrimary bg-white/5"
+                  : "text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -599,8 +607,9 @@ function TeamSettingsPanelInner({
   const effectiveRoleRaw = currentUserMember?.role || userRole;
   const effectiveRole = String(effectiveRoleRaw).toUpperCase();
   // 구 명칭 호환성: TEAM_MANAGER도 MANAGER로 간주
-  const isActualManager = effectiveRole === "MANAGER" || effectiveRole === "TEAM_MANAGER" || effectiveRole === "감독";
-  const isActualCoach = effectiveRole === "COACH" || effectiveRole === "코치";
+  const isActualManager = ["MANAGER", "TEAM_MANAGER", "감독"].includes(effectiveRole);
+  const isActualCoach = ["COACH", "코치"].includes(effectiveRole);
+  const currentMemberId = currentUserMember?.id;
 
   // 팀 정보 (첫 번째 멤버의 team 정보를 통해 가져옴)
   const teamData = teamMemberConnection.members[0]?.team;
@@ -708,10 +717,46 @@ function TeamSettingsPanelInner({
     } else if (targetRole === "MANAGER") {
       const managerCount = teamMemberConnection.members.filter((m: any) => m.role === "MANAGER" || m.role === "TEAM_MANAGER").length;
       if (managerCount >= 1) {
-        // 본인이 감독이고 다른 사람을 감독으로 만들려는 상횡이면 '권한 위임' 성격이 강함
-        // 하지만 현재 백엔드 mutation 한 번에 두 명의 역할을 바꿀 순 없으므로,
-        // 기획상 한 명만 감독일 수 있다면 여기서 차단하거나 정책에 따라 안내해야 함.
-        // 여기서는 일단 기존 감독이 있는 경우 차단하는 로직을 유지하되, TEAM_MANAGER 체크를 추가함.
+        // 이미 감독이 있고, 내가 현재 감독인 경우 '위임' 진행
+        if (isActualManager) {
+          const proceed = confirm("새로운 감독을 지정하면 본인은 '선수'로 변경됩니다. 위임하시겠습니까?");
+          if (!proceed) {
+            setRoleModal(null);
+            return;
+          }
+
+          try {
+            // 1. 타인을 MANAGER로 변경
+            const numericMemberId = parseNumericIdFromRelayGlobalId(roleModal.memberId);
+            if (numericMemberId === null) throw new Error("Invalid Member ID");
+            
+            await updateMember({
+              id: numericMemberId,
+              role: "MANAGER" as GqlTeamMemberRole
+            });
+
+            // 2. 본인을 PLAYER로 변경
+            if (currentMemberId) {
+              const numericCurrentMemberId = parseNumericIdFromRelayGlobalId(currentMemberId);
+              if (numericCurrentMemberId) {
+                await updateMember({
+                  id: numericCurrentMemberId,
+                  role: "PLAYER" as GqlTeamMemberRole
+                });
+              }
+            }
+
+            alert("감독 권한이 성공적으로 위임되었습니다.");
+            setRoleModal(null);
+            return;
+          } catch (error) {
+            console.error("Delegation failed:", error);
+            alert("감독 위임 처리에 실패했습니다.");
+            setRoleModal(null);
+            return;
+          }
+        }
+
         alert("이미 감독이 존재합니다. 한 팀에 감독은 1명만 가능합니다.");
         setRoleModal(null);
         return;
@@ -985,15 +1030,12 @@ function TeamSettingsPanelInner({
                         value={member.role}
                         disabled={
                           (!isActualManager && !isActualCoach) || 
-                          (member.userId === currentUserId) || 
-                          (isActualCoach && member.role === "감독")
+                          (member.userId === currentUserId)
                         }
                         availableRoles={
-                          isActualManager 
+                          isActualManager || isActualCoach
                             ? ["감독", "코치", "선수"] 
-                            : isActualCoach 
-                              ? ["코치", "선수"] 
-                              : [member.role]
+                            : [member.role]
                         }
                         onChange={(newRole) => {
                           setRoleModal({
