@@ -10,6 +10,9 @@ import { verifyFormationMatchAccessSSR } from "@/utils/verifyFormationMatchAcces
 import FormationMatchDataLoader from "./_components/FormationMatchDataLoader";
 import { loadFormationMatchPageSnapshotSSR } from "@/lib/relay/ssr/loadFormationMatchPageSnapshot";
 
+/** RSC·풀 리로드 시 이전 스냅샷이 남지 않도록 (포메이션 SSR은 항상 최신 조회) */
+export const dynamic = "force-dynamic";
+
 type FormationMatchPageProps = {
   params: Promise<{ matchId: string }>;
 };
@@ -119,6 +122,22 @@ export default async function FormationMatchPage({
         }}
         savedInitialQuarters={
           formationSsrSnapshot?.initialQuarters ?? undefined
+        }
+        savedInitialInHouseDraftTeamByKey={
+          formationSsrSnapshot?.initialInHouseDraftTeamByKey ?? undefined
+        }
+        savedDraftMatchFormationId={
+          formationSsrSnapshot?.savedDraftMatchFormationId ?? undefined
+        }
+        savedLatestConfirmedMatchFormationId={
+          formationSsrSnapshot?.savedLatestConfirmedMatchFormationId ??
+          undefined
+        }
+        savedInitialFormationPrimarySource={
+          formationSsrSnapshot?.savedInitialFormationPrimarySource ?? undefined
+        }
+        savedInitialFormationSourceRevision={
+          formationSsrSnapshot?.savedInitialFormationSourceRevision ?? undefined
         }
       />
     </FormationMatchDataLoader>

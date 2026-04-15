@@ -1,7 +1,12 @@
 import { fetchQuery } from "relay-runtime";
 import type { formationMatchPagePreloadQuery$data } from "@/__generated__/formationMatchPagePreloadQuery.graphql";
 import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarterDataFromTacticsDocument";
-import { pickPrimaryMatchFormationRow } from "@/lib/formation/pickPrimaryMatchFormationRow";
+import { extractInHouseDraftTeamByKeyFromTactics } from "@/lib/formation/extractInHouseDraftTeamByKeyFromTactics";
+import {
+  pickLatestConfirmedMatchFormationRow,
+  pickLatestDraftMatchFormationRow,
+  pickPrimaryMatchFormationRow,
+} from "@/lib/formation/pickPrimaryMatchFormationRow";
 import { matchAttendanceRowsToAttendingPlayers } from "@/lib/formation/matchAttendanceToPlayers";
 import { matchMercenaryRowsToPlayers } from "@/lib/formation/roster/matchMercenaryRowsToPlayers";
 import { mergeAttendingMembersAndMercenaries } from "@/lib/formation/roster/mergeAttendingMembersAndMercenaries";
@@ -69,9 +74,37 @@ function deriveSnapshot(
   );
   const resolve = createFormationLineupResolver(players);
 
-  const primary = pickPrimaryMatchFormationRow(data.findMatchFormation);
+  const formationRows = data.findMatchFormation ?? [];
+  const savedDraftMatchFormationId =
+    pickLatestDraftMatchFormationRow(formationRows)?.id ?? null;
+  const savedLatestConfirmedMatchFormationId =
+    pickLatestConfirmedMatchFormationRow(formationRows)?.id ?? null;
+
+  const primary = pickPrimaryMatchFormationRow(formationRows);
+  const savedInitialFormationPrimarySource =
+    primary == null
+      ? null
+      : primary.isDraft === false
+        ? ("confirmed" as const)
+        : ("draft" as const);
+
+  const savedInitialFormationSourceRevision =
+    primary == null
+      ? null
+      : `${primary.id}:${primary.isDraft ? "1" : "0"}:${String(primary.updatedAt ?? "")}:${
+          primary.tactics ? JSON.stringify(primary.tactics) : "null"
+        }`;
+
   if (primary == null || primary.tactics == null) {
-    return { players, initialQuarters: null };
+    return {
+      players,
+      initialQuarters: null,
+      initialInHouseDraftTeamByKey: {},
+      savedDraftMatchFormationId,
+      savedLatestConfirmedMatchFormationId,
+      savedInitialFormationPrimarySource,
+      savedInitialFormationSourceRevision,
+    };
   }
 
   const initialQuarters = buildQuarterDataFromTacticsDocument(
@@ -79,7 +112,18 @@ function deriveSnapshot(
     quarterSpec,
     resolve,
   );
-  return { players, initialQuarters };
+  const initialInHouseDraftTeamByKey = extractInHouseDraftTeamByKeyFromTactics(
+    primary.tactics,
+  );
+  return {
+    players,
+    initialQuarters,
+    initialInHouseDraftTeamByKey,
+    savedDraftMatchFormationId,
+    savedLatestConfirmedMatchFormationId,
+    savedInitialFormationPrimarySource,
+    savedInitialFormationSourceRevision,
+  };
 }
 
 export async function loadFormationMatchPageSnapshotSSR(options: {
@@ -117,10 +161,11 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
         "findMatchFormation (raw)",
         data.findMatchFormation ?? [],
       );
-      const formationRows = data.findMatchFormation ?? [];
-      const primaryFormationRow = pickPrimaryMatchFormationRow(formationRows);
+      const formationRowsForLog = data.findMatchFormation ?? [];
+      const primaryFormationRow =
+        pickPrimaryMatchFormationRow(formationRowsForLog);
       devPrettyFormationPreloadLog("findMatchFormation (ids · 스냅샷에 쓰인 행)", {
-        allRowIds: formationRows.map((r) => ({
+        allRowIds: formationRowsForLog.map((r) => ({
           id: r.id,
           isDraft: r.isDraft,
           updatedAt: r.updatedAt,
@@ -128,15 +173,23 @@ export async function loadFormationMatchPageSnapshotSSR(options: {
         primaryFormationRowIdUsedForInitialQuarters:
           primaryFormationRow?.id ?? null,
         primaryIsDraft: primaryFormationRow?.isDraft ?? null,
+        savedDraftMatchFormationId: snapshot.savedDraftMatchFormationId,
+        savedLatestConfirmedMatchFormationId:
+          snapshot.savedLatestConfirmedMatchFormationId,
+        savedInitialFormationPrimarySource:
+          snapshot.savedInitialFormationPrimarySource,
+        savedInitialFormationSourceRevision:
+          snapshot.savedInitialFormationSourceRevision,
       });
       devPrettyFormationPreloadLog("derived snapshot (full)", {
         matchFormation: {
           primaryRowId: primaryFormationRow?.id ?? null,
-          allIds: formationRows.map((r) => r.id),
+          allIds: formationRowsForLog.map((r) => r.id),
         },
         attendingPlayerCount: snapshot.players.length,
         players: snapshot.players,
         initialQuarters: snapshot.initialQuarters,
+        initialInHouseDraftTeamByKey: snapshot.initialInHouseDraftTeamByKey,
       });
     } catch (logErr) {
       console.error(

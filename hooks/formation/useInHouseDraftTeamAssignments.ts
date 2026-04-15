@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { Player } from "@/types/formation";
+import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
 import {
   getFormationRosterPlayerKey,
 } from "@/lib/formation/roster/formationRosterPlayerKey";
@@ -9,14 +10,19 @@ import {
 /** 팀 드래프트에서 선수별 A/B 배정 — null은 미배정 */
 export type InHouseDraftTeamChoice = "A" | "B" | null;
 
-export type InHouseDraftTeamByPlayerKey = Record<string, "A" | "B">;
+export type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
 
 /**
  * 내전 팀 드래프트용 A/B 배정 상태 — UI(데스크톱/모바일)와 무관하게 동일 규칙으로 갱신한다.
+ * @param initialDraft SSR·저장 `tactics.inHouseDraftTeamByKey`에서 복원한 초기값
  */
-export function useInHouseDraftTeamAssignments() {
+export function useInHouseDraftTeamAssignments(
+  initialDraft?: InHouseDraftTeamByPlayerKey | null,
+) {
   const [draftTeamByKey, setDraftTeamByKey] =
-    useState<InHouseDraftTeamByPlayerKey>({});
+    useState<InHouseDraftTeamByPlayerKey>(() =>
+      initialDraft == null ? {} : { ...initialDraft },
+    );
 
   const setDraftTeam = useCallback((player: Player, team: InHouseDraftTeamChoice) => {
     const key = getFormationRosterPlayerKey(player);

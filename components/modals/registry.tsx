@@ -87,6 +87,13 @@ const PlayerSearchModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const FormationChangeLineupModal = dynamic(
+  () => import("./FormationChangeLineupModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -105,4 +112,5 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   CONFIRM: GlobalConfirmModal,
   EDIT_GAME: EditGameModal,
   PLAYER_SEARCH: PlayerSearchModal,
+  FORMATION_CHANGE_LINEUP: FormationChangeLineupModal,
 } as ModalComponentMap;

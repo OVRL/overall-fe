@@ -174,4 +174,55 @@ describe("useFormationManager", () => {
     // 라인업이 모두 비워져야(초기 상태) 한다
     expect(result.current.quarters[0].lineup).toEqual({});
   });
+
+  it("ssrFormationSourceRevision이 바뀌면 quarters를 새 initial과 맞춘다", () => {
+    const initialA: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+    const initialB: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-4-2",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+
+    const { result, rerender } = renderHook(
+      (props: { initial: QuarterData[]; rev: string }) =>
+        useFormationManager(props.initial, props.rev),
+      {
+        initialProps: {
+          initial: initialA,
+          rev: "10:1:2026-01-01T00:00:00.000Z",
+        },
+      },
+    );
+
+    expect(result.current.quarters[0].formation).toBe("4-3-3");
+
+    act(() => {
+      result.current.assignPlayer(1, 0, mockPlayerA);
+    });
+    expect(result.current.quarters[0].lineup?.[0]).toEqual(mockPlayerA);
+
+    rerender({
+      initial: initialB,
+      rev: "10:1:2026-01-02T00:00:00.000Z",
+    });
+
+    expect(result.current.quarters[0].formation).toBe("4-4-2");
+    expect(result.current.quarters[0].lineup?.[0]).toBeUndefined();
+  });
 });

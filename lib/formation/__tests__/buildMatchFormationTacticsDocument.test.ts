@@ -95,6 +95,31 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     });
   });
 
+  it("IN_HOUSE는 formationTeamA·formationTeamB가 있으면 tactics 팀별 formation에 반영한다", () => {
+    const quarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        formationTeamA: "4-3-3",
+        formationTeamB: "4-4-2",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+    const doc = buildMatchFormationTacticsDocumentFromQuarters(
+      quarters,
+      "INTERNAL",
+      fixedNow,
+    );
+    const q0 = doc.quarters[0];
+    if (q0.kind !== "IN_HOUSE") throw new Error("narrow");
+    expect(q0.teams.A.formation).toBe("4-3-3");
+    expect(q0.teams.B.formation).toBe("4-4-2");
+  });
+
   it("IN_HOUSE에서 teamA/B가 비어 있고 lineup만 있으면 A팀 tactics로 폴백한다", () => {
     const quarters: QuarterData[] = [
       {
@@ -125,5 +150,45 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
       teamMemberId: 99,
     });
     expect(Object.keys(q0.teams.B.lineup)).toHaveLength(0);
+  });
+
+  it("INTERNAL이면 inHouseDraftTeamByKey를 tactics 루트에 넣는다", () => {
+    const quarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+    const doc = buildMatchFormationTacticsDocumentFromQuarters(
+      quarters,
+      "INTERNAL",
+      {
+        inHouseDraftTeamByKey: { "t:1": "A", "m:9": "B" },
+      },
+    );
+    expect(doc.inHouseDraftTeamByKey).toEqual({ "t:1": "A", "m:9": "B" });
+  });
+
+  it("INTERNAL이고 드래프트 옵션 없으면 inHouseDraftTeamByKey는 빈 객체", () => {
+    const quarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+      },
+    ];
+    const doc = buildMatchFormationTacticsDocumentFromQuarters(
+      quarters,
+      "INTERNAL",
+      fixedNow,
+    );
+    expect(doc.inHouseDraftTeamByKey).toEqual({});
   });
 });

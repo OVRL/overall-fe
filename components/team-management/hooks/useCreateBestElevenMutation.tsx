@@ -1,6 +1,8 @@
 import { graphql, useMutation } from "react-relay";
-import type { Position } from "@/types/position";
-import type { useCreateBestElevenMutation as MutationType } from "../../../__generated__/useCreateBestElevenMutation.graphql";
+import type {
+  CreateBestElevenInput,
+  useCreateBestElevenMutation as MutationType,
+} from "../../../__generated__/useCreateBestElevenMutation.graphql";
 
 const createBestElevenMutation = graphql`
   mutation useCreateBestElevenMutation($input: CreateBestElevenInput!) {
@@ -13,11 +15,8 @@ const createBestElevenMutation = graphql`
   }
 `;
 
-export type CreateBestElevenMutationInput = {
-  position: Position;
-  teamId: number;
-  userId: number;
-};
+/** GraphQL `CreateBestElevenInput`과 동일 — `types/position`의 `"용병"` 등 enum 밖 값은 불가 */
+export type CreateBestElevenMutationInput = CreateBestElevenInput;
 
 export function useCreateBestElevenMutation() {
   const [commit, isInFlight] = useMutation<MutationType>(createBestElevenMutation);

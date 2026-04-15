@@ -62,11 +62,10 @@
 
 ### 3.6 저장용 `tactics` JSON (현재)
 
-- **변경 없음**: 저장·임시저장은 기존 `buildMatchFormationTacticsDocumentFromQuarters` → 문서 v3.
-- **`draftTeamByKey`는 `tactics`에 넣지 않는다(제품 합의)**  
-  - 팀 드래프트 배정은 **브라우저 세션에서만** 유지된다.  
-  - **새로고침·재진입 시 드래프트 맵은 초기화**되며, 사용자는 팀 드래프트를 **처음부터 다시** 설정한다.  
-  - 쿼터 라인업(슬롯)만 서버에 저장되는 기존 동작은 그대로다.
+- 저장·임시저장은 `buildMatchFormationTacticsDocumentFromQuarters` → 문서 v3.
+- **내전(`INTERNAL`)**일 때 루트에 **`inHouseDraftTeamByKey`** 를 함께 저장한다(키: `getFormationRosterPlayerKey`, 값: `"A"` \| `"B"`). 비어 있으면 `{}`.
+- SSR·재진입 시 `extractInHouseDraftTeamByKeyFromTactics` → `useInHouseDraftTeamAssignments(초기맵)`으로 복원한다.
+- 상세 계약: `docs/match-formation-tactics-document-contract.md`
 
 ---
 
@@ -85,7 +84,13 @@
 | `lib/formation/roster/validateInHouseListToBoardDnD.ts` | 명단→보드 DnD 시 드래프트 소속 검증; 보드 슬롯 간 이동(`BoardPlayer`)은 제외 |
 | `components/formation/board/DroppableSlot.tsx` | 보드 슬롯 DnD·썸네일; 명단에서 선택된 선수와의 동일성은 `isSameFormationRosterPlayer`(숫자 id만 비교하지 않음) |
 | `components/formation/FormationControls.tsx` | A/B 선택 제거(명단 탭으로 이전) |
-| `app/formation/_components/FormationBuilder.tsx` | 훅·`draftSubTeamLineups` 계산·공통 props·리셋 시 드래프트 초기화 |
+| `app/formation/_components/FormationBuilder.tsx` | 훅·`draftSubTeamLineups` 계산·`tactics`에 `inHouseDraftTeamByKey` 직렬화·SSR 초기 드래프트·**드래프트/확정 행 id** 주입·임시저장·확정 분기(`confirmMatchFormation` / `update` / `create`)·리셋 시 드래프트 초기화 |
+| `app/formation/_hooks/useConfirmMatchFormationMutation.tsx` | `confirmMatchFormation(draftId, userId)` |
+| `lib/formation/pickPrimaryMatchFormationRow.ts` | 초기 `tactics` 출처: 확정 행이 있으면 **id 최대** 확정, 없으면 **id 최대** 드래프트. 별도: `pickLatestDraftMatchFormationRow`, `pickLatestConfirmedMatchFormationRow` |
+| `types/formationMatchPageSnapshot.ts` | `savedDraftMatchFormationId`, `savedLatestConfirmedMatchFormationId`, `savedInitialFormationPrimarySource`, `savedInitialFormationSourceRevision` |
+| `lib/relay/ssr/loadFormationMatchPageSnapshot.ts` | 위 id들과 `initialQuarters`를 동일 쿼리에서 채움 |
+| `lib/formation/extractInHouseDraftTeamByKeyFromTactics.ts` | 저장 `tactics`에서 팀 드래프트 맵 추출 |
+| `types/inHouseDraftTeam.ts` | `InHouseDraftTeamByPlayerKey` 타입 |
 | `app/formation/_components/FormationBuilderDesktop.tsx` | 드래프트 시 `FormationDraftLineupOverview`, 아니면 `FormationBoardList` |
 | `app/formation/_components/FormationBuilderDesktopWithDnd.tsx` | 드래프트 시 DnD 배치 무시 |
 | `app/formation/_components/FormationBuilderMobile.tsx` | 동일 분기 + 모바일 명단 |
@@ -109,8 +114,12 @@
    - `A`/`B`: 우측 명단은 `filterPlayersForInHouseLineupTab`으로 **해당 탭에 드래프트 배정된 선수만** 표시  
 
 3. **임시저장 / 확정 저장**  
-   - 기존과 동일: `saveMatchFormationDraft` → `updateMatchFormation`, `createMatchFormation`  
-   - **드래프트 맵은 의도적으로 서버에 저장하지 않음** — §3.6 참고
+   - **임시저장**: `saveMatchFormationDraft`(첫 드래프트) → 이후 같은 드래프트 id로 `updateMatchFormation`. 드래프트 id는 SSR의 `savedDraftMatchFormationId`(=`findMatchFormation` 중 `isDraft===true`의 **최대 id**) 또는 첫 임시저장 응답으로 유지.  
+   - **포메이션 저장하기(확정)** — 초기 보드 출처(`savedInitialFormationPrimarySource`: `pickPrimary`가 고른 행이 확정이면 `confirmed`)와 **동일 행**에 쓴다.  
+     - **`confirmed`**: orphan 드래프트 id가 ref에 있어도, 화면은 확정 `tactics`이므로 **`savedLatestConfirmedMatchFormationId`로 `updateMatchFormation`만** (잘못된 draft id에 `confirm`하지 않음).  
+     - **`draft`**: `updateMatchFormation`(draft id) → `confirmMatchFormation`.  
+     - **행 없음**: `createMatchFormation`.  
+   - 내전이면 `tactics`에 **`inHouseDraftTeamByKey`** 포함 — §3.6 참고
 
 4. **리셋**  
    - `resetQuarters` + `resetDraftAssignments` + 뷰 모드 `A` 등
@@ -121,7 +130,7 @@
 
 | 항목 | 설명 |
 |------|------|
-| 드래프트 비영속(합의됨) | `draftTeamByKey`는 서버 `tactics`에 포함하지 않음. **새로고침·재진입 시 드래프트만 사라지고** 팀 드래프트는 **다시** 설정하는 것이 전제다. |
+| 드래프트 영속 | 내전은 `tactics.inHouseDraftTeamByKey`로 저장·복원. 구문서에 필드가 없으면 복원 시 `{}`로 A/B 명단 필터만 비어 있을 수 있음. |
 | 드래프트 vs 슬롯 정합성 | 명단 필터·DnD 검증·배치 후 `setDraftTeam` 등은 §7.3 기준으로 구현; 추가 정책은 필요 시 별도 검토 |
 | 모바일 UI | 데스크톱과 동일 데이터·다른 레이아웃; Figma/기획 확정 후 전용 마크업 가능 |
 
@@ -164,27 +173,29 @@
 
 | 주제 | 내용 |
 |------|------|
-| `draftTeamByKey` | **의도적으로** `tactics`에 미포함 — 새로고침 시 드래프트만 초기화(§3.6·§6, 제품 합의) |
+| `inHouseDraftTeamByKey` | `tactics` 루트에 포함(내전). 구저장 없음 → 필터·좌측 요약은 빈 맵 기준 |
 | `userId === null` | 임시저장/확정 저장 핸들러가 조용히 return — **토스트·로그인 유도**는 별도 UX 정책 |
 | 뮤테이션 실패 | 일부 경로는 `console.error` 위주 — **toast.error·재시도**는 `lib/toast.tsx` 패턴으로 통일 여지(프로젝트 전반 과제) |
-| `latestDraftFormationIdRef` | 메모리 전용·연타 시 중복 생성 가능성 등 — 서버 id 복원·버튼 잠금 정책은 저장 플로우 과제 |
+| `latestDraftFormationIdRef` / 확정 id | SSR에서 `savedDraftMatchFormationId`·`savedLatestConfirmedMatchFormationId`로 시드. 확정 성공 후 `router.refresh()`로 RSC 스냅샷 재정렬. |
+| `savedInitialFormationSourceRevision` | 초기 `MatchFormation` 행의 `id:isDraft:updatedAt` 문자열. 저장 후 서버가 `updatedAt`을 바꾸면 리비전이 달라지고, `useFormationManager`가 새 SSR `initialQuarters`로 `quarters`를 다시 맞춤(직렬화 키만으로는 동기화가 스킵되던 경우 방지). |
+| `formation/[matchId]/page` | `export const dynamic = "force-dynamic"` — 포메이션 페이지 RSC가 이전 스냅샷에 묶이지 않도록. |
 
 ---
 
 ## 8. 앞으로 할 작업(백로그)
 
 **추가로 하면 좋은 작업**을 정리한다.  
-(드래프트 서버 영속화는 **제품상 하지 않기로 합의**되어 백로그에 넣지 않는다 — §3.6·§6.)
+(과거 “드래프트 비영속” 합의는 **`inHouseDraftTeamByKey` 저장**으로 대체됨.)
 
 1. **팀별 포메이션 상이**  
-   - 현재 내전은 쿼터당 `formation` 하나를 A/B에 동시 적용; A만 다른 포메이션 등은 `QuarterData`/문서 확장 검토
+   - 구현됨: IN_HOUSE는 `QuarterData.formationTeamA` / `formationTeamB`와 `tactics.teams.{A,B}.formation`으로 팀별 저장·복원 (`docs/match-formation-tactics-document-contract.md` §7). 포메이션 변경 시 슬롯 초기화·검증 UX는 추가 검토 여지
 
 2. **품질**  
    - 단위 테스트: 위 roster 모듈들 + `hooks/formation/__tests__/useFormationManager.test.tsx`(슬롯 `applyAssign` roster 키), `components/formation/__tests__/DroppableSlot.test.tsx`(선택 하이라이트)  
    - 팀 드래프트 UX(빈 열, 접근성) 점검
 
 3. **문서·스키마**  
-   - 백엔드와 `tactics` JSON 계약이 바뀌면 본 문서 §3.6·저장 플로우 절 갱신(드래프트 영속화는 대상 아님)
+   - 백엔드와 `tactics` JSON 계약이 바뀌면 본 문서 §3.6·저장 플로우·`docs/match-formation-tactics-document-contract.md` 갱신
 
 ---
 

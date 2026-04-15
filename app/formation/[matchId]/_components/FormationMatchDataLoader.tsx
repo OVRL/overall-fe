@@ -33,6 +33,15 @@ function mergeSsrInitialQuartersIntoChildren(
     return cloneElement(child, {
       ...prev,
       savedInitialQuarters: useSsrQuarters,
+      savedInitialInHouseDraftTeamByKey:
+        ssrSnapshot.initialInHouseDraftTeamByKey,
+      savedDraftMatchFormationId: ssrSnapshot.savedDraftMatchFormationId,
+      savedLatestConfirmedMatchFormationId:
+        ssrSnapshot.savedLatestConfirmedMatchFormationId,
+      savedInitialFormationPrimarySource:
+        ssrSnapshot.savedInitialFormationPrimarySource,
+      savedInitialFormationSourceRevision:
+        ssrSnapshot.savedInitialFormationSourceRevision,
     } as Record<string, unknown>);
   });
 }

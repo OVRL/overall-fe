@@ -38,7 +38,10 @@ function syntheticDraftPlayer(displayName: string): Player {
   };
 }
 
-function syntheticExistingMercenaryPlayer(name: string, mercenaryId: number): Player {
+function syntheticExistingMercenaryPlayer(
+  name: string,
+  mercenaryId: number,
+): Player {
   return {
     id: mercenaryId,
     name,
@@ -101,7 +104,18 @@ const PlayerListSection = ({
         </span>
         <div className="py-1">{renderPlayerList()}</div>
       </div>
-
+      {mercenaryDraft && !isSearching && (
+        <div className="flex flex-col gap-y-2">
+          <span className="font-semibold text-sm leading-4 text-Label-Primary">
+            용병으로 추가
+          </span>
+          <PlayerItem
+            player={syntheticDraftPlayer(mercenaryDraft.displayName)}
+            isSelected={mercenaryDraft.willRegister}
+            onSelect={() => onToggleMercenaryDraft(mercenaryDraft.registerName)}
+          />
+        </div>
+      )}
       {existingMercenaries.length > 0 && !isSearching && (
         <div className="flex flex-col gap-y-2">
           <span className="font-semibold text-sm leading-4 text-Label-Primary">
@@ -117,19 +131,6 @@ const PlayerListSection = ({
               />
             ))}
           </ul>
-        </div>
-      )}
-
-      {mercenaryDraft && !isSearching && (
-        <div className="flex flex-col gap-y-2">
-          <span className="font-semibold text-sm leading-4 text-Label-Primary">
-            용병으로 추가
-          </span>
-          <PlayerItem
-            player={syntheticDraftPlayer(mercenaryDraft.displayName)}
-            isSelected={mercenaryDraft.willRegister}
-            onSelect={() => onToggleMercenaryDraft(mercenaryDraft.registerName)}
-          />
         </div>
       )}
 
@@ -156,7 +157,11 @@ const PlayerListSection = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-semibold ${p.currentStatus === "ATTEND" ? "text-primary" : "text-red-500"}`}
+                    className={`text-xs font-semibold ${
+                      p.currentStatus === "ATTEND"
+                        ? "text-primary"
+                        : "text-red-500"
+                    }`}
                   >
                     {p.currentStatus === "ATTEND" ? "참석 추가" : "참석 취소"}
                   </span>

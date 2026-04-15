@@ -67,8 +67,8 @@
 ### 3.3 직렬화 / 역직렬화
 
 - **`lib/formation/buildMatchFormationTacticsDocument.ts`**: `playerToRef`가 `rosterKind`에 따라 팀원/용병 ref 분기.
-- **`lib/formation/normalizeTacticsSlotPlayerRef.ts`**: JSON 슬롯 객체 → 정규 ref (v2는 `teamMemberId`만 있어도 팀원으로 간주).
-- **`lib/formation/buildQuarterDataFromTacticsDocument.ts`**: 파서가 **스키마 v2 또는 v3** 허용; 슬롯별 `normalizeTacticsSlotPlayerRef` 후 **`FormationLineupResolver`**로 `Player` 복원.
+- **`lib/formation/normalizeTacticsSlotPlayerRef.ts`**: JSON 슬롯 객체 → 정규 ref (v2는 `teamMemberId`만 있어도 팀원으로 간주). `mercenaryId`·`teamMemberId`는 **숫자**뿐 아니라 `"MatchMercenaryModel:9"`·`"20"` 같은 문자열도 `parseTacticsNumericId`로 정수 PK에 맞춘다.
+- **`lib/formation/buildQuarterDataFromTacticsDocument.ts`**: 파서가 **스키마 v2 또는 v3** 허용; 슬롯별 `normalizeTacticsSlotPlayerRef` 후 **`FormationLineupResolver`**로 `Player` 복원. (내전 팀 드래프트 `inHouseDraftTeamByKey`는 별도 `extractInHouseDraftTeamByKeyFromTactics` — `docs/formation-roster-view-mode-team-draft.md` §3.6)
 
 ### 3.4 라인업 해석기
 

@@ -73,15 +73,20 @@ export function buildQuarterDataFromTacticsDocument(
       };
     }
 
-    const formation = isFormationType(snap.teams.A.formation)
+    const formationTeamA = isFormationType(snap.teams.A.formation)
       ? snap.teams.A.formation
+      : q.formation;
+    const formationTeamB = isFormationType(snap.teams.B.formation)
+      ? snap.teams.B.formation
       : q.formation;
     const teamA = slotMapToLineup(snap.teams.A.lineup ?? {}, resolvePlayer);
     const teamB = slotMapToLineup(snap.teams.B.lineup ?? {}, resolvePlayer);
     return {
       ...q,
       type: "IN_HOUSE",
-      formation,
+      formation: formationTeamA,
+      formationTeamA,
+      formationTeamB,
       teamA,
       teamB,
       lineup: { ...teamA },

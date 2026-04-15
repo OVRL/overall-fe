@@ -27,6 +27,8 @@ import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTe
 import { isSameFormationRosterPlayer } from "@/lib/formation/roster/formationRosterPlayerKey";
 import { validateInHouseListToBoardDnD } from "@/lib/formation/roster/validateInHouseListToBoardDnD";
 import { toast } from "@/lib/toast";
+import { useFormationChangeFlow } from "@/hooks/formation/useFormationChangeFlow";
+import type { FormationChangeScope } from "@/lib/formation/formationChangePolicy";
 import fire from "@/public/icons/fire.svg";
 import Icon from "@/components/ui/Icon";
 
@@ -91,6 +93,30 @@ export default function FormationBuilderMobile({
   assignPlayer,
 }: FormationBuilderMobileProps) {
   const rosterPlayers = useFormationMatchPlayers();
+
+  const inHouseBoardSubTeam =
+    matchType === "INTERNAL" &&
+    (formationRosterViewMode === "A" || formationRosterViewMode === "B")
+      ? formationRosterViewMode
+      : undefined;
+
+  const formationChangeScope: FormationChangeScope | null = useMemo(() => {
+    if (matchType === "MATCH") return { kind: "MATCHING" };
+    if (
+      matchType === "INTERNAL" &&
+      formationRosterViewMode !== "draft" &&
+      (formationRosterViewMode === "A" || formationRosterViewMode === "B")
+    ) {
+      return { kind: "IN_HOUSE", team: formationRosterViewMode };
+    }
+    return null;
+  }, [matchType, formationRosterViewMode]);
+
+  const { onFormationChangeIntent } = useFormationChangeFlow(
+    quarters,
+    setQuarters,
+    formationChangeScope,
+  );
 
   const showDraftOverview =
     matchType === "INTERNAL" &&
@@ -247,6 +273,10 @@ export default function FormationBuilderMobile({
           ) : (
             <FormationBoardSingle
               quarters={quarters}
+              inHouseBoardSubTeam={inHouseBoardSubTeam}
+              onFormationChangeIntent={
+                formationChangeScope != null ? onFormationChangeIntent : undefined
+              }
               currentQuarterId={currentQuarterId}
               selectedPlayer={selectedPlayer}
               setQuarters={setQuarters}

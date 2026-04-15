@@ -9,7 +9,11 @@ const updateMatchFormationForDraftMutation = graphql`
   ) {
     updateMatchFormation(input: $input) {
       id
+      isDraft
+      matchId
+      teamId
       tactics
+      updatedAt
     }
   }
 `;

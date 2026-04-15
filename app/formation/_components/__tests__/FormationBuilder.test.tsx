@@ -6,6 +6,10 @@ import { FormationMatchContext } from "../../_context/FormationMatchContext";
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
 
 // 1. 모듈 모킹
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: jest.fn() }),
+}));
+
 jest.mock("@/hooks/formation/useFormationManager");
 jest.mock("@/app/formation/_hooks/useSaveMatchFormationDraftMutation", () => ({
   useSaveMatchFormationDraftMutation: () => ({
@@ -21,6 +25,12 @@ jest.mock("@/app/formation/_hooks/useUpdateMatchFormationForDraftMutation", () =
 }));
 jest.mock("@/app/formation/_hooks/useCreateMatchFormationMutation", () => ({
   useCreateMatchFormationMutation: () => ({
+    commit: jest.fn(),
+    isInFlight: false,
+  }),
+}));
+jest.mock("@/app/formation/_hooks/useConfirmMatchFormationMutation", () => ({
+  useConfirmMatchFormationMutation: () => ({
     commit: jest.fn(),
     isInFlight: false,
   }),

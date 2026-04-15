@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7e921fa199af77fa9287909fa7703643>>
+ * @generated SignedSource<<26e1b67b021a4bb4a74862006407ab9b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,16 +9,12 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type UpdateMatchFormationInput = {
-  id: number;
-  tactics: any;
+export type useConfirmMatchFormationMutation$variables = {
+  draftId: number;
   userId: number;
 };
-export type useUpdateMatchFormationForDraftMutation$variables = {
-  input: UpdateMatchFormationInput;
-};
-export type useUpdateMatchFormationForDraftMutation$data = {
-  readonly updateMatchFormation: {
+export type useConfirmMatchFormationMutation$data = {
+  readonly confirmMatchFormation: {
     readonly id: number;
     readonly isDraft: boolean;
     readonly matchId: number;
@@ -27,9 +23,9 @@ export type useUpdateMatchFormationForDraftMutation$data = {
     readonly updatedAt: any;
   };
 };
-export type useUpdateMatchFormationForDraftMutation = {
-  response: useUpdateMatchFormationForDraftMutation$data;
-  variables: useUpdateMatchFormationForDraftMutation$variables;
+export type useConfirmMatchFormationMutation = {
+  response: useConfirmMatchFormationMutation$data;
+  variables: useConfirmMatchFormationMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -37,7 +33,12 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "input"
+    "name": "draftId"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "userId"
   }
 ],
 v1 = [
@@ -46,13 +47,18 @@ v1 = [
     "args": [
       {
         "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
+        "name": "draftId",
+        "variableName": "draftId"
+      },
+      {
+        "kind": "Variable",
+        "name": "userId",
+        "variableName": "userId"
       }
     ],
     "concreteType": "MatchFormationModel",
     "kind": "LinkedField",
-    "name": "updateMatchFormation",
+    "name": "confirmMatchFormation",
     "plural": false,
     "selections": [
       {
@@ -106,7 +112,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "useUpdateMatchFormationForDraftMutation",
+    "name": "useConfirmMatchFormationMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -115,20 +121,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "useUpdateMatchFormationForDraftMutation",
+    "name": "useConfirmMatchFormationMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "efb2738bb6e797d7bb7ba8e491391e1e",
+    "cacheID": "a01279ce64ce2b809d18a106634fc768",
     "id": null,
     "metadata": {},
-    "name": "useUpdateMatchFormationForDraftMutation",
+    "name": "useConfirmMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateMatchFormationForDraftMutation(\n  $input: UpdateMatchFormationInput!\n) {\n  updateMatchFormation(input: $input) {\n    id\n    isDraft\n    matchId\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
+    "text": "mutation useConfirmMatchFormationMutation(\n  $draftId: Int!\n  $userId: Int!\n) {\n  confirmMatchFormation(draftId: $draftId, userId: $userId) {\n    id\n    isDraft\n    matchId\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4ce3eb787bcee42de6fdbdf2d735f3d6";
+(node as any).hash = "5de74862255b19fc2ae6fe17e049bf89";
 
 export default node;

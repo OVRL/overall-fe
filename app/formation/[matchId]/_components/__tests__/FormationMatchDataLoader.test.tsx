@@ -124,6 +124,11 @@ describe("FormationMatchDataLoader", () => {
               },
             ],
             initialQuarters: null,
+            initialInHouseDraftTeamByKey: {},
+            savedDraftMatchFormationId: null,
+            savedLatestConfirmedMatchFormationId: null,
+            savedInitialFormationPrimarySource: null,
+            savedInitialFormationSourceRevision: null,
           }}
         >
           <TestChild />

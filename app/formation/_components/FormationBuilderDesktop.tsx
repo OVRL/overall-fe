@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import FormationControls from "@/components/formation/FormationControls";
 import FormationBoardList from "@/components/formation/board/FormationBoardList";
 import FormationPlayerList from "@/components/formation/player-list/FormationPlayerList";
@@ -9,6 +9,8 @@ import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatc
 import { QuarterData, Player } from "@/types/formation";
 import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
+import { useFormationChangeFlow } from "@/hooks/formation/useFormationChangeFlow";
+import type { FormationChangeScope } from "@/lib/formation/formationChangePolicy";
 
 export interface FormationBuilderDesktopProps {
   scheduleCard: React.ReactNode;
@@ -60,6 +62,30 @@ export default function FormationBuilderDesktop({
 }: FormationBuilderDesktopProps) {
   const rosterPlayers = useFormationMatchPlayers();
 
+  const inHouseBoardSubTeam =
+    matchType === "INTERNAL" &&
+    (formationRosterViewMode === "A" || formationRosterViewMode === "B")
+      ? formationRosterViewMode
+      : undefined;
+
+  const formationChangeScope: FormationChangeScope | null = useMemo(() => {
+    if (matchType === "MATCH") return { kind: "MATCHING" };
+    if (
+      matchType === "INTERNAL" &&
+      formationRosterViewMode !== "draft" &&
+      (formationRosterViewMode === "A" || formationRosterViewMode === "B")
+    ) {
+      return { kind: "IN_HOUSE", team: formationRosterViewMode };
+    }
+    return null;
+  }, [matchType, formationRosterViewMode]);
+
+  const { onFormationChangeIntent } = useFormationChangeFlow(
+    quarters,
+    setQuarters,
+    formationChangeScope,
+  );
+
   const showDraftOverview =
     matchType === "INTERNAL" &&
     formationRosterViewMode === "draft" &&
@@ -86,6 +112,10 @@ export default function FormationBuilderDesktop({
         ) : (
           <FormationBoardList
             quarters={quarters}
+            inHouseBoardSubTeam={inHouseBoardSubTeam}
+            onFormationChangeIntent={
+              formationChangeScope != null ? onFormationChangeIntent : undefined
+            }
             selectedPlayer={selectedPlayer}
             setQuarters={setQuarters}
             onPositionRemove={onPositionRemove}

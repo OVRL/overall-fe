@@ -4,12 +4,17 @@ import { QuarterData, Player, FormationType } from "@/types/formation";
 
 export interface FormationBoardSingleProps {
   quarters: QuarterData[];
+  inHouseBoardSubTeam?: "A" | "B";
   currentQuarterId: number | null;
   selectedPlayer: Player | null;
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   onPositionRemove: (quarterId: number, index: number) => void;
   /** 모바일: 선수 선택 후 빈 포지션 탭 시 호출 */
   onPlaceSelectedPlayer?: (quarterId: number, index: number) => void;
+  onFormationChangeIntent?: (
+    quarterId: number,
+    nextFormation: FormationType,
+  ) => void;
 }
 
 /**
@@ -18,11 +23,13 @@ export interface FormationBoardSingleProps {
  */
 const FormationBoardSingle: React.FC<FormationBoardSingleProps> = ({
   quarters,
+  inHouseBoardSubTeam,
   currentQuarterId,
   selectedPlayer,
   setQuarters,
   onPositionRemove,
   onPlaceSelectedPlayer,
+  onFormationChangeIntent,
 }) => {
   const quarterToShow =
     quarters.find((q) => q.id === currentQuarterId) ?? quarters[0];
@@ -48,12 +55,22 @@ const FormationBoardSingle: React.FC<FormationBoardSingleProps> = ({
         onPositionRemove={onPositionRemove}
         onPlaceSelectedPlayer={onPlaceSelectedPlayer}
         onFormationChange={(fmt) => {
+          const f = fmt as FormationType;
+          if (onFormationChangeIntent) {
+            onFormationChangeIntent(quarterToShow.id, f);
+            return;
+          }
           setQuarters((prev) =>
-            prev.map((q) =>
-              q.id === quarterToShow.id
-                ? { ...q, formation: fmt as FormationType }
-                : q,
-            ),
+            prev.map((q) => {
+              if (q.id !== quarterToShow.id) return q;
+              if (q.type === "IN_HOUSE" && inHouseBoardSubTeam != null) {
+                if (inHouseBoardSubTeam === "A") {
+                  return { ...q, formationTeamA: f, formation: f };
+                }
+                return { ...q, formationTeamB: f, formation: f };
+              }
+              return { ...q, formation: f };
+            }),
           );
         }}
       />

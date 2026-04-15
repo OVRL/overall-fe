@@ -9,6 +9,8 @@ export type PositionSelectPayload =
 
 interface FormationBoardListProps {
   quarters: QuarterData[];
+  /** 내전 A/B 라인업 탭일 때만 — 포메이션 드롭다운이 해당 팀의 `formationTeamA|B`를 바꾼다. */
+  inHouseBoardSubTeam?: "A" | "B";
   selectedPlayer: Player | null;
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   onPositionRemove: (quarterId: number, index: number) => void;
@@ -18,18 +20,28 @@ interface FormationBoardListProps {
   onPositionSelect?: (pos: PositionSelectPayload) => void;
   /** 선택된 선수를 해당 포지션에 배치 */
   onPlaceSelectedPlayer?: (quarterId: number, index: number, label: string) => void;
+  /**
+   * 포메이션 변경 의도 — 있으면 확인 모달 등 상위 플로우로 위임.
+   * 없으면 기존처럼 `setQuarters`로 즉시 반영(InHouseMatchPanel 등).
+   */
+  onFormationChangeIntent?: (
+    quarterId: number,
+    nextFormation: FormationType,
+  ) => void;
   showBoardHeader?: boolean;
   boardClassName?: string;
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
   quarters,
+  inHouseBoardSubTeam,
   selectedPlayer,
   setQuarters,
   onPositionRemove,
   currentQuarterId,
   onPositionSelect,
   onPlaceSelectedPlayer,
+  onFormationChangeIntent,
   showBoardHeader = true,
   boardClassName,
 }) => {
@@ -55,15 +67,22 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
             showHeader={showBoardHeader}
             boardClassName={boardClassName}
             onFormationChange={(fmt) => {
+              const f = fmt as FormationType;
+              if (onFormationChangeIntent) {
+                onFormationChangeIntent(quarter.id, f);
+                return;
+              }
               setQuarters((prev) =>
-                prev.map((q) =>
-                  q.id === quarter.id
-                    ? {
-                        ...q,
-                        formation: fmt as FormationType,
-                      }
-                    : q,
-                ),
+                prev.map((q) => {
+                  if (q.id !== quarter.id) return q;
+                  if (q.type === "IN_HOUSE" && inHouseBoardSubTeam != null) {
+                    if (inHouseBoardSubTeam === "A") {
+                      return { ...q, formationTeamA: f, formation: f };
+                    }
+                    return { ...q, formationTeamB: f, formation: f };
+                  }
+                  return { ...q, formation: f };
+                }),
               );
             }}
           />

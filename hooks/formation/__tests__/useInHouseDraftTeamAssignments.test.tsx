@@ -55,4 +55,12 @@ describe("useInHouseDraftTeamAssignments", () => {
     });
     expect(result.current.getDraftTeam(player)).toBe("A");
   });
+
+  it("초기 맵이 있으면 마운트 시 반영된다", () => {
+    const { result } = renderHook(() =>
+      useInHouseDraftTeamAssignments({ "t:1": "B" }),
+    );
+    expect(result.current.draftTeamByKey).toEqual({ "t:1": "B" });
+    expect(result.current.getDraftTeam(player)).toBe("B");
+  });
 });

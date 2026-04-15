@@ -23,7 +23,7 @@ import FormationBoardList from "@/components/formation/board/FormationBoardList"
 import PositionChip from "@/components/PositionChip";
 import Dropdown from "@/components/ui/Dropdown";
 import { QuarterData, Player } from "@/types/formation";
-import type { Position } from "@/types/position";
+import type { CreateBestElevenMutationInput } from "./hooks/useCreateBestElevenMutation";
 import { FORMATION_OPTIONS } from "@/constants/formations";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Edit2, Loader2 } from "lucide-react";
@@ -447,13 +447,13 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     }
 
     // 새로 저장할 항목 수집
-    const newEntries: Array<{ position: Position; teamId: number; userId: number }> = [];
+    const newEntries: CreateBestElevenMutationInput[] = [];
     for (let slot = 1; slot <= 11; slot += 1) {
       const player = lineup[slot];
       if (player == null) continue;
       const cell = board[slot as keyof typeof board];
       if (cell == null) continue;
-      const position = cell.role as Position;
+      const position = cell.role as CreateBestElevenMutationInput["position"];
       const member = memberByTeamMemberId.get(String(player.id));
       if (!member) continue;
 

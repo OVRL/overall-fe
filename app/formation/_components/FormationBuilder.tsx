@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatchPlayersContext";
 import { useFormationManager } from "@/hooks/formation/useFormationManager";
@@ -14,13 +15,21 @@ import { useUserId } from "@/hooks/useUserId";
 import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchContext";
 import { useSaveMatchFormationDraftMutation } from "@/app/formation/_hooks/useSaveMatchFormationDraftMutation";
 import { useUpdateMatchFormationForDraftMutation } from "@/app/formation/_hooks/useUpdateMatchFormationForDraftMutation";
+import { useConfirmMatchFormationMutation } from "@/app/formation/_hooks/useConfirmMatchFormationMutation";
 import { useCreateMatchFormationMutation } from "@/app/formation/_hooks/useCreateMatchFormationMutation";
 import FormationBuilderMobile from "./FormationBuilderMobile";
 import { FormationBuilderContentSkeleton } from "./FormationBuilderContentSkeleton";
 import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
+import {
+  getInHouseFormationForTeam,
+  withInHouseFormationsNormalized,
+} from "@/lib/formation/inHouseQuarterFormations";
 import { buildMatchFormationTacticsDocumentFromQuarters } from "@/lib/formation/buildMatchFormationTacticsDocument";
+import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
 import { toast } from "@/lib/toast";
 import { Player, type QuarterData } from "@/types/formation";
+import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
+import type { FormationMatchFormationPrimarySource } from "@/types/formationMatchPageSnapshot";
 import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import FormationHeader from "./FormationHeader";
 
@@ -45,6 +54,16 @@ interface FormationBuilderProps {
   matchQuarterSpec?: MatchQuarterSpec | null;
   /** SSR 등에서 복원한 저장 포메이션 (없으면 matchQuarterSpec 기준 기본 쿼터) */
   savedInitialQuarters?: QuarterData[] | null;
+  /** `tactics.inHouseDraftTeamByKey` — 내전 명단 A/B 필터 복원 */
+  savedInitialInHouseDraftTeamByKey?: InHouseDraftTeamByPlayerKey | null;
+  /** SSR `findMatchFormation` — `isDraft`인 행 중 최대 id (임시저장·확정 분기) */
+  savedDraftMatchFormationId?: number | null;
+  /** SSR — 확정 행(`isDraft === false`) 중 최대 id */
+  savedLatestConfirmedMatchFormationId?: number | null;
+  /** SSR — `initialQuarters`를 채운 행이 확정이면 `confirmed` (저장 시 확정 행만 갱신) */
+  savedInitialFormationPrimarySource?: FormationMatchFormationPrimarySource | null;
+  /** SSR — 초기 포메이션 행 리비전(`id:isDraft:updatedAt`) — 새로고침 후 `quarters` 동기화 */
+  savedInitialFormationSourceRevision?: string | null;
 }
 
 /**
@@ -55,17 +74,59 @@ export default function FormationBuilder({
   scheduleCard,
   matchQuarterSpec = null,
   savedInitialQuarters = null,
+  savedInitialInHouseDraftTeamByKey = null,
+  savedDraftMatchFormationId = null,
+  savedLatestConfirmedMatchFormationId = null,
+  savedInitialFormationPrimarySource = null,
+  savedInitialFormationSourceRevision = null,
 }: FormationBuilderProps) {
+  const router = useRouter();
   const { matchId, teamId } = useFormationMatchIds();
   const userId = useUserId();
   const { commit: commitSaveDraft, isInFlight: isSaveDraftInFlight } =
     useSaveMatchFormationDraftMutation();
+  /** 임시저장 전용 — 확정 저장의 `updateMatchFormation`과 inFlight 분리 */
   const { commit: commitUpdateDraft, isInFlight: isUpdateDraftInFlight } =
     useUpdateMatchFormationForDraftMutation();
+  const {
+    commit: commitUpdateForConfirm,
+    isInFlight: isUpdateForConfirmInFlight,
+  } = useUpdateMatchFormationForDraftMutation();
+  const { commit: commitConfirm, isInFlight: isConfirmInFlight } =
+    useConfirmMatchFormationMutation();
   const { commit: commitCreateFormation, isInFlight: isCreateFormationInFlight } =
     useCreateMatchFormationMutation();
-  /** 첫 `saveMatchFormationDraft` 응답 id — 이후 임시저장은 `updateMatchFormation`만 사용 */
-  const latestDraftFormationIdRef = useRef<number | null>(null);
+  /**
+   * 드래프트 행 id — SSR `savedDraftMatchFormationId`로 시드, 이후 `saveMatchFormationDraft` 응답으로 갱신.
+   * 임시저장은 `updateMatchFormation`, 확정은 `confirmMatchFormation(draftId)` 전에 동일 id로 tactics 플러시.
+   */
+  const latestDraftFormationIdRef = useRef<number | null>(
+    savedDraftMatchFormationId ?? null,
+  );
+  /** 확정만 있을 때 `updateMatchFormation`으로 전술만 갱신 */
+  const latestConfirmedFormationIdRef = useRef<number | null>(
+    savedLatestConfirmedMatchFormationId ?? null,
+  );
+
+  /** 스냅샷에 없을 때: 확정·드래프트 id가 둘 다 있으면 UI는 항상 확정 우선(`pickPrimary`와 동일) */
+  const resolvedSavePrimarySource = useMemo<
+    FormationMatchFormationPrimarySource | null
+  >(() => {
+    if (savedInitialFormationPrimarySource != null) {
+      return savedInitialFormationPrimarySource;
+    }
+    if (
+      savedLatestConfirmedMatchFormationId != null &&
+      savedDraftMatchFormationId != null
+    ) {
+      return "confirmed";
+    }
+    return null;
+  }, [
+    savedInitialFormationPrimarySource,
+    savedLatestConfirmedMatchFormationId,
+    savedDraftMatchFormationId,
+  ]);
 
   const initialQuartersFromSpec = useMemo(
     () =>
@@ -78,20 +139,76 @@ export default function FormationBuilder({
     [matchQuarterSpec],
   );
 
-  const resolvedInitialQuarters =
-    savedInitialQuarters != null && savedInitialQuarters.length > 0
-      ? savedInitialQuarters
-      : initialQuartersFromSpec;
+  const resolvedInitialQuarters = useMemo(() => {
+    const raw =
+      savedInitialQuarters != null && savedInitialQuarters.length > 0
+        ? savedInitialQuarters
+        : initialQuartersFromSpec;
+    if (raw == null) return undefined;
+    return raw.map((q) => withInHouseFormationsNormalized(q));
+  }, [savedInitialQuarters, initialQuartersFromSpec]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    const fromSavedSsr =
+      savedInitialQuarters != null && savedInitialQuarters.length > 0;
+    const quartersForLog = resolvedInitialQuarters ?? [];
+    console.log("[FormationBuilder] 포메이션 초기 로드(디버그)", {
+      matchId,
+      teamId,
+      userId,
+      matchQuarterSpec,
+      savedInitialFormationPrimarySource,
+      savedInitialFormationSourceRevision,
+      resolvedSavePrimarySource,
+      findMatchFormationRowIds: {
+        savedDraftMatchFormationId: savedDraftMatchFormationId ?? null,
+        savedLatestConfirmedMatchFormationId:
+          savedLatestConfirmedMatchFormationId ?? null,
+        refSeededDraftId: latestDraftFormationIdRef.current,
+        refSeededConfirmedId: latestConfirmedFormationIdRef.current,
+      },
+      initialQuarters: {
+        source: fromSavedSsr ? "SSR savedInitialQuarters" : "기본 쿼터 스펙",
+        quarterCount: quartersForLog.length,
+        summary: quartersForLog.map((q) => ({
+          quarterId: q.id,
+          type: q.type,
+          formation: q.formation,
+        })),
+      },
+      inHouseDraftTeamByKey: {
+        keyCount: Object.keys(savedInitialInHouseDraftTeamByKey ?? {}).length,
+        keys: Object.keys(savedInitialInHouseDraftTeamByKey ?? {}),
+      },
+    });
+  }, [
+    matchId,
+    teamId,
+    userId,
+    matchQuarterSpec,
+    savedDraftMatchFormationId,
+    savedLatestConfirmedMatchFormationId,
+    savedInitialFormationPrimarySource,
+    savedInitialFormationSourceRevision,
+    resolvedSavePrimarySource,
+    savedInitialQuarters,
+    savedInitialInHouseDraftTeamByKey,
+    resolvedInitialQuarters,
+  ]);
 
   const { quarters, setQuarters, assignPlayer, removePlayer, resetQuarters } =
-    useFormationManager(resolvedInitialQuarters);
+    useFormationManager(
+      resolvedInitialQuarters,
+      savedInitialFormationSourceRevision ?? null,
+    );
   const rosterPlayers = useFormationMatchPlayers();
   const {
     draftTeamByKey,
     setDraftTeam,
     getDraftTeam,
     resetDraftAssignments,
-  } = useInHouseDraftTeamAssignments();
+  } = useInHouseDraftTeamAssignments(savedInitialInHouseDraftTeamByKey);
   const isLgOrBelow = useIsMobile(1023);
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(null);
   const [selectedListPlayer, setSelectedListPlayer] = useState<Player | null>(
@@ -158,7 +275,11 @@ export default function FormationBuilder({
           prev.map((q) => {
             if (q.type !== "IN_HOUSE") return q;
             const slots = mode === "A" ? (q.teamA ?? {}) : (q.teamB ?? {});
-            return { ...q, lineup: { ...slots } };
+            return {
+              ...q,
+              lineup: { ...slots },
+              formation: getInHouseFormationForTeam(q, mode),
+            };
           }),
         );
         // A/B 탭에서는 명단이 드래프트 배정으로 필터되므로, 목록에 없는 선택은 해제
@@ -220,6 +341,9 @@ export default function FormationBuilder({
     const tactics = buildMatchFormationTacticsDocumentFromQuarters(
       quarters,
       documentMatchType,
+      matchType === "INTERNAL"
+        ? { inHouseDraftTeamByKey: draftTeamByKey }
+        : undefined,
     );
     const draftId = latestDraftFormationIdRef.current;
 
@@ -231,6 +355,9 @@ export default function FormationBuilder({
             userId,
             tactics,
           },
+        },
+        onCompleted: () => {
+          toast.success("임시저장에 성공했습니다.");
         },
         onError: (err) => {
           console.error("[FormationBuilder] updateMatchFormation (draft)", err);
@@ -251,6 +378,7 @@ export default function FormationBuilder({
       onCompleted: (response) => {
         latestDraftFormationIdRef.current =
           response.saveMatchFormationDraft.id;
+        toast.success("임시저장에 성공했습니다.");
       },
       onError: (err) => {
         console.error("[FormationBuilder] saveMatchFormationDraft", err);
@@ -264,9 +392,15 @@ export default function FormationBuilder({
     userId,
     quarters,
     matchType,
+    draftTeamByKey,
   ]);
 
-  /** 확정 행 생성 — 이후 `confirmMatchFormation` 플로우로 바꿀 때 여기서 분기 */
+  /**
+   * 포메이션 저장하기
+   * — 초기 보드가 **확정 행**에서 온 경우: orphan 드래프트 id가 ref에 있어도 **확정 행만** `update`(화면·SSR 출처와 동일 행)
+   * — 초기 보드가 **드래프트**만: `update`(draft)` + `confirmMatchFormation`
+   * — 저장 행 없음: `createMatchFormation`
+   */
   const handleSaveConfirm = useCallback(() => {
     if (userId == null) {
       if (process.env.NODE_ENV === "development") {
@@ -278,7 +412,149 @@ export default function FormationBuilder({
     const tactics = buildMatchFormationTacticsDocumentFromQuarters(
       quarters,
       documentMatchType,
+      matchType === "INTERNAL"
+        ? { inHouseDraftTeamByKey: draftTeamByKey }
+        : undefined,
     );
+
+    const draftId = latestDraftFormationIdRef.current;
+    const confirmedId = latestConfirmedFormationIdRef.current;
+
+    const finishSuccess = () => {
+      router.refresh();
+    };
+
+    if (resolvedSavePrimarySource === "confirmed" && confirmedId != null) {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[FormationBuilder] 확정 저장 분기: 확정 행만 update (초기 출처=confirmed)",
+          { confirmedId, draftIdIgnored: draftId },
+        );
+      }
+      commitUpdateForConfirm({
+        variables: {
+          input: {
+            id: confirmedId,
+            userId,
+            tactics,
+          },
+        },
+        onCompleted: (res) => {
+          if (res.updateMatchFormation == null) {
+            toast.error(
+              "포메이션 저장 응답이 비어 있습니다. 네트워크 탭에서 GraphQL errors를 확인해 주세요.",
+            );
+            return;
+          }
+          toast.success("포메이션이 저장되었습니다.");
+          finishSuccess();
+        },
+        onError: (err) => {
+          console.error(
+            "[FormationBuilder] updateMatchFormation (확정본·초기출처 confirmed)",
+            err,
+          );
+          toast.error(
+            getGraphQLErrorMessage(err, "포메이션 저장에 실패했습니다."),
+          );
+        },
+      });
+      return;
+    }
+
+    if (draftId != null) {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[FormationBuilder] 확정 저장 분기: draft update + confirm",
+          { draftId },
+        );
+      }
+      commitUpdateForConfirm({
+        variables: {
+          input: {
+            id: draftId,
+            userId,
+            tactics,
+          },
+        },
+        onCompleted: () => {
+          commitConfirm({
+            variables: { draftId, userId },
+            onCompleted: (res) => {
+              const row = res.confirmMatchFormation;
+              if (row == null) {
+                toast.error(
+                  "포메이션 확정 응답이 비어 있습니다. 네트워크 탭에서 GraphQL errors를 확인해 주세요.",
+                );
+                return;
+              }
+              latestDraftFormationIdRef.current = null;
+              latestConfirmedFormationIdRef.current = row.isDraft ? null : row.id;
+              toast.success("포메이션이 저장되었습니다.");
+              finishSuccess();
+            },
+            onError: (err) => {
+              console.error("[FormationBuilder] confirmMatchFormation", err);
+              toast.error(
+                getGraphQLErrorMessage(err, "포메이션 확정에 실패했습니다."),
+              );
+            },
+          });
+        },
+        onError: (err) => {
+          console.error(
+            "[FormationBuilder] updateMatchFormation (confirm 플러시)",
+            err,
+          );
+          toast.error(
+            getGraphQLErrorMessage(err, "포메이션 저장(확정 전 단계)에 실패했습니다."),
+          );
+        },
+      });
+      return;
+    }
+
+    if (confirmedId != null) {
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[FormationBuilder] 확정 저장 분기: 확정만 update (초기 출처=draft 아님·확정 id 있음)",
+          { confirmedId },
+        );
+      }
+      commitUpdateForConfirm({
+        variables: {
+          input: {
+            id: confirmedId,
+            userId,
+            tactics,
+          },
+        },
+        onCompleted: (res) => {
+          if (res.updateMatchFormation == null) {
+            toast.error(
+              "포메이션 저장 응답이 비어 있습니다. 네트워크 탭에서 GraphQL errors를 확인해 주세요.",
+            );
+            return;
+          }
+          toast.success("포메이션이 저장되었습니다.");
+          finishSuccess();
+        },
+        onError: (err) => {
+          console.error(
+            "[FormationBuilder] updateMatchFormation (확정본 갱신)",
+            err,
+          );
+          toast.error(
+            getGraphQLErrorMessage(err, "포메이션 저장에 실패했습니다."),
+          );
+        },
+      });
+      return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[FormationBuilder] 확정 저장 분기: createMatchFormation");
+    }
     commitCreateFormation({
       variables: {
         input: {
@@ -289,23 +565,34 @@ export default function FormationBuilder({
         },
       },
       onCompleted: (response) => {
-        toast.success(
-          response.createMatchFormation.isDraft
-            ? "포메이션이 임시저장되었습니다."
-            : "포메이션이 저장되었습니다.",
-        );
+        const row = response.createMatchFormation;
+        if (row.isDraft) {
+          latestDraftFormationIdRef.current = row.id;
+          latestConfirmedFormationIdRef.current = null;
+          toast.success("포메이션이 임시저장되었습니다.");
+        } else {
+          latestDraftFormationIdRef.current = null;
+          latestConfirmedFormationIdRef.current = row.id;
+          toast.success("포메이션이 저장되었습니다.");
+        }
+        finishSuccess();
       },
       onError: (err) => {
         console.error("[FormationBuilder] createMatchFormation", err);
       },
     });
   }, [
+    commitConfirm,
     commitCreateFormation,
+    commitUpdateForConfirm,
     matchId,
     teamId,
     userId,
     quarters,
     matchType,
+    draftTeamByKey,
+    router,
+    resolvedSavePrimarySource,
   ]);
 
   const content = isLgOrBelow ? (
@@ -324,7 +611,11 @@ export default function FormationBuilder({
         onSaveDraft={userId != null ? handleSaveDraft : undefined}
         isSaveDraftPending={isSaveDraftInFlight || isUpdateDraftInFlight}
         onSaveConfirm={userId != null ? handleSaveConfirm : undefined}
-        isSaveConfirmPending={isCreateFormationInFlight}
+        isSaveConfirmPending={
+          isCreateFormationInFlight ||
+          isConfirmInFlight ||
+          isUpdateForConfirmInFlight
+        }
       />
       <main className="flex-1 flex flex-col min-h-0 px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
         {content}

@@ -16,11 +16,21 @@ export function buildQuartersFromMatch(
   const type: QuarterData["type"] =
     matchType === "INTERNAL" ? "IN_HOUSE" : "MATCHING";
 
-  return Array.from({ length: n }, (_, i) => ({
-    id: i + 1,
-    type,
-    formation: "4-3-3",
-    matchup: { home: "A", away: "B" },
-    lineup: {},
-  }));
+  return Array.from({ length: n }, (_, i) => {
+    const base = {
+      id: i + 1,
+      type,
+      formation: "4-3-3" as const,
+      matchup: { home: "A" as const, away: "B" as const },
+      lineup: {},
+    };
+    if (type === "IN_HOUSE") {
+      return {
+        ...base,
+        formationTeamA: "4-3-3" as const,
+        formationTeamB: "4-3-3" as const,
+      };
+    }
+    return base;
+  });
 }

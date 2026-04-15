@@ -1,4 +1,5 @@
 import type { Player } from "@/types/formation";
+import { parseTacticsNumericId } from "@/lib/formation/tacticsNumericId";
 
 export type MatchMercenaryRowLike = {
   readonly id: number;
@@ -16,11 +17,13 @@ export function matchMercenaryRowsToPlayers(
   const out: Player[] = [];
   for (const row of rows) {
     if (row == null || row.teamId !== teamId) continue;
+    const numId = parseTacticsNumericId(row.id);
+    if (numId == null) continue;
     const name = row.name.trim() || "이름 없음";
     out.push({
-      id: row.id,
+      id: numId,
       rosterKind: "MERCENARY",
-      mercenaryId: row.id,
+      mercenaryId: numId,
       name,
       position: "용병",
       number: 0,
