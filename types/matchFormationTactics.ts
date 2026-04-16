@@ -5,15 +5,17 @@ import type { FormationType } from "@/constants/formation";
  *
  * - `findMatchFormation` / `updateMatchFormation`는 팀·매치 단위 행으로 `teamId`·`matchId` 등을 갖고,
  *   이 페이로드는 그 한 행에 대응하는 보드 상태만 담습니다.
- * - 좌표·슬롯 라벨(role)은 저장하지 않고 `FORMATIONS[formation][slot]`에서만 해석합니다.
+ * - 좌표·슬롯 라벨(role)은 저장하지 않고 `FORMATION_POSITIONS[formation][slotIndex]`와
+ *   `FORMATIONS[formation][slotIndex + 1]`로 해석합니다 (보드·tactics는 슬롯 0~10).
  *
  * @see schema.graphql — MatchFormationModel, UpdateMatchFormationInput
  */
 
 export const MATCH_FORMATION_TACTICS_SCHEMA_VERSION = 1 as const;
 
-/** 보드 슬롯 1~11 — `FORMATIONS[formation]`의 키와 동일 */
+/** 보드·tactics 저장 슬롯 0~10 (UI `lineup` 인덱스와 동일). `FORMATIONS` 좌표 키는 1~11이라 +1로 대응 */
 export type FormationSlotKey =
+  | "0"
   | "1"
   | "2"
   | "3"
@@ -23,10 +25,10 @@ export type FormationSlotKey =
   | "7"
   | "8"
   | "9"
-  | "10"
-  | "11";
+  | "10";
 
 export const FORMATION_SLOT_KEYS: readonly FormationSlotKey[] = [
+  "0",
   "1",
   "2",
   "3",
@@ -37,7 +39,6 @@ export const FORMATION_SLOT_KEYS: readonly FormationSlotKey[] = [
   "8",
   "9",
   "10",
-  "11",
 ] as const;
 
 /**

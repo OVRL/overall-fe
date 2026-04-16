@@ -2,6 +2,7 @@ import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
 import {
   MATCH_FORMATION_TACTICS_DOCUMENT_VERSION,
   MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY,
+  MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3,
 } from "@/types/matchFormationTacticsDocument";
 
 /**
@@ -16,7 +17,8 @@ export function extractInHouseDraftTeamByKeyFromTactics(
   const ver = o.schemaVersion;
   if (
     ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION &&
-    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY &&
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3
   ) {
     return {};
   }

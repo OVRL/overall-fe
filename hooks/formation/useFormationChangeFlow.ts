@@ -12,7 +12,7 @@ import type { FormationType, QuarterData } from "@/types/formation";
 
 /**
  * 포메이션 드롭다운 변경 시: 배치 없음 → 즉시 반영(keep과 동일),
- * 배치 있음 → 확인 모달(유지 / 비우기 / 취소).
+ * 배치 있음 → 확인 모달(취소 / 변경).
  */
 export function useFormationChangeFlow(
   quarters: QuarterData[],
@@ -47,23 +47,7 @@ export function useFormationChangeFlow(
       }
 
       openModal({
-        fromFormationLabel: current,
-        toFormationLabel: nextFormation,
-        onKeepLineup: applyKeep,
-        onClearLineup: () => {
-          setQuarters((prev) =>
-            prev.map((qu) =>
-              qu.id === quarterId
-                ? applyFormationChangeDecision(
-                    qu,
-                    nextFormation,
-                    "clear",
-                    scope,
-                  )
-                : qu,
-            ),
-          );
-        },
+        onConfirm: applyKeep,
         onCancel: () => {},
       });
     },

@@ -35,7 +35,7 @@ function playerToRef(p: Player): MatchFormationTacticsPlayerRef {
 }
 
 /**
- * UI `QuarterData` 슬롯 맵(1~11) → 저장용 슬롯 키 맵.
+ * UI `QuarterData` 슬롯 맵(0~10) → 저장용 슬롯 키 맵(`"0"`…`"10"`).
  */
 export function lineupRecordToSlotMap(
   slots: Record<number, Player | null> | undefined,
@@ -43,7 +43,7 @@ export function lineupRecordToSlotMap(
   if (slots == null) return {};
   const out: Partial<Record<FormationSlotKey, MatchFormationTacticsPlayerRef>> =
     {};
-  for (let i = 1; i <= 11; i += 1) {
+  for (let i = 0; i <= 10; i += 1) {
     const p = slots[i];
     if (p == null) continue;
     const key = String(i) as FormationSlotKey;

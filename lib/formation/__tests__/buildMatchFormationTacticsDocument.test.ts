@@ -13,7 +13,7 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
         formation: "4-3-3",
         matchup: { home: "A", away: "B" },
         lineup: {
-          1: {
+          0: {
             id: 101,
             name: "김정수",
             position: "GK",
@@ -37,7 +37,7 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     expect(q0.quarterId).toBe(1);
     expect(q0.updatedAt).toBe(fixedNow.toISOString());
     expect(q0.formation).toBe("4-3-3");
-    expect(q0.lineup["1"]).toEqual({
+    expect(q0.lineup["0"]).toEqual({
       kind: "TEAM_MEMBER",
       teamMemberId: 101,
       displayName: "김정수",
@@ -55,7 +55,7 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
         matchup: { home: "A", away: "B" },
         lineup: {},
         teamA: {
-          11: {
+          10: {
             id: 201,
             name: "A선수",
             position: "ST",
@@ -64,7 +64,7 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
           },
         },
         teamB: {
-          1: {
+          0: {
             id: 301,
             name: "B키퍼",
             position: "GK",
@@ -85,11 +85,11 @@ describe("buildMatchFormationTacticsDocumentFromQuarters", () => {
     if (q0.kind !== "IN_HOUSE") throw new Error("narrow");
     expect(q0.teams.A.formation).toBe("4-4-2");
     expect(q0.teams.B.formation).toBe("4-4-2");
-    expect(q0.teams.A.lineup["11"]).toMatchObject({
+    expect(q0.teams.A.lineup["10"]).toMatchObject({
       kind: "TEAM_MEMBER",
       teamMemberId: 201,
     });
-    expect(q0.teams.B.lineup["1"]).toMatchObject({
+    expect(q0.teams.B.lineup["0"]).toMatchObject({
       kind: "TEAM_MEMBER",
       teamMemberId: 301,
     });

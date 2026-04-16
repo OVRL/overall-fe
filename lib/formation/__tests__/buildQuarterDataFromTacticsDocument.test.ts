@@ -1,6 +1,9 @@
 import { buildQuarterDataFromTacticsDocument } from "../buildQuarterDataFromTacticsDocument";
 import { createFormationLineupResolver } from "../roster/createFormationLineupResolver";
-import { MATCH_FORMATION_TACTICS_DOCUMENT_VERSION } from "@/types/matchFormationTacticsDocument";
+import {
+  MATCH_FORMATION_TACTICS_DOCUMENT_VERSION,
+  MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3,
+} from "@/types/matchFormationTacticsDocument";
 import type { Player } from "@/types/formation";
 
 describe("buildQuarterDataFromTacticsDocument", () => {
@@ -34,7 +37,7 @@ describe("buildQuarterDataFromTacticsDocument", () => {
           kind: "MATCHING" as const,
           formation: "4-3-3",
           lineup: {
-            "1": { teamMemberId: 101, displayName: "김", backNumber: 9 },
+            "0": { teamMemberId: 101, displayName: "김", backNumber: 9 },
           },
         },
       ],
@@ -49,7 +52,32 @@ describe("buildQuarterDataFromTacticsDocument", () => {
       resolve,
     );
     expect(out[0]?.type).toBe("MATCHING");
-    expect(out[0]?.lineup?.[1]).toEqual(p1);
+    expect(out[0]?.lineup?.[0]).toEqual(p1);
+  });
+
+  it("v3 문서의 슬롯 1~11 키는 UI 인덱스 0~10으로 변환된다", () => {
+    const doc = {
+      schemaVersion: MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3,
+      matchType: "MATCH" as const,
+      quarters: [
+        {
+          quarterId: 1,
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          kind: "MATCHING" as const,
+          formation: "4-3-3",
+          lineup: {
+            "1": { teamMemberId: 101, displayName: "김", backNumber: 9 },
+          },
+        },
+      ],
+    };
+    const resolve = createFormationLineupResolver([p1]);
+    const out = buildQuarterDataFromTacticsDocument(
+      doc,
+      { quarterCount: 1, matchType: "MATCH" },
+      resolve,
+    );
+    expect(out[0]?.lineup?.[0]).toEqual(p1);
   });
 
   it("IN_HOUSE는 teamA/B와 기본 lineup(teamA 복사)을 채운다", () => {
@@ -65,7 +93,7 @@ describe("buildQuarterDataFromTacticsDocument", () => {
             A: {
               formation: "4-4-2",
               lineup: {
-                "11": { teamMemberId: 101, displayName: "김", backNumber: 9 },
+                "10": { teamMemberId: 101, displayName: "김", backNumber: 9 },
               },
             },
             B: { formation: "4-4-2", lineup: {} },
@@ -86,8 +114,8 @@ describe("buildQuarterDataFromTacticsDocument", () => {
     expect(out[0]?.formation).toBe("4-4-2");
     expect(out[0]?.formationTeamA).toBe("4-4-2");
     expect(out[0]?.formationTeamB).toBe("4-4-2");
-    expect(out[0]?.teamA?.[11]).toEqual(p1);
-    expect(out[0]?.lineup?.[11]).toEqual(p1);
+    expect(out[0]?.teamA?.[10]).toEqual(p1);
+    expect(out[0]?.lineup?.[10]).toEqual(p1);
   });
 
   it("IN_HOUSE에서 A·B formation이 다르면 둘 다 QuarterData에 복원한다", () => {

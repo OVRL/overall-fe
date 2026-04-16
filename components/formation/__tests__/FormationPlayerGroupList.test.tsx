@@ -57,18 +57,19 @@ describe("FormationPlayerGroupList 컴포넌트", () => {
     render(<FormationPlayerGroupList {...defaultProps} />);
     const rows = screen.getAllByTestId("player-row");
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toHaveTextContent("Player 1");
-    expect(rows[1]).toHaveTextContent("Player 2");
+    // 대분류 MF가 FW보다 위 — Player 2(MF)가 먼저
+    expect(rows[0]).toHaveTextContent("Player 2");
+    expect(rows[1]).toHaveTextContent("Player 1");
   });
 
   it("각 선수가 포함된 쿼터 정보(activeQuarters)를 올바르게 계산하여 전달다", () => {
     render(<FormationPlayerGroupList {...defaultProps} />);
     const rows = screen.getAllByTestId("player-row");
 
-    // Player 1은 1Q 라인업에만 있음
-    expect(rows[0]).toHaveTextContent("Quarters: 1");
-    // Player 2는 2Q 라인업에만 있음
-    expect(rows[1]).toHaveTextContent("Quarters: 2");
+    // Player 2(MF)가 첫 행 — 2Q만
+    expect(rows[0]).toHaveTextContent("Quarters: 2");
+    // Player 1(FW) — 1Q만
+    expect(rows[1]).toHaveTextContent("Quarters: 1");
   });
 
   it("선수 배열이 비어있을 경우 '선수가 없습니다.' 텍스트를 출력해야 한다", () => {
@@ -81,7 +82,7 @@ describe("FormationPlayerGroupList 컴포넌트", () => {
     const rows = screen.getAllByTestId("player-row");
 
     fireEvent.click(rows[0]);
-    expect(mockOnSelectPlayer).toHaveBeenCalledWith(mockPlayer1);
+    expect(mockOnSelectPlayer).toHaveBeenCalledWith(mockPlayer2);
   });
 
   it("선수 삭제 액션 발생 시 confirm을 띄운 뒤 onRemovePlayer가 호출되어야 한다", () => {
@@ -92,6 +93,6 @@ describe("FormationPlayerGroupList 컴포넌트", () => {
     fireEvent.contextMenu(rows[0]);
 
     expect(window.confirm).toHaveBeenCalled();
-    expect(mockOnRemovePlayer).toHaveBeenCalledWith(mockPlayer1.id);
+    expect(mockOnRemovePlayer).toHaveBeenCalledWith(mockPlayer2.id);
   });
 });

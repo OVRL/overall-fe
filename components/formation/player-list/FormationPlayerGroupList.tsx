@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Player } from "@/types/formation";
 import FormationPlayerRow, {
   type FormationPlayerListRowMode,
@@ -8,6 +8,7 @@ import {
   isSameFormationRosterPlayer,
 } from "@/lib/formation/roster/formationRosterPlayerKey";
 import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
+import { sortPlayersForFormationLineupList } from "@/lib/formation/roster/sortPlayersForFormationLineupList";
 
 interface FormationPlayerGroupListProps {
   filteredPlayers: Player[];
@@ -33,6 +34,11 @@ const FormationPlayerGroupList: React.FC<FormationPlayerGroupListProps> = ({
   getDraftTeam,
   onDraftTeamSelect,
 }) => {
+  const sortedPlayers = useMemo(
+    () => sortPlayersForFormationLineupList(filteredPlayers),
+    [filteredPlayers],
+  );
+
   const getPlayerQuarters = (target: Player): number[] => {
     const quarters: number[] = [];
     currentQuarterLineups.forEach((quarterData, index) => {
@@ -89,10 +95,10 @@ const FormationPlayerGroupList: React.FC<FormationPlayerGroupListProps> = ({
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide space-y-4 pr-1">
       <div className="flex flex-col gap-2">
-        {filteredPlayers.map((p) => renderRow(p))}
+        {sortedPlayers.map((p) => renderRow(p))}
       </div>
 
-      {filteredPlayers.length === 0 && (
+      {sortedPlayers.length === 0 && (
         <div className="text-center text-gray-500 py-10 text-sm">
           선수가 없습니다.
         </div>

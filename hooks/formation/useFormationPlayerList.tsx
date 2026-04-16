@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Player } from "@/types/formation";
 import { getMainPositionFromRole } from "@/lib/positionUtils";
+import { isMercenaryFormationPlayer } from "@/lib/formation/roster/isMercenaryFormationPlayer";
 
 export interface UseFormationPlayerListArgs {
   players: Player[];
@@ -14,6 +15,14 @@ export interface UseFormationPlayerListArgs {
   } | null;
 }
 
+/** 보드/상위에서 넘어온 역할 → 명단 칩 탭 (용병은 MF가 아닌 `용병` 탭) */
+function tabFromTargetRole(role: string): string | null {
+  if (role === "용병") return "용병";
+  const main = getMainPositionFromRole(role);
+  if (main === "전체") return null;
+  return main;
+}
+
 export function useFormationPlayerList({
   players,
   targetPosition,
@@ -22,11 +31,12 @@ export function useFormationPlayerList({
   const [searchTerm, setSearchTerm] = useState("");
   const [userTab, setUserTab] = useState<string>("전체");
 
-  // 포지션이 지정되면 그에 맞는 탭, 없으면 사용자 선택 탭
   const positionDerivedTab = useMemo(() => {
     const target = activePosition?.role || targetPosition;
-    return target ? getMainPositionFromRole(target) : null;
+    if (target == null || target === "") return null;
+    return tabFromTargetRole(target);
   }, [targetPosition, activePosition]);
+
   const activePosTab = positionDerivedTab ?? userTab;
   const setActivePosTab = (tab: string) => setUserTab(tab);
 
@@ -34,6 +44,12 @@ export function useFormationPlayerList({
     return players.filter((p) => {
       if (searchTerm && !p.name.includes(searchTerm)) return false;
       if (activePosTab === "전체") return true;
+
+      if (isMercenaryFormationPlayer(p)) {
+        return activePosTab === "용병";
+      }
+      if (activePosTab === "용병") return false;
+
       const mapped = getMainPositionFromRole(p.position);
       return mapped === activePosTab;
     });

@@ -62,7 +62,7 @@
 
 ### 3.6 저장용 `tactics` JSON (현재)
 
-- 저장·임시저장은 `buildMatchFormationTacticsDocumentFromQuarters` → 문서 v3.
+- 저장·임시저장은 `buildMatchFormationTacticsDocumentFromQuarters` → 문서 v4(라인업 슬롯 키 `"0"`…`"10"`).
 - **내전(`INTERNAL`)**일 때 루트에 **`inHouseDraftTeamByKey`** 를 함께 저장한다(키: `getFormationRosterPlayerKey`, 값: `"A"` \| `"B"`). 비어 있으면 `{}`.
 - SSR·재진입 시 `extractInHouseDraftTeamByKeyFromTactics` → `useInHouseDraftTeamAssignments(초기맵)`으로 복원한다.
 - 상세 계약: `docs/match-formation-tactics-document-contract.md`

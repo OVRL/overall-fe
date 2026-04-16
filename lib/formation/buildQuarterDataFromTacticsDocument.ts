@@ -1,10 +1,11 @@
 import type { FormationType } from "@/constants/formation";
 import type { Player, QuarterData } from "@/types/formation";
-import type { FormationSlotKey } from "@/types/matchFormationTactics";
 import {
   MATCH_FORMATION_TACTICS_DOCUMENT_VERSION,
   MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY,
+  MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3,
   type MatchFormationTacticsDocument,
+  type MatchFormationTacticsLineupRecord,
 } from "@/types/matchFormationTacticsDocument";
 import { buildQuartersFromMatch } from "@/lib/formation/buildQuartersFromMatch";
 import type { FormationMatchQuarterSpec } from "@/types/formationMatchPageSnapshot";
@@ -21,7 +22,8 @@ function parseTacticsDocument(raw: unknown): MatchFormationTacticsDocument | nul
   const ver = o.schemaVersion;
   if (
     ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION &&
-    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY &&
+    ver !== MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3
   ) {
     return null;
   }
@@ -31,15 +33,24 @@ function parseTacticsDocument(raw: unknown): MatchFormationTacticsDocument | nul
 }
 
 function slotMapToLineup(
-  lineup: Partial<Record<FormationSlotKey, unknown>>,
+  lineup: MatchFormationTacticsLineupRecord,
   resolve: FormationLineupResolver,
+  schemaVersion: number,
 ): Record<number, Player | null> {
+  const legacy =
+    schemaVersion === MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_LEGACY ||
+    schemaVersion === MATCH_FORMATION_TACTICS_DOCUMENT_VERSION_V3;
   const out: Record<number, Player | null> = {};
   for (const key of Object.keys(lineup)) {
-    const ref = normalizeTacticsSlotPlayerRef(lineup[key as FormationSlotKey]);
+    const ref = normalizeTacticsSlotPlayerRef(lineup[key]);
     if (ref == null) continue;
     const p = resolve(ref);
-    if (p != null) out[Number(key)] = p;
+    if (p == null) continue;
+    const n = Number(key);
+    if (!Number.isFinite(n)) continue;
+    const idx = legacy ? n - 1 : n;
+    if (idx < 0 || idx > 10) continue;
+    out[idx] = p;
   }
   return out;
 }
@@ -57,6 +68,8 @@ export function buildQuarterDataFromTacticsDocument(
   const base = buildQuartersFromMatch(spec.quarterCount, spec.matchType);
   if (doc == null) return base;
 
+  const schemaVersion = (doc as { schemaVersion: number }).schemaVersion;
+
   return base.map((q) => {
     const snap = doc.quarters.find((s) => s.quarterId === q.id);
     if (snap == null) return q;
@@ -69,7 +82,7 @@ export function buildQuarterDataFromTacticsDocument(
         ...q,
         type: "MATCHING",
         formation,
-        lineup: slotMapToLineup(snap.lineup ?? {}, resolvePlayer),
+        lineup: slotMapToLineup(snap.lineup ?? {}, resolvePlayer, schemaVersion),
       };
     }
 
@@ -79,8 +92,16 @@ export function buildQuarterDataFromTacticsDocument(
     const formationTeamB = isFormationType(snap.teams.B.formation)
       ? snap.teams.B.formation
       : q.formation;
-    const teamA = slotMapToLineup(snap.teams.A.lineup ?? {}, resolvePlayer);
-    const teamB = slotMapToLineup(snap.teams.B.lineup ?? {}, resolvePlayer);
+    const teamA = slotMapToLineup(
+      snap.teams.A.lineup ?? {},
+      resolvePlayer,
+      schemaVersion,
+    );
+    const teamB = slotMapToLineup(
+      snap.teams.B.lineup ?? {},
+      resolvePlayer,
+      schemaVersion,
+    );
     return {
       ...q,
       type: "IN_HOUSE",

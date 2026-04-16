@@ -25,6 +25,8 @@ import {
   isSameFormationRosterPlayer,
 } from "@/lib/formation/roster/formationRosterPlayerKey";
 import { filterPlayersForInHouseLineupTab } from "@/lib/formation/roster/filterPlayersForInHouseLineupTab";
+import { sortPlayersForFormationLineupList } from "@/lib/formation/roster/sortPlayersForFormationLineupList";
+import { FORMATION_PLAYER_LIST_POSITION_TABS } from "@/constants/formationPlayerListTabs";
 
 export interface FormationPlayerListMobileProps {
   players: Player[];
@@ -44,8 +46,6 @@ export interface FormationPlayerListMobileProps {
   getDraftTeam?: (player: Player) => InHouseDraftTeamChoice;
   onDraftTeamSelect?: (player: Player, team: InHouseDraftTeamChoice) => void;
 }
-
-const TABS = ["전체", "FW", "MF", "DF", "GK"];
 
 /** 모바일용 컴팩트 선수 카드 — 라인업(드래그) / 팀 드래프트(A/B) 레이아웃 분기 */
 function PlayerCardMobile({
@@ -191,6 +191,12 @@ const FormationPlayerListMobile = ({
       activePosition,
     });
 
+  /** 데스크톱 FormationPlayerGroupList와 동일: 대분류 GK→DF→MF→FW, 동일 분류는 이름순 */
+  const sortedPlayersForMobile = useMemo(
+    () => sortPlayersForFormationLineupList(filteredPlayers),
+    [filteredPlayers],
+  );
+
   const draftListDragDisabled =
     matchType === "INTERNAL" && formationRosterViewMode === "draft";
   const draftRowMode =
@@ -242,7 +248,7 @@ const FormationPlayerListMobile = ({
         )}
 
       <div className="flex items-center gap-3 px-4 pb-3">
-        {TABS.map((tab) => (
+        {FORMATION_PLAYER_LIST_POSITION_TABS.map((tab) => (
           <AssistiveChip
             key={tab}
             label={tab}
@@ -255,12 +261,12 @@ const FormationPlayerListMobile = ({
 
       <div className="overflow-x-auto max-md:scrollbar-hide">
         <div className="flex gap-3 px-4 pb-2">
-          {filteredPlayers.length === 0 ? (
+          {sortedPlayersForMobile.length === 0 ? (
             <p className="text-Label-Tertiary text-sm py-6 w-full text-center">
               선수가 없습니다.
             </p>
           ) : (
-            filteredPlayers.map((player) => {
+            sortedPlayersForMobile.map((player) => {
               const rosterKey = getFormationRosterPlayerKey(player);
               return (
                 <PlayerCardMobile

@@ -1,4 +1,5 @@
 import AssistiveChip from "@/components/ui/AssistiveChip";
+import { FORMATION_PLAYER_LIST_POSITION_TABS } from "@/constants/formationPlayerListTabs";
 import calendar from "@/public/icons/calendar.svg";
 import Icon from "../../ui/Icon";
 
@@ -14,7 +15,7 @@ const PlayerListFilter = ({
   activePosTab,
   onPosTabChange,
 }: PlayerListFilterProps) => {
-  const tabs = ["전체", "FW", "MF", "DF", "GK"];
+  const tabs = FORMATION_PLAYER_LIST_POSITION_TABS;
 
   return (
     <div className="flex flex-col gap-6">

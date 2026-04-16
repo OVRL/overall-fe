@@ -76,10 +76,7 @@ export interface ModalPropsMap {
   };
   /** 포메이션 빌더 — 라인업이 있을 때 포메이션 변경 확인 */
   FORMATION_CHANGE_LINEUP: {
-    fromFormationLabel: string;
-    toFormationLabel: string;
-    onKeepLineup: () => void;
-    onClearLineup: () => void;
+    onConfirm: () => void;
     onCancel: () => void;
   };
 }

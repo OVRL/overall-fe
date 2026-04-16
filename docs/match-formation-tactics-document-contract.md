@@ -12,7 +12,7 @@
 
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
-| `schemaVersion` | `2` \| `3` | 예 | **호환성 게이트**. 파서가 지원하지 않는 값이면 문서 전체를 버리고 기본 쿼터로 폴백한다. |
+| `schemaVersion` | `2` \| `3` \| `4` | 예 | **호환성 게이트**. 파서가 지원하지 않는 값이면 문서 전체를 버리고 기본 쿼터로 폴백한다. **v4**부터 라인업 슬롯 키가 `"0"`…`"10"`(보드 인덱스와 동일). **v2·v3**는 슬롯 키 `"1"`…`"11"`(복원 시 UI 0~10으로 변환). |
 | `matchType` | `"MATCH"` \| `"INTERNAL"` | 예 | GraphQL `MatchType`과 동일 문자열. `INTERNAL`이면 내전(듀얼 팀) 쿼터를 사용한다. |
 | `quarters` | 배열 | 예 | 쿼터별 스냅샷. 길이는 경기 스펙과 다를 수 있으며, 복원 시 `quarterId`로 매칭한다. |
 | `inHouseDraftTeamByKey` | object | 아니오 | **`matchType === "INTERNAL"`일 때** 명단 A/B 탭 필터용 팀 드래프트. 키는 `getFormationRosterPlayerKey` (`t:` / `m:`), 값은 `"A"` \| `"B"`. 저장 시 없으면 `{}`로 둘 수 있다. |
@@ -21,7 +21,7 @@
 
 ```json
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "matchType": "INTERNAL",
   "quarters": []
 }
@@ -47,8 +47,8 @@
 
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
-| `formation` | string | 예 | `FormationType`. 슬롯 의미는 `FORMATIONS[formation]`으로만 해석. |
-| `lineup` | object | 예 | 키: `"1"` … `"11"` (`FormationSlotKey`). 값: `MatchFormationTacticsPlayerRef` 또는 정규화 전 레거시 형태. |
+| `formation` | string | 예 | `FormationType`. 슬롯 의미는 `FORMATION_POSITIONS[formation][i]` / `FORMATIONS[formation][i+1]`로 해석(i는 라인업 키 정수). |
+| `lineup` | object | 예 | **v4**: 키 `"0"` … `"10"` (보드 슬롯과 동일). **v2·v3**: 키 `"1"` … `"11"`. 값: `MatchFormationTacticsPlayerRef` 또는 정규화 전 레거시 형태. |
 
 ```json
 {
@@ -57,7 +57,7 @@
   "kind": "MATCHING",
   "formation": "4-3-3",
   "lineup": {
-    "1": { "kind": "TEAM_MEMBER", "teamMemberId": 10 }
+    "0": { "kind": "TEAM_MEMBER", "teamMemberId": 10 }
   }
 }
 ```
@@ -79,10 +79,10 @@
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
 | `formation` | string | 예 | 해당 팀 보드의 `FormationType`. **B의 값은 A와 달라도 된다.** |
-| `lineup` | object | 예 | 키 `"1"`…`"11"`. 값은 `MATCHING`과 동일 규칙의 선수 ref. |
+| `lineup` | object | 예 | **v4**: 키 `"0"`…`"10"`. **v2·v3**: 키 `"1"`…`"11"`. 값은 `MATCHING`과 동일 규칙의 선수 ref. |
 
 **슬롯 의미 규칙 (중요)**  
-같은 슬롯 번호 `"7"`이라도, **A 보드는 `teams.A.formation`**, **B 보드는 `teams.B.formation`**으로 해석한다.  
+같은 슬롯 번호(예: v4의 `"6"`)라도, **A 보드는 `teams.A.formation`**, **B 보드는 `teams.B.formation`**으로 해석한다.  
 소비자는 팀 보드 단위로 `formation`을 선택해 슬롯→포지션을 계산해야 한다.
 
 ```json
@@ -93,7 +93,7 @@
   "teams": {
     "A": {
       "formation": "4-3-3",
-      "lineup": { "11": { "teamMemberId": 101 } }
+      "lineup": { "10": { "teamMemberId": 101 } }
     },
     "B": {
       "formation": "4-4-2",
@@ -120,17 +120,22 @@
 
 이유:
 
-1. **구버전 문서 구분** — 현재 코드는 `2`와 `3`만 수용한다. 저장소·캐시·다른 클라이언트에 남은 v2를 안전히 거르거나 해석할 수 있다.
+1. **구버전 문서 구분** — 현재 코드는 `2`·`3`·`4`를 수용한다. 저장소·캐시·다른 클라이언트에 남은 v2·v3를 안전히 거르거나 해석할 수 있다.
 2. **파서 폴백** — 지원하지 않는 버전이면 전체 문서를 무시하고 기본 쿼터로 복구할 수 있다(데이터 손상 대신 “빈 보드”로 예측 가능).
 3. **비호환 변경의 명시** — `quarters` 항목 구조를 바꾸거나 `kind`를 추가하는 등 **해석 규칙이 바뀌는** 변경은 새 정수로 표시하는 편이 디버깅·문서화에 유리하다.
 
 ### 4.2 버전을 올리지 않아도 되는 경우
 
-- **같은 `schemaVersion` 안에서 의미만 명확히 하는 것** — 예: IN_HOUSE에서 `teams.A.formation`과 `teams.B.formation`이 **서로 달라도 된다**는 것은, 이미 타입상 두 필드가 분리되어 있으므로 **v3 계약 확장(의미 명시)**으로 처리할 수 있다. 필드 이름이나 `quarters[]` 판별 구조가 바뀌지 않으면 **반드시 v4로 올릴 필요는 없다.**
+- **같은 `schemaVersion` 안에서 의미만 명확히 하는 것** — 예: IN_HOUSE에서 `teams.A.formation`과 `teams.B.formation`이 **서로 달라도 된다**는 것은, 이미 타입상 두 필드가 분리되어 있으므로 동일 메이저 버전에서 **의미 명시**로 처리할 수 있다.
 
-### 4.3 버전을 올려야 하는 경우(예: v4)
+### 4.3 버전을 올린 예: v4 (라인업 슬롯 키)
 
-- `schemaVersion`이 `3`인 문서를 **더 이상 해석할 수 없게** 필수 필드·`kind` 값·루트 키 구조를 바꿀 때.
+- **v4**: `lineup` 키를 `"0"`…`"10"`으로 두어 UI `lineup` 인덱스와 일치(GK가 누락되지 않도록).
+- **v2·v3**: `lineup` 키 `"1"`…`"11"` — 읽기 시에만 UI 0~10으로 변환한다.
+
+### 4.4 앞으로 버전을 올려야 하는 경우(예: v5)
+
+- 이전 문서를 **더 이상 해석할 수 없게** 필수 필드·`kind` 값·루트 키 구조를 바꿀 때.
 - 파서가 “알 수 없는 버전”으로 **의도적으로 거부**해야 할 때.
 
 정책 제안: **버전 번호는 “파서/타입이 깨지는가” 기준으로만 증가**시키고, 제품 의미(예: 팀별 상이 포메이션 허용)는 동일 버전에서 문서·코드로 정합을 맞춘다.
@@ -155,4 +160,4 @@
 
 ---
 
-*문서 성격: 2026년 기준 스냅샷 문서(v2/v3) 재정의 및 `schemaVersion` 검토. 내전 팀 드래프트 영속 필드 반영.*
+*문서 성격: 2026년 기준 스냅샷 문서(v2/v3/v4) 및 `schemaVersion` 검토. v4는 라인업 슬롯 키 0~10. 내전 팀 드래프트 영속 필드 반영.*
