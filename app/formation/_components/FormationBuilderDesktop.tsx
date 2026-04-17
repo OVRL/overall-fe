@@ -92,37 +92,42 @@ export default function FormationBuilderDesktop({
     draftSubTeamLineups != null;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 lg:flex-row gap-4 w-full max-w-screen-xl justify-center lg:items-stretch 2xl:max-w-none">
-      <div className="w-full lg:flex-1 2xl:w-225 2xl:flex-none flex flex-col gap-4 min-h-0 shrink-0 transition-all duration-300">
-        {scheduleCard}
+    <div className="flex-1 flex flex-col min-h-0 w-full max-w-screen-xl justify-center lg:flex-row lg:items-stretch lg:gap-4 lg:overflow-hidden 2xl:max-w-none">
+      <div className="flex w-full min-h-0 flex-col gap-4 shrink-0 transition-all duration-300 lg:min-h-0 lg:min-w-0 lg:flex-1 lg:shrink lg:overflow-hidden 2xl:w-225 2xl:flex-none">
+        <div className="shrink-0">{scheduleCard}</div>
 
-        <FormationControls
-          currentQuarterId={currentQuarterId}
-          setCurrentQuarterId={setCurrentQuarterId}
-          quarters={quarters}
-          quarterDurationMinutes={quarterDurationMinutes}
-        />
-
-        {showDraftOverview ? (
-          <FormationDraftLineupOverview
-            lineupA={draftSubTeamLineups.A}
-            lineupB={draftSubTeamLineups.B}
-            className="min-h-48"
-          />
-        ) : (
-          <FormationBoardList
-            quarters={quarters}
-            inHouseBoardSubTeam={inHouseBoardSubTeam}
-            onFormationChangeIntent={
-              formationChangeScope != null ? onFormationChangeIntent : undefined
-            }
-            selectedPlayer={selectedPlayer}
-            setQuarters={setQuarters}
-            onPositionRemove={onPositionRemove}
+        <div className="shrink-0">
+          <FormationControls
             currentQuarterId={currentQuarterId}
             setCurrentQuarterId={setCurrentQuarterId}
+            quarters={quarters}
+            quarterDurationMinutes={quarterDurationMinutes}
           />
-        )}
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {showDraftOverview ? (
+            <FormationDraftLineupOverview
+              lineupA={draftSubTeamLineups.A}
+              lineupB={draftSubTeamLineups.B}
+              className="min-h-0 flex-1"
+            />
+          ) : (
+            <FormationBoardList
+              scrollLayout="formationDesktop"
+              quarters={quarters}
+              inHouseBoardSubTeam={inHouseBoardSubTeam}
+              onFormationChangeIntent={
+                formationChangeScope != null ? onFormationChangeIntent : undefined
+              }
+              selectedPlayer={selectedPlayer}
+              setQuarters={setQuarters}
+              onPositionRemove={onPositionRemove}
+              currentQuarterId={currentQuarterId}
+              setCurrentQuarterId={setCurrentQuarterId}
+            />
+          )}
+        </div>
       </div>
 
       <FormationPlayerList

@@ -605,7 +605,13 @@ export default function FormationBuilder({
   );
 
   return (
-    <div className="min-h-dvh pt-safe bg-surface-primary flex flex-col">
+    <div
+      className={
+        isLgOrBelow
+          ? "min-h-dvh pt-safe bg-surface-primary flex flex-col"
+          : "h-dvh max-h-dvh overflow-hidden pt-safe bg-surface-primary flex flex-col"
+      }
+    >
       <FormationHeader
         onReset={handleReset}
         onSaveDraft={userId != null ? handleSaveDraft : undefined}
@@ -617,7 +623,13 @@ export default function FormationBuilder({
           isUpdateForConfirmInFlight
         }
       />
-      <main className="flex-1 flex flex-col min-h-0 px-3 md:px-6 py-4 w-full items-center bg-surface-primary">
+      <main
+        className={
+          isLgOrBelow
+            ? "flex-1 flex flex-col min-h-0 px-3 md:px-6 py-4 w-full items-center bg-surface-primary"
+            : "flex-1 flex flex-col min-h-0 overflow-hidden px-3 md:px-6 py-4 w-full items-center bg-surface-primary"
+        }
+      >
         {content}
       </main>
     </div>

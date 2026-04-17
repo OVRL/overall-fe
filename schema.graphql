@@ -34,8 +34,8 @@ type BestElevenModel {
   """베스트 일레븐 ID"""
   id: Int!
 
-  """포지션"""
-  position: Position!
+  """전술 정보 (JSON)"""
+  tactics: JSONObject
   team: TeamModel
 
   """팀 ID"""
@@ -46,8 +46,8 @@ type BestElevenModel {
 }
 
 input CreateBestElevenInput {
-  """포지션"""
-  position: Position!
+  """전술 정보 (JSON)"""
+  tactics: JSONObject
 
   """팀 ID"""
   teamId: Int!
@@ -132,6 +132,20 @@ input CreateMatchInput {
 
   """투표 마감 시간"""
   voteDeadline: GraphQLDateTime!
+}
+
+input CreateMatchMomVoteInput {
+  """투표할 용병 ID"""
+  candidateMercenaryId: Int
+
+  """투표할 팀 멤버 유저 ID"""
+  candidateUserId: Int
+
+  """경기 ID"""
+  matchId: Int!
+
+  """팀 ID"""
+  teamId: Int!
 }
 
 input CreateTeamInput {
@@ -388,6 +402,46 @@ type MatchModel {
   voteDeadline: GraphQLDateTime!
 }
 
+type MatchMomVoteModel {
+  """투표받은 용병 정보"""
+  candidateMercenary: MatchMercenaryModel
+
+  """투표받은 용병 ID"""
+  candidateMercenaryId: Int
+
+  """투표받은 팀 멤버 정보"""
+  candidateUser: UserModel
+
+  """투표받은 팀 멤버 유저 ID"""
+  candidateUserId: Int
+  createdAt: GraphQLDateTime!
+  id: Int!
+  matchId: Int!
+  teamId: Int!
+  updatedAt: GraphQLDateTime!
+
+  """투표한 유저 정보"""
+  voterUser: UserModel
+  voterUserId: Int!
+}
+
+type MatchMomVoteResultModel {
+  """투표받은 용병 정보"""
+  candidateMercenary: MatchMercenaryModel
+
+  """투표받은 용병 ID"""
+  candidateMercenaryId: Int
+
+  """투표받은 팀 멤버 정보"""
+  candidateUser: UserModel
+
+  """투표받은 팀 멤버 유저 ID"""
+  candidateUserId: Int
+
+  """득표 수"""
+  voteCount: Int!
+}
+
 """경기 유형 (match: 외부 경기, internal: 내전)"""
 enum MatchType {
   INTERNAL
@@ -400,6 +454,8 @@ type Mutation {
 
   """임시저장 포메이션 확정 (선택한 draft 승격, 기존 확정본 덮어쓰기, 나머지 draft 삭제)"""
   confirmMatchFormation(draftId: Int!, userId: Int!): MatchFormationModel!
+
+  """베스트 일레븐 등록 (전술 정보 JSON 포함)"""
   createBestEleven(input: CreateBestElevenInput!): BestElevenModel!
   createInviteCode(teamId: Float!): CreateInviteCodeModel!
   createMatch(input: CreateMatchInput!): MatchModel!
@@ -410,6 +466,9 @@ type Mutation {
 
   """용병 추가 (코치/감독 전용)"""
   createMatchMercenary(input: AddMatchMercenaryInput!): MatchMercenaryModel!
+
+  """MOM 투표. 매치 종료 후 24시간 이내, 해당 매치에 참석(ATTEND)한 팀 멤버만 투표 가능합니다. 1인 1표."""
+  createMatchMomVote(input: CreateMatchMomVoteInput!): MatchMomVoteModel!
   createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteBestEleven(id: Int!): Boolean!
@@ -439,6 +498,9 @@ type Mutation {
 
   """매치 포메이션 전술 수정"""
   updateMatchFormation(input: UpdateMatchFormationInput!): MatchFormationModel!
+
+  """MOM 투표 수정. 투표 마감(vote_deadline) 이전에 본인의 투표만 수정 가능합니다."""
+  updateMatchMomVote(input: UpdateMatchMomVoteInput!): MatchMomVoteModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload): UserModel!
@@ -556,6 +618,9 @@ type Query {
     """경기 ID"""
     matchId: Int!
   ): [MatchMercenaryModel!]!
+
+  """MOM 투표 결과 조회. 해당 매치의 후보별 득표 수를 득표 순으로 반환합니다."""
+  matchMomVotes(matchId: Int!, teamId: Int!): [MatchMomVoteResultModel!]!
   searchTeamMember(name: String!, teamId: Int!): [TeamMemberModel!]!
 }
 
@@ -743,6 +808,20 @@ input UpdateMatchInput {
 
   """투표 마감 시간"""
   voteDeadline: GraphQLDateTime
+}
+
+input UpdateMatchMomVoteInput {
+  """변경할 용병 ID"""
+  candidateMercenaryId: Int
+
+  """변경할 팀 멤버 유저 ID"""
+  candidateUserId: Int
+
+  """투표 ID"""
+  id: Int!
+
+  """팀 ID"""
+  teamId: Int!
 }
 
 input UpdateTeamInput {

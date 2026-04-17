@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 import QuarterFormationBoard from "./QuarterFormationBoard";
 import { QuarterData, Player, FormationType } from "@/types/formation";
 
@@ -30,6 +31,11 @@ interface FormationBoardListProps {
   ) => void;
   showBoardHeader?: boolean;
   boardClassName?: string;
+  /**
+   * `formationDesktop`: 포메이션 경기 빌더(lg+)에서 좌측 영역 높이에 맞춰 세로 스크롤만 사용(2열 그리드).
+   * 그 외 패널은 기본값 유지.
+   */
+  scrollLayout?: "default" | "formationDesktop";
 }
 
 const FormationBoardList: React.FC<FormationBoardListProps> = ({
@@ -44,14 +50,28 @@ const FormationBoardList: React.FC<FormationBoardListProps> = ({
   onFormationChangeIntent,
   showBoardHeader = true,
   boardClassName,
+  scrollLayout = "default",
 }) => {
+  const isFormationDesktop = scrollLayout === "formationDesktop";
+
   return (
-    <div className="flex-1 w-full overflow-x-auto">
-      {/* 그리드: 모바일 1열, quarter가 2개 이상일 때 md 이상에서 2열 */}
+    <div
+      className={cn(
+        "w-full",
+        isFormationDesktop
+          ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+          : "flex-1 overflow-x-auto",
+      )}
+    >
+      {/* 그리드: 기본은 md+ 2열 / formationDesktop은 lg+ 2열(데스크 빌더와 동일 브레이크포인트) */}
       <div
-        className={`grid w-full gap-3 grid-cols-1 ${
-          quarters.length > 1 ? "md:grid-cols-2" : ""
-        }`}
+        className={cn(
+          "grid w-full gap-3 grid-cols-1",
+          quarters.length > 1 &&
+            (isFormationDesktop ? "lg:grid-cols-2" : "md:grid-cols-2"),
+          isFormationDesktop &&
+            "min-h-0 flex-1 overflow-y-auto overscroll-y-contain overflow-x-hidden scrollbar-hide pr-1",
+        )}
       >
         {quarters.map((quarter) => (
           <QuarterFormationBoard

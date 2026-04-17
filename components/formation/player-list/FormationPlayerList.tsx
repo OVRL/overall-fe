@@ -84,10 +84,10 @@ export default function FormationPlayerList({
   return (
     <section
       aria-label="선수 목록"
-      className="w-full lg:w-90 2xl:w-90 flex flex-col min-h-0 shrink-0 transition-all duration-300 lg:self-stretch"
+      className="flex w-full min-h-0 shrink-0 flex-col transition-all duration-300 lg:min-h-0 lg:w-90 lg:self-stretch 2xl:w-90"
     >
-      <div className="w-full min-h-0 flex-1 flex flex-col bg-surface-card border border-border-card rounded-xl shadow-card overflow-hidden">
-        <aside className="min-h-0 flex-1 p-4 flex flex-col gap-3 w-full md:w-92 lg:w-full">
+      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-xl border border-border-card bg-surface-card shadow-card lg:h-full lg:min-h-0">
+        <aside className="flex min-h-0 w-full flex-1 flex-col gap-3 p-4 md:w-92 lg:w-full lg:min-h-0">
           <div className="shrink-0 flex flex-col gap-3">
             {matchType === "INTERNAL" &&
               formationRosterViewMode != null &&

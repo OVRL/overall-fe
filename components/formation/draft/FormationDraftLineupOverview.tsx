@@ -61,21 +61,18 @@ function TeamColumn({
   players: Player[];
 }) {
   return (
-    <div className="flex flex-col gap-3 min-w-0 rounded-xl border border-border-card bg-surface-card/50 p-3">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-3 rounded-xl border border-border-card bg-surface-card/50 p-3">
       <h3
         className={cn(
-          "font-bold tracking-tight h-12 text-center",
+          "shrink-0 font-bold tracking-tight h-12 text-center",
           accentClassName,
         )}
       >
         {title}
       </h3>
-      <div className="flex flex-col gap-1 min-h-0">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain scrollbar-hide pr-1">
         {players.length > 0 ? (
-          <ul
-            className="flex flex-col gap-1 min-w-0"
-            aria-label="배정된 선수"
-          >
+          <ul className="flex min-w-0 flex-col gap-1" aria-label="배정된 선수">
             {players.map((p) => (
               <li key={getFormationRosterPlayerKey(p)}>
                 <DraftPlayerChip player={p} />
@@ -100,19 +97,26 @@ export default function FormationDraftLineupOverview({
   return (
     <section
       aria-label="팀 드래프트 라인업 요약"
-      className={cn("flex-1 min-h-0 w-full flex flex-col gap-3", className)}
+      className={cn(
+        "flex w-full min-h-0 flex-1 flex-col gap-3 overflow-hidden",
+        className,
+      )}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-h-0">
-        <TeamColumn
-          title="Team A"
-          accentClassName="text-white"
-          players={lineupA}
-        />
-        <TeamColumn
-          title="Team B"
-          accentClassName="text-white"
-          players={lineupB}
-        />
+      <div className="flex min-h-0 flex-1 flex-col gap-3 md:flex-row md:gap-3">
+        <div className="flex min-h-0 flex-1 md:min-w-0 md:w-0">
+          <TeamColumn
+            title="Team A"
+            accentClassName="text-white"
+            players={lineupA}
+          />
+        </div>
+        <div className="flex min-h-0 flex-1 md:min-w-0 md:w-0">
+          <TeamColumn
+            title="Team B"
+            accentClassName="text-white"
+            players={lineupB}
+          />
+        </div>
       </div>
     </section>
   );

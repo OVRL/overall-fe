@@ -74,24 +74,25 @@
 | 경로 | 역할 |
 |------|------|
 | `components/formation/player-list/FormationRosterViewModeTabs.tsx` | 팀 드래프트 / A팀 / B팀 탭 |
-| `components/formation/draft/FormationDraftLineupOverview.tsx` | 드래프트 모드 좌측 A/B 열 + 정렬된 선수 칩 나열 (`lineupA` / `lineupB`) |
+| `components/formation/draft/FormationDraftLineupOverview.tsx` | 드래프트 모드 좌측 A/B 열 + 정렬된 선수 칩 나열 (`lineupA` / `lineupB`); 팀 제목은 고정·`DraftPlayerChip` 목록만 열마다 `overflow-y-auto`(명단 `FormationPlayerGroupList`와 동일 패턴) |
 | `components/formation/player-list/FormationDraftSubTeamToggle.tsx` | 명단 행 우측 미선택(−) / A / B 라디오 그룹 |
 | `components/formation/player-list/FormationPlayerRow.tsx` | `listRowMode`: lineup( OVR+쿼터 ) / draft( 토글 ) |
 | `components/formation/player-list/FormationPlayerGroupList.tsx` | 안정 키·선택 비교·드래프트 props 전달 |
-| `components/formation/player-list/FormationPlayerList.tsx` | 내전일 때 탭 + 드래프트 props + A/B 탭 시 명단 필터 |
+| `components/formation/player-list/FormationPlayerList.tsx` | 내전일 때 탭 + 드래프트 props + A/B 탭 시 명단 필터; **데스크톱(lg+)** 에서 카드·`aside`에 `min-h-0`/`lg:h-full`로 우측 열 높이를 채우고 `FormationPlayerGroupList`가 세로 스크롤을 담당 |
 | `components/formation/player-list/FormationPlayerListMobile.tsx` | 모바일 카드 레이아웃 분기 + 동일 훅 연동 + A/B 탭 시 명단 필터 |
 | `lib/formation/roster/filterPlayersForInHouseLineupTab.ts` | A/B 라인업 탭에서 우측 명단을 드래프트 배정에 맞게 축소 |
 | `lib/formation/roster/validateInHouseListToBoardDnD.ts` | 명단→보드 DnD 시 드래프트 소속 검증; 보드 슬롯 간 이동(`BoardPlayer`)은 제외 |
 | `components/formation/board/DroppableSlot.tsx` | 보드 슬롯 DnD·썸네일; 명단에서 선택된 선수와의 동일성은 `isSameFormationRosterPlayer`(숫자 id만 비교하지 않음) |
 | `components/formation/FormationControls.tsx` | A/B 선택 제거(명단 탭으로 이전) |
-| `app/formation/_components/FormationBuilder.tsx` | 훅·`draftSubTeamLineups` 계산·`tactics`에 `inHouseDraftTeamByKey` 직렬화·SSR 초기 드래프트·**드래프트/확정 행 id** 주입·임시저장·확정 분기(`confirmMatchFormation` / `update` / `create`)·리셋 시 드래프트 초기화 |
+| `app/formation/_components/FormationBuilder.tsx` | 훅·`draftSubTeamLineups` 계산·`tactics`에 `inHouseDraftTeamByKey` 직렬화·SSR 초기 드래프트·**드래프트/확정 행 id** 주입·임시저장·확정 분기(`confirmMatchFormation` / `update` / `create`)·리셋 시 드래프트 초기화; **lg 이상**에서는 루트 `h-dvh max-h-dvh overflow-hidden`·`main` `overflow-hidden`으로 페이지 전체 스크롤 없이 본문만 뷰포트에 맞춤(모바일은 기존 `min-h-dvh`) |
 | `app/formation/_hooks/useConfirmMatchFormationMutation.tsx` | `confirmMatchFormation(draftId, userId)` |
 | `lib/formation/pickPrimaryMatchFormationRow.ts` | 초기 `tactics` 출처: 확정 행이 있으면 **id 최대** 확정, 없으면 **id 최대** 드래프트. 별도: `pickLatestDraftMatchFormationRow`, `pickLatestConfirmedMatchFormationRow` |
 | `types/formationMatchPageSnapshot.ts` | `savedDraftMatchFormationId`, `savedLatestConfirmedMatchFormationId`, `savedInitialFormationPrimarySource`, `savedInitialFormationSourceRevision` |
 | `lib/relay/ssr/loadFormationMatchPageSnapshot.ts` | 위 id들과 `initialQuarters`를 동일 쿼리에서 채움 |
 | `lib/formation/extractInHouseDraftTeamByKeyFromTactics.ts` | 저장 `tactics`에서 팀 드래프트 맵 추출 |
 | `types/inHouseDraftTeam.ts` | `InHouseDraftTeamByPlayerKey` 타입 |
-| `app/formation/_components/FormationBuilderDesktop.tsx` | 드래프트 시 `FormationDraftLineupOverview`, 아니면 `FormationBoardList` |
+| `app/formation/_components/FormationBuilderDesktop.tsx` | 드래프트 시 `FormationDraftLineupOverview`, 아니면 `FormationBoardList`; 좌측 하단은 `flex-1 min-h-0 overflow-hidden` 래퍼 — 보드는 `FormationBoardList` 스크롤, 드래프트 요약은 **팀 컬럼 내부** 스크롤 |
+| `components/formation/board/FormationBoardList.tsx` | 기본 그리드는 `md:grid-cols-2`; **`scrollLayout="formationDesktop"`** 시 외곽 `overflow-hidden` + 그리드 `lg:grid-cols-2`·`overflow-y-auto`로 좌측 할당 높이 안에서 2열 보드만큼씩 스크롤(다른 패널은 기본값 유지) |
 | `app/formation/_components/FormationBuilderDesktopWithDnd.tsx` | 드래프트 시 DnD 배치 무시 |
 | `app/formation/_components/FormationBuilderMobile.tsx` | 동일 분기 + 모바일 명단 |
 
