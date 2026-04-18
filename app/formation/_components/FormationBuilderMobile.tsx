@@ -1,38 +1,36 @@
 "use client";
 
-import React, { useState, useMemo, useId } from "react";
-import {
-  DndContext,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  TouchSensor,
-  rectIntersection,
-  CollisionDetection,
-} from "@dnd-kit/core";
+import React, { useCallback, useMemo } from "react";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
-import ProfileAvatar from "@/components/ui/ProfileAvatar";
-import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import QuarterSelectorTabs from "@/components/formation/quarter/QuarterSelectorTabs";
 import FormationBoardSingle from "@/components/formation/board/FormationBoardSingle";
-import FormationDraftLineupOverview from "@/components/formation/draft/FormationDraftLineupOverview";
 import FormationPlayerListMobile from "@/components/formation/player-list/FormationPlayerListMobile";
+import FormationRosterViewModeTabs from "@/components/formation/player-list/FormationRosterViewModeTabs";
+import { FormationMobileDraftTeamColumns } from "./FormationMobileDraftTeamColumns";
+import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
+import useModal from "@/hooks/useModal";
+import { sortPlayersForFormationLineupList } from "@/lib/formation/roster/sortPlayersForFormationLineupList";
 import { useFormationMatchPlayers } from "@/app/formation/_context/FormationMatchPlayersContext";
 import { QuarterData, Player } from "@/types/formation";
 import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
-import { isSameFormationRosterPlayer } from "@/lib/formation/roster/formationRosterPlayerKey";
+import {
+  getFormationRosterPlayerKey,
+  isSameFormationRosterPlayer,
+} from "@/lib/formation/roster/formationRosterPlayerKey";
 import { validateInHouseListToBoardDnD } from "@/lib/formation/roster/validateInHouseListToBoardDnD";
+import { getAssignedQuarterIdsForPlayerFromQuarters } from "@/lib/formation/roster/getAssignedQuarterIdsForPlayerFromQuarters";
 import { toast } from "@/lib/toast";
 import { useFormationChangeFlow } from "@/hooks/formation/useFormationChangeFlow";
+import { useFormationListToBoardDnd } from "@/hooks/formation/useFormationListToBoardDnd";
 import type { FormationChangeScope } from "@/lib/formation/formationChangePolicy";
-import fire from "@/public/icons/fire.svg";
-import Icon from "@/components/ui/Icon";
+import { FormationMatchInfoAccordion } from "./FormationMatchInfoAccordion";
+import { FormationDragOverlayAvatar } from "./FormationDragOverlayAvatar";
 
 export interface FormationBuilderMobileProps {
+  /** SSR에서 구성된 경기 일정 카드 — 모바일에서는 경기 정보 아코디언 안에 표시 */
+  scheduleCard: React.ReactNode;
   quarters: QuarterData[];
   setQuarters: React.Dispatch<React.SetStateAction<QuarterData[]>>;
   currentQuarterId: number | null;
@@ -58,25 +56,12 @@ export interface FormationBuilderMobileProps {
   ) => void;
 }
 
-function MobileDragOverlayAvatar({ player }: { player: Player }) {
-  const { src, fallbackSrc } = getFormationPlayerProfileAvatarUrls(player);
-  return (
-    <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
-      <ProfileAvatar
-        src={src}
-        fallbackSrc={fallbackSrc}
-        alt={player.name}
-        size={48}
-      />
-    </div>
-  );
-}
-
 /**
  * 모바일 전용 레이아웃: QuarterSelectorTabs + 단일 보드 + 선수 명단.
  * 데스크톱 전용 컴포넌트를 import하지 않음 (이관 시 분리 용이).
  */
 export default function FormationBuilderMobile({
+  scheduleCard,
   quarters,
   setQuarters,
   currentQuarterId,
@@ -118,10 +103,67 @@ export default function FormationBuilderMobile({
     formationChangeScope,
   );
 
-  const showDraftOverview =
-    matchType === "INTERNAL" &&
-    formationRosterViewMode === "draft" &&
-    draftSubTeamLineups != null;
+  const isInternalDraftUi =
+    matchType === "INTERNAL" && formationRosterViewMode === "draft";
+
+  const { openModal: openTeamDraftModal } = useModal("FORMATION_MOBILE_TEAM_DRAFT");
+
+  const sortedRosterAllForDraftModal = useMemo(
+    () => sortPlayersForFormationLineupList(rosterPlayers),
+    [rosterPlayers],
+  );
+
+  const handleApplyDraftModal = useCallback(
+    (next: InHouseDraftTeamByPlayerKey) => {
+      if (!setDraftTeam) return;
+      for (const p of rosterPlayers) {
+        const key = getFormationRosterPlayerKey(p);
+        const v = next[key];
+        setDraftTeam(p, v === "A" || v === "B" ? v : null);
+      }
+    },
+    [rosterPlayers, setDraftTeam],
+  );
+
+  const openDraftModal = useCallback(() => {
+    const m: InHouseDraftTeamByPlayerKey = {};
+    if (getDraftTeam) {
+      for (const p of rosterPlayers) {
+        const t = getDraftTeam(p);
+        if (t === "A" || t === "B") {
+          m[getFormationRosterPlayerKey(p)] = t;
+        }
+      }
+    }
+    openTeamDraftModal({
+      players: sortedRosterAllForDraftModal,
+      initialDraftByKey: m,
+      onApply: handleApplyDraftModal,
+    });
+  }, [
+    getDraftTeam,
+    rosterPlayers,
+    sortedRosterAllForDraftModal,
+    openTeamDraftModal,
+    handleApplyDraftModal,
+  ]);
+
+  const {
+    dndId,
+    sensors,
+    collisionDetection,
+    activePlayer,
+    handleDragStart,
+    handleDragEnd,
+  } = useFormationListToBoardDnd({
+    matchType,
+    formationRosterViewMode,
+    getDraftTeam,
+    assignPlayer,
+    setCurrentQuarterId,
+    hitRadiusPx: 40,
+    enableTouchSensor: true,
+  });
 
   /** 선수 선택 후 빈 포지션 탭 시 해당 슬롯에 배치. 중복은 useFormationManager.assignPlayer에서 처리. */
   const handlePlaceSelectedPlayer = (quarterId: number, index: number) => {
@@ -143,147 +185,65 @@ export default function FormationBuilderMobile({
     }
   };
 
-  const dndId = useId();
-  const [activePlayer, setActivePlayer] = useState<Player | null>(null);
-
-  const customCollisionDetection: CollisionDetection = (args) => {
-    const { pointerCoordinates, droppableContainers, droppableRects } = args;
-    if (!pointerCoordinates) return rectIntersection(args);
-
-    const collisions = [];
-    for (const container of droppableContainers) {
-      const rect = droppableRects.get(container.id);
-      if (rect) {
-        const center = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-        const dx = pointerCoordinates.x - center.x;
-        const dy = pointerCoordinates.y - center.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 40) {
-          collisions.push({
-            id: container.id,
-            data: { droppableContainer: container, value: distance },
-          });
-        }
-      }
-    }
-    return collisions.sort((a, b) => a.data?.value - b.data?.value);
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 150, tolerance: 5 },
-    }),
+  const getAssignedQuarterIdsForPlayer = useMemo(
+    () => getAssignedQuarterIdsForPlayerFromQuarters(quarters),
+    [quarters],
   );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const player = event.active.data.current?.player as Player;
-    if (player) setActivePlayer(player);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActivePlayer(null);
-    const { over } = event;
-    if (!over) return;
-    if (formationRosterViewMode === "draft") return;
-
-    const player = event.active.data.current?.player as Player;
-    if (!player) return;
-
-    const dragSourceType = event.active.data.current?.type as string | undefined;
-    const check = validateInHouseListToBoardDnD(
-      matchType,
-      formationRosterViewMode,
-      dragSourceType,
-      player,
-      getDraftTeam,
-    );
-    if (!check.allowed) {
-      toast.error(check.message);
-      return;
-    }
-
-    const quarterId = over.data.current?.quarterId as number;
-    const positionIndex = over.data.current?.positionIndex as number;
-
-    if (quarterId != null && positionIndex !== undefined) {
-      assignPlayer(quarterId, positionIndex, player);
-      setCurrentQuarterId(quarterId);
-    }
-  };
-
-  /** 선수별 배치된 쿼터 id 목록 (명단에서 QuarterDotsMobile 표시용) */
-  const getAssignedQuarterIdsForPlayer = useMemo(() => {
-    return (playerId: number): number[] => {
-      return quarters
-        .filter((q) => {
-          if (q.type === "IN_HOUSE") {
-            const inA = Object.values(q.teamA ?? {}).some(
-              (p) => p?.id === playerId,
-            );
-            const inB = Object.values(q.teamB ?? {}).some(
-              (p) => p?.id === playerId,
-            );
-            const inL = Object.values(q.lineup ?? {}).some(
-              (p) => p?.id === playerId,
-            );
-            return inA || inB || inL;
-          }
-          return Object.values(q.lineup ?? {}).some((p) => p?.id === playerId);
-        })
-        .map((q) => q.id)
-        .sort((a, b) => a - b);
-    };
-  }, [quarters]);
 
   return (
     <DndContext
       id={dndId}
       sensors={sensors}
-      collisionDetection={customCollisionDetection}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="flex-1 flex flex-col lg:flex-row gap-6 w-full max-w-screen-xl  lg:items-stretch 2xl:max-w-none">
         <div className="w-full lg:flex-1 2xl:w-225 2xl:flex-none flex flex-col gap-4 shrink-0 transition-all duration-300">
-          {/* 쿼터 탭만 노출 (매치 카드·스쿼드 추천 없음) */}
           <section aria-label="쿼터 선택" className="flex flex-col gap-6">
-            <div className="flex items-center gap-2.5">
-              <Icon src={fire} nofill width={24} height={24} />
-              <h2 className="font-semibold text-[#f7f8f8] leading-6">
-                경기 정보
-              </h2>
-            </div>
-            <QuarterSelectorTabs
-              quarters={quarters}
-              currentQuarterId={currentQuarterId}
-              setCurrentQuarterId={setCurrentQuarterId}
-            />
+            <FormationMatchInfoAccordion scheduleCard={scheduleCard} />
+            {matchType === "INTERNAL" &&
+              onFormationRosterViewModeChange != null && (
+                <FormationRosterViewModeTabs
+                  value={formationRosterViewMode}
+                  onChange={onFormationRosterViewModeChange}
+                />
+              )}
+            {!isInternalDraftUi ? (
+              <>
+                <QuarterSelectorTabs
+                  quarters={quarters}
+                  currentQuarterId={currentQuarterId}
+                  setCurrentQuarterId={setCurrentQuarterId}
+                />
+                <FormationBoardSingle
+                  quarters={quarters}
+                  inHouseBoardSubTeam={inHouseBoardSubTeam}
+                  onFormationChangeIntent={
+                    formationChangeScope != null
+                      ? onFormationChangeIntent
+                      : undefined
+                  }
+                  currentQuarterId={currentQuarterId}
+                  selectedPlayer={selectedPlayer}
+                  setQuarters={setQuarters}
+                  onPositionRemove={onPositionRemove}
+                  onPlaceSelectedPlayer={handlePlaceSelectedPlayer}
+                />
+              </>
+            ) : draftSubTeamLineups != null ? (
+              <>
+                <FormationMobileDraftTeamColumns
+                  lineupA={draftSubTeamLineups.A}
+                  lineupB={draftSubTeamLineups.B}
+                  onColumnPress={() => {
+                    openDraftModal();
+                  }}
+                  className="min-h-36"
+                />
+              </>
+            ) : null}
           </section>
-
-          {showDraftOverview ? (
-            <FormationDraftLineupOverview
-              lineupA={draftSubTeamLineups.A}
-              lineupB={draftSubTeamLineups.B}
-              className="min-h-36"
-            />
-          ) : (
-            <FormationBoardSingle
-              quarters={quarters}
-              inHouseBoardSubTeam={inHouseBoardSubTeam}
-              onFormationChangeIntent={
-                formationChangeScope != null ? onFormationChangeIntent : undefined
-              }
-              currentQuarterId={currentQuarterId}
-              selectedPlayer={selectedPlayer}
-              setQuarters={setQuarters}
-              onPositionRemove={onPositionRemove}
-              onPlaceSelectedPlayer={handlePlaceSelectedPlayer}
-            />
-          )}
         </div>
 
         <FormationPlayerListMobile
@@ -304,17 +264,14 @@ export default function FormationBuilderMobile({
           {...(matchType === "INTERNAL"
             ? {
                 formationRosterViewMode,
-                onFormationRosterViewModeChange,
                 getDraftTeam,
-                onDraftTeamSelect: (player: Player, team: InHouseDraftTeamChoice) =>
-                  setDraftTeam?.(player, team),
               }
             : {})}
         />
 
         <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
           {activePlayer ? (
-            <MobileDragOverlayAvatar player={activePlayer} />
+            <FormationDragOverlayAvatar player={activePlayer} />
           ) : null}
         </DragOverlay>
       </div>

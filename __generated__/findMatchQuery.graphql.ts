@@ -48,6 +48,7 @@ export type findMatchQuery$data = {
       readonly longitude: number;
     };
     readonly voteDeadline: any;
+    readonly isFormationDraft: boolean | null | undefined;
   }>;
 };
 export type findMatchQuery = {
@@ -134,6 +135,13 @@ v5 = [
         "args": null,
         "kind": "ScalarField",
         "name": "voteDeadline",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "isFormationDraft",
         "storageKey": null
       },
       {
@@ -281,7 +289,7 @@ return {
     "metadata": {},
     "name": "findMatchQuery",
     "operationKind": "query",
-    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    endTime\n    voteDeadline\n    matchType\n    quarterCount\n    quarterDuration\n    description\n    uniformType\n    teamName\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n      homeUniform\n      awayUniform\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
+    "text": "query findMatchQuery(\n  $createdTeamId: Int!\n) {\n  findMatch(createdTeamId: $createdTeamId) {\n    __typename\n    id\n    matchDate\n    startTime\n    endTime\n    voteDeadline\n    isFormationDraft\n    matchType\n    quarterCount\n    quarterDuration\n    description\n    uniformType\n    teamName\n    createdTeam {\n      __typename\n      id\n      name\n      emblem\n      homeUniform\n      awayUniform\n    }\n    opponentTeam {\n      __typename\n      id\n      name\n      emblem\n    }\n    venue {\n      address\n      latitude\n      longitude\n    }\n  }\n}\n"
   }
 };
 })();

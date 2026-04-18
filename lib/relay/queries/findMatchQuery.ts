@@ -13,6 +13,7 @@ export const FindMatchQuery = graphql`
       startTime
       endTime
       voteDeadline
+      isFormationDraft
       matchType
       quarterCount
       quarterDuration

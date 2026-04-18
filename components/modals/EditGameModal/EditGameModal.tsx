@@ -37,6 +37,7 @@ const editGameModalQuery = graphql`
       startTime
       endTime
       voteDeadline
+      isFormationDraft
       matchType
       quarterCount
       quarterDuration

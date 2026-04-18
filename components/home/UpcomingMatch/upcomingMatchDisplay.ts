@@ -22,11 +22,18 @@ export type UpcomingMatchDisplay = {
 export type MatchForUpcomingDisplay = {
   matchDate: string;
   startTime: string;
+  endTime: string;
+  quarterCount: number;
+  quarterDuration?: number;
+  /** 참석 투표 마감 (GraphQLDateTime ISO 문자열) */
+  voteDeadline?: string | null;
+  /** true면 포메이션 임시저장(미확정) 상태로 간주 */
+  isFormationDraft?: boolean | null;
   matchType: "INTERNAL" | "MATCH";
   createdTeam?: { name?: string | null; emblem?: string | null } | null;
   opponentTeam?: { name?: string | null; emblem?: string | null } | null;
-  /** 테스트/디버깅용 선택 식별자 (Relay 노드에는 id 있음) */
-  id?: string;
+  /** Relay/REST 공통: 숫자 id 또는 글로벌 id 문자열 */
+  id?: string | number;
 };
 
 /**
@@ -37,8 +44,14 @@ export type MatchForUpcomingDisplay = {
 export function buildUpcomingMatchDisplay(
   match: MatchForUpcomingDisplay,
 ): UpcomingMatchDisplay {
-  const matchId = match.id?.trim();
-  if (matchId == null || matchId === "") {
+  const rawId = match.id;
+  const matchId =
+    typeof rawId === "number"
+      ? String(rawId)
+      : typeof rawId === "string"
+        ? rawId.trim()
+        : "";
+  if (matchId === "") {
     throw new Error(
       "buildUpcomingMatchDisplay: 경기 id가 없습니다. Relay findMatch 노드를 전달했는지 확인하세요.",
     );

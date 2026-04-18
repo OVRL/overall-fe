@@ -94,6 +94,20 @@ const FormationChangeLineupModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const FormationMobileTeamDraftModal = dynamic(
+  () => import("./FormationMobileTeamDraftModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
+const FormationCheckLineupModal = dynamic(
+  () => import("./FormationCheckLineupModal/FormationCheckLineupModal"),
+  {
+    ssr: false,
+    loading: () => <ModalLoadingFallback />,
+  },
+);
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -113,4 +127,6 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   EDIT_GAME: EditGameModal,
   PLAYER_SEARCH: PlayerSearchModal,
   FORMATION_CHANGE_LINEUP: FormationChangeLineupModal,
+  FORMATION_MOBILE_TEAM_DRAFT: FormationMobileTeamDraftModal,
+  FORMATION_CHECK_LINEUP: FormationCheckLineupModal,
 } as ModalComponentMap;

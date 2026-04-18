@@ -1,43 +1,18 @@
 "use client";
 
-import React, { useState, useId } from "react";
+import React from "react";
 import {
   DndContext,
-  DragEndEvent,
-  DragStartEvent,
   DragOverlay,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  rectIntersection,
-  CollisionDetection,
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 
 import FormationBuilderDesktop from "./FormationBuilderDesktop";
-import ProfileAvatar from "@/components/ui/ProfileAvatar";
-import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { QuarterData, Player } from "@/types/formation";
 import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
-import { validateInHouseListToBoardDnD } from "@/lib/formation/roster/validateInHouseListToBoardDnD";
-import { toast } from "@/lib/toast";
-
-/** 드래그 오버레이: 명단 행과 동일 `getFormationPlayerProfileAvatarUrls` */
-function DragOverlayPlayerAvatar({ player }: { player: Player }) {
-  const { src, fallbackSrc } = getFormationPlayerProfileAvatarUrls(player);
-
-  return (
-    <div className="rounded-full flex w-12 h-12 items-center justify-center bg-black/30 border-2 border-[#B8FF12]/30 overflow-hidden cursor-grabbing">
-      <ProfileAvatar
-        src={src}
-        fallbackSrc={fallbackSrc}
-        alt={player.name}
-        size={48}
-      />
-    </div>
-  );
-}
+import { useFormationListToBoardDnd } from "@/hooks/formation/useFormationListToBoardDnd";
+import { FormationDragOverlayAvatar } from "./FormationDragOverlayAvatar";
 
 export interface FormationBuilderDesktopWithDndProps {
   scheduleCard: React.ReactNode;
@@ -72,80 +47,28 @@ export interface FormationBuilderDesktopWithDndProps {
 export default function FormationBuilderDesktopWithDnd(
   props: FormationBuilderDesktopWithDndProps,
 ) {
-  const dndId = useId();
-  const [activePlayer, setActivePlayer] = useState<Player | null>(null);
-
-  const customCollisionDetection: CollisionDetection = (args) => {
-    const { pointerCoordinates, droppableContainers, droppableRects } = args;
-    if (!pointerCoordinates) return rectIntersection(args);
-
-    const collisions = [];
-    for (const container of droppableContainers) {
-      const rect = droppableRects.get(container.id);
-      if (rect) {
-        const center = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-        };
-        const dx = pointerCoordinates.x - center.x;
-        const dy = pointerCoordinates.y - center.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 30) {
-          collisions.push({
-            id: container.id,
-            data: { droppableContainer: container, value: distance },
-          });
-        }
-      }
-    }
-    return collisions.sort((a, b) => a.data?.value - b.data?.value);
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-  );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const player = event.active.data.current?.player as Player;
-    if (player) setActivePlayer(player);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActivePlayer(null);
-    const { over } = event;
-    if (!over) return;
-    if (props.formationRosterViewMode === "draft") return;
-
-    const player = event.active.data.current?.player as Player;
-    if (!player) return;
-
-    const dragSourceType = event.active.data.current?.type as string | undefined;
-    const check = validateInHouseListToBoardDnD(
-      props.matchType,
-      props.formationRosterViewMode,
-      dragSourceType,
-      player,
-      props.getDraftTeam,
-    );
-    if (!check.allowed) {
-      toast.error(check.message);
-      return;
-    }
-
-    const quarterId = over.data.current?.quarterId as number;
-    const positionIndex = over.data.current?.positionIndex as number;
-
-    if (quarterId != null && positionIndex !== undefined) {
-      props.assignPlayer(quarterId, positionIndex, player);
-      props.setCurrentQuarterId(quarterId);
-    }
-  };
+  const {
+    dndId,
+    sensors,
+    collisionDetection,
+    activePlayer,
+    handleDragStart,
+    handleDragEnd,
+  } = useFormationListToBoardDnd({
+    matchType: props.matchType ?? "MATCH",
+    formationRosterViewMode: props.formationRosterViewMode,
+    getDraftTeam: props.getDraftTeam,
+    assignPlayer: props.assignPlayer,
+    setCurrentQuarterId: props.setCurrentQuarterId,
+    hitRadiusPx: 30,
+    enableTouchSensor: false,
+  });
 
   return (
     <DndContext
       id={dndId}
       sensors={sensors}
-      collisionDetection={customCollisionDetection}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
@@ -170,7 +93,7 @@ export default function FormationBuilderDesktopWithDnd(
 
       <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
         {activePlayer ? (
-          <DragOverlayPlayerAvatar player={activePlayer} />
+          <FormationDragOverlayAvatar player={activePlayer} />
         ) : null}
       </DragOverlay>
     </DndContext>

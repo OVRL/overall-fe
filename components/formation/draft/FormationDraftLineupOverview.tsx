@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
 import type { Player } from "@/types/formation";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import PositionChip from "@/components/PositionChip";
+import Icon from "@/components/ui/Icon";
+import userAdd from "@/public/icons/user_add.svg";
 import { cn } from "@/lib/utils";
 import { getFormationPlayerProfileAvatarUrls } from "@/lib/formation/formationPlayerProfileAvatarUrls";
 import { getFormationRosterPlayerKey } from "@/lib/formation/roster/formationRosterPlayerKey";
@@ -17,8 +18,49 @@ export interface FormationDraftLineupOverviewProps {
   className?: string;
 }
 
-function DraftPlayerChip({ player }: { player: Player }) {
+export type DraftPlayerChipVariant = "desktop" | "mobile";
+
+export function DraftPlayerChip({
+  player,
+  variant = "desktop",
+}: {
+  player: Player;
+  variant?: DraftPlayerChipVariant;
+}) {
+  if (variant === "mobile") {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2 rounded-xl",
+          "min-w-0 max-w-full",
+        )}
+      >
+        <div className="flex items-center">
+          <div className="flex min-w-0 flex-1 gap-1">
+            <div className="flex items-center px-1.25">
+              <PositionChip
+                position={player.position as Position}
+                variant="outline"
+              />
+            </div>
+            <div className="flex h-8 items-center">
+              <span className="w-18.75 truncate text-sm text-Label-Primary">
+                {player.name}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex h-8 w-8 items-center">
+          <span className="w-13.25 text-center text-sm font-bold text-Label-Secondary">
+            {player.overall}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   const { src, fallbackSrc } = getFormationPlayerProfileAvatarUrls(player);
+
   return (
     <div
       className={cn(
@@ -28,25 +70,52 @@ function DraftPlayerChip({ player }: { player: Player }) {
     >
       <div className="flex items-center">
         <ProfileAvatar src={src} fallbackSrc={fallbackSrc} alt="" size={48} />
-        <div className="min-w-0 flex-1 flex gap-1">
-          <div className="flex items-center">
+        <div className="flex min-w-0 flex-1 gap-1">
+          <div className="flex items-center mx-2">
             <PositionChip
               position={player.position as Position}
               variant="outline"
             />
           </div>
-          <div className="h-8 w-18.75 flex items-center">
-            <span className="text-Label-Primary text-sm truncate ">
+          <div className="flex h-8 w-18.75 items-center">
+            <span className="truncate text-sm text-Label-Primary">
               {player.name}
             </span>
           </div>
         </div>
       </div>
-      <div className="h-8 w-12.25 flex items-center">
-        <span className="text-Label-Secondary font-bold text-sm w-13.25">
+      <div className="flex h-8 w-12.25 items-center">
+        <span className="w-13.25 text-sm font-bold text-Label-Secondary">
           OVR {player.overall}
         </span>
       </div>
+    </div>
+  );
+}
+
+function DraftLineupColumnEmpty() {
+  return (
+    <div
+      className={cn(
+        "flex h-103 w-full shrink-0 flex-col items-center justify-center gap-2 text-gray-500",
+        "px-4 text-center",
+      )}
+      role="status"
+      aria-live="polite"
+      aria-label="선수 명단에서 팀을 선택하세요."
+    >
+      <Icon
+        src={userAdd}
+        alt=""
+        width={20}
+        height={20}
+        className="shrink-0"
+        aria-hidden
+      />
+      <p className="text-sm leading-snug text-gray-500">
+        <span className="block">선수 명단에서</span>
+        <span className="block">팀을 선택하세요.</span>
+      </p>
     </div>
   );
 }
@@ -64,7 +133,7 @@ function TeamColumn({
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-3 rounded-xl border border-border-card bg-surface-card/50 p-3">
       <h3
         className={cn(
-          "shrink-0 font-bold tracking-tight h-12 text-center",
+          "h-12 shrink-0 text-center font-bold tracking-tight",
           accentClassName,
         )}
       >
@@ -79,7 +148,9 @@ function TeamColumn({
               </li>
             ))}
           </ul>
-        ) : null}
+        ) : (
+          <DraftLineupColumnEmpty />
+        )}
       </div>
     </div>
   );

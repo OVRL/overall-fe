@@ -146,7 +146,7 @@
 
 - `MatchFormationModel.tactics` / 입력 타입의 `tactics`는 **JSONObject**로, 서버는 구조를 강제하지 않는다.
 - 본 문서는 **프론트가 읽고 쓰는 권장 계약**이며, 백엔드 마이그레이션 없이 JSON 내용만 맞추면 된다.
-- **행 단위**: `findMatchFormation`은 여러 `MatchFormationModel`을 돌려줄 수 있다. 초기 보드에 쓸 `tactics`는 **확정(`isDraft===false`)이 있으면 그중 id 최대**, 없으면 **드래프트(`isDraft===true`) 중 id 최대** 행에서 읽는다(`lib/formation/pickPrimaryMatchFormationRow.ts`). 확정 저장 분기·임시저장 대상 id는 `docs/formation-roster-view-mode-team-draft.md` §5를 따른다.
+- **행 단위**: `findMatchFormation`은 여러 `MatchFormationModel`을 돌려줄 수 있다. 초기 보드에 쓸 `tactics`는 **확정(`isDraft===false`)이 있으면 그중 id 최대**, 없으면 **드래프트(`isDraft===true`) 중 id 최대** 행에서 읽는다(`lib/formation/pickPrimaryMatchFormationRow.ts`). 확정 저장·자동 저장(디바운스) 대상 id 분기는 `docs/formation-roster-view-mode-team-draft.md` §5를 따른다.
 
 ---
 

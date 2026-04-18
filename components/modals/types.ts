@@ -3,6 +3,7 @@ import { ComponentType } from "react";
 import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
 import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 import type { Player } from "@/types/formation";
+import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
 
 export interface ModalPropsMap {
   // 예시:
@@ -78,6 +79,17 @@ export interface ModalPropsMap {
   FORMATION_CHANGE_LINEUP: {
     onConfirm: () => void;
     onCancel: () => void;
+  };
+  /** 포메이션 빌더(모바일) — 내전 팀 드래프트 전체 참석자 편집 */
+  FORMATION_MOBILE_TEAM_DRAFT: {
+    players: Player[];
+    initialDraftByKey: InHouseDraftTeamByPlayerKey;
+    onApply: (next: InHouseDraftTeamByPlayerKey) => void;
+  };
+  /** 홈 등 — 확정 포메이션 읽기 전용 MATCH LINEUP 모달 */
+  FORMATION_CHECK_LINEUP: {
+    matchId: number;
+    teamId: number;
   };
 }
 

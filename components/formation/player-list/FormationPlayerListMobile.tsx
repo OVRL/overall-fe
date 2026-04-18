@@ -16,8 +16,6 @@ import { useFormationMatchIds } from "@/app/formation/_context/FormationMatchCon
 import { useFormationPlayerList } from "@/hooks/formation/useFormationPlayerList";
 import { useDraggable } from "@dnd-kit/core";
 import QuarterDotsMobile from "../quarter/QuarterDotsMobile";
-import FormationRosterViewModeTabs from "./FormationRosterViewModeTabs";
-import FormationDraftSubTeamToggle from "./FormationDraftSubTeamToggle";
 import type { FormationRosterViewMode } from "@/types/formationRosterViewMode";
 import type { InHouseDraftTeamChoice } from "@/hooks/formation/useInHouseDraftTeamAssignments";
 import {
@@ -27,6 +25,25 @@ import {
 import { filterPlayersForInHouseLineupTab } from "@/lib/formation/roster/filterPlayersForInHouseLineupTab";
 import { sortPlayersForFormationLineupList } from "@/lib/formation/roster/sortPlayersForFormationLineupList";
 import { FORMATION_PLAYER_LIST_POSITION_TABS } from "@/constants/formationPlayerListTabs";
+
+function DraftTeamCornerBadge({ team }: { team: InHouseDraftTeamChoice }) {
+  return (
+    <div
+      className={cn(
+        "absolute top-0 right-0 flex size-5 items-center justify-center rounded-full border-2 border-surface-card text-[0.625rem] font-bold leading-none",
+        team === null &&
+          "border-Position-MF-Green bg-Position-MF-Green/30 text-Position-MF-Green",
+        team === "A" &&
+          "border-Position-FW-Red bg-Position-FW-Red/30 text-Position-FW-Red",
+        team === "B" &&
+          "border-Position-DF-Blue bg-Position-DF-Blue/30 text-Position-DF-Blue",
+      )}
+      aria-hidden
+    >
+      {team === null ? "−" : team}
+    </div>
+  );
+}
 
 export interface FormationPlayerListMobileProps {
   players: Player[];
@@ -42,9 +59,7 @@ export interface FormationPlayerListMobileProps {
   getAssignedQuarterIdsForPlayer?: (playerId: number) => number[];
   matchType?: "MATCH" | "INTERNAL";
   formationRosterViewMode?: FormationRosterViewMode;
-  onFormationRosterViewModeChange?: (mode: FormationRosterViewMode) => void;
   getDraftTeam?: (player: Player) => InHouseDraftTeamChoice;
-  onDraftTeamSelect?: (player: Player, team: InHouseDraftTeamChoice) => void;
 }
 
 /** 모바일용 컴팩트 선수 카드 — 라인업(드래그) / 팀 드래프트(A/B) 레이아웃 분기 */
@@ -54,20 +69,24 @@ function PlayerCardMobile({
   assignedQuarterIds,
   isSelected,
   disableDrag,
-  draftMode,
+  draftTeamBadge,
   draftTeam,
-  onDraftTeamChange,
 }: {
   player: Player;
   onSelect: (player: Player) => void;
   assignedQuarterIds?: number[];
   isSelected?: boolean;
   disableDrag?: boolean;
-  draftMode?: boolean;
+  /** 팀 드래프트: 아바타 모서리에 A/B/− 표시(모바일) */
+  draftTeamBadge?: boolean;
   draftTeam?: InHouseDraftTeamChoice;
-  onDraftTeamChange?: (team: InHouseDraftTeamChoice) => void;
 }) {
   const hasAssignment = assignedQuarterIds && assignedQuarterIds.length > 0;
+  /** A/B 라인업: 쿼터 도트만. 팀 드래프트: 팀 배지만(둘 다 켜지지 않음). */
+  const showQuarterDots = hasAssignment && !draftTeamBadge;
+  const showDraftBadge = Boolean(draftTeamBadge);
+  const selectionVisual =
+    Boolean(isSelected) && !draftTeamBadge;
   const rosterKey = getFormationRosterPlayerKey(player);
 
   const { src: avatarSrc, fallbackSrc: avatarFallbackSrc } =
@@ -79,7 +98,7 @@ function PlayerCardMobile({
       type: "ListPlayer",
       player,
     },
-    disabled: Boolean(disableDrag || draftMode),
+    disabled: Boolean(disableDrag || draftTeamBadge),
   });
 
   const cardInner = (
@@ -94,42 +113,18 @@ function PlayerCardMobile({
       <span className="text-Label-Primary text-sm text-center line-clamp-1 w-18.75 truncate">
         {player.name}
       </span>
-      {hasAssignment && !draftMode && (
+      {showQuarterDots ? (
         <div className="absolute top-0.5 right-0.5">
           <QuarterDotsMobile quarterIds={assignedQuarterIds!} />
         </div>
-      )}
+      ) : null}
+      {showDraftBadge ? (
+        <div className="absolute top-0 right-0">
+          <DraftTeamCornerBadge team={draftTeam ?? null} />
+        </div>
+      ) : null}
     </>
   );
-
-  if (draftMode && onDraftTeamChange) {
-    return (
-      <div
-        ref={setNodeRef}
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "shrink-0 flex flex-col items-center gap-2 rounded-lg p-2 min-w-22 relative",
-          isSelected && "bg-surface-secondary border border-Fill_AccentPrimary",
-        )}
-      >
-        <button
-          type="button"
-          onClick={() => onSelect(player)}
-          className="flex flex-col items-center gap-2 w-full touch-manipulation relative"
-          aria-pressed={isSelected}
-          aria-label={player.name}
-        >
-          {cardInner}
-        </button>
-        <FormationDraftSubTeamToggle
-          value={draftTeam ?? null}
-          onChange={onDraftTeamChange}
-          playerName={player.name}
-        />
-      </div>
-    );
-  }
 
   return (
     <button
@@ -137,20 +132,26 @@ function PlayerCardMobile({
       {...attributes}
       {...listeners}
       type="button"
-      onClick={() => onSelect(player)}
+      onClick={() => {
+        if (!draftTeamBadge) onSelect(player);
+      }}
+      aria-disabled={draftTeamBadge ? true : undefined}
       className={cn(
-        "shrink-0 flex flex-col items-center gap-2 transition-colors text-left rounded-lg p-2 min-w-18.75 relative touch-none",
-        isSelected && "bg-surface-card border border-Fill_AccentPrimary",
+        "shrink-0 flex flex-col items-center gap-2 transition-colors text-left rounded-lg p-2 min-w-18.75 relative touch-manipulation",
+        draftTeamBadge && "cursor-default",
+        selectionVisual && "bg-surface-card border border-Fill_AccentPrimary",
         isDragging && "opacity-50",
         disableDrag && "opacity-100",
       )}
-      aria-pressed={isSelected}
+      aria-pressed={selectionVisual ? true : false}
       aria-label={
-        hasAssignment
-          ? `${player.name} (${assignedQuarterIds!.length}개 쿼터 배치됨)`
-          : isSelected
-            ? `${player.name} 선택됨, 다시 탭하면 선택 해제`
-            : player.name
+        draftTeamBadge
+          ? `${player.name}, 팀 드래프트 명단`
+          : hasAssignment
+            ? `${player.name} (${assignedQuarterIds!.length}개 쿼터 배치됨)`
+            : isSelected
+              ? `${player.name} 선택됨, 다시 탭하면 선택 해제`
+              : player.name
       }
     >
       {cardInner}
@@ -167,9 +168,7 @@ const FormationPlayerListMobile = ({
   getAssignedQuarterIdsForPlayer,
   matchType = "MATCH",
   formationRosterViewMode,
-  onFormationRosterViewModeChange,
   getDraftTeam,
-  onDraftTeamSelect,
 }: FormationPlayerListMobileProps) => {
   const { openModal } = useModal("FORMATION_MATCH_ATTENDANCE_PLAYER");
   const { matchId, teamId } = useFormationMatchIds();
@@ -199,11 +198,10 @@ const FormationPlayerListMobile = ({
 
   const draftListDragDisabled =
     matchType === "INTERNAL" && formationRosterViewMode === "draft";
-  const draftRowMode =
+  const draftTeamBadgeMode =
     matchType === "INTERNAL" &&
     formationRosterViewMode === "draft" &&
-    getDraftTeam != null &&
-    onDraftTeamSelect != null;
+    getDraftTeam != null;
 
   return (
     <section
@@ -218,9 +216,7 @@ const FormationPlayerListMobile = ({
             aria-hidden
             className="shrink-0"
           />
-          <h3 className="text-[#f7f7f8] font-semibold leading-6">
-            참석 선수 명단
-          </h3>
+          <h3 className="text-[#f7f7f8] font-semibold leading-6">선수 명단</h3>
         </div>
         <div>
           <Button
@@ -235,17 +231,6 @@ const FormationPlayerListMobile = ({
           </Button>
         </div>
       </div>
-
-      {matchType === "INTERNAL" &&
-        formationRosterViewMode != null &&
-        onFormationRosterViewModeChange != null && (
-          <div className="px-4 pb-3">
-            <FormationRosterViewModeTabs
-              value={formationRosterViewMode}
-              onChange={onFormationRosterViewModeChange}
-            />
-          </div>
-        )}
 
       <div className="flex items-center gap-3 px-4 pb-3">
         {FORMATION_PLAYER_LIST_POSITION_TABS.map((tab) => (
@@ -281,13 +266,8 @@ const FormationPlayerListMobile = ({
                     isSameFormationRosterPlayer(selectedPlayer, player)
                   }
                   disableDrag={draftListDragDisabled}
-                  draftMode={draftRowMode}
+                  draftTeamBadge={draftTeamBadgeMode}
                   draftTeam={getDraftTeam?.(player)}
-                  onDraftTeamChange={
-                    draftRowMode
-                      ? (team) => onDraftTeamSelect!(player, team)
-                      : undefined
-                  }
                 />
               );
             })

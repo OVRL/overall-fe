@@ -4,13 +4,14 @@ import { useLazyLoadQuery } from "react-relay";
 import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
 import { FindMatchQuery } from "@/lib/relay/queries/findMatchQuery";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { computeHomeUpcomingMatchLayout } from "@/utils/match/computeHomeUpcomingMatchLayout";
 import type { MatchForUpcomingDisplay } from "./upcomingMatchDisplay";
-import { buildUpcomingMatchDisplay } from "./upcomingMatchDisplay";
-import { pickSoonestUpcomingMatch } from "@/utils/match/pickSoonestMatch";
+import HomeUpcomingInviteCopyCard from "./HomeUpcomingInviteCopyCard";
 import NoUpcomingMatch from "./NoUpcomingMatch";
 import OnboardingUpcomingMatch from "./OnboardingUpcomingMatch";
 import UpcomingMatchDesktop from "./UpcomingMatchDesktop";
 import UpcomingMatchMobile from "./UpcomingMatchMobile";
+import { useInviteCodeForTeam } from "./useInviteCodeForTeam";
 
 /** 다가오는 경기 없을 때: 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch */
 function NoMatchContent({
@@ -32,8 +33,7 @@ function NoMatchContent({
 }
 
 /**
- * Relay 스토어에서 findMatch를 읽어 다가오는 경기 1건을 표시
- * 경기 없을 때 팀원 1명이면 온보딩, 2명 이상이면 NoUpcomingMatch.
+ * Relay 스토어에서 findMatch를 읽어 홈 경기 카드·우선 CTA를 표시합니다.
  */
 export default function UpcomingMatchWithData() {
   const { selectedTeamIdNum, isSoloTeam } = useSelectedTeamId();
@@ -65,42 +65,72 @@ function UpcomingMatchWithQuery({
 
   const matches = (data?.findMatch ??
     []) as unknown as MatchForUpcomingDisplay[];
-  const soonest = pickSoonestUpcomingMatch(matches);
-  const display = soonest ? buildUpcomingMatchDisplay(soonest) : null;
+  const layout = computeHomeUpcomingMatchLayout(matches);
 
-  // 개발 시 API(스토어) 기준 목록과 pickSoonestUpcomingMatch 선택값 확인 (브라우저 콘솔 + RSC 1차 렌더 시 서버 로그)
+  const { copyCode } = useInviteCodeForTeam(createdTeamId);
+  const onCopyTeamCode = () => copyCode();
+
   if (process.env.NODE_ENV === "development") {
     const runtime = typeof window !== "undefined" ? "client" : "server";
-    // pickedSoonest: pickSoonestUpcomingMatch()가 고른 1건 (현재 시각 이후 시작만)
-    console.log("[UpcomingMatchWithData] findMatch Relay 데이터", {
+    console.log("[UpcomingMatchWithData] findMatch · 홈 레이아웃", {
       runtime,
       createdTeamId,
       rawCount: matches.length,
-      matches: matches.map((m) => ({
-        id: m.id,
-        matchDate: m.matchDate,
-        startTime: m.startTime,
-        matchType: m.matchType,
-      })),
-      pickedSoonest: soonest
-        ? {
-            id: soonest.id,
-            matchDate: soonest.matchDate,
-            startTime: soonest.startTime,
-            matchType: soonest.matchType,
-          }
-        : null,
+      layoutKind: layout.kind,
     });
   }
 
-  if (display == null) {
+  if (layout.kind === "empty") {
     return <NoMatchContent isSoloTeam={isSoloTeam} teamId={createdTeamId} />;
   }
 
+  if (layout.kind === "copy_only") {
+    if (isSoloTeam) {
+      return (
+        <NoMatchContent isSoloTeam={isSoloTeam} teamId={createdTeamId} />
+      );
+    }
+    return (
+      <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
+        <HomeUpcomingInviteCopyCard teamId={createdTeamId} />
+      </div>
+    );
+  }
+
+  const splitMomBanner =
+    layout.kind === "split"
+      ? {
+          display: layout.topMom.display,
+          momHref: layout.topMom.momHref,
+        }
+      : null;
+
+  const mainPanel =
+    layout.kind === "split"
+      ? {
+          display: layout.bottom.display,
+          primary: layout.bottom.primary,
+          sectionTitle: layout.bottom.sectionTitle,
+        }
+      : {
+          display: layout.display,
+          primary: layout.primary,
+          sectionTitle: layout.sectionTitle,
+          teaserDisplay: layout.teaserDisplay ?? null,
+        };
+
   return (
-    <div className="bg-surface-card rounded-[1.25rem] p-4 border border-border-card">
-      <UpcomingMatchMobile display={display} />
-      <UpcomingMatchDesktop display={display} />
+    <div className="bg-surface-card rounded-[1.25rem] p-4 md:p-6 border border-border-card">
+      <UpcomingMatchMobile
+        splitMomBanner={splitMomBanner}
+        main={mainPanel}
+        onCopyTeamCode={onCopyTeamCode}
+      />
+      <UpcomingMatchDesktop
+        splitMomBanner={splitMomBanner}
+        main={mainPanel}
+        onCopyTeamCode={onCopyTeamCode}
+      />
     </div>
   );
 }

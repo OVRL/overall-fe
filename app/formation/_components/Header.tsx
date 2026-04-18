@@ -161,10 +161,11 @@ const Header = (props?: HeaderProps) => {
           className="p-3 transition-all cursor-pointer hover:bg-gray-100/10 active:scale-95"
           aria-label="뒤로 가기"
         >
-          <Icon src={arrowBack} alt="뒤로 가기" width={24} height={24} />
+          <Icon src={arrowBack} alt="뒤로 가기" width={24} height={24} nofill />
         </button>
         <p className="text-[#F7F8F8] font-semibold leading-6">
-          모든 변경사항은 저장 버튼을 눌러야 반영됩니다.
+          라인업·팀 드래프트는 자동 저장됩니다. 경기 반영은 「포메이션 저장하기」를
+          눌러 주세요.
         </p>
       </div>
       <div className="flex items-center gap-4">

@@ -1,8 +1,11 @@
 import { RegisterGameValues } from "@/components/modals/RegisterGameModal/schema";
 import { format } from "date-fns";
+import type { EditGameModalQuery$data } from "@/__generated__/EditGameModalQuery.graphql";
 import type { findMatchQuery$data } from "@/__generated__/findMatchQuery.graphql";
 
-type MatchNode = findMatchQuery$data["findMatch"][0];
+type MatchNode =
+  | findMatchQuery$data["findMatch"][number]
+  | EditGameModalQuery$data["findMatch"][number];
 
 export function mapFindMatchResultToRegisterGameValues(
   match: MatchNode,

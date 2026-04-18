@@ -1,5 +1,7 @@
 import type { MatchForUpcomingDisplay } from "@/components/home/UpcomingMatch/upcomingMatchDisplay";
 import {
+  pickMostRecentlyEndedMatch,
+  pickSoonestAmongNotEndedMatch,
   pickSoonestMatch,
   pickSoonestUpcomingMatch,
 } from "../pickSoonestMatch";
@@ -9,11 +11,14 @@ function 경기(
   matchDate: string,
   startTime: string,
   id?: string,
+  endTime = "23:59:00",
 ): MatchForUpcomingDisplay {
   return {
     id,
     matchDate,
     startTime,
+    endTime,
+    quarterCount: 4,
     matchType: "MATCH",
     createdTeam: null,
     opponentTeam: null,
@@ -160,5 +165,36 @@ describe("pickSoonestUpcomingMatch", () => {
 
   it("빈 배열이면 null을 반환한다", () => {
     expect(pickSoonestUpcomingMatch([], 기준시각)).toBeNull();
+  });
+});
+
+describe("pickSoonestAmongNotEndedMatch", () => {
+  const 기준 = new Date(2025, 2, 20, 11, 0, 0, 0).getTime();
+
+  it("진행 중(end > now)인 경기가 있으면 시작이 가장 이른 걸 고른다", () => {
+    const 목록 = [
+      경기("2025-03-20", "10:00:00", "진행중", "12:00:00"),
+      경기("2025-03-21", "09:00:00", "내일"),
+    ];
+    const 결과 = pickSoonestAmongNotEndedMatch(목록, 기준);
+    expect(결과?.id).toBe("진행중");
+  });
+
+  it("모두 종료(end <= now)면 null", () => {
+    const 목록 = [경기("2025-03-19", "10:00:00", "어제", "12:00:00")];
+    expect(pickSoonestAmongNotEndedMatch(목록, 기준)).toBeNull();
+  });
+});
+
+describe("pickMostRecentlyEndedMatch", () => {
+  const 기준 = new Date(2025, 2, 20, 11, 0, 0, 0).getTime();
+
+  it("종료된 경기 중 종료가 가장 늦은 1건", () => {
+    const 목록 = [
+      경기("2025-03-18", "10:00:00", "더과거", "12:00:00"),
+      경기("2025-03-19", "10:00:00", "최근", "14:00:00"),
+    ];
+    const 결과 = pickMostRecentlyEndedMatch(목록, 기준);
+    expect(결과?.id).toBe("최근");
   });
 });

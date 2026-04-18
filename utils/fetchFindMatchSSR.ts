@@ -8,6 +8,8 @@ const FIND_MATCH_QUERY = `
       matchDate
       startTime
       endTime
+      voteDeadline
+      isFormationDraft
       matchType
       quarterCount
       quarterDuration
@@ -47,6 +49,8 @@ export type MatchForUpcoming = {
   matchDate: string;
   startTime: string;
   endTime: string;
+  voteDeadline?: string | null;
+  isFormationDraft?: boolean | null;
   matchType: "INTERNAL" | "MATCH";
   quarterCount: number;
   quarterDuration: number;
