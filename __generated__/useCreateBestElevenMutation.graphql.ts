@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<476497b3e55318f645b20af8f78f193b>>
+ * @generated SignedSource<<3cfde846f109267a2792879001cd1048>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,9 +9,8 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type CreateBestElevenInput = {
-  position: Position;
+  tactics?: any | null | undefined;
   teamId: number;
   userId: number;
 };
@@ -21,7 +20,7 @@ export type useCreateBestElevenMutation$variables = {
 export type useCreateBestElevenMutation$data = {
   readonly createBestEleven: {
     readonly id: number;
-    readonly position: Position;
+    readonly tactics: any | null | undefined;
     readonly teamId: number;
     readonly userId: number;
   };
@@ -65,7 +64,7 @@ v1 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "position",
+        "name": "tactics",
         "storageKey": null
       },
       {
@@ -104,16 +103,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "afbc4ba5d18fb976f43f7e6f2ed0ecb3",
+    "cacheID": "146372dbd69581020c10049b33704bbc",
     "id": null,
     "metadata": {},
     "name": "useCreateBestElevenMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateBestElevenMutation(\n  $input: CreateBestElevenInput!\n) {\n  createBestEleven(input: $input) {\n    id\n    position\n    teamId\n    userId\n  }\n}\n"
+    "text": "mutation useCreateBestElevenMutation(\n  $input: CreateBestElevenInput!\n) {\n  createBestEleven(input: $input) {\n    id\n    tactics\n    teamId\n    userId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6fe80a5a926ec257576afabd5615b8cd";
+(node as any).hash = "bca82871a92d0497a1497c281b806d41";
 
 export default node;

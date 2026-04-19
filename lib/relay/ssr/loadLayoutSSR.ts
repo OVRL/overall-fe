@@ -20,6 +20,7 @@ import {
   EMPTY_LAYOUT_STATE,
   type LayoutState,
 } from "./layoutState";
+import { buildHomeUpcomingMatchLayoutSnapshot } from "./buildHomeUpcomingMatchLayoutSnapshot";
 import {
   isSameTeamId,
   normalizeRelayTeamGlobalId,
@@ -140,12 +141,25 @@ export async function loadLayoutSSR(
       matchObs,
     )) as findMatchQuery$data | undefined;
 
+    const snapshotNow = Date.now();
+    const homeUpcomingMatchLayoutSnapshot =
+      buildHomeUpcomingMatchLayoutSnapshot(
+        initialSelectedTeamIdNum,
+        matchData?.findMatch,
+        snapshotNow,
+      );
+    layoutStateWithNum = {
+      ...layoutStateWithNum,
+      homeUpcomingMatchLayoutSnapshot,
+    };
+
     // 개발 환경에서만: GraphQL findMatch 네트워크 응답 원본 (터미널 = next dev 서버 로그)
     if (process.env.NODE_ENV === "development") {
       const list = matchData?.findMatch ?? [];
       console.log("[SSR loadLayoutSSR] findMatch API 응답", {
         createdTeamId: initialSelectedTeamIdNum,
         count: list.length,
+        layoutKind: homeUpcomingMatchLayoutSnapshot.layout.kind,
         matches: list.map((m) => ({
           id: m.id,
           matchDate: m.matchDate,
@@ -251,6 +265,7 @@ function deriveLayoutState(
     initialSelectedTeamIdFromSingleTeam,
     initialIsSoloTeam: false,
     initialSelectedTeamMemberRole,
+    homeUpcomingMatchLayoutSnapshot: null,
   };
 }
 

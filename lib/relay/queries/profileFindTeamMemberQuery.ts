@@ -15,6 +15,10 @@ export const ProfileFindTeamMemberQuery = graphql`
       profileImg
       userId
       role
+      foot
+      introduction
+      preferredNumber
+      preferredPosition
       team {
         __typename
         id
@@ -22,8 +26,18 @@ export const ProfileFindTeamMemberQuery = graphql`
         emblem
       }
       user {
+        id
         name
+        birthDate
+        profileImage
+        activityArea
+        favoritePlayer
+        foot
+        preferredNumber
+        mainPosition
+        subPositions
         region {
+          code
           sidoName
           siggName
           name

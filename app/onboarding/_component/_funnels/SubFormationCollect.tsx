@@ -42,7 +42,7 @@ const SubFormationCollect = ({
                 setSubPositions(newPositions);
               }
             }}
-            className="w-full h-auto md:max-w-layout md:h-120"
+            className="h-auto w-full md:max-w-layout"
             multiSelect={true}
             disabledPositions={mainPosition ? [mainPosition] : []}
           />

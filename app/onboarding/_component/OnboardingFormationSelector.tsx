@@ -16,8 +16,6 @@ interface OnboardingFormationSelectorProps {
   multiSelect?: boolean;
 }
 
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-
 /**
  * 절대적인 경기장 위 좌표 (0.0 ~ 1.0)
  * 기존 모바일 크롭(cropX=0.24, width=0.52) 기준 좌표를 역산하여 정의함.
@@ -40,8 +38,8 @@ const BASE_FIELD_COORDINATES: Partial<
   GK: { top: 0.8743, left: 0.5026 },
 } as const;
 
-const MOBILE_CROP = { x: 0.24, y: 0.1, width: 0.52, height: 0.87 };
-const DESKTOP_CROP = { x: 0, y: 0.1, width: 1.0, height: 0.87 };
+/** 좌표·칩 정렬이 이 크롭 기준으로 맞춰져 있어 PC에서도 동일하게 유지한다. */
+const VIEW_CROP = { x: 0.24, y: 0.1, width: 0.52, height: 0.87 };
 
 const OnboardingFormationSelector = ({
   value,
@@ -50,9 +48,6 @@ const OnboardingFormationSelector = ({
   disabledPositions = [],
   multiSelect = false,
 }: OnboardingFormationSelectorProps) => {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
-  const currentCrop = (isDesktop ?? false) ? DESKTOP_CROP : MOBILE_CROP;
-
   const handlePositionClick = (pos: Position) => {
     if (multiSelect) {
       if (value.includes(pos)) {
@@ -67,7 +62,7 @@ const OnboardingFormationSelector = ({
 
   const getRelativePosition = (
     fieldPos: { top: number; left: number },
-    crop: typeof MOBILE_CROP,
+    crop: typeof VIEW_CROP,
   ) => {
     const relativeLeft = (fieldPos.left - crop.x) / crop.width;
     const relativeTop = (fieldPos.top - crop.y) / crop.height;
@@ -78,15 +73,15 @@ const OnboardingFormationSelector = ({
   };
 
   const aspectRatio =
-    (currentCrop.width * FIELD_WIDTH) / (currentCrop.height * FIELD_HEIGHT);
+    (VIEW_CROP.width * FIELD_WIDTH) / (VIEW_CROP.height * FIELD_HEIGHT);
 
   return (
     <div className={cn("relative", className)} style={{ aspectRatio }}>
       <div className="relative w-full h-full rounded-3xl overflow-hidden border border-transparent bg-card-bg">
         <ObjectField
-          crop={currentCrop}
+          crop={VIEW_CROP}
           autoAspect={false}
-          className={cn("w-full", (isDesktop ?? false) ? "h-109" : "h-full")}
+          className="h-full w-full"
         >
           {" "}
           <div className="absolute inset-0 pointer-events-none  h-9/10 top-0">
@@ -95,7 +90,7 @@ const OnboardingFormationSelector = ({
                 const isDisabled = disabledPositions.includes(pos as Position);
                 const styleCoords = getRelativePosition(
                   fieldCoords,
-                  currentCrop,
+                  VIEW_CROP,
                 );
 
                 return (

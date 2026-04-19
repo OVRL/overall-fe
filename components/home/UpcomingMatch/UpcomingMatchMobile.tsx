@@ -20,7 +20,9 @@ export type UpcomingMatchMobilePanel = {
   display: UpcomingMatchDisplay;
   primary: HomePrimaryCta;
   sectionTitle: string;
-  teaserDisplay?: UpcomingMatchDisplay | null;
+  headerRowClassName?: string;
+  headerIconClassName?: string;
+  showFormationSetup?: boolean;
 };
 
 export type UpcomingMatchMobileProps = {
@@ -79,18 +81,24 @@ function MobileUpcomingMatchActionsWithCapabilities({
   primary,
   onAttendanceVote,
   onCopyTeamCode,
+  showFormationSetupOverride,
 }: {
   userId: number;
   formationHref: string;
   primary: HomePrimaryCta;
   onAttendanceVote: () => void;
   onCopyTeamCode: () => void;
+  showFormationSetupOverride?: boolean;
 }) {
   const { showRegisterGame } = useTeamManagementCapabilitiesForUser(userId);
+  const showFormationSetup =
+    showFormationSetupOverride !== undefined
+      ? showFormationSetupOverride
+      : showRegisterGame;
   return (
     <MobileUpcomingMatchActions
       formationHref={formationHref}
-      showFormationSetup={showRegisterGame}
+      showFormationSetup={showFormationSetup}
       primary={primary}
       onAttendanceVote={onAttendanceVote}
       onCopyTeamCode={onCopyTeamCode}
@@ -110,23 +118,25 @@ function MobileMainSection({
   onCopyTeamCode: () => void;
 }) {
   const formationHref = formationHrefFromDisplay(panel.display);
+  const formationFromPanel = panel.showFormationSetup;
+  const showFormationWhenLoggedOut = formationFromPanel ?? false;
+  const showFormationFallback =
+    formationFromPanel !== undefined ? formationFromPanel : false;
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="text-center">
-        <MatchHeader title={panel.sectionTitle} />
+        <MatchHeader
+          title={panel.sectionTitle}
+          rowClassName={panel.headerRowClassName}
+          iconClassName={panel.headerIconClassName}
+        />
         <MatchInfoMobile display={panel.display} />
-        {panel.teaserDisplay ? (
-          <p className="mt-3 text-xs text-Label-Tertiary px-2">
-            다음: {panel.teaserDisplay.formattedDateTime} ·{" "}
-            {panel.teaserDisplay.homeTeam.name} vs{" "}
-            {panel.teaserDisplay.awayTeam.name}
-          </p>
-        ) : null}
       </div>
       {userId == null ? (
         <MobileUpcomingMatchActions
           formationHref={formationHref}
-          showFormationSetup={false}
+          showFormationSetup={showFormationWhenLoggedOut}
           primary={panel.primary}
           onAttendanceVote={onAttendanceVote}
           onCopyTeamCode={onCopyTeamCode}
@@ -136,7 +146,7 @@ function MobileMainSection({
           fallback={
             <MobileUpcomingMatchActions
               formationHref={formationHref}
-              showFormationSetup={false}
+              showFormationSetup={showFormationFallback}
               primary={panel.primary}
               onAttendanceVote={onAttendanceVote}
               onCopyTeamCode={onCopyTeamCode}
@@ -149,6 +159,7 @@ function MobileMainSection({
             primary={panel.primary}
             onAttendanceVote={onAttendanceVote}
             onCopyTeamCode={onCopyTeamCode}
+            showFormationSetupOverride={formationFromPanel}
           />
         </Suspense>
       )}

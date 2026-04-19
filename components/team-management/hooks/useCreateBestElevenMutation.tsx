@@ -8,14 +8,14 @@ const createBestElevenMutation = graphql`
   mutation useCreateBestElevenMutation($input: CreateBestElevenInput!) {
     createBestEleven(input: $input) {
       id
-      position
+      tactics
       teamId
       userId
     }
   }
 `;
 
-/** GraphQL `CreateBestElevenInput`과 동일 — `types/position`의 `"용병"` 등 enum 밖 값은 불가 */
+/** GraphQL `CreateBestElevenInput`과 동일 */
 export type CreateBestElevenMutationInput = CreateBestElevenInput;
 
 export function useCreateBestElevenMutation() {

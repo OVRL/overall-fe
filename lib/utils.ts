@@ -79,6 +79,15 @@ export function getValidImageSrc(
   if (src == null || typeof src !== "string") return fallback;
   let t = src.trim();
   if (!t) return fallback;
+  /** 로컬 미리보기·인라인 이미지는 그대로 통과 (이후 로직에서 `:` 때문에 잘못된 경로로 바뀌는 것 방지) */
+  if (t.startsWith("blob:") || t.startsWith("data:")) {
+    try {
+      new URL(t);
+      return t;
+    } catch {
+      return fallback;
+    }
+  }
   t = fixMissingSlashAfterCdnHost(t);
   if (t.startsWith("http://") || t.startsWith("https://")) {
     try {
@@ -96,4 +105,9 @@ export function getValidImageSrc(
     return `/${t.replace(/^\.\//, "")}`;
   }
   return fallback;
+}
+
+/** `next/image`가 최적화 단계에서 `URL` 생성에 실패하는 `blob:`·`data:` URL */
+export function isNextImageUnoptimizedSrc(src: string): boolean {
+  return src.startsWith("blob:") || src.startsWith("data:");
 }

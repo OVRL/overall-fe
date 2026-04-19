@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a06339f4ceb469f262d6e166801a8886>>
+ * @generated SignedSource<<db20a0701ee031cfb3f358fab4852144>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type EditGameModalQuery$data = {
     readonly description: string | null | undefined;
     readonly endTime: string;
     readonly id: number;
+    readonly isFormationDraft: boolean | null | undefined;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
@@ -48,7 +49,6 @@ export type EditGameModalQuery$data = {
       readonly longitude: number;
     };
     readonly voteDeadline: any;
-    readonly isFormationDraft: boolean | null | undefined;
   }>;
 };
 export type EditGameModalQuery = {
@@ -284,7 +284,7 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "cde2ca9076989a83026386f92106d114",
+    "cacheID": "d547d963525da69a3f7421e1b80cce87",
     "id": null,
     "metadata": {},
     "name": "EditGameModalQuery",
@@ -294,6 +294,6 @@ return {
 };
 })();
 
-(node as any).hash = "f2aee220499050569c966ef8a7e94e24";
+(node as any).hash = "2c8e434afa068e2a2140995e31373ef5";
 
 export default node;

@@ -14,6 +14,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { headers, cookies } from "next/headers";
 import { UserInitProvider } from "@/components/providers/UserInitProvider";
 import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
+import { HomeUpcomingMatchLayoutSnapshotProvider } from "@/components/providers/HomeUpcomingMatchLayoutSnapshotProvider";
 import { SELECTED_TEAM_ID_COOKIE_KEY } from "@/lib/cookie/selectedTeamId";
 import { loadLayoutSSR } from "@/lib/relay/ssr/loadLayoutSSR";
 import { EMPTY_LAYOUT_STATE } from "@/lib/relay/ssr/layoutState";
@@ -142,24 +143,28 @@ export default async function RootLayout({
                 userId={layoutState.userId}
                 initialUser={layoutState.initialUser}
               >
-                <SelectedTeamProvider
-                  initialSelectedTeamId={layoutState.initialSelectedTeamId}
-                  initialSelectedTeamIdNum={
-                    layoutState.initialSelectedTeamIdNum
-                  }
-                  initialSelectedTeamName={layoutState.initialSelectedTeamName}
-                  initialSelectedTeamImageUrl={
-                    layoutState.initialSelectedTeamImageUrl
-                  }
-                  initialIsSoloTeam={layoutState.initialIsSoloTeam}
+                <HomeUpcomingMatchLayoutSnapshotProvider
+                  snapshot={layoutState.homeUpcomingMatchLayoutSnapshot}
                 >
-                  <GlobalPortalProvider>
-                    <div id="modal-root"></div>
-                    <PageTransition>{children}</PageTransition>
-                    <Modals />
-                  </GlobalPortalProvider>
-                  <Toaster />
-                </SelectedTeamProvider>
+                  <SelectedTeamProvider
+                    initialSelectedTeamId={layoutState.initialSelectedTeamId}
+                    initialSelectedTeamIdNum={
+                      layoutState.initialSelectedTeamIdNum
+                    }
+                    initialSelectedTeamName={layoutState.initialSelectedTeamName}
+                    initialSelectedTeamImageUrl={
+                      layoutState.initialSelectedTeamImageUrl
+                    }
+                    initialIsSoloTeam={layoutState.initialIsSoloTeam}
+                  >
+                    <GlobalPortalProvider>
+                      <div id="modal-root"></div>
+                      <PageTransition>{children}</PageTransition>
+                      <Modals />
+                    </GlobalPortalProvider>
+                    <Toaster />
+                  </SelectedTeamProvider>
+                </HomeUpcomingMatchLayoutSnapshotProvider>
               </UserInitProvider>
             </RelayProvider>
           </ThemeProvider>

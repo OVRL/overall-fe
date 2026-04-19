@@ -34,7 +34,7 @@ const bestElevenQuery = graphql`
     }
     findBestEleven(teamId: $teamId) {
       id
-      position
+      tactics
       teamId
       userId
     }
@@ -50,6 +50,6 @@ export const useBestElevenQuery = (teamId: number) => {
   return useLazyLoadQuery<QueryType>(
     bestElevenQuery,
     { teamId },
-    { fetchPolicy: "network-only" },
+    { fetchPolicy: "store-or-network" },
   );
 };

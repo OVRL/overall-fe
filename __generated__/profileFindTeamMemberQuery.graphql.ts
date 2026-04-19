@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6336e10df0d89c624aaef579c5b982ad>>
+ * @generated SignedSource<<15c56d56ab7404da3a8907b09b707c21>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,8 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type Foot = "B" | "L" | "R" | "%future added value";
+export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
 export type profileFindTeamMemberQuery$variables = {
   userId: number;
@@ -16,7 +18,9 @@ export type profileFindTeamMemberQuery$variables = {
 export type profileFindTeamMemberQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
+    readonly foot: Foot | null | undefined;
     readonly id: number;
+    readonly introduction: string | null | undefined;
     readonly joinedAt: any;
     readonly overall: {
       readonly appearances: number;
@@ -35,6 +39,8 @@ export type profileFindTeamMemberQuery$data = {
       readonly userId: number;
       readonly winRate: number;
     } | null | undefined;
+    readonly preferredNumber: number | null | undefined;
+    readonly preferredPosition: Position | null | undefined;
     readonly profileImg: string | null | undefined;
     readonly role: Role;
     readonly team: {
@@ -45,14 +51,24 @@ export type profileFindTeamMemberQuery$data = {
     } | null | undefined;
     readonly teamId: number;
     readonly user: {
+      readonly activityArea: string | null | undefined;
+      readonly birthDate: any | null | undefined;
+      readonly favoritePlayer: string | null | undefined;
+      readonly foot: Foot | null | undefined;
+      readonly id: number;
+      readonly mainPosition: Position | null | undefined;
       readonly name: string | null | undefined;
+      readonly preferredNumber: number | null | undefined;
+      readonly profileImage: string | null | undefined;
       readonly region: {
+        readonly code: string;
         readonly dongName: string | null | undefined;
         readonly name: string;
         readonly riName: string | null | undefined;
         readonly sidoName: string;
         readonly siggName: string | null | undefined;
       } | null | undefined;
+      readonly subPositions: ReadonlyArray<Position> | null | undefined;
     } | null | undefined;
     readonly userId: number;
   }>;
@@ -102,10 +118,24 @@ v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "foot",
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "preferredNumber",
+  "storageKey": null
+},
+v7 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v6 = [
+v8 = [
   {
     "alias": null,
     "args": [
@@ -145,6 +175,22 @@ v6 = [
         "name": "role",
         "storageKey": null
       },
+      (v5/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "introduction",
+        "storageKey": null
+      },
+      (v6/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "preferredPosition",
+        "storageKey": null
+      },
       {
         "alias": null,
         "args": null,
@@ -155,7 +201,7 @@ v6 = [
         "selections": [
           (v1/*: any*/),
           (v2/*: any*/),
-          (v5/*: any*/),
+          (v7/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -174,7 +220,52 @@ v6 = [
         "name": "user",
         "plural": false,
         "selections": [
+          (v2/*: any*/),
+          (v7/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "birthDate",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "profileImage",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "activityArea",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "favoritePlayer",
+            "storageKey": null
+          },
           (v5/*: any*/),
+          (v6/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "mainPosition",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "subPositions",
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -183,6 +274,13 @@ v6 = [
             "name": "region",
             "plural": false,
             "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "code",
+                "storageKey": null
+              },
               {
                 "alias": null,
                 "args": null,
@@ -197,7 +295,7 @@ v6 = [
                 "name": "siggName",
                 "storageKey": null
               },
-              (v5/*: any*/),
+              (v7/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -326,7 +424,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "profileFindTeamMemberQuery",
-    "selections": (v6/*: any*/),
+    "selections": (v8/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -335,19 +433,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "profileFindTeamMemberQuery",
-    "selections": (v6/*: any*/)
+    "selections": (v8/*: any*/)
   },
   "params": {
-    "cacheID": "9fd74476eff3b564e6103a073c2a9246",
+    "cacheID": "ea6b14f7d91a43116a4595da4805c0bb",
     "id": null,
     "metadata": {},
     "name": "profileFindTeamMemberQuery",
     "operationKind": "query",
-    "text": "query profileFindTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      name\n      region {\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
+    "text": "query profileFindTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    foot\n    introduction\n    preferredNumber\n    preferredPosition\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      id\n      name\n      birthDate\n      profileImage\n      activityArea\n      favoritePlayer\n      foot\n      preferredNumber\n      mainPosition\n      subPositions\n      region {\n        code\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c9eec257bbab9e4ca9391e19c93b5f7a";
+(node as any).hash = "142becc9b815b1de7843fd5ecd99bc02";
 
 export default node;

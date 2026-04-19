@@ -36,8 +36,13 @@ import { useCreateBestElevenMutation } from "./hooks/useCreateBestElevenMutation
 import { useDeleteBestElevenMutation } from "./hooks/useDeleteBestElevenMutation";
 import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
 import { Suspense } from "react";
-import { FORMATIONS, type FormationType } from "@/constants/formation";
+import { type FormationType } from "@/constants/formation";
 import { getValidImageSrc, cn } from "@/lib/utils";
+import { buildMatchFormationTacticsDocumentFromQuarters } from "@/lib/formation/buildMatchFormationTacticsDocument";
+import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarterDataFromTacticsDocument";
+import { createFormationLineupResolver } from "@/lib/formation/roster/createFormationLineupResolver";
+import { pickPrimaryBestElevenRow } from "@/lib/formation/pickPrimaryBestElevenRow";
+import { useUserId } from "@/hooks/useUserId";
 
 /**
  * 선수 스탯 목업 (이미지 기준)
@@ -194,6 +199,7 @@ export default function BestElevenPanel() {
 }
 
 function BestElevenPanelInner({ teamId }: { teamId: number }) {
+  const editorUserId = useUserId();
   const isMobile = useIsMobile(1023);
   const dndId = useId();
   const { openModal } = useModal("PLAYER_SEARCH");
@@ -214,93 +220,73 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const { executeMutation: deleteBestEleven } = useDeleteBestElevenMutation();
   const { executeMutation: updateMember } = useUpdateTeamMemberMutation();
 
-  // 선수 목록 변환 (TeamMemberModel -> Player) - 참조 무결성 유지를 위해 useMemo 사용
-  const allPlayers: Player[] = React.useMemo(() => (data.findManyTeamMember?.members || []).map((m: any) => ({
-    id: m.id,
-    name: m.user?.name || "알 수 없음",
-    image: m.user?.profileImage || "/images/player/img_player_1.webp",
-    position: m.preferredPosition || "-",
-    number: m.preferredNumber || 0,
-    overall: m.overall?.ovr || 0,
-    isMom: (m.overall?.mom3 || 0) > 0 || (m.overall?.mom8 || 0) > 0,
-    joinDate: m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : "-",
-    age: m.user?.birthDate ? String(new Date().getFullYear() - new Date(m.user.birthDate).getFullYear()) : "0",
-    stats: {
-      matches: m.overall?.appearances || 0,
-      goals: m.overall?.goals || 0,
-      assists: m.overall?.assists || 0,
-      contributions: m.overall?.keyPasses || 0,
-      cleanSheets: m.overall?.cleanSheets || 0,
-      winRate: `${m.overall?.winRate || 0}%`,
+  // 선수 목록 변환 (TeamMemberModel -> Player) — tactics `teamMemberId`와 맞추기 위해 숫자 PK 사용
+  const allPlayers: Player[] = React.useMemo(() => {
+    const members = data.findManyTeamMember?.members ?? [];
+    const out: Player[] = [];
+    for (const m of members as any[]) {
+      const tmId = parseNumericIdFromRelayGlobalId(m.id);
+      if (tmId == null) continue;
+      out.push({
+        id: tmId,
+        name: m.user?.name || "알 수 없음",
+        image: m.user?.profileImage || "/images/player/img_player_1.webp",
+        position: m.preferredPosition || "-",
+        number: m.preferredNumber || 0,
+        overall: m.overall?.ovr || 0,
+        isMom: (m.overall?.mom3 || 0) > 0 || (m.overall?.mom8 || 0) > 0,
+        joinDate: m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : "-",
+        age: m.user?.birthDate
+          ? String(new Date().getFullYear() - new Date(m.user.birthDate).getFullYear())
+          : "0",
+        stats: {
+          matches: m.overall?.appearances || 0,
+          goals: m.overall?.goals || 0,
+          assists: m.overall?.assists || 0,
+          contributions: m.overall?.keyPasses || 0,
+          cleanSheets: m.overall?.cleanSheets || 0,
+          winRate: `${m.overall?.winRate || 0}%`,
+        },
+      });
     }
-  })), [data.findManyTeamMember]);
+    return out;
+  }, [data.findManyTeamMember]);
 
-  // 포메이션 데이터 복원 (findBestEleven -> QuarterData)
-  // BestElevenModel: { id, position, teamId, userId }
-  // userId 기준으로 allPlayers에서 선수를 찾아 포메이션 슬롯에 배치
-  const bestElevenData = data.findBestEleven ?? [];
+  const bestElevenRows = data.findBestEleven ?? [];
 
   const getInitialQuarters = useCallback((): QuarterData[] => {
-    const defaultFormation = "4-2-3-1" as any;
+    const defaultFormation = "4-2-3-1" as FormationType;
+    const emptyQuarter: QuarterData = {
+      id: 1,
+      type: "MATCHING",
+      formation: defaultFormation,
+      lineup: {},
+      matchup: { home: "A", away: "B" },
+    };
 
-    if (bestElevenData.length === 0) {
-      return [
-        {
-          id: 1,
-          type: "MATCHING",
-          formation: defaultFormation,
-          lineup: {},
-          matchup: { home: "A", away: "B" },
-        },
-      ];
+    const primary = pickPrimaryBestElevenRow(bestElevenRows);
+    if (primary?.tactics == null) {
+      return [emptyQuarter];
     }
 
-    // userId -> Player 매핑 (teamMember.user.id와 BestElevenModel.userId 비교)
-    const playerByUserId = new Map<number, Player>();
-    const members = data.findManyTeamMember?.members ?? [];
-    for (const p of allPlayers) {
-      const member = members.find((m: any) => String(m.id) === String(p.id));
-      const uid = parseNumericIdFromRelayGlobalId(member?.user?.id);
-      if (uid != null) {
-        playerByUserId.set(uid, p);
-      }
-    }
+    const resolvePlayer = createFormationLineupResolver(allPlayers);
+    const restored = buildQuarterDataFromTacticsDocument(primary.tactics, {
+      quarterCount: 1,
+      matchType: "MATCH",
+    }, resolvePlayer);
 
-    // 포지션별로 bestEleven 항목 그룹화 (같은 포지션 여러 개 대응)
-    type MutableEntry = { id: number; position: string; teamId: number; userId: number };
-    const positionQueue = new Map<string, MutableEntry[]>();
-    for (const entry of bestElevenData) {
-      const pos = entry.position as string;
-      if (!positionQueue.has(pos)) positionQueue.set(pos, []);
-      positionQueue.get(pos)!.push({ id: Number(entry.id), position: pos, teamId: Number(entry.teamId), userId: Number(entry.userId) });
-    }
-
-    // 포메이션 슬롯에 선수 배치
-    const formationType = defaultFormation;
-    const board = FORMATIONS[formationType as FormationType] ?? {};
-    const mappedLineup: Record<number, Player | null> = {};
-
-    for (const [slotStr, cell] of Object.entries(board)) {
-      const slot = Number(slotStr);
-      const role = (cell as any).role as string;
-      const queue = positionQueue.get(role);
-      if (queue && queue.length > 0) {
-        const entry = queue.shift()!;
-        const player = playerByUserId.get(Number(entry.userId));
-        if (player) mappedLineup[slot] = player;
-      }
-    }
+    const q1 = restored.find((q) => q.id === 1) ?? restored[0];
+    if (q1 == null) return [emptyQuarter];
 
     return [
       {
+        ...q1,
         id: 1,
         type: "MATCHING",
-        formation: formationType,
-        lineup: mappedLineup,
         matchup: { home: "A", away: "B" },
       },
     ];
-  }, [bestElevenData, allPlayers, data.findManyTeamMember]);
+  }, [bestElevenRows, allPlayers]);
 
   // 상태 초기화
   const [quarters, setQuarters] = useState<QuarterData[]>(getInitialQuarters);
@@ -439,53 +425,31 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     if (player && quarterId != null && positionIndex !== undefined) assignPlayer(quarterId, positionIndex, player);
   };
 
-  // 저장 로직 — 기존 베스트11 전체 삭제 후 새 lineup 저장
+  // 저장 로직 — 기존 베스트11 행 삭제 후 tactics 문서 1건으로 재생성 (계약: docs/match-formation-tactics-document-contract.md)
   const handleSave = async () => {
-    const formation = quarters[0].formation as FormationType;
-    const board = FORMATIONS[formation];
-    
-    if (!board) {
-      alert("지원하지 않는 포메이션입니다. 다른 포메이션으로 변경해 주세요.");
+    if (editorUserId == null) {
+      alert("로그인 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
       return;
     }
-    
-    const lineup = quarters[0].lineup ?? {};
-    const members = data.findManyTeamMember?.members ?? [];
 
-    // teamMemberId -> member 매핑 (Relay GlobalId 포함 처리)
-    // Relay는 __typename이 있을 때 id를 "TeamMemberModel:123" 형태로 반환함
-    // → String(m.id) 그대로 키로 사용하여 player.id와 일치시킴
-    const memberByTeamMemberId = new Map<string, (typeof members)[number]>();
-    for (const m of members) {
-      memberByTeamMemberId.set(String(m.id), m);
-    }
-
-    // 새로 저장할 항목 수집
-    const newEntries: CreateBestElevenMutationInput[] = [];
-    for (let slot = 1; slot <= 11; slot += 1) {
-      const player = lineup[slot];
-      if (player == null) continue;
-      const cell = board[slot as keyof typeof board];
-      if (cell == null) continue;
-      const position = cell.role as CreateBestElevenMutationInput["position"];
-      const member = memberByTeamMemberId.get(String(player.id));
-      if (!member) continue;
-
-      const uid = parseNumericIdFromRelayGlobalId(member.user?.id);
-      if (uid == null) {
-        continue;
-      }
-      newEntries.push({ position, teamId, userId: uid });
-    }
-
+    const lineup = quarters[0]?.lineup ?? {};
+    const hasAnySlotPlayer = Object.values(lineup).some((p) => p != null);
     const currentBestEleven = data.findBestEleven ?? [];
     const newManagerMemberId = manager.memberId;
 
-    // 빈 엔트리 저장을 허용 (기존 항목 삭제를 위함)
-    if (newEntries.length === 0 && currentBestEleven.length === 0 && newManagerMemberId === initialManagerId) {
+    if (
+      !hasAnySlotPlayer &&
+      currentBestEleven.length === 0 &&
+      newManagerMemberId === initialManagerId
+    ) {
       alert("변경사항이 없습니다.");
       return;
     }
+
+    const tacticsDoc = buildMatchFormationTacticsDocumentFromQuarters(
+      quarters,
+      "MATCH",
+    );
 
     try {
       // 1단계: 감독 변경 사항 반영
@@ -521,12 +485,14 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
         }
       }
 
-      // 3단계: 신규 항목 생성
-      await Promise.all(
-        newEntries.map(async (entry) => {
-          await createBestEleven(entry);
-        })
-      );
+      if (hasAnySlotPlayer) {
+        const input: CreateBestElevenMutationInput = {
+          teamId,
+          userId: editorUserId,
+          tactics: tacticsDoc as CreateBestElevenMutationInput["tactics"],
+        };
+        await createBestEleven(input);
+      }
 
       setHasChanges(false);
       alert("베스트 11이 저장되었습니다.");

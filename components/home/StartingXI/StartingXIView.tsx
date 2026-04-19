@@ -12,6 +12,7 @@ import {
   startingXIRootVariants,
   startingXISectionVariants,
 } from "./motion-variants";
+import type { FormationType } from "@/constants/formation";
 
 export interface StartingXIProps {
   players: Player[];
@@ -19,6 +20,9 @@ export interface StartingXIProps {
   isSoloTeam: boolean;
   onPlayersChange: (players: Player[]) => void;
   onPlayerSelect?: (player: Player) => void;
+  /** `FORMATION_POSITIONS[formation]` 순서와 동일한 11슬롯 — 베스트11 tactics 복원 시 */
+  bestElevenFormation?: FormationType | null;
+  bestElevenSlotPlayers?: Array<Player | null> | null;
 }
 
 /**
@@ -27,6 +31,8 @@ export interface StartingXIProps {
 export default function StartingXIView({
   players,
   isSoloTeam,
+  bestElevenFormation = null,
+  bestElevenSlotPlayers = null,
 }: StartingXIProps) {
   return (
     <MotionConfig reducedMotion="user">
@@ -62,6 +68,8 @@ export default function StartingXIView({
           <FormationField
             players={players}
             isSoloTeam={isSoloTeam}
+            bestElevenFormation={bestElevenFormation}
+            bestElevenSlotPlayers={bestElevenSlotPlayers}
             className="relative md:aspect-video"
           />
         </motion.div>

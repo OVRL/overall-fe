@@ -9,6 +9,12 @@ export type MatchTeamDisplay = {
   emblemUrl: string;
 };
 
+/** 홈·원정 득점 (표시는 보통 `3:1` 형태) */
+export type MatchScorePair = {
+  home: number;
+  away: number;
+};
+
 /** 다가오는 경기 카드에 표시할 데이터 */
 export type UpcomingMatchDisplay = {
   /** Relay MatchModel.id (글로벌 ID 등). 포메이션 등 링크 쿼리에 사용 */
@@ -16,13 +22,20 @@ export type UpcomingMatchDisplay = {
   formattedDateTime: string;
   homeTeam: MatchTeamDisplay;
   awayTeam: MatchTeamDisplay;
+  /**
+   * 종료 후 스코어. 있으면 `MatchInfo`에서 VS 대신 `home:away` 표기.
+   * `MatchForUpcomingDisplay`의 `homeScore` / `awayScore`가 API로 채워지면 자동 반영.
+   */
+  matchScore?: MatchScorePair | null;
 };
 
 /** buildUpcomingMatchDisplay 입력: Relay findMatch 노드와 동일한 필드 구조 */
 export type MatchForUpcomingDisplay = {
-  matchDate: string;
-  startTime: string;
-  endTime: string;
+  /** Relay `Date` 스칼라 등으로 런타임에 null/비문자열일 수 있음 */
+  matchDate?: string | null;
+  startTime?: string | null;
+  /** 비어 있거나 null이면 쿼터 길이로 추정(effectiveMatchEndMs) */
+  endTime?: string | null;
   quarterCount: number;
   quarterDuration?: number;
   /** 참석 투표 마감 (GraphQLDateTime ISO 문자열) */
@@ -34,7 +47,29 @@ export type MatchForUpcomingDisplay = {
   opponentTeam?: { name?: string | null; emblem?: string | null } | null;
   /** Relay/REST 공통: 숫자 id 또는 글로벌 id 문자열 */
   id?: string | number;
+  /**
+   * 경기 종료 후 득점 (스키마 필드명은 백엔드와 맞춰 `mapFindMatchToUpcomingDisplay`에서 매핑).
+   * 둘 다 유한 숫자일 때만 카드에 스코어 라인 표시.
+   */
+  homeScore?: number | null;
+  awayScore?: number | null;
 };
+
+function resolveMatchScore(
+  match: MatchForUpcomingDisplay,
+): MatchScorePair | null {
+  const h = match.homeScore;
+  const a = match.awayScore;
+  if (
+    typeof h === "number" &&
+    Number.isFinite(h) &&
+    typeof a === "number" &&
+    Number.isFinite(a)
+  ) {
+    return { home: h, away: a };
+  }
+  return null;
+}
 
 /**
  * findMatch 노드를 내전/매칭 구분에 맞게 표시용 데이터로 변환합니다.
@@ -57,9 +92,19 @@ export function buildUpcomingMatchDisplay(
     );
   }
 
-  const formattedDateTime = formatMatchDateTime(match.matchDate, match.startTime);
+  const md = match.matchDate;
+  const st = match.startTime;
+  const formattedDateTime =
+    md != null &&
+    st != null &&
+    String(md).trim() !== "" &&
+    String(st).trim() !== ""
+      ? formatMatchDateTime(String(md).trim(), String(st).trim())
+      : "일정 미정";
   const createdName = match.createdTeam?.name?.trim() || "팀";
   const createdEmblem = match.createdTeam?.emblem?.trim() || DEFAULT_EMBLEM;
+
+  const matchScore = resolveMatchScore(match);
 
   if (match.matchType === "INTERNAL") {
     return {
@@ -67,6 +112,7 @@ export function buildUpcomingMatchDisplay(
       formattedDateTime,
       homeTeam: { name: `${createdName} Team A`, emblemUrl: createdEmblem },
       awayTeam: { name: `${createdName} Team B`, emblemUrl: createdEmblem },
+      matchScore,
     };
   }
 
@@ -78,6 +124,7 @@ export function buildUpcomingMatchDisplay(
     formattedDateTime,
     homeTeam: { name: createdName, emblemUrl: createdEmblem },
     awayTeam: { name: opponentName, emblemUrl: opponentEmblem },
+    matchScore,
   };
 }
 

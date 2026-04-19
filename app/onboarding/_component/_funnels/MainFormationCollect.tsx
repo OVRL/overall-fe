@@ -33,7 +33,7 @@ const MainFormationCollect = ({
           <OnboardingFormationSelector
             value={mainPosition ? [mainPosition] : []}
             onChange={(positions) => setMainPosition(positions[0])}
-            className="w-full h-auto md:max-w-layout md:h-120"
+            className="h-auto w-full md:max-w-layout"
           />
         </div>
       </div>

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c76be428e989ac9095e823164880c666>>
+ * @generated SignedSource<<153a3f434341e8eaf332546ed7ea6abb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type findMatchQuery$data = {
     readonly description: string | null | undefined;
     readonly endTime: string;
     readonly id: number;
+    readonly isFormationDraft: boolean | null | undefined;
     readonly matchDate: any;
     readonly matchType: MatchType;
     readonly opponentTeam: {
@@ -48,7 +49,6 @@ export type findMatchQuery$data = {
       readonly longitude: number;
     };
     readonly voteDeadline: any;
-    readonly isFormationDraft: boolean | null | undefined;
   }>;
 };
 export type findMatchQuery = {
@@ -284,7 +284,7 @@ return {
     "selections": (v5/*: any*/)
   },
   "params": {
-    "cacheID": "8189918e10d4b484015722c0435aecff",
+    "cacheID": "d3951fe3ec81b0deadcf06173d1a1eea",
     "id": null,
     "metadata": {},
     "name": "findMatchQuery",
@@ -294,6 +294,6 @@ return {
 };
 })();
 
-(node as any).hash = "9893217ebbdde2b08b6ce4890448bf77";
+(node as any).hash = "c0c11b2648d25756f76b01fec0542043";
 
 export default node;

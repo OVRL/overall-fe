@@ -16,6 +16,7 @@ describe("UserIntroSection", () => {
     expect(screen.getByRole("heading", { name: "—" })).toBeInTheDocument();
     expect(screen.getByText(/가입일:.*—/)).toBeInTheDocument();
     expect(screen.getByText(/활동지역:.*—/)).toBeInTheDocument();
+    expect(screen.getByText("등록된 소개가 없습니다.")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "프로필" })).toBeInTheDocument();
   });
 
@@ -39,5 +40,23 @@ describe("UserIntroSection", () => {
     expect(screen.getByText(/활동지역:/)).toBeInTheDocument();
     expect(screen.getByText(/서울 강남구/)).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "홍길동" })).toBeInTheDocument();
+    expect(screen.getByText("등록된 소개가 없습니다.")).toBeInTheDocument();
+  });
+
+  it("팀 멤버 introduction이 있으면 그 내용을 표시한다", () => {
+    const member = {
+      profileImg: null,
+      joinedAt: "2024-01-15T00:00:00.000Z",
+      introduction: "  팀 소개 글  ",
+      user: {
+        name: "이몽룡",
+        region: { name: "경기" },
+      },
+      team: { id: "VGVhbTox", name: "팀A", emblem: null },
+    } as unknown as ProfileTeamMemberRow;
+
+    render(<UserIntroSection member={member} />);
+
+    expect(screen.getByText("팀 소개 글")).toBeInTheDocument();
   });
 });

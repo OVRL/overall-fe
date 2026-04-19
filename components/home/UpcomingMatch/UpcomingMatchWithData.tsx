@@ -4,7 +4,8 @@ import { useLazyLoadQuery } from "react-relay";
 import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
 import { FindMatchQuery } from "@/lib/relay/queries/findMatchQuery";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
-import { computeHomeUpcomingMatchLayout } from "@/utils/match/computeHomeUpcomingMatchLayout";
+import { useHomeUpcomingMatchLayoutSnapshot } from "@/components/providers/HomeUpcomingMatchLayoutSnapshotProvider";
+import { useResolvedHomeUpcomingMatchLayout } from "./useResolvedHomeUpcomingMatchLayout";
 import type { MatchForUpcomingDisplay } from "./upcomingMatchDisplay";
 import HomeUpcomingInviteCopyCard from "./HomeUpcomingInviteCopyCard";
 import NoUpcomingMatch from "./NoUpcomingMatch";
@@ -65,7 +66,12 @@ function UpcomingMatchWithQuery({
 
   const matches = (data?.findMatch ??
     []) as unknown as MatchForUpcomingDisplay[];
-  const layout = computeHomeUpcomingMatchLayout(matches);
+  const ssrSnapshot = useHomeUpcomingMatchLayoutSnapshot();
+  const layout = useResolvedHomeUpcomingMatchLayout(
+    createdTeamId,
+    ssrSnapshot,
+    matches,
+  );
 
   const { copyCode } = useInviteCodeForTeam(createdTeamId);
   const onCopyTeamCode = () => copyCode();
@@ -116,7 +122,9 @@ function UpcomingMatchWithQuery({
           display: layout.display,
           primary: layout.primary,
           sectionTitle: layout.sectionTitle,
-          teaserDisplay: layout.teaserDisplay ?? null,
+          headerRowClassName: layout.headerRowClassName,
+          headerIconClassName: layout.headerIconClassName,
+          showFormationSetup: layout.showFormationSetup,
         };
 
   return (

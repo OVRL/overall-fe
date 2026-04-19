@@ -6,7 +6,7 @@ import {
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { isVoteDeadlinePassedAt } from "@/utils/match/isVoteDeadlinePassed";
 import {
-  matchEndMs,
+  effectiveMatchEndMs,
   matchStartMs,
   pickMostRecentlyEndedMatch,
   pickSoonestAmongNotEndedMatch,
@@ -17,6 +17,15 @@ export const MOM_VOTE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** 직전 경기 MOM 구간과 다음 경기 안내가 동시에 필요한지 판단할 간격(36h) */
 export const MOM_NEXT_MATCH_OVERLAP_GAP_MS = 36 * 60 * 60 * 1000;
+
+/** 단일 카드·직전 경기 MOM(경기 종료)일 때 `MatchHeader` 타이틀 톤 */
+export const SINGLE_MOM_ENDED_HEADER_ROW_CLASS = "text-[#f7f8f8]";
+/**
+ * 캘린더 SVG가 고정 스트로크색이라 `text-*`로는 안 바뀜 → 밝은 회색 톤에 가깝게 보정
+ * (`brightness(0) invert(0.968)` ≈ #f7f8f8 근처)
+ */
+export const SINGLE_MOM_ENDED_HEADER_ICON_CLASS =
+  "[filter:brightness(0)_invert(0.968)]";
 
 export type HomePrimaryCta =
   | { kind: "mom_vote"; href: string }
@@ -43,8 +52,15 @@ export type HomeUpcomingMatchLayout =
       primary: HomePrimaryCta;
       /** 카드 헤더 타이틀 (기본: 다가오는 경기) */
       sectionTitle: string;
-      /** MOM 집중 카드일 때 하단에 보여 줄 다음 경기 요약 */
-      teaserDisplay: UpcomingMatchDisplay | null;
+      /** `MatchHeader` 행 (`text-*` 등). 미지정이면 기본 흰 타이틀. */
+      headerRowClassName?: string;
+      /** `MatchHeader` 캘린더 아이콘. 미지정이면 기본 에셋 색. */
+      headerIconClassName?: string;
+      /**
+       * 포메이션 설정 링크 표시. 미지정이면 화면에서 권한 기준으로 결정.
+       * `false`면 숨김(직전 경기 MOM 단일 카드 등).
+       */
+      showFormationSetup?: boolean;
     };
 
 function momVoteHref(matchId: string): string {
@@ -58,7 +74,8 @@ function isMomVotingWindowOpen(
   lastEnded: MatchForUpcomingDisplay,
   nowMs: number,
 ): boolean {
-  const end = matchEndMs(lastEnded.matchDate, lastEnded.endTime);
+  const end = effectiveMatchEndMs(lastEnded);
+  if (!Number.isFinite(end)) return false;
   return nowMs >= end && nowMs < end + MOM_VOTE_WINDOW_MS;
 }
 
@@ -66,8 +83,11 @@ function gapBetweenLastEndAndNextStartMs(
   lastEnded: MatchForUpcomingDisplay,
   nextActive: MatchForUpcomingDisplay,
 ): number {
-  const lastEnd = matchEndMs(lastEnded.matchDate, lastEnded.endTime);
+  const lastEnd = effectiveMatchEndMs(lastEnded);
   const nextStart = matchStartMs(nextActive.matchDate, nextActive.startTime);
+  if (!Number.isFinite(lastEnd) || !Number.isFinite(nextStart)) {
+    return Number.NaN;
+  }
   return nextStart - lastEnd;
 }
 
@@ -106,14 +126,17 @@ export function computeHomeUpcomingMatchLayout(
   }
 
   if (momOpen && lastEnded != null) {
+    // 스코어는 `lastEnded.homeScore` / `awayScore`가 오면 `buildUpcomingMatchDisplay`가
+    // `display.matchScore`에 넣고, `MatchInfo`에서 VS 대신 `3:1` 형태로 표시합니다.
     const momDisplay = buildUpcomingMatchDisplay(lastEnded);
     return {
       kind: "single",
       display: momDisplay,
       primary: { kind: "mom_vote", href: momVoteHref(momDisplay.matchId) },
-      sectionTitle: "직전 경기 (MOM)",
-      teaserDisplay:
-        active != null ? buildUpcomingMatchDisplay(active) : null,
+      sectionTitle: "경기 종료",
+      headerRowClassName: SINGLE_MOM_ENDED_HEADER_ROW_CLASS,
+      headerIconClassName: SINGLE_MOM_ENDED_HEADER_ICON_CLASS,
+      showFormationSetup: false,
     };
   }
 
@@ -124,7 +147,6 @@ export function computeHomeUpcomingMatchLayout(
       display,
       primary: computePrimaryForNonMomMatch(active, nowMs),
       sectionTitle: "다가오는 경기",
-      teaserDisplay: null,
     };
   }
 

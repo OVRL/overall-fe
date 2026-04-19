@@ -1,25 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { useProfileImageUploadFlow } from "@/hooks/useProfileImageUploadFlow";
-import Image from "next/image";
 import { getValidImageSrc, isNextImageUnoptimizedSrc } from "@/lib/utils";
 
-interface ImageUploaderProps {
+type Props = {
+  currentImage?: string | null;
   onFileSelect?: (file: File) => void;
-  className?: string;
-  previewHeight?: string;
-  currentImage?: string;
   onDefaultImageSelect?: (image: string) => void;
-}
+};
 
-const ImageUploader = ({
-  onFileSelect,
-  className,
-  previewHeight,
+/**
+ * `ImageUploader`와 동일한 모달·파일 플로우, 프로필 편집 UI(원형 프리뷰·카피)만 분리.
+ */
+export default function ProfileEditImageBlock({
   currentImage,
+  onFileSelect,
   onDefaultImageSelect,
-}: ImageUploaderProps) => {
+}: Props) {
   const {
     displaySrc,
     fileInputRef,
@@ -27,7 +26,7 @@ const ImageUploader = ({
     onHiddenFileChange,
     pickDefaultImage,
   } = useProfileImageUploadFlow({
-    currentImage,
+    currentImage: currentImage ?? undefined,
     onFileSelect,
     onDefaultImageSelect,
   });
@@ -35,54 +34,55 @@ const ImageUploader = ({
   const resolvedSrc = displaySrc ? getValidImageSrc(displaySrc) : null;
 
   return (
-    <div className={`flex flex-col gap-y-12 px-4 ${className || ""}`}>
+    <div className="flex flex-col items-center gap-y-4">
+      <p className="text-sm text-left font-semibold text-Label-Primary w-full">
+        프로필 사진
+      </p>
       <input
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/*"
         onChange={onHiddenFileChange}
       />
-      <div
-        className="size-50 shrink-0 bg-bg-modal rounded-lg overflow-hidden relative mx-auto"
-        style={previewHeight ? { height: previewHeight } : undefined}
-      >
+      <div className="relative size-37.5 shrink-0 overflow-hidden">
         {resolvedSrc ? (
           <Image
             src={resolvedSrc}
-            alt="Preview"
+            alt="프로필 미리보기"
             fill
-            sizes="200px"
+            sizes="150px"
             className="object-cover"
             unoptimized={isNextImageUnoptimizedSrc(resolvedSrc)}
           />
         ) : null}
       </div>
-      <div className="flex flex-col gap-2 h-23.5">
+      <p className="text-left w-full text-xs text-Label-Tertiary">
+        JPG, PNG 파일을 업로드하세요 (최대 5MB)
+      </p>
+      <div className="flex w-full flex-col gap-2">
         <Button
+          type="button"
           variant="line"
           size="m"
-          className="flex-1"
-          type="button"
+          className="w-full border-gray-1000 text-Label-Secondary"
           onClick={pickFromAlbum}
         >
-          사진 불러오기
+          앨범에서 사진 선택
         </Button>
         <Button
+          type="button"
           variant="line"
           size="m"
-          className="flex-1"
-          type="button"
+          className="w-full border-gray-1000 text-Label-Secondary"
           onClick={(e) => {
             e.preventDefault();
             pickDefaultImage();
           }}
         >
-          기본 이미지 변경
+          기본이미지로 변경
         </Button>
       </div>
     </div>
   );
-};
-
-export default ImageUploader;
+}

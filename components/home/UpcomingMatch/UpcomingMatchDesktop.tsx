@@ -20,7 +20,14 @@ export type UpcomingMatchDesktopPanel = {
   display: UpcomingMatchDisplay;
   primary: HomePrimaryCta;
   sectionTitle: string;
-  teaserDisplay?: UpcomingMatchDisplay | null;
+  /** `MatchHeader` 행 (`text-*` 등) */
+  headerRowClassName?: string;
+  /** `MatchHeader` 캘린더 아이콘 색·필터 등 */
+  headerIconClassName?: string;
+  /**
+   * 포메이션 설정 링크 표시. 미지정이면 로그인 시 권한(capabilities), 비로그인은 숨김.
+   */
+  showFormationSetup?: boolean;
 };
 
 export type UpcomingMatchDesktopProps = {
@@ -41,17 +48,23 @@ function MatchInfoDesktopWithCapabilities({
   userId,
   display,
   formationHref,
+  showFormationSetupOverride,
 }: {
   userId: number;
   display: UpcomingMatchDisplay;
   formationHref: string;
+  showFormationSetupOverride?: boolean;
 }) {
   const { showRegisterGame } = useTeamManagementCapabilitiesForUser(userId);
+  const showFormationSetup =
+    showFormationSetupOverride !== undefined
+      ? showFormationSetupOverride
+      : showRegisterGame;
   return (
     <MatchInfoDesktop
       display={display}
       formationHref={formationHref}
-      showFormationSetup={showRegisterGame}
+      showFormationSetup={showFormationSetup}
     />
   );
 }
@@ -68,16 +81,25 @@ function DesktopMatchBlock({
   onCopyTeamCode: () => void;
 }) {
   const formationHref = formationHrefFromDisplay(panel.display);
+  const formationFromPanel = panel.showFormationSetup;
+  const showFormationWhenLoggedOut = formationFromPanel ?? false;
+  const showFormationFallback =
+    formationFromPanel !== undefined ? formationFromPanel : false;
+
   return (
     <div className="flex flex-col gap-2 w-full">
-      <div className="flex flex-row justify-between items-center gap-4 relative w-full">
-        <div className="flex gap-x-6 w-full pr-25">
-          <MatchHeader title={panel.sectionTitle} />
+      <div className="flex flex-row items-center gap-4 w-full min-w-0">
+        <div className="flex gap-x-6 min-w-0 flex-1">
+          <MatchHeader
+            title={panel.sectionTitle}
+            rowClassName={panel.headerRowClassName}
+            iconClassName={panel.headerIconClassName}
+          />
           {userId == null ? (
             <MatchInfoDesktop
               display={panel.display}
               formationHref={formationHref}
-              showFormationSetup={false}
+              showFormationSetup={showFormationWhenLoggedOut}
             />
           ) : (
             <Suspense
@@ -85,7 +107,7 @@ function DesktopMatchBlock({
                 <MatchInfoDesktop
                   display={panel.display}
                   formationHref={formationHref}
-                  showFormationSetup={false}
+                  showFormationSetup={showFormationFallback}
                 />
               }
             >
@@ -93,28 +115,21 @@ function DesktopMatchBlock({
                 userId={userId}
                 display={panel.display}
                 formationHref={formationHref}
+                showFormationSetupOverride={formationFromPanel}
               />
             </Suspense>
           )}
         </div>
 
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-25 flex justify-end">
+        <div className="shrink-0 self-center">
           <UpcomingMatchPrimaryCtaButton
             primary={panel.primary}
             onAttendanceVote={onAttendanceVote}
             onCopyTeamCode={onCopyTeamCode}
-            className="w-full p-3 text-Label-Fixed_black"
+            className="inline-flex h-10.25 w-auto shrink-0 px-4 text-Label-Fixed_black"
           />
         </div>
       </div>
-
-      {panel.teaserDisplay ? (
-        <p className="text-xs text-Label-Tertiary md:pl-33 max-w-full truncate">
-          다음: {panel.teaserDisplay.formattedDateTime} ·{" "}
-          {panel.teaserDisplay.homeTeam.name} vs{" "}
-          {panel.teaserDisplay.awayTeam.name}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -147,7 +162,7 @@ const UpcomingMatchDesktop = ({
             href={splitMomBanner.momHref}
             className={cn(
               buttonVariants({ variant: "primary", size: "m" }),
-              "shrink-0 font-semibold text-Label-Fixed_black text-sm px-4 py-2.5",
+              "inline-flex h-10.25 w-auto shrink-0 font-semibold text-Label-Fixed_black text-sm px-4",
             )}
           >
             MOM 투표하기

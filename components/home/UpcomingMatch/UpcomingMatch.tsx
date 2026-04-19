@@ -26,7 +26,6 @@ const UpcomingMatch = ({ display }: UpcomingMatchProps) => {
     display,
     primary: { kind: "attendance" as const },
     sectionTitle: "다가오는 경기",
-    teaserDisplay: null as UpcomingMatchDisplay | null,
   };
 
   const noopCopy = () => {};

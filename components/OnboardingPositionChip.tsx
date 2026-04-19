@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { Position } from "@/types/position";
 import { POSITION_CATEGORY_MAP } from "@/constants/position";
 
-interface OnboardingPositionChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface OnboardingPositionChipProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   position: Position | string;
   selected?: boolean;
 }

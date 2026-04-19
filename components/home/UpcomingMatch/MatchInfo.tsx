@@ -8,6 +8,44 @@ interface MatchInfoProps {
   display: UpcomingMatchDisplay;
 }
 
+function MatchHomeAwayCenterMark({
+  display,
+  variant,
+}: {
+  display: UpcomingMatchDisplay;
+  variant: "mobile" | "desktop";
+}) {
+  const score = display.matchScore;
+  const hasScore =
+    score != null &&
+    typeof score.home === "number" &&
+    typeof score.away === "number" &&
+    Number.isFinite(score.home) &&
+    Number.isFinite(score.away);
+  if (hasScore) {
+    return (
+      <span
+        className={cn(
+          "text-gray-500 text-[0.8125rem] tabular-nums",
+          variant === "desktop" && "font-bold",
+        )}
+      >
+        {score.home}:{score.away}
+      </span>
+    );
+  }
+  return (
+    <span
+      className={cn(
+        "text-gray-500 text-[0.8125rem]",
+        variant === "desktop" && "font-bold",
+      )}
+    >
+      VS
+    </span>
+  );
+}
+
 /** 데스크톱: 포메이션 설정 링크 노출·경로 제어 */
 export interface MatchInfoDesktopProps extends MatchInfoProps {
   formationHref: string;
@@ -32,7 +70,7 @@ export function MatchInfoMobile({ display }: MatchInfoProps) {
           logo={homeTeam.emblemUrl}
           reverse={true}
         />
-        <span className="text-gray-500 text-[0.8125rem]">VS</span>
+        <MatchHomeAwayCenterMark display={display} variant="mobile" />
         <TeamInfo
           name={awayTeam.name}
           logo={awayTeam.emblemUrl}
@@ -63,7 +101,7 @@ export function MatchInfoDesktop({
           logo={homeTeam.emblemUrl}
           reverse={true}
         />
-        <span className="text-gray-500 text-[0.8125rem] font-bold">VS</span>
+        <MatchHomeAwayCenterMark display={display} variant="desktop" />
         <TeamInfo
           name={awayTeam.name}
           logo={awayTeam.emblemUrl}

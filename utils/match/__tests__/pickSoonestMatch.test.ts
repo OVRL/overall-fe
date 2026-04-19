@@ -11,14 +11,17 @@ function 경기(
   matchDate: string,
   startTime: string,
   id?: string,
-  endTime = "23:59:00",
+  /** 생략 시 기본 `"23:59:00"`. `null`이면 API처럼 종료 시각 없음(기본값으로 대체되지 않음) */
+  endTime?: string | null,
+  quarterDuration = 15,
 ): MatchForUpcomingDisplay {
   return {
     id,
     matchDate,
     startTime,
-    endTime,
+    endTime: endTime === undefined ? "23:59:00" : endTime,
     quarterCount: 4,
+    quarterDuration,
     matchType: "MATCH",
     createdTeam: null,
     opponentTeam: null,
@@ -196,5 +199,73 @@ describe("pickMostRecentlyEndedMatch", () => {
     ];
     const 결과 = pickMostRecentlyEndedMatch(목록, 기준);
     expect(결과?.id).toBe("최근");
+  });
+
+  it("endTime이 비어 있어도 쿼터 길이로 종료 시각을 추정해 크래시하지 않는다", () => {
+    /** 2025-03-20 10:00 시작, 4쿼터×15분 → 11:00 종료. 기준 11:30이면 종료됨 */
+    const 목록 = [
+      경기("2025-03-20", "10:00:00", "무종료시각", null, 15),
+    ];
+    const 기준1130 = new Date(2025, 2, 20, 11, 30, 0, 0).getTime();
+    expect(pickMostRecentlyEndedMatch(목록, 기준1130)?.id).toBe("무종료시각");
+  });
+});
+
+describe("endTime 누락 시 pickSoonestAmongNotEndedMatch", () => {
+  it("쿼터 기준으로 아직 종료 전이면 not-ended로 남긴다", () => {
+    /** 종료 추정 11:00, 기준 10:30이면 아직 not-ended */
+    const 기준1030 = new Date(2025, 2, 20, 10, 30, 0, 0).getTime();
+    const 목록 = [경기("2025-03-20", "10:00:00", "진행추정", null, 15)];
+    expect(pickSoonestAmongNotEndedMatch(목록, 기준1030)?.id).toBe("진행추정");
+  });
+
+  it("endTime이 시작과 같으면 무시하고 쿼터·추정 길이로 종료를 잡는다", () => {
+    /** 시작=종료 20:00(잘못된 데이터), 쿼터 60분 → 21:00 종료. 20:39엔 아직 진행 */
+    const 기준2039 = new Date(2025, 2, 20, 20, 39, 0, 0).getTime();
+    const 목록 = [경기("2025-03-20", "20:00:00", "시작동일종료", "20:00:00", 15)];
+    expect(pickSoonestAmongNotEndedMatch(목록, 기준2039)?.id).toBe(
+      "시작동일종료",
+    );
+  });
+
+  it("쿼터 정보가 없으면 기본 2시간 동안은 종료로 보지 않는다", () => {
+    const 기준2039 = new Date(2025, 2, 20, 20, 39, 0, 0).getTime();
+    const 목록: MatchForUpcomingDisplay[] = [
+      {
+        id: "무쿼터",
+        matchDate: "2025-03-20",
+        startTime: "20:00:00",
+        endTime: null,
+        quarterCount: 0,
+        quarterDuration: 0,
+        matchType: "MATCH",
+        createdTeam: null,
+        opponentTeam: null,
+      },
+    ];
+    expect(pickSoonestAmongNotEndedMatch(목록, 기준2039)?.id).toBe("무쿼터");
+  });
+});
+
+describe("matchDate/startTime 누락", () => {
+  it("시작 시각을 만들 수 없으면 pickSoonestMatch·ended/notEnded에서 제외된다", () => {
+    const bad: MatchForUpcomingDisplay = {
+      id: "bad",
+      matchDate: undefined,
+      startTime: undefined,
+      endTime: "12:00:00",
+      quarterCount: 4,
+      quarterDuration: 15,
+      matchType: "MATCH",
+      createdTeam: null,
+      opponentTeam: null,
+    };
+    const good = 경기("2025-03-20", "10:00:00", "ok", null, 15);
+    expect(pickSoonestMatch([bad, good])).toBe(good);
+    const 기준 = new Date(2025, 2, 20, 12, 0, 0, 0).getTime();
+    expect(pickMostRecentlyEndedMatch([bad, good], 기준)?.id).toBe("ok");
+    expect(() =>
+      pickSoonestAmongNotEndedMatch([bad], 기준),
+    ).not.toThrow();
   });
 });

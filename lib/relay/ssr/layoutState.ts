@@ -1,5 +1,6 @@
 import type { UserModel } from "@/contexts/UserContext";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
+import type { HomeUpcomingMatchLayoutSnapshot } from "@/lib/relay/ssr/buildHomeUpcomingMatchLayoutSnapshot";
 
 /**
  * Layout SSR 로더가 파생해 클라이언트 Provider에 전달하는 상태.
@@ -26,6 +27,11 @@ export interface LayoutState {
   initialIsSoloTeam: boolean;
   /** 선택 팀에 대한 findTeamMember.role (팀 관리 RBAC·SSR 리다이렉트용) */
   initialSelectedTeamMemberRole: TeamMemberRole | null;
+  /**
+   * 홈 다가오는 경기 카드: `loadLayoutSSR`에서 `findMatch`와 동일 시각으로 계산한 레이아웃.
+   * 하이드레이션 전까지 `UpcomingMatchWithData`가 우선 사용합니다.
+   */
+  homeUpcomingMatchLayoutSnapshot: HomeUpcomingMatchLayoutSnapshot | null;
 }
 
 export const EMPTY_LAYOUT_STATE: LayoutState = {
@@ -39,4 +45,5 @@ export const EMPTY_LAYOUT_STATE: LayoutState = {
   initialSelectedTeamIdFromSingleTeam: false,
   initialIsSoloTeam: false,
   initialSelectedTeamMemberRole: null,
+  homeUpcomingMatchLayoutSnapshot: null,
 };

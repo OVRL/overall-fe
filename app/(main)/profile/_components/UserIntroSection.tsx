@@ -1,9 +1,13 @@
+"use client";
+
+import { useMemo } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import Icon from "@/components/ui/Icon";
 import ImgPlayer from "@/components/ui/ImgPlayer";
 import editIcon from "@/public/icons/edit.svg";
-import { formatRegionSearchDisplay } from "@/lib/region/formatRegionSearchDisplay";
+import useModal from "@/hooks/useModal";
+import { mapMemberToProfileEditInitial } from "@/components/modals/EditProfileModal/mapMemberToProfileEditInitial";
 import type { ProfileTeamMemberRow } from "../types/profileTeamMemberTypes";
 
 function formatJoinedAtLabel(value: unknown): string {
@@ -19,9 +23,15 @@ type UserIntroSectionProps = {
 
 const UserIntroSection = ({ member }: UserIntroSectionProps) => {
   const displayName = member?.user?.name?.trim() || "—";
-  const activityRegionLabel =
-    formatRegionSearchDisplay(member?.user?.region) || "—";
   const joinedLabel = formatJoinedAtLabel(member?.joinedAt);
+
+  const { openModal: openEditProfileModal } = useModal("EDIT_PROFILE");
+  const profileEditInitial = useMemo(
+    () => mapMemberToProfileEditInitial(member),
+    [member],
+  );
+  const activityRegionLabel =
+    profileEditInitial.activityArea.trim() || "—";
 
   const editButtonClassName =
     "group shrink-0 py-2 px-3 flex gap-2 rounded-lg bg-gray-1000 text-Fill_Tertiary items-center cursor-pointer transition-colors duration-200 hover:bg-surface-elevated hover:text-Label-Secondary";
@@ -44,6 +54,9 @@ const UserIntroSection = ({ member }: UserIntroSectionProps) => {
             <button
               type="button"
               className={`${editButtonClassName} absolute top-6 right-6 z-10 md:static md:z-auto`}
+              onClick={() =>
+                openEditProfileModal({ initial: profileEditInitial })
+              }
             >
               <Icon
                 src={editIcon}
@@ -61,8 +74,9 @@ const UserIntroSection = ({ member }: UserIntroSectionProps) => {
             활동지역: {activityRegionLabel}
           </p>
           <p className="text-center text-Label-Secondary md:text-left">
-            축구를 사랑하는 공격수입니다. 팀워크를 중시하며 골을 넣는 것을
-            즐깁니다. 함께 성장하는 팀을 만들어가고 싶습니다! ⚽️
+            {member?.introduction?.trim()
+              ? member.introduction.trim()
+              : "등록된 소개가 없습니다."}
           </p>
         </div>
       </div>
