@@ -122,6 +122,10 @@ const ProfileSubPositionPickerModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
+const MomVoteModal = dynamic(() => import("./MomVoteModal/MomVoteModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -135,6 +139,7 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   TEAM_DATA_PLAYER_DETAIL: TeamDataPlayerDetailModal,
   TEAM_DATA_STAT_RANKING: TeamDataStatRankingModal,
   ATTENDANCE_VOTE: AttendanceVoteModal,
+  MOM_VOTE: MomVoteModal,
   TEAM_CREATED: TeamCreatedModal,
   FORMATION_VENUE_MAP: FormationVenueMapModal,
   CONFIRM: GlobalConfirmModal,

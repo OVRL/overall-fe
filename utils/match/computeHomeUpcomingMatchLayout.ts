@@ -28,7 +28,8 @@ export const SINGLE_MOM_ENDED_HEADER_ICON_CLASS =
   "[filter:brightness(0)_invert(0.968)]";
 
 export type HomePrimaryCta =
-  | { kind: "mom_vote"; href: string }
+  /** `matchId`가 있으면 MOM 투표 모달, 없으면 `href` 링크 폴백 */
+  | { kind: "mom_vote"; matchId: number | null; href: string }
   | { kind: "attendance" }
   | { kind: "formation_preparing" }
   | { kind: "formation_confirm"; matchId: number }
@@ -129,10 +130,17 @@ export function computeHomeUpcomingMatchLayout(
     // 스코어는 `lastEnded.homeScore` / `awayScore`가 오면 `buildUpcomingMatchDisplay`가
     // `display.matchScore`에 넣고, `MatchInfo`에서 VS 대신 `3:1` 형태로 표시합니다.
     const momDisplay = buildUpcomingMatchDisplay(lastEnded);
+    const momMatchId =
+      parseNumericIdFromRelayGlobalId(momDisplay.matchId) ??
+      parseNumericIdFromRelayGlobalId(lastEnded.id as string | number);
     return {
       kind: "single",
       display: momDisplay,
-      primary: { kind: "mom_vote", href: momVoteHref(momDisplay.matchId) },
+      primary: {
+        kind: "mom_vote",
+        matchId: momMatchId,
+        href: momVoteHref(momDisplay.matchId),
+      },
       sectionTitle: "경기 종료",
       headerRowClassName: SINGLE_MOM_ENDED_HEADER_ROW_CLASS,
       headerIconClassName: SINGLE_MOM_ENDED_HEADER_ICON_CLASS,

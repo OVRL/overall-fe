@@ -38,6 +38,9 @@
 ## 2. 데이터 → UI: `UpcomingMatchWithData`
 
 - **파일**: `components/home/UpcomingMatch/UpcomingMatchWithData.tsx`
+- `findMatch`는 **`mapFindMatchNodesToMatchForUpcomingDisplay`**로 SSR과 동일 경로 정규화 후 레이아웃 훅에 넘긴다.
+- **`fetchPolicy: "store-only"`**: 첫 페인트 이후 네트워크로 `findMatch`를 다시 받아 레이아웃이 뒤집히는 것을 줄인다. (스토어에 데이터가 없는 클라 전용 진입은 별도 기획·보완 필요.)
+- **레이아웃 스냅샷**: 선택 팀이 SSR 스냅샷 팀과 같으면 `useResolvedHomeUpcomingMatchLayout`이 **`ssrSnapshot.layout`를 그대로** 쓴다. 기획·트레이드오프·엣지 케이스는 **`docs/home-upcoming-match-ssr-layout-snapshot.md`** 참고.
 - `layout.kind !== "split"`일 때 `mainPanel`에 다음을 넘깁니다.
   - `headerRowClassName`, `headerIconClassName`, `showFormationSetup` (레이아웃에 있으면)
 

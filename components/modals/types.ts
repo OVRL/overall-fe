@@ -66,6 +66,11 @@ export interface ModalPropsMap {
   };
   REGISTER_GAME: Record<string, never>;
   ATTENDANCE_VOTE: Record<string, never>;
+  /** 홈 직전 경기 MOM 투표 (참석자 목록: findMatchAttendance) */
+  MOM_VOTE: {
+    matchId: number;
+    teamId: number;
+  };
   TEAM_CREATED: Record<string, never>;
   EDIT_GAME: {
     matchId: number;

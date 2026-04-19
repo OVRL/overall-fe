@@ -29,21 +29,45 @@ export function UpcomingMatchPrimaryCtaButton({
   const { openModal: openFormationLineupModal } = useModal(
     "FORMATION_CHECK_LINEUP",
   );
+  const { openModal: openMomVoteModal } = useModal("MOM_VOTE");
 
   switch (primary.kind) {
-    case "mom_vote":
+    case "mom_vote": {
+      const momMatchId = primary.matchId;
+      if (momMatchId == null) {
+        return (
+          <Link
+            href={primary.href}
+            className={cn(
+              buttonVariants({ variant: "primary", size: "m" }),
+              base,
+              className,
+            )}
+          >
+            MOM 투표하기
+          </Link>
+        );
+      }
       return (
-        <Link
-          href={primary.href}
-          className={cn(
-            buttonVariants({ variant: "primary", size: "m" }),
-            base,
-            className,
-          )}
+        <Button
+          variant="primary"
+          size="m"
+          className={cn(base, className)}
+          onClick={() => {
+            if (selectedTeamIdNum == null) {
+              toast.error("팀을 선택한 뒤 다시 시도해 주세요.");
+              return;
+            }
+            openMomVoteModal({
+              matchId: momMatchId,
+              teamId: selectedTeamIdNum,
+            });
+          }}
         >
           MOM 투표하기
-        </Link>
+        </Button>
       );
+    }
     case "attendance":
       return (
         <Button

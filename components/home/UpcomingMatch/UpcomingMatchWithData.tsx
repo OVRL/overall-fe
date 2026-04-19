@@ -1,12 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
 import { FindMatchQuery } from "@/lib/relay/queries/findMatchQuery";
+import { mapFindMatchNodesToMatchForUpcomingDisplay } from "@/lib/relay/ssr/mapFindMatchToUpcomingDisplay";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { useHomeUpcomingMatchLayoutSnapshot } from "@/components/providers/HomeUpcomingMatchLayoutSnapshotProvider";
 import { useResolvedHomeUpcomingMatchLayout } from "./useResolvedHomeUpcomingMatchLayout";
-import type { MatchForUpcomingDisplay } from "./upcomingMatchDisplay";
 import HomeUpcomingInviteCopyCard from "./HomeUpcomingInviteCopyCard";
 import NoUpcomingMatch from "./NoUpcomingMatch";
 import OnboardingUpcomingMatch from "./OnboardingUpcomingMatch";
@@ -61,11 +62,13 @@ function UpcomingMatchWithQuery({
   const data = useLazyLoadQuery<findMatchQuery>(
     FindMatchQuery,
     { createdTeamId },
-    { fetchPolicy: "store-or-network" },
+    { fetchPolicy: "store-only" },
   );
 
-  const matches = (data?.findMatch ??
-    []) as unknown as MatchForUpcomingDisplay[];
+  const matches = useMemo(
+    () => mapFindMatchNodesToMatchForUpcomingDisplay(data?.findMatch),
+    [data?.findMatch],
+  );
   const ssrSnapshot = useHomeUpcomingMatchLayoutSnapshot();
   const layout = useResolvedHomeUpcomingMatchLayout(
     createdTeamId,

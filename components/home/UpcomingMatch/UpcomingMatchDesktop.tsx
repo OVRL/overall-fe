@@ -1,9 +1,11 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "@/components/Link";
-import { buttonVariants } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import useModal from "@/hooks/useModal";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
+import { toast } from "@/lib/toast";
 import { useTeamManagementCapabilitiesForUser } from "@/hooks/useTeamManagementCapabilitiesForUser";
 import { useUserId } from "@/hooks/useUserId";
 import { cn } from "@/lib/utils";
@@ -143,7 +145,9 @@ const UpcomingMatchDesktop = ({
   onCopyTeamCode,
 }: UpcomingMatchDesktopProps) => {
   const userId = useUserId();
+  const { selectedTeamIdNum } = useSelectedTeamId();
   const { openModal } = useModal("ATTENDANCE_VOTE");
+  const { openModal: openMomVoteModal } = useModal("MOM_VOTE");
   const onAttendanceVote = () => openModal({});
 
   return (
@@ -158,15 +162,30 @@ const UpcomingMatchDesktop = ({
               {splitMomBanner.display.awayTeam.name}
             </span>
           </div>
-          <Link
-            href={splitMomBanner.momHref}
+          <Button
+            type="button"
+            variant="primary"
+            size="m"
             className={cn(
-              buttonVariants({ variant: "primary", size: "m" }),
               "inline-flex h-10.25 w-auto shrink-0 font-semibold text-Label-Fixed_black text-sm px-4",
             )}
+            onClick={() => {
+              if (selectedTeamIdNum == null) {
+                toast.error("팀을 선택한 뒤 다시 시도해 주세요.");
+                return;
+              }
+              const matchId = parseNumericIdFromRelayGlobalId(
+                splitMomBanner.display.matchId,
+              );
+              if (matchId == null) {
+                toast.error("경기 정보를 불러올 수 없습니다.");
+                return;
+              }
+              openMomVoteModal({ matchId, teamId: selectedTeamIdNum });
+            }}
           >
             MOM 투표하기
-          </Link>
+          </Button>
         </div>
       ) : null}
 
