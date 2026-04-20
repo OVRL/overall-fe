@@ -2,22 +2,60 @@
 
 import { useEffect, useState } from "react";
 import { useAdminAuth } from "../layout";
+import { cn } from "@/lib/utils";
 
 interface Team {
   id: number;
   name: string | null;
   activityArea: string | null;
+  region: {
+    sidoName: string | null;
+    siggName: string | null;
+  } | null;
   description: string | null;
   emblem: string | null;
-  members: { id: number }[] | null;
+  members: { 
+    id: number;
+    role: string;
+    user: {
+      name: string;
+      profileImage: string | null;
+    } | null;
+  }[] | null;
 }
 
 export default function AdminTeamsPage() {
   const { email } = useAdminAuth();
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const teamIdFromUrl = searchParams?.get("teamId");
+  
   const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
+
+  // URL 파라미터에 따른 초기 선택 팀 설정
+  useEffect(() => {
+    if (teams.length > 0 && teamIdFromUrl) {
+      const team = teams.find(t => String(t.id) === teamIdFromUrl);
+      if (team) {
+        setSelectedTeam(team);
+      }
+    }
+  }, [teams, teamIdFromUrl]);
+
+  // 선택 팀 변경 시 URL 업데이트
+  const handleSelectTeam = (team: Team | null) => {
+    setSelectedTeam(team);
+    const url = new URL(window.location.href);
+    if (team) {
+      url.searchParams.set("teamId", String(team.id));
+    } else {
+      url.searchParams.delete("teamId");
+    }
+    window.history.pushState({}, "", url.toString());
+  };
 
   useEffect(() => {
     async function load() {
@@ -34,17 +72,30 @@ export default function AdminTeamsPage() {
                   id
                   name
                   activityArea
+                  region {
+                    sidoName
+                    siggName
+                  }
                   description
                   emblem
-                  members { id }
+                  members { 
+                    id 
+                    role
+                    user {
+                      name
+                      profileImage
+                    }
+                  }
                 }
               }
             }`,
           }),
         });
-        const data = await res.json();
-        setTeams(data?.data?.findManyTeam?.items ?? []);
-        setTotalCount(data?.data?.findManyTeam?.totalCount ?? 0);
+        const json = await res.json();
+        const data = json.data;
+        const fetchedTeams = data?.findManyTeam?.items ?? [];
+        setTeams(fetchedTeams);
+        setTotalCount(data?.findManyTeam?.totalCount ?? 0);
       } catch (err) {
         console.error(err);
       } finally {
@@ -54,16 +105,51 @@ export default function AdminTeamsPage() {
     load();
   }, []);
 
+  // 선택된 팀의 매치 기록을 별도로 가져오는 Effect
+  const [selectedTeamMatches, setSelectedTeamMatches] = useState<any[]>([]);
+  useEffect(() => {
+    if (!selectedTeam) {
+      setSelectedTeamMatches([]);
+      return;
+    }
+    async function loadMatches() {
+      try {
+        const res = await fetch("/api/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            query: `query TeamMatches($teamId: Int!) {
+              findMatch(createdTeamId: $teamId) {
+                id
+                matchDate
+                description
+              }
+            }`,
+            variables: { teamId: selectedTeam?.id }
+          }),
+        });
+        const json = await res.json();
+        setSelectedTeamMatches(json.data?.findMatch ?? []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    loadMatches();
+  }, [selectedTeam]);
+
   const filteredTeams = search.trim()
     ? teams.filter(
         (t) =>
           t.name?.toLowerCase().includes(search.toLowerCase()) ||
-          t.activityArea?.toLowerCase().includes(search.toLowerCase()),
+          t.activityArea?.toLowerCase().includes(search.toLowerCase()) ||
+          t.region?.sidoName?.toLowerCase().includes(search.toLowerCase()) ||
+          t.region?.siggName?.toLowerCase().includes(search.toLowerCase()),
       )
     : teams;
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-Label-Primary">팀 관리</h1>
@@ -128,7 +214,8 @@ export default function AdminTeamsPage() {
               {filteredTeams.map((team) => (
                 <div
                   key={team.id}
-                  className="px-6 py-4 md:grid md:grid-cols-12 md:items-center md:gap-4"
+                  onClick={() => handleSelectTeam(team)}
+                  className="px-6 py-4 md:grid md:grid-cols-12 md:items-center md:gap-4 cursor-pointer hover:bg-gray-900/50 transition-colors"
                 >
                   {/* Mobile */}
                   <div className="md:hidden">
@@ -149,7 +236,7 @@ export default function AdminTeamsPage() {
                           {team.name ?? "이름 없음"}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {team.activityArea ?? "-"} · 멤버 {team.members?.length ?? 0}명
+                          {team.region ? `${team.region.sidoName} ${team.region.siggName}` : (team.activityArea ?? "-")} · 멤버 {team.members?.length ?? 0}명
                         </p>
                       </div>
                     </div>
@@ -170,7 +257,7 @@ export default function AdminTeamsPage() {
                     </span>
                   </div>
                   <span className="hidden text-xs text-gray-400 md:block col-span-3">
-                    {team.activityArea ?? "-"}
+                    {team.region ? `${team.region.sidoName} ${team.region.siggName}` : (team.activityArea ?? "-")}
                   </span>
                   <span className="hidden text-xs text-gray-400 md:block col-span-2">
                     {team.members?.length ?? 0}명
@@ -184,6 +271,143 @@ export default function AdminTeamsPage() {
           </>
         )}
       </div>
+
+      {/* Team Detail Slide-over */}
+      {selectedTeam && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => handleSelectTeam(null)}
+          />
+          <div className="relative h-full w-full max-w-xl animate-slide-in-right bg-surface-secondary border-l border-gray-900 shadow-2xl overflow-y-auto">
+            {/* Detail Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-900 bg-surface-secondary/80 backdrop-blur px-6 py-4">
+              <h2 className="text-lg font-bold text-Label-Primary">팀 상세 정보</h2>
+              <button 
+                onClick={() => handleSelectTeam(null)}
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-900 hover:text-Label-Primary transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-8">
+              {/* Profile Card */}
+              <div className="flex flex-col items-center text-center gap-4">
+                {selectedTeam.emblem ? (
+                  <img src={selectedTeam.emblem} alt="" className="h-24 w-24 rounded-2xl object-cover ring-4 ring-gray-900/50" />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gray-900 text-3xl font-bold text-gray-700">
+                    {selectedTeam.name?.[0] ?? "?"}
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-2xl font-bold text-Label-Primary">{selectedTeam.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedTeam.region ? `${selectedTeam.region.sidoName} ${selectedTeam.region.siggName}` : selectedTeam.activityArea}
+                  </p>
+                </div>
+              </div>
+
+              {/* Info grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl border border-gray-900 bg-gray-1300 p-4 font-pretendard">
+                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">멤버</p>
+                  <p className="text-xl font-black text-Label-Primary">{selectedTeam.members?.length ?? 0}<span className="text-xs font-normal ml-0.5 opacity-50">명</span></p>
+                </div>
+                <div className="rounded-xl border border-gray-900 bg-gray-1300 p-4 font-pretendard">
+                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider mb-1">총 경기수</p>
+                  <p className="text-xl font-black text-Label-Primary">{selectedTeamMatches.length}<span className="text-xs font-normal ml-0.5 opacity-50">회</span></p>
+                </div>
+              </div>
+
+              {/* Match Records List */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-Label-Primary flex items-center justify-between">
+                  최근 경기 기록
+                  <span className="text-xs font-normal text-gray-500">{selectedTeamMatches.length}</span>
+                </h4>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                  {selectedTeamMatches.map((match: any) => {
+                    let scoreInfo = null;
+                    try {
+                      if (match.description) scoreInfo = JSON.parse(match.description).score;
+                    } catch (e) {}
+
+                    const isWin = scoreInfo ? scoreInfo.home > scoreInfo.away : false;
+                    const isDraw = scoreInfo ? scoreInfo.home === scoreInfo.away : false;
+
+                    return (
+                      <div key={match.id} className="flex items-center justify-between rounded-xl border border-gray-900 bg-gray-1300 px-4 py-3">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs font-bold text-Label-Primary">
+                            {new Date(match.matchDate).toLocaleDateString()}
+                          </span>
+                          <span className="text-[10px] text-gray-600">ID: {match.id}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {scoreInfo && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-black text-Label-Primary">{scoreInfo.home} : {scoreInfo.away}</span>
+                              <span className={cn(
+                                "px-1.5 py-0.5 rounded text-[10px] font-black uppercase",
+                                isWin ? "bg-blue-500/20 text-blue-500" : isDraw ? "bg-gray-500/20 text-gray-500" : "bg-red-500/20 text-red-500"
+                              )}>
+                                {isWin ? "W" : isDraw ? "D" : "L"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {selectedTeamMatches.length === 0 && (
+                    <div className="py-8 text-center text-xs text-gray-600 bg-gray-1300 rounded-2xl border border-dashed border-gray-900">
+                      경기 기록이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Members List */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-Label-Primary flex items-center justify-between">
+                  멤버 명단
+                  <span className="text-xs font-normal text-gray-500">{selectedTeam.members?.length ?? 0}</span>
+                </h4>
+                <div className="divide-y divide-gray-900 rounded-2xl border border-gray-900 bg-gray-1300 overflow-hidden">
+                  {selectedTeam.members?.map((member: any) => (
+                    <div key={member.id} className="flex items-center gap-3 px-4 py-3">
+                      <div className="h-8 w-8 rounded-full bg-gray-900 overflow-hidden border border-white/5">
+                        <img src={member.user?.profileImage || "/images/player/img_player_1.webp"} alt="" className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-Label-Primary truncate">{member.user?.name}</p>
+                        <p className="text-[10px] text-gray-600 uppercase font-bold tracking-tight">{member.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {(!selectedTeam.members || selectedTeam.members.length === 0) && (
+                    <div className="py-8 text-center text-xs text-gray-600">멤버가 없습니다.</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Description */}
+              {selectedTeam.description && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-bold text-Label-Primary">팀 설명</h4>
+                  <div className="rounded-2xl bg-gray-1300 border border-gray-900 p-4 text-sm text-Label-Secondary whitespace-pre-wrap leading-relaxed italic">
+                    "{selectedTeam.description}"
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
