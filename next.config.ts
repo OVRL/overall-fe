@@ -43,6 +43,16 @@ const nextConfig = {
       // beforeFiles: 파일시스템(앱 라우트)보다 먼저 적용됨
       beforeFiles: [
         {
+          source: "/",
+          has: [{ type: "host", value: "(?<subdomain>admin)\\..*" }],
+          destination: "/admin",
+        },
+        {
+          source: "/:path((?!admin).*)*",
+          has: [{ type: "host", value: "(?<subdomain>admin)\\..*" }],
+          destination: "/admin/:path*",
+        },
+        {
           source: "/graphql",
           destination: `${env.BACKEND_URL}/graphql`,
         },

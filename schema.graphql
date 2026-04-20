@@ -502,7 +502,7 @@ type Mutation {
   """MOM 투표 수정. 투표 마감(vote_deadline) 이전에 본인의 투표만 수정 가능합니다."""
   updateMatchMomVote(input: UpdateMatchMomVoteInput!): MatchMomVoteModel!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
-  updateTeamMember(input: UpdateTeamMemberInput!): TeamMemberModel!
+  updateTeamMember(input: UpdateTeamMemberInput!, profileImage: Upload): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload): UserModel!
 }
 
@@ -849,9 +849,6 @@ input UpdateTeamMemberInput {
 
   """선호 포지션 (선택)"""
   preferredPosition: Position
-
-  """프로필 이미지 (선택)"""
-  profileImg: String
 
   """역할 (선택)"""
   role: Role

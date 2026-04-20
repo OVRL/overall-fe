@@ -22,11 +22,7 @@ const navItems: NavItem[] = [
     href: "#",
     external: true,
   },
-  {
-    label: "문의하기",
-    href: "#",
-    external: true,
-  },
+  { label: "문의하기", href: "/contact" },
 ];
 
 function NavLink({ item }: { item: NavItem }) {

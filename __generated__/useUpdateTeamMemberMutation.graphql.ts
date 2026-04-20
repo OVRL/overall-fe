@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c485961b20cdcecc2437c5a595140eea>>
+ * @generated SignedSource<<3796643fae86008225f3a803e33a9d33>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,6 @@ export type UpdateTeamMemberInput = {
   introduction?: string | null | undefined;
   preferredNumber?: number | null | undefined;
   preferredPosition?: Position | null | undefined;
-  profileImg?: string | null | undefined;
   role?: Role | null | undefined;
 };
 export type useUpdateTeamMemberMutation$variables = {
