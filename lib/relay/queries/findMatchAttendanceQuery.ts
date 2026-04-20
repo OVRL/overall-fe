@@ -5,6 +5,7 @@ export const FindMatchAttendanceQuery = graphql`
   query findMatchAttendanceQuery($matchId: Int!, $teamId: Int!) {
     findMatchAttendance(matchId: $matchId, teamId: $teamId) {
       id
+      matchId
       userId
       user {
         id

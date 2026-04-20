@@ -39,6 +39,7 @@ export function MomVoteRankPicker({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        menuStrategy="overlay"
       />
     </div>
   );

@@ -3,10 +3,16 @@
 import Icon from "./Icon";
 import arrow_down from "@/public/icons/arrow_down.svg";
 import arrow_up from "@/public/icons/arrow_up.svg";
-import { useRef, useState, useEffect } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
-import { useClickOutside } from "@/hooks/useClickOutside";
 
 interface DropdownProps {
   options: { label: string; value: string }[];
@@ -21,6 +27,59 @@ interface DropdownProps {
   className?: string;
   /** 트리거 버튼에 적용 (열기/닫기 버튼) */
   triggerClassName?: string;
+  /**
+   * `inline`: 기존처럼 트리거 아래 absolute (overflow 부모 안에서 잘릴 수 있음)
+   * `overlay`: body 포털 + fixed 배치 — 스크롤 모달 안에서도 목록이 잘리지 않도록 사용
+   */
+  menuStrategy?: "inline" | "overlay";
+}
+
+const MENU_MAX_PX = 240; // max-h-60 과 동일 계열
+const GAP_PX = 4;
+const OVERLAY_Z = 100;
+
+type OverlayPlacement = "top" | "bottom";
+
+type OverlayGeometry = {
+  placement: OverlayPlacement;
+  left: number;
+  width: number;
+  maxHeight: number;
+  top?: number;
+  bottom?: number;
+};
+
+function computeOverlayGeometry(trigger: DOMRect): OverlayGeometry {
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
+  const spaceBelow = vh - trigger.bottom - GAP_PX;
+  const spaceAbove = trigger.top - GAP_PX;
+  // 아래 공간이 부족하고 위가 더 넓으면 위로 펼침
+  const openUp =
+    spaceBelow < MENU_MAX_PX * 0.45 && spaceAbove >= spaceBelow;
+
+  let left = trigger.left;
+  left = Math.max(8, Math.min(left, vw - trigger.width - 8));
+
+  if (!openUp) {
+    const maxH = Math.min(MENU_MAX_PX, Math.max(64, spaceBelow - 8));
+    return {
+      placement: "bottom",
+      top: trigger.bottom + GAP_PX,
+      left,
+      width: trigger.width,
+      maxHeight: maxH,
+    };
+  }
+
+  const maxH = Math.min(MENU_MAX_PX, Math.max(64, spaceAbove - 8));
+  return {
+    placement: "top",
+    bottom: vh - trigger.top + GAP_PX,
+    left,
+    width: trigger.width,
+    maxHeight: maxH,
+  };
 }
 
 const Dropdown = ({
@@ -32,24 +91,73 @@ const Dropdown = ({
   ariaLabelledBy,
   className,
   triggerClassName,
+  menuStrategy = "inline",
 }: DropdownProps) => {
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [overlayGeometry, setOverlayGeometry] =
+    useState<OverlayGeometry | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const overlayMenuRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const isKeyboardActionRef = useRef<boolean>(false);
 
   const selectedLabel = options?.find((opt) => opt.value === value)?.label;
 
-  useClickOutside(dropdownRef, () => {
+  const closeMenu = useCallback(() => {
     setIsOpen(false);
     setFocusedIndex(-1);
-  });
+  }, []);
+
+  // 열려 있을 때만 바깥 클릭으로 닫기 (인라인: 패널이 ref 안에 있음 / 오버레이: 포털 ref 별도)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const listener = (event: MouseEvent | TouchEvent) => {
+      const t = event.target as Node;
+      if (dropdownRef.current?.contains(t)) return;
+      if (menuStrategy === "overlay" && overlayMenuRef.current?.contains(t)) {
+        return;
+      }
+      closeMenu();
+    };
+
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [isOpen, menuStrategy, closeMenu]);
+
+  const updateOverlayGeometry = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    setOverlayGeometry(computeOverlayGeometry(el.getBoundingClientRect()));
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isOpen || menuStrategy !== "overlay") {
+      setOverlayGeometry(null);
+      return;
+    }
+    updateOverlayGeometry();
+
+    const onScrollOrResize = () => {
+      updateOverlayGeometry();
+    };
+    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    return () => {
+      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+    };
+  }, [isOpen, menuStrategy, updateOverlayGeometry]);
 
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
-    setIsOpen(false);
-    setFocusedIndex(-1);
+    closeMenu();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -57,7 +165,6 @@ const Dropdown = ({
       if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
         e.preventDefault();
         setIsOpen(true);
-        // Focus first item or selected item
         const idx = options.findIndex((opt) => opt.value === value);
         setFocusedIndex(idx >= 0 ? idx : 0);
       }
@@ -84,16 +191,14 @@ const Dropdown = ({
         break;
       case "Escape":
         e.preventDefault();
-        setIsOpen(false);
-        setFocusedIndex(-1);
+        closeMenu();
         break;
       case "Tab":
-        setIsOpen(false);
+        closeMenu();
         break;
     }
   };
 
-  // Scroll focused item into view (Keyboard only)
   useEffect(() => {
     if (
       isOpen &&
@@ -109,94 +214,147 @@ const Dropdown = ({
     }
   }, [focusedIndex, isOpen]);
 
-  return (
-    <div
-      className={cn("relative text-left", className)}
-      ref={dropdownRef}
-      onKeyDown={handleKeyDown}
-    >
-      {/* Trigger Button */}
+  const listBoxClass =
+    "flex flex-col gap-1 p-2 overflow-y-auto custom-scrollbar overscroll-contain";
+
+  const renderOptionButtons = () =>
+    options.map((option, index) => (
       <button
         type="button"
-        id={triggerId}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) {
-            const idx = options.findIndex((opt) => opt.value === value);
-            setFocusedIndex(idx >= 0 ? idx : 0);
-          }
-        }}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-label={ariaLabelledBy ? undefined : placeholder}
-        aria-labelledby={ariaLabelledBy}
+        key={option.value}
+        onClick={() => handleSelect(option.value)}
+        role="option"
+        aria-selected={value === option.value}
+        tabIndex={-1}
         className={cn(
-          "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
-          "bg-Fill_Quatiary border-transparent",
-          isOpen ? "border-Fill_AccentPrimary" : "",
-          triggerClassName,
+          "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none",
+          value === option.value
+            ? "text-Fill_AccentPrimary"
+            : "text-white/60",
+          focusedIndex === index && "bg-white/10",
         )}
+        onMouseEnter={() => {
+          isKeyboardActionRef.current = false;
+          setFocusedIndex(index);
+        }}
       >
-        <span
+        {option.label}
+      </button>
+    ));
+
+  const overlayPanel =
+    isOpen &&
+    menuStrategy === "overlay" &&
+    overlayGeometry &&
+    typeof document !== "undefined"
+      ? createPortal(
+          <AnimatePresence>
+            <motion.div
+              key="dropdown-overlay"
+              ref={overlayMenuRef}
+              role="presentation"
+              initial={{ opacity: 0, y: overlayGeometry.placement === "bottom" ? -8 : 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: overlayGeometry.placement === "bottom" ? -8 : 8 }}
+              transition={{ duration: 0.15 }}
+              style={{
+                position: "fixed",
+                zIndex: OVERLAY_Z,
+                left: overlayGeometry.left,
+                width: overlayGeometry.width,
+                maxHeight: overlayGeometry.maxHeight,
+                ...(overlayGeometry.placement === "bottom"
+                  ? { top: overlayGeometry.top }
+                  : { bottom: overlayGeometry.bottom }),
+              }}
+              className="bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2 flex flex-col min-h-0"
+            >
+              <div
+                ref={listRef}
+                className={cn(listBoxClass, "max-h-full")}
+                role="listbox"
+              >
+                {renderOptionButtons()}
+              </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body,
+        )
+      : null;
+
+  return (
+    <>
+      <div
+        className={cn("relative text-left", className)}
+        ref={dropdownRef}
+        onKeyDown={handleKeyDown}
+      >
+        <button
+          type="button"
+          ref={triggerRef}
+          id={triggerId}
+          onClick={() => {
+            setIsOpen((prev) => {
+              const next = !prev;
+              if (next) {
+                const idx = options.findIndex((opt) => opt.value === value);
+                setFocusedIndex(idx >= 0 ? idx : 0);
+              }
+              return next;
+            });
+          }}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-label={ariaLabelledBy ? undefined : placeholder}
+          aria-labelledby={ariaLabelledBy}
           className={cn(
-            "text-sm font-normal truncate w-25.25 text-left",
-            selectedLabel ? "text-Label-Secondary" : "text-Label-Primary",
+            "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
+            "bg-Fill_Quatiary border-transparent",
+            isOpen ? "border-Fill_AccentPrimary" : "",
+            triggerClassName,
           )}
         >
-          {selectedLabel || placeholder}
-        </span>
-        <motion.div
-          animate={{ rotate: 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-Fill_Tertiary"
-        >
-          <Icon src={isOpen ? arrow_up : arrow_down} width={24} height={24} />
-        </motion.div>
-      </button>
-
-      {/* Dropdown Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-50 mt-1 w-full bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2"
+          <span
+            className={cn(
+              "text-sm font-normal truncate w-25.25 text-left",
+              selectedLabel ? "text-Label-Secondary" : "text-Label-Primary",
+            )}
           >
-            <div
-              className="flex flex-col gap-1 p-2 max-h-60 overflow-y-auto custom-scrollbar overscroll-contain"
-              role="listbox"
-              ref={listRef}
-            >
-              {options.map((option, index) => (
-                <button
-                  type="button"
-                  key={option.value}
-                  onClick={() => handleSelect(option.value)}
-                  role="option"
-                  aria-selected={value === option.value}
-                  tabIndex={-1} // Manage focus manually
-                  className={cn(
-                    "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none",
-                    value === option.value
-                      ? "text-Fill_AccentPrimary"
-                      : "text-white/60",
-                    focusedIndex === index && "bg-white/10",
-                  )}
-                  onMouseEnter={() => {
-                    isKeyboardActionRef.current = false;
-                    setFocusedIndex(index);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            {selectedLabel || placeholder}
+          </span>
+          <motion.div
+            animate={{ rotate: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-Fill_Tertiary"
+          >
+            <Icon src={isOpen ? arrow_up : arrow_down} width={24} height={24} />
           </motion.div>
+        </button>
+
+        {menuStrategy === "inline" && (
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-50 mt-1 w-full bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2"
+              >
+                <div
+                  className={cn(listBoxClass, "max-h-60")}
+                  role="listbox"
+                  ref={listRef}
+                >
+                  {renderOptionButtons()}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
-      </AnimatePresence>
-    </div>
+      </div>
+      {overlayPanel}
+    </>
   );
 };
 
