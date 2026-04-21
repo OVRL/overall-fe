@@ -25,6 +25,23 @@ export function useCreateBestElevenMutation() {
     return new Promise<MutationType["response"]>((resolve, reject) => {
       commit({
         variables: { input },
+        updater: (store) => {
+          const payload = store.getRootField("createBestEleven");
+          if (!payload) return;
+
+          const root = store.getRoot();
+          const teamId = input.teamId;
+          const list = root.getLinkedRecords("findBestEleven", { teamId });
+          
+          if (list) {
+            // 현재 유저의 기존 레코드를 목록에서 제거하고 새 레코드를 추가
+            const userId = payload.getValue("userId");
+            const newList = list.filter(item => 
+              item != null && String(item.getValue("userId")) !== String(userId)
+            );
+            root.setLinkedRecords([...newList, payload], "findBestEleven", { teamId });
+          }
+        },
         onCompleted: (response, errors) => {
           if (errors) reject(errors);
           else resolve(response);
