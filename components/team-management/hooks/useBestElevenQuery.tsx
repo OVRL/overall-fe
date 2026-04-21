@@ -1,7 +1,7 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import type { useBestElevenQuery as QueryType } from "../../../__generated__/useBestElevenQuery.graphql";
 
-const bestElevenQuery = graphql`
+export const useBestElevenFetchQuery = graphql`
   query useBestElevenQuery($teamId: Int!) {
     findManyTeamMember(teamId: $teamId, limit: 200) {
       members {
@@ -48,7 +48,7 @@ const bestElevenQuery = graphql`
 
 export const useBestElevenQuery = (teamId: number) => {
   return useLazyLoadQuery<QueryType>(
-    bestElevenQuery,
+    useBestElevenFetchQuery,
     { teamId },
     { fetchPolicy: "store-or-network" },
   );

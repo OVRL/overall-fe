@@ -16,11 +16,13 @@ function rowNumericId(row: RowWithIdTactics): number {
 export function pickPrimaryBestElevenRow<T extends RowWithIdTactics>(
   rows: readonly T[],
 ): T | null {
-  if (rows.length === 0) return null;
-  const withTactics = rows.filter(
+  const validRows = rows.filter((r) => r != null);
+  if (validRows.length === 0) return null;
+
+  const withTactics = validRows.filter(
     (r) => r.tactics != null && typeof r.tactics === "object",
   );
-  const pool = withTactics.length > 0 ? withTactics : [...rows];
+  const pool = withTactics.length > 0 ? withTactics : [...validRows];
   return pool.reduce((best, cur) =>
     rowNumericId(cur) > rowNumericId(best) ? cur : best,
   );

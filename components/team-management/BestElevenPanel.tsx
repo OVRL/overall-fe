@@ -16,6 +16,7 @@ import {
   useDraggable,
 } from "@dnd-kit/core";
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
+import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
 import Image from "next/image";
 
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
@@ -43,6 +44,8 @@ import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarte
 import { createFormationLineupResolver } from "@/lib/formation/roster/createFormationLineupResolver";
 import { pickPrimaryBestElevenRow } from "@/lib/formation/pickPrimaryBestElevenRow";
 import { useUserId } from "@/hooks/useUserId";
+import { useRelayEnvironment, fetchQuery } from "react-relay";
+import { useBestElevenFetchQuery } from "./hooks/useBestElevenQuery";
 
 /**
  * 선수 스탯 목업 (이미지 기준)
@@ -83,7 +86,7 @@ const MOCK_LINEUP_LIST = [
  * 스탯 아이템 (상세 카드용)
  */
 const StatCardItem = ({ icon, label, value }: { icon: string; label: string; value: string | number }) => (
-  <div className="flex-1 min-w-[30%] bg-[#222]/30 rounded-xl p-2 md:p-3 border border-white/5">
+  <div className="flex-1 min-w-[31%] bg-white/5 backdrop-blur-md rounded-xl p-2 md:p-2.5 border border-white/5 shadow-inner">
     <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] text-gray-400 font-bold mb-1">
       <span className="opacity-80">{icon}</span>
       <span className="uppercase">{label}</span>
@@ -199,6 +202,8 @@ export default function BestElevenPanel() {
 }
 
 function BestElevenPanelInner({ teamId }: { teamId: number }) {
+  const environment = useRelayEnvironment();
+  const router = useBridgeRouter();
   const editorUserId = useUserId();
   const isMobile = useIsMobile(1023);
   const dndId = useId();
@@ -252,7 +257,10 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     return out;
   }, [data.findManyTeamMember]);
 
-  const bestElevenRows = data.findBestEleven ?? [];
+  const bestElevenRows = useMemo(
+    () => (data.findBestEleven ?? []).filter((r) => r != null),
+    [data.findBestEleven],
+  );
 
   const getInitialQuarters = useCallback((): QuarterData[] => {
     const defaultFormation = "4-2-3-1" as FormationType;
@@ -292,7 +300,15 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const [quarters, setQuarters] = useState<QuarterData[]>(getInitialQuarters);
 
   // 감독 정보 찾기 (정적 변수들 먼저 선언)
-  const initialManagerMember = data.findManyTeamMember?.members?.find((m: any) => m.role === "MANAGER");
+  const initialManagerMember = useMemo(() => {
+    const members = data.findManyTeamMember?.members ?? [];
+    // 1. 현재 접속 유저가 매니저인 경우 우선
+    const meAsManager = members.find((m: any) => m.role === "MANAGER" && m.userId === editorUserId);
+    if (meAsManager) return meAsManager;
+    // 2. 아니면 첫 번째 매니저
+    return members.find((m: any) => m.role === "MANAGER");
+  }, [data.findManyTeamMember?.members, editorUserId]);
+  
   const initialManagerId = initialManagerMember?.id ? String(initialManagerMember.id) : null;
 
   // 팀 전체 매치 기록 기반 승/무/패 산출
@@ -432,14 +448,24 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       return;
     }
 
+    // 저장 시점에 최신 데이터를 강제 조회하여 삭제 대상을 정확히 파악합니다. (네트워크 기반)
+    const freshData = await new Promise<any>((resolve) => {
+      fetchQuery(environment, useBestElevenFetchQuery, { teamId }, { fetchPolicy: "network-only" })
+        .subscribe({
+          next: (res) => resolve(res),
+          error: () => resolve(null)
+        });
+    });
+
+    const bestElevenToClean = freshData?.findBestEleven ?? [];
     const lineup = quarters[0]?.lineup ?? {};
     const hasAnySlotPlayer = Object.values(lineup).some((p) => p != null);
-    const currentBestEleven = data.findBestEleven ?? [];
+    
     const newManagerMemberId = manager.memberId;
 
     if (
       !hasAnySlotPlayer &&
-      currentBestEleven.length === 0 &&
+      bestElevenToClean.length === 0 &&
       newManagerMemberId === initialManagerId
     ) {
       alert("변경사항이 없습니다.");
@@ -470,16 +496,16 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
         }
       }
 
-      // 1단계: 감독 변경 사항 반영
-      if (currentBestEleven.length > 0) {
-        for (const entry of currentBestEleven) {
+      // 2단계: 기존 베스트 일레븐 데이터 삭제 (중복 키 방지)
+      if (bestElevenToClean.length > 0) {
+        console.log(`[BestEleven] Attempting to clean up ${bestElevenToClean.length} records...`);
+        for (const entry of bestElevenToClean) {
           const numericId = parseNumericIdFromRelayGlobalId(entry.id);
           if (numericId != null) {
             try {
               await deleteBestEleven(numericId);
             } catch (err: any) {
-              // '베스트 일레븐을 찾을 수 없습니다' 에러는 무시하고 진행 (이미 없는 것과 같음)
-              console.warn(`[BestEleven] Delete failed for ID ${numericId}:`, err.message);
+              console.warn(`[BestEleven] Cleanup skip for ID ${numericId}:`, err.message);
             }
           }
         }
@@ -494,10 +520,21 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       }
 
       setHasChanges(false);
-      alert("베스트 11이 저장되었습니다.");
+      alert("베스트 11이 성공적으로 저장되었습니다.");
+      
+      // 데이터 정합성을 위해 서버 데이터를 갱신합니다.
+      // alert 이후에 호출하여 사용자가 저장된 모습을 확인한 뒤 동기화되도록 합니다.
+      router.refresh();
     } catch (error) {
       console.error("[BestEleven] Failed to save best eleven:", error);
       alert("저장 중 오류가 발생했습니다. 콘솔을 확인해주세요.");
+    }
+  };
+
+  const handleReset = () => {
+    if (confirm("모든 구성을 초기화하시겠습니까? (서버에 저장된 이전 상태로 복구됩니다.)")) {
+      setQuarters(getInitialQuarters());
+      setHasChanges(false);
     }
   };
 
@@ -708,7 +745,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                 </div>
 
                 {/* 하단: 스탯 그리드 */}
-                <div className="relative z-20 grid grid-cols-3 gap-2 mt-auto">
+                <div className="relative z-30 grid grid-cols-3 gap-2 mt-6 mb-2">
                   <StatCardItem icon="🏃" label="출장" value={selectedPlayerDetail?.stats?.matches || 0} />
                   <StatCardItem icon="⚽" label="골" value={selectedPlayerDetail?.stats?.goals || 0} />
                   <StatCardItem icon="👟" label="도움" value={selectedPlayerDetail?.stats?.assists || 0} />
@@ -764,7 +801,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
           </div>
           <div className="flex items-center gap-2 md:gap-3 flex-nowrap shrink-0">
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleReset}
               className="px-4 md:px-8 py-2 md:py-2.5 rounded-xl border border-white/10 text-white text-[10px] md:text-xs font-black hover:bg-white/5 transition-all disabled:opacity-50 whitespace-nowrap"
               disabled={isSaving}
             >
