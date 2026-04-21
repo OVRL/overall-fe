@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6d181a320e228dcda5d21e54cb9b7e6f>>
+ * @generated SignedSource<<bebf14763e34dd9328294332783f0af0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -26,24 +26,25 @@ export type momVoteModalQuery$data = {
     } | null | undefined;
     readonly userId: number;
   }>;
-  readonly findMyMatchMomVote: {
+  readonly findMatchMom: ReadonlyArray<{
     readonly candidateMercenaryId: number | null | undefined;
     readonly candidateUserId: number | null | undefined;
+    readonly voteCount: number;
+  }>;
+  readonly findMyMatchMom: ReadonlyArray<{
+    readonly candidateMercenary: {
+      readonly name: string;
+    } | null | undefined;
+    readonly candidateMercenaryId: number | null | undefined;
+    readonly candidateUser: {
+      readonly name: string | null | undefined;
+    } | null | undefined;
+    readonly candidateUserId: number | null | undefined;
+    readonly createdAt: any;
     readonly id: number;
     readonly matchId: number;
     readonly teamId: number;
     readonly voterUserId: number;
-  } | null | undefined;
-  readonly matchMercenaries: ReadonlyArray<{
-    readonly id: number;
-    readonly matchId: number;
-    readonly name: string;
-    readonly teamId: number;
-  }>;
-  readonly matchMomVotes: ReadonlyArray<{
-    readonly candidateMercenaryId: number | null | undefined;
-    readonly candidateUserId: number | null | undefined;
-    readonly voteCount: number;
   }>;
 };
 export type momVoteModalQuery = {
@@ -102,23 +103,19 @@ v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "teamId",
+  "name": "candidateUserId",
   "storageKey": null
 },
 v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "candidateUserId",
-  "storageKey": null
-},
-v8 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
   "name": "candidateMercenaryId",
   "storageKey": null
 },
+v8 = [
+  (v5/*: any*/)
+],
 v9 = [
   {
     "alias": null,
@@ -169,27 +166,10 @@ v9 = [
   },
   {
     "alias": null,
-    "args": [
-      (v1/*: any*/)
-    ],
-    "concreteType": "MatchMercenaryModel",
-    "kind": "LinkedField",
-    "name": "matchMercenaries",
-    "plural": true,
-    "selections": [
-      (v3/*: any*/),
-      (v5/*: any*/),
-      (v4/*: any*/),
-      (v6/*: any*/)
-    ],
-    "storageKey": null
-  },
-  {
-    "alias": null,
     "args": (v2/*: any*/),
     "concreteType": "MatchMomVoteResultModel",
     "kind": "LinkedField",
-    "name": "matchMomVotes",
+    "name": "findMatchMom",
     "plural": true,
     "selections": [
       {
@@ -199,22 +179,30 @@ v9 = [
         "name": "voteCount",
         "storageKey": null
       },
-      (v7/*: any*/),
-      (v8/*: any*/)
+      (v6/*: any*/),
+      (v7/*: any*/)
     ],
     "storageKey": null
   },
   {
     "alias": null,
-    "args": (v2/*: any*/),
+    "args": [
+      (v1/*: any*/)
+    ],
     "concreteType": "MatchMomVoteModel",
     "kind": "LinkedField",
-    "name": "findMyMatchMomVote",
-    "plural": false,
+    "name": "findMyMatchMom",
+    "plural": true,
     "selections": [
       (v3/*: any*/),
       (v4/*: any*/),
-      (v6/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "teamId",
+        "storageKey": null
+      },
       {
         "alias": null,
         "args": null,
@@ -222,8 +210,35 @@ v9 = [
         "name": "voterUserId",
         "storageKey": null
       },
+      (v6/*: any*/),
       (v7/*: any*/),
-      (v8/*: any*/)
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "createdAt",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "UserModel",
+        "kind": "LinkedField",
+        "name": "candidateUser",
+        "plural": false,
+        "selections": (v8/*: any*/),
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "MatchMercenaryModel",
+        "kind": "LinkedField",
+        "name": "candidateMercenary",
+        "plural": false,
+        "selections": (v8/*: any*/),
+        "storageKey": null
+      }
     ],
     "storageKey": null
   }
@@ -246,16 +261,16 @@ return {
     "selections": (v9/*: any*/)
   },
   "params": {
-    "cacheID": "f34671278e34edf7770779068a2b1316",
+    "cacheID": "638af5befa22d8130e640197ad4b9bbe",
     "id": null,
     "metadata": {},
     "name": "momVoteModalQuery",
     "operationKind": "query",
-    "text": "query momVoteModalQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    matchId\n    userId\n    user {\n      id\n      name\n      profileImage\n    }\n    attendanceStatus\n  }\n  matchMercenaries(matchId: $matchId) {\n    id\n    name\n    matchId\n    teamId\n  }\n  matchMomVotes(matchId: $matchId, teamId: $teamId) {\n    voteCount\n    candidateUserId\n    candidateMercenaryId\n  }\n  findMyMatchMomVote(matchId: $matchId, teamId: $teamId) {\n    id\n    matchId\n    teamId\n    voterUserId\n    candidateUserId\n    candidateMercenaryId\n  }\n}\n"
+    "text": "query momVoteModalQuery(\n  $matchId: Int!\n  $teamId: Int!\n) {\n  findMatchAttendance(matchId: $matchId, teamId: $teamId) {\n    id\n    matchId\n    userId\n    user {\n      id\n      name\n      profileImage\n    }\n    attendanceStatus\n  }\n  findMatchMom(matchId: $matchId, teamId: $teamId) {\n    voteCount\n    candidateUserId\n    candidateMercenaryId\n  }\n  findMyMatchMom(matchId: $matchId) {\n    id\n    matchId\n    teamId\n    voterUserId\n    candidateUserId\n    candidateMercenaryId\n    createdAt\n    candidateUser {\n      name\n    }\n    candidateMercenary {\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "fdc43faaa0302dd764f517c00371a246";
+(node as any).hash = "990daec3241f059236becdcd8d96d168";
 
 export default node;

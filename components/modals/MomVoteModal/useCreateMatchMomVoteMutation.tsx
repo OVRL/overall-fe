@@ -3,7 +3,7 @@ import type { useCreateMatchMomVoteMutation as MutationType } from "@/__generate
 
 const mutation = graphql`
   mutation useCreateMatchMomVoteMutation($input: CreateMatchMomVoteInput!) {
-    createMatchMomVote(input: $input) {
+    createMatchMom(input: $input) {
       id
       matchId
       teamId

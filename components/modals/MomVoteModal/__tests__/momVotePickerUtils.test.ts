@@ -3,10 +3,11 @@ import {
   buildMomVoteCandidateOptions,
   optionsExcludingOthers,
   parseMomVoteSelectionToCandidateInput,
+  picksToCandidateUserIds,
+  withOptionForValue,
 } from "../momVotePickerUtils";
 
 type Row = findMatchAttendanceQuery["response"]["findMatchAttendance"][number];
-type Merc = findMatchAttendanceQuery["response"]["matchMercenaries"][number];
 
 const MATCH_ID = 9001;
 
@@ -20,15 +21,6 @@ function row(
     userId: input.userId,
     user: input.user,
   } as Row;
-}
-
-function merc(partial: Partial<Merc> & Pick<Merc, "id" | "name">): Merc {
-  return {
-    matchId: partial.matchId ?? MATCH_ID,
-    teamId: partial.teamId ?? 1,
-    id: partial.id,
-    name: partial.name,
-  } as Merc;
 }
 
 describe("buildMomVoteCandidateOptions", () => {
@@ -54,7 +46,7 @@ describe("buildMomVoteCandidateOptions", () => {
         }),
       ];
 
-    expect(buildMomVoteCandidateOptions(rows, [], MATCH_ID)).toEqual([
+    expect(buildMomVoteCandidateOptions(rows, MATCH_ID)).toEqual([
       { label: "참석자", value: "4" },
     ]);
   });
@@ -74,12 +66,12 @@ describe("buildMomVoteCandidateOptions", () => {
         }),
       ];
 
-    expect(buildMomVoteCandidateOptions(rows, [], MATCH_ID)).toEqual([
+    expect(buildMomVoteCandidateOptions(rows, MATCH_ID)).toEqual([
       { label: "이번경기", value: "2" },
     ]);
   });
 
-  it("userId 기준 중복을 제거하고, 용병은 m:id 형태로 붙인다", () => {
+  it("userId 기준 중복을 제거하고, 용병(matchMercenaries)은 후보에 넣지 않는다", () => {
     const rows: findMatchAttendanceQuery["response"]["findMatchAttendance"] =
       [
         row({
@@ -91,13 +83,76 @@ describe("buildMomVoteCandidateOptions", () => {
           user: { id: 7, name: "두번째", profileImage: null },
         }),
       ];
-    const mercenaries: findMatchAttendanceQuery["response"]["matchMercenaries"] =
-      [merc({ id: 10, name: "용병A" })];
 
-    expect(buildMomVoteCandidateOptions(rows, mercenaries, MATCH_ID)).toEqual([
+    expect(buildMomVoteCandidateOptions(rows, MATCH_ID)).toEqual([
       { label: "첫번째", value: "7" },
-      { label: "용병A", value: "m:10" },
     ]);
+  });
+
+  it("후보 표시명 기준 한국어 로케일 오름차순으로 정렬한다", () => {
+    const rows: findMatchAttendanceQuery["response"]["findMatchAttendance"] =
+      [
+        row({
+          userId: 1,
+          user: { id: 1, name: "홍길동", profileImage: null },
+        }),
+        row({
+          userId: 2,
+          user: { id: 2, name: "가나다", profileImage: null },
+        }),
+      ];
+
+    expect(buildMomVoteCandidateOptions(rows, MATCH_ID)).toEqual([
+      { label: "가나다", value: "2" },
+      { label: "홍길동", value: "1" },
+    ]);
+  });
+
+  it("excludeUserId가 지정되면 해당 팀원 후보를 제외한다", () => {
+    const rows: findMatchAttendanceQuery["response"]["findMatchAttendance"] =
+      [
+        row({
+          userId: 5,
+          user: { id: 5, name: "본인", profileImage: null },
+        }),
+        row({
+          userId: 6,
+          user: { id: 6, name: "타인", profileImage: null },
+        }),
+      ];
+
+    expect(
+      buildMomVoteCandidateOptions(rows, MATCH_ID, { excludeUserId: 5 }),
+    ).toEqual([{ label: "타인", value: "6" }]);
+  });
+});
+
+describe("withOptionForValue", () => {
+  const all = [
+    { label: "A", value: "1" },
+    { label: "B", value: "2" },
+  ];
+
+  it("선택값이 목록에 없으면 fallback 라벨로 한 줄 추가한다", () => {
+    expect(withOptionForValue(all, "99", "레거시")).toEqual([
+      { label: "A", value: "1" },
+      { label: "B", value: "2" },
+      { label: "레거시", value: "99" },
+    ]);
+  });
+
+  it("값이 비어 있으면 원본을 그대로 반환한다", () => {
+    expect(withOptionForValue(all, undefined, "x")).toEqual(all);
+  });
+});
+
+describe("picksToCandidateUserIds", () => {
+  it("세 슬롯이 모두 팀원이면 userId 3개를 반환한다", () => {
+    expect(picksToCandidateUserIds("1", "2", "3")).toEqual([1, 2, 3]);
+  });
+
+  it("용병 m:id 값은 후보에 없지만 레거시 문자열이면 파싱에서 제외한다", () => {
+    expect(picksToCandidateUserIds("1", "m:9", "3")).toEqual([1, 3]);
   });
 });
 

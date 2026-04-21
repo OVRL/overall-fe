@@ -18,6 +18,8 @@ interface DropdownProps {
   options: { label: string; value: string }[];
   value?: string;
   onChange: (value: string) => void;
+  /** true면 목록 열기·선택 불가 */
+  disabled?: boolean;
   placeholder?: string;
   /** 트리거 버튼 id (외부 label의 htmlFor와 연결) */
   triggerId?: string;
@@ -55,8 +57,7 @@ function computeOverlayGeometry(trigger: DOMRect): OverlayGeometry {
   const spaceBelow = vh - trigger.bottom - GAP_PX;
   const spaceAbove = trigger.top - GAP_PX;
   // 아래 공간이 부족하고 위가 더 넓으면 위로 펼침
-  const openUp =
-    spaceBelow < MENU_MAX_PX * 0.45 && spaceAbove >= spaceBelow;
+  const openUp = spaceBelow < MENU_MAX_PX * 0.45 && spaceAbove >= spaceBelow;
 
   let left = trigger.left;
   left = Math.max(8, Math.min(left, vw - trigger.width - 8));
@@ -86,6 +87,7 @@ const Dropdown = ({
   options,
   value,
   onChange,
+  disabled = false,
   placeholder = "선택해주세요",
   triggerId,
   ariaLabelledBy,
@@ -108,7 +110,12 @@ const Dropdown = ({
   const closeMenu = useCallback(() => {
     setIsOpen(false);
     setFocusedIndex(-1);
+    setOverlayGeometry(null);
   }, []);
+
+  useEffect(() => {
+    if (disabled) closeMenu();
+  }, [disabled, closeMenu]);
 
   // 열려 있을 때만 바깥 클릭으로 닫기 (인라인: 패널이 ref 안에 있음 / 오버레이: 포털 ref 별도)
   useEffect(() => {
@@ -139,7 +146,6 @@ const Dropdown = ({
 
   useLayoutEffect(() => {
     if (!isOpen || menuStrategy !== "overlay") {
-      setOverlayGeometry(null);
       return;
     }
     updateOverlayGeometry();
@@ -161,6 +167,7 @@ const Dropdown = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
     if (!isOpen) {
       if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
         e.preventDefault();
@@ -228,9 +235,7 @@ const Dropdown = ({
         tabIndex={-1}
         className={cn(
           "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none",
-          value === option.value
-            ? "text-Fill_AccentPrimary"
-            : "text-white/60",
+          value === option.value ? "text-Fill_AccentPrimary" : "text-white/60",
           focusedIndex === index && "bg-white/10",
         )}
         onMouseEnter={() => {
@@ -253,9 +258,15 @@ const Dropdown = ({
               key="dropdown-overlay"
               ref={overlayMenuRef}
               role="presentation"
-              initial={{ opacity: 0, y: overlayGeometry.placement === "bottom" ? -8 : 8 }}
+              initial={{
+                opacity: 0,
+                y: overlayGeometry.placement === "bottom" ? -8 : 8,
+              }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: overlayGeometry.placement === "bottom" ? -8 : 8 }}
+              exit={{
+                opacity: 0,
+                y: overlayGeometry.placement === "bottom" ? -8 : 8,
+              }}
               transition={{ duration: 0.15 }}
               style={{
                 position: "fixed",
@@ -293,24 +304,30 @@ const Dropdown = ({
           type="button"
           ref={triggerRef}
           id={triggerId}
+          disabled={disabled}
           onClick={() => {
+            if (disabled) return;
             setIsOpen((prev) => {
               const next = !prev;
               if (next) {
                 const idx = options.findIndex((opt) => opt.value === value);
                 setFocusedIndex(idx >= 0 ? idx : 0);
+              } else {
+                setOverlayGeometry(null);
               }
               return next;
             });
           }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
+          aria-disabled={disabled}
           aria-label={ariaLabelledBy ? undefined : placeholder}
           aria-labelledby={ariaLabelledBy}
           className={cn(
             "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
             "bg-Fill_Quatiary border-transparent",
             isOpen ? "border-Fill_AccentPrimary" : "",
+            disabled && "opacity-60 cursor-not-allowed",
             triggerClassName,
           )}
         >

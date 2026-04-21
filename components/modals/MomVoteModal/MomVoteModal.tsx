@@ -17,9 +17,15 @@ import { MomVoteRankPicker } from "./MomVoteRankPicker";
 import {
   buildMomVoteCandidateOptions,
   optionsExcludingOthers,
-  parseMomVoteSelectionToCandidateInput,
+  picksToCandidateUserIds,
+  withOptionForValue,
 } from "./momVotePickerUtils";
+import {
+  pickLabelFromRow,
+  sortMyMatchMomVotes,
+} from "./momVoteMyVotesMapping";
 import { useCreateMatchMomVoteMutation } from "./useCreateMatchMomVoteMutation";
+import { useMomVotePicksState } from "./useMomVotePicksState";
 import { useUpdateMatchMomVoteMutation } from "./useUpdateMatchMomVoteMutation";
 
 const WRAPPER_CLASS =
@@ -33,14 +39,22 @@ type MomVoteModalProps = {
 function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
   const { hideModal } = useModal();
   const currentUserId = useUserId();
+  /** 모달이 열릴 때마다 마운트가 새로 되므로, 세션당 1회만 생성 → Relay fetchKey가 달라져 이전 스냅샷에 묶이지 않음 */
+  const [querySessionId] = useState(
+    () =>
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   const [refreshKey, setRefreshKey] = useState(0);
 
   const data = useLazyLoadQuery<momVoteModalQuery>(
     MomVoteModalQuery,
     { matchId, teamId },
     {
-      fetchPolicy: "store-or-network",
-      fetchKey: `${matchId}-${teamId}-${refreshKey}`,
+      // 캐시가 있어도 네트워크에서 최신화; 재오픈 시 querySessionId로 별도 리텐션
+      fetchPolicy: "store-and-network",
+      fetchKey: `${matchId}-${teamId}-${querySessionId}-${refreshKey}`,
     },
   );
 
@@ -51,67 +65,90 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
 
   const isMutating = isCreateInFlight || isUpdateInFlight;
 
-  const allOptions = useMemo(
+  const myVotes = data.findMyMatchMom ?? [];
+
+  const {
+    hasVoted,
+    top1,
+    top2,
+    top3,
+    setTop1,
+    setTop2,
+    setTop3,
+    picksDisabled,
+    isRevoteEditing,
+    beginRevoteEditing,
+  } = useMomVotePicksState({ myVotes, refreshKey });
+
+  const sortedMyVotes = useMemo(
+    () => sortMyMatchMomVotes(myVotes),
+    [myVotes],
+  );
+
+  const baseOptions = useMemo(
     () =>
       buildMomVoteCandidateOptions(
         data.findMatchAttendance ?? [],
-        data.matchMercenaries ?? [],
         matchId,
+        { excludeUserId: currentUserId },
       ),
-    [data.findMatchAttendance, data.matchMercenaries, matchId],
+    [data.findMatchAttendance, matchId, currentUserId],
   );
 
-  const myVoteRecord = data.findMyMatchMomVote ?? null;
-  const matchMomRows = data.matchMomVotes ?? [];
-
-  /** 집계 행의 candidateUserId가 내 userId와 같으면(요청하신 휴리스틱) 재투표 UI 톤 */
-  const userRuleSuggestsRevote =
-    currentUserId != null &&
-    matchMomRows.some(
-      (r) =>
-        r.candidateUserId != null && r.candidateUserId === currentUserId,
+  const opt1 = useMemo(() => {
+    const blocked = optionsExcludingOthers(baseOptions, top1, [top2, top3]);
+    return withOptionForValue(
+      blocked,
+      top1,
+      sortedMyVotes[0] ? pickLabelFromRow(sortedMyVotes[0]) : "후보",
     );
+  }, [baseOptions, top1, top2, top3, sortedMyVotes]);
 
-  const showRevoteUi = myVoteRecord != null || userRuleSuggestsRevote;
+  const opt2 = useMemo(() => {
+    const blocked = optionsExcludingOthers(baseOptions, top2, [top1, top3]);
+    return withOptionForValue(
+      blocked,
+      top2,
+      sortedMyVotes[1] ? pickLabelFromRow(sortedMyVotes[1]) : "후보",
+    );
+  }, [baseOptions, top1, top2, top3, sortedMyVotes]);
 
-  /** 서버에 저장된 내 투표(TOP1만 API 반영) — 사용자 선택으로 덮어쓸 수 있음 */
-  const serverTop1 = useMemo(() => {
-    const row = data.findMyMatchMomVote;
-    if (!row) return undefined;
-    if (row.candidateMercenaryId != null) return `m:${row.candidateMercenaryId}`;
-    if (row.candidateUserId != null) return String(row.candidateUserId);
-    return undefined;
-  }, [data.findMyMatchMomVote]);
-
-  /** undefined면 serverTop1을 따름 */
-  const [top1Override, setTop1Override] = useState<string | undefined>(
-    undefined,
-  );
-  const [top2, setTop2] = useState<string | undefined>();
-  const [top3, setTop3] = useState<string | undefined>();
-
-  const top1 =
-    top1Override !== undefined ? top1Override : serverTop1;
-
-  const opt1 = optionsExcludingOthers(allOptions, top1, [top2, top3]);
-  const opt2 = optionsExcludingOthers(allOptions, top2, [top1, top3]);
-  const opt3 = optionsExcludingOthers(allOptions, top3, [top1, top2]);
+  const opt3 = useMemo(() => {
+    const blocked = optionsExcludingOthers(baseOptions, top3, [top1, top2]);
+    return withOptionForValue(
+      blocked,
+      top3,
+      sortedMyVotes[2] ? pickLabelFromRow(sortedMyVotes[2]) : "후보",
+    );
+  }, [baseOptions, top1, top2, top3, sortedMyVotes]);
 
   const distinct =
     top1 != null &&
     top2 != null &&
     top3 != null &&
     new Set([top1, top2, top3]).size === 3;
-  const canSubmit = distinct && allOptions.length >= 3;
 
-  const onVote = () => {
-    if (!canSubmit || currentUserId == null) return;
-    const fields = parseMomVoteSelectionToCandidateInput(top1!);
-    if (
-      fields.candidateUserId == null &&
-      fields.candidateMercenaryId == null
-    ) {
-      toast.error("유효한 후보를 선택해 주세요.");
+  const enoughCandidates = baseOptions.length >= 3;
+  const canSubmitVote = distinct && enoughCandidates;
+
+  const isRevoteLockedView = hasVoted && !isRevoteEditing;
+
+  const primaryDisabled =
+    currentUserId == null ||
+    isMutating ||
+    (!isRevoteLockedView && !canSubmitVote);
+
+  const onPrimaryClick = () => {
+    if (currentUserId == null) return;
+    if (isRevoteLockedView) {
+      beginRevoteEditing();
+      return;
+    }
+    if (!canSubmitVote) return;
+
+    const candidateUserIds = picksToCandidateUserIds(top1, top2, top3);
+    if (candidateUserIds.length !== 3) {
+      toast.error("팀원 후보 3명을 모두 선택해 주세요.");
       return;
     }
 
@@ -123,38 +160,30 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
 
     const bump = () => setRefreshKey((k) => k + 1);
 
-    if (myVoteRecord != null) {
+    const input = {
+      matchId,
+      teamId,
+      candidateUserIds,
+    };
+
+    const onSuccess = () => {
+      toast.success("투표를 완료했습니다.");
+      bump();
+      hideModal();
+    };
+
+    if (hasVoted) {
       executeUpdate({
-        variables: {
-          input: {
-            id: myVoteRecord.id,
-            teamId,
-            ...fields,
-          },
-        },
-        onCompleted: () => {
-          toast.success("MOM 투표가 수정되었습니다.");
-          bump();
-          hideModal();
-        },
+        variables: { input },
+        onCompleted: onSuccess,
         onError,
       });
       return;
     }
 
     executeCreate({
-      variables: {
-        input: {
-          matchId,
-          teamId,
-          ...fields,
-        },
-      },
-      onCompleted: () => {
-        toast.success("MOM 투표가 등록되었습니다.");
-        bump();
-        hideModal();
-      },
+      variables: { input },
+      onCompleted: onSuccess,
       onError,
     });
   };
@@ -172,9 +201,9 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
             <p className="text-sm text-Label-Tertiary">
               로그인 후 투표할 수 있습니다.
             </p>
-          ) : allOptions.length === 0 ? (
+          ) : baseOptions.length < 3 ? (
             <p className="text-sm text-Label-Tertiary">
-              이 경기에 등록된 참석자가 없습니다.
+              투표 가능한 후보가 3명 미만입니다.
             </p>
           ) : (
             <div className="flex flex-col gap-6">
@@ -184,7 +213,7 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
                     rank: 1 as const,
                     options: opt1,
                     value: top1,
-                    onChange: setTop1Override,
+                    onChange: setTop1,
                   },
                   {
                     rank: 2 as const,
@@ -206,6 +235,7 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
                   options={options}
                   value={value}
                   onChange={onChange}
+                  disabled={picksDisabled}
                 />
               ))}
             </div>
@@ -217,15 +247,15 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
           size="xl"
           className={cn(
             "font-semibold",
-            showRevoteUi && "bg-red-500 text-Label-Primary",
+            isRevoteLockedView && "bg-red-500 text-Label-Primary",
           )}
-          disabled={!canSubmit || currentUserId == null || isMutating}
-          onClick={onVote}
+          disabled={primaryDisabled}
+          onClick={onPrimaryClick}
           aria-busy={isMutating}
         >
           {isMutating ? (
             <LoadingSpinner label="MOM 투표 처리 중" size="sm" />
-          ) : showRevoteUi ? (
+          ) : isRevoteLockedView ? (
             "재투표하기"
           ) : (
             "투표하기"
@@ -251,8 +281,7 @@ function MomVoteModalFallback() {
 }
 
 /**
- * 홈 직전 경기 MOM 투표 — 참석자·집계·내 투표(findMyMatchMomVote) 조회 후 create/update.
- * 서버 스키마에 `findMyMatchMomVote` 쿼리가 있어야 수정(update) 시 투표 id를 알 수 있습니다.
+ * 홈 직전 경기 MOM 투표 — 참석자·내 투표(findMyMatchMom) 조회 후 createMatchMom / updateMatchMom.
  */
 export default function MomVoteModal({ matchId, teamId }: MomVoteModalProps) {
   return (

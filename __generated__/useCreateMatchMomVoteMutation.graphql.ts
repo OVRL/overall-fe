@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<83b4bad490cbca8b5e8be2c30ef48d0b>>
+ * @generated SignedSource<<f04a1017f453f77889a81075ccbc7000>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,8 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateMatchMomVoteInput = {
-  candidateMercenaryId?: number | null | undefined;
-  candidateUserId?: number | null | undefined;
+  candidateUserIds: ReadonlyArray<number>;
   matchId: number;
   teamId: number;
 };
@@ -19,14 +18,14 @@ export type useCreateMatchMomVoteMutation$variables = {
   input: CreateMatchMomVoteInput;
 };
 export type useCreateMatchMomVoteMutation$data = {
-  readonly createMatchMomVote: {
+  readonly createMatchMom: ReadonlyArray<{
     readonly candidateMercenaryId: number | null | undefined;
     readonly candidateUserId: number | null | undefined;
     readonly id: number;
     readonly matchId: number;
     readonly teamId: number;
     readonly voterUserId: number;
-  };
+  }>;
 };
 export type useCreateMatchMomVoteMutation = {
   response: useCreateMatchMomVoteMutation$data;
@@ -53,8 +52,8 @@ v1 = [
     ],
     "concreteType": "MatchMomVoteModel",
     "kind": "LinkedField",
-    "name": "createMatchMomVote",
-    "plural": false,
+    "name": "createMatchMom",
+    "plural": true,
     "selections": [
       {
         "alias": null,
@@ -120,16 +119,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "f36eb66f376e785348efab3b29d32f5e",
+    "cacheID": "4de65dcdad8ad1fda8f157647f6bfd49",
     "id": null,
     "metadata": {},
     "name": "useCreateMatchMomVoteMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateMatchMomVoteMutation(\n  $input: CreateMatchMomVoteInput!\n) {\n  createMatchMomVote(input: $input) {\n    id\n    matchId\n    teamId\n    voterUserId\n    candidateUserId\n    candidateMercenaryId\n  }\n}\n"
+    "text": "mutation useCreateMatchMomVoteMutation(\n  $input: CreateMatchMomVoteInput!\n) {\n  createMatchMom(input: $input) {\n    id\n    matchId\n    teamId\n    voterUserId\n    candidateUserId\n    candidateMercenaryId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6f0d0da53aa2cc755e1a0a841e57359a";
+(node as any).hash = "36cb34a34549b5332ff3c89e2d471838";
 
 export default node;

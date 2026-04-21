@@ -605,6 +605,12 @@ type Query {
   findMyMatchMom(matchId: Int!): [MatchMomVoteModel!]!
   findTeam(name: String!): TeamModel
 
+  """초대코드로 팀 정보를 조회합니다"""
+  findTeamByInviteCode(
+    """팀 초대코드"""
+    inviteCode: String!
+  ): TeamModel
+
   """팀에 온 가입 신청 이력을 조회합니다. status를 지정하면 해당 상태만, 없으면 전체 상태를 조회합니다."""
   findTeamJoinRequest(status: JoinRequestStatus, teamId: Int!): [JoinRequestModel!]!
   findTeamMember: [TeamMemberModel!]!
