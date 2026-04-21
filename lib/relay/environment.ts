@@ -13,7 +13,10 @@ function createEnvironment(initialRecords?: SerializedRelayRecords) {
     network: Network.create(fetchQuery),
     store: new Store(source),
     getDataID: (node: { [key: string]: any }, type: string) => {
-      return node.id ? `${type}:${node.id}` : null;
+      if (node == null || typeof node !== "object") return null;
+      const id = node.id;
+      if (id == null) return null;
+      return `${type}:${id}`;
     },
     isServer: typeof window === "undefined",
   } as any);

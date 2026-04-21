@@ -47,17 +47,15 @@ export type UpcomingMatchDesktopProps = {
  * FindTeamMember 쿼리 이후: 헤더와 동일하게 Player가 아닐 때만 포메이션 진입 UI 표시
  */
 function MatchInfoDesktopWithCapabilities({
-  userId,
   display,
   formationHref,
   showFormationSetupOverride,
 }: {
-  userId: number;
   display: UpcomingMatchDisplay;
   formationHref: string;
   showFormationSetupOverride?: boolean;
 }) {
-  const { showRegisterGame } = useTeamManagementCapabilitiesForUser(userId);
+  const { showRegisterGame } = useTeamManagementCapabilitiesForUser();
   const showFormationSetup =
     showFormationSetupOverride !== undefined
       ? showFormationSetupOverride
@@ -114,7 +112,6 @@ function DesktopMatchBlock({
               }
             >
               <MatchInfoDesktopWithCapabilities
-                userId={userId}
                 display={panel.display}
                 formationHref={formationHref}
                 showFormationSetupOverride={formationFromPanel}

@@ -110,7 +110,6 @@ export async function commitFormationRosterModalMutations(options: {
                 input: {
                   matchId,
                   teamId,
-                  userId: player.userId,
                   attendanceStatus: targetStatus,
                 },
               },

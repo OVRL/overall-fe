@@ -51,9 +51,6 @@ input CreateBestElevenInput {
 
   """팀 ID"""
   teamId: Int!
-
-  """유저 ID"""
-  userId: Int!
 }
 
 type CreateInviteCodeModel {
@@ -73,9 +70,6 @@ input CreateMatchAttendanceInput {
 
   """팀 ID"""
   teamId: Int!
-
-  """유저 ID"""
-  userId: Int!
 }
 
 """매치 포메이션 생성"""
@@ -88,9 +82,6 @@ input CreateMatchFormationInput {
 
   """팀 ID"""
   teamId: Int!
-
-  """최종 수정자 유저 ID"""
-  userId: Int!
 }
 
 input CreateMatchInput {
@@ -135,11 +126,8 @@ input CreateMatchInput {
 }
 
 input CreateMatchMomVoteInput {
-  """투표할 용병 ID"""
-  candidateMercenaryId: Int
-
-  """투표할 팀 멤버 유저 ID"""
-  candidateUserId: Int
+  """투표할 팀 멤버 유저 ID 배열 (최대 3명)"""
+  candidateUserIds: [Int!]!
 
   """경기 ID"""
   matchId: Int!
@@ -156,9 +144,6 @@ input CreateTeamInput {
   historyStartDate: DateTime!
   homeUniform: UniformDesign!
   name: String!
-
-  """팀 생성자 유저 ID"""
-  userId: Int!
 }
 
 """
@@ -450,10 +435,10 @@ enum MatchType {
 
 type Mutation {
   """본인의 팀 가입 신청을 취소합니다. PENDING 상태의 신청만 취소 가능합니다."""
-  cancelJoinRequest(joinRequestId: Int!, userId: Int!): Boolean!
+  cancelJoinRequest(joinRequestId: Int!): Boolean!
 
   """임시저장 포메이션 확정 (선택한 draft 승격, 기존 확정본 덮어쓰기, 나머지 draft 삭제)"""
-  confirmMatchFormation(draftId: Int!, userId: Int!): MatchFormationModel!
+  confirmMatchFormation(draftId: Int!): MatchFormationModel!
 
   """베스트 일레븐 등록 (전술 정보 JSON 포함)"""
   createBestEleven(input: CreateBestElevenInput!): BestElevenModel!
@@ -467,8 +452,10 @@ type Mutation {
   """용병 추가 (코치/감독 전용)"""
   createMatchMercenary(input: AddMatchMercenaryInput!): MatchMercenaryModel!
 
-  """MOM 투표. 매치 종료 후 24시간 이내, 해당 매치에 참석(ATTEND)한 팀 멤버만 투표 가능합니다. 1인 1표."""
-  createMatchMomVote(input: CreateMatchMomVoteInput!): MatchMomVoteModel!
+  """
+  MOM 투표. 매치 종료 후 24시간 이내, 해당 매치에 참석(ATTEND)한 팀 멤버만 투표 가능합니다. 최대 3명까지 투표 가능.
+  """
+  createMatchMom(input: CreateMatchMomVoteInput!): [MatchMomVoteModel!]!
   createTeam(emblem: Upload, input: CreateTeamInput!): TeamModel!
   createTeamMember(input: JoinTeamInput!): TeamMemberModel!
   deleteBestEleven(id: Int!): Boolean!
@@ -499,8 +486,10 @@ type Mutation {
   """매치 포메이션 전술 수정"""
   updateMatchFormation(input: UpdateMatchFormationInput!): MatchFormationModel!
 
-  """MOM 투표 수정. 투표 마감(vote_deadline) 이전에 본인의 투표만 수정 가능합니다."""
-  updateMatchMomVote(input: UpdateMatchMomVoteInput!): MatchMomVoteModel!
+  """
+  MOM 투표 수정. 투표 마감(vote_deadline) 이전에 본인의 투표만 수정 가능합니다. 기존 투표를 삭제하고 새로 생성합니다.
+  """
+  updateMatchMom(input: UpdateMatchMomVoteInput!): [MatchMomVoteModel!]!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!, profileImage: Upload): TeamMemberModel!
   updateUser(input: UpdateUserInput!, profileImage: Upload): UserModel!
@@ -606,10 +595,19 @@ type Query {
   """확정된 매치 포메이션 조회 (isDraft=false)"""
   findMatchFormation(matchId: Int!, teamId: Int!): [MatchFormationModel!]!
 
+  """MOM 투표 결과 조회. 해당 매치의 후보별 득표 수를 득표 순으로 반환합니다."""
+  findMatchMom(matchId: Int!, teamId: Int!): [MatchMomVoteResultModel!]!
+
   """본인의 팀 가입 신청 이력을 조회합니다. 모든 상태(pending/approved/rejected)가 포함됩니다."""
-  findMyJoinRequestList(userId: Int!): [JoinRequestModel!]!
+  findMyJoinRequest: [JoinRequestModel!]!
+
+  """내가 해당 경기에 투표한 MOM 목록을 조회합니다."""
+  findMyMatchMom(matchId: Int!): [MatchMomVoteModel!]!
   findTeam(name: String!): TeamModel
-  findTeamMember(userId: Int!): [TeamMemberModel!]!
+
+  """팀에 온 가입 신청 이력을 조회합니다. status를 지정하면 해당 상태만, 없으면 전체 상태를 조회합니다."""
+  findTeamJoinRequest(status: JoinRequestStatus, teamId: Int!): [JoinRequestModel!]!
+  findTeamMember: [TeamMemberModel!]!
   findUser(email: String!): UserModel!
   findUserById(id: Int!): UserModel!
 
@@ -618,9 +616,6 @@ type Query {
     """경기 ID"""
     matchId: Int!
   ): [MatchMercenaryModel!]!
-
-  """MOM 투표 결과 조회. 해당 매치의 후보별 득표 수를 득표 순으로 반환합니다."""
-  matchMomVotes(matchId: Int!, teamId: Int!): [MatchMomVoteResultModel!]!
   searchTeamMember(name: String!, teamId: Int!): [TeamMemberModel!]!
 }
 
@@ -646,9 +641,6 @@ input RequestJoinTeamInput {
 
   """가입 신청 메시지"""
   message: String
-
-  """유저 ID"""
-  userId: Int!
 }
 
 """팀 권한"""
@@ -668,9 +660,6 @@ input SaveMatchFormationDraftInput {
 
   """팀 ID"""
   teamId: Int!
-
-  """최종 수정자 유저 ID"""
-  userId: Int!
 }
 
 type TeamArrayModel {
@@ -773,9 +762,6 @@ input UpdateMatchFormationInput {
 
   """전술 정보 (JSON)"""
   tactics: JSONObject!
-
-  """최종 수정자 유저 ID"""
-  userId: Int!
 }
 
 input UpdateMatchInput {
@@ -811,14 +797,11 @@ input UpdateMatchInput {
 }
 
 input UpdateMatchMomVoteInput {
-  """변경할 용병 ID"""
-  candidateMercenaryId: Int
+  """변경할 팀 멤버 유저 ID 배열 (최대 3명)"""
+  candidateUserIds: [Int!]!
 
-  """변경할 팀 멤버 유저 ID"""
-  candidateUserId: Int
-
-  """투표 ID"""
-  id: Int!
+  """경기 ID"""
+  matchId: Int!
 
   """팀 ID"""
   teamId: Int!

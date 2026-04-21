@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<26e1b67b021a4bb4a74862006407ab9b>>
+ * @generated SignedSource<<7d9f8fee3f9d670fe6555597c11a3f42>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,6 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type useConfirmMatchFormationMutation$variables = {
   draftId: number;
-  userId: number;
 };
 export type useConfirmMatchFormationMutation$data = {
   readonly confirmMatchFormation: {
@@ -34,11 +33,6 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "draftId"
-  },
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "userId"
   }
 ],
 v1 = [
@@ -49,11 +43,6 @@ v1 = [
         "kind": "Variable",
         "name": "draftId",
         "variableName": "draftId"
-      },
-      {
-        "kind": "Variable",
-        "name": "userId",
-        "variableName": "userId"
       }
     ],
     "concreteType": "MatchFormationModel",
@@ -125,16 +114,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "a01279ce64ce2b809d18a106634fc768",
+    "cacheID": "daa231560d569a50d8eac8411940bd59",
     "id": null,
     "metadata": {},
     "name": "useConfirmMatchFormationMutation",
     "operationKind": "mutation",
-    "text": "mutation useConfirmMatchFormationMutation(\n  $draftId: Int!\n  $userId: Int!\n) {\n  confirmMatchFormation(draftId: $draftId, userId: $userId) {\n    id\n    isDraft\n    matchId\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
+    "text": "mutation useConfirmMatchFormationMutation(\n  $draftId: Int!\n) {\n  confirmMatchFormation(draftId: $draftId) {\n    id\n    isDraft\n    matchId\n    teamId\n    tactics\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5de74862255b19fc2ae6fe17e049bf89";
+(node as any).hash = "81b7d0ebce14e3caa73dd0db99f37c88";
 
 export default node;

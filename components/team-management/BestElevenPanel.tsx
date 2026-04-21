@@ -488,7 +488,6 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       if (hasAnySlotPlayer) {
         const input: CreateBestElevenMutationInput = {
           teamId,
-          userId: editorUserId,
           tactics: tacticsDoc as CreateBestElevenMutationInput["tactics"],
         };
         await createBestEleven(input);

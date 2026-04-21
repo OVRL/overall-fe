@@ -24,6 +24,7 @@ import { buildHomeUpcomingMatchLayoutSnapshot } from "./buildHomeUpcomingMatchLa
 import {
   isSameTeamId,
   normalizeRelayTeamGlobalId,
+  parseNumericIdFromRelayGlobalId,
 } from "@/lib/relay/parseRelayGlobalId";
 import {
   parseTeamMemberRole,
@@ -76,15 +77,24 @@ export async function loadLayoutSSR(
         ),
       )
     : Promise.resolve<findUserByIdQuery$data | null>(null);
+  // findTeamMember는 백엔드 리졸버/데이터 이슈로 실패할 수 있음 → 전체 레이아웃 500 방지
   const teamMemberPromise = hasUser
     ? observableToPromise(
         fetchQuery(
           environment,
           FindTeamMemberQuery,
-          { userId: userId! },
+          {},
           { fetchPolicy: "network-only" },
         ),
-      )
+      ).catch((err: unknown) => {
+        if (process.env.NODE_ENV === "development") {
+          console.warn(
+            "[loadLayoutSSR] FindTeamMemberQuery 실패 — 팀 멤버십 없이 레이아웃을 계속합니다. (클라이언트에서 재시도됩니다)",
+            err,
+          );
+        }
+        return null as findTeamMemberQuery$data | null;
+      })
     : Promise.resolve<findTeamMemberQuery$data | null>(null);
 
   const [userData, teamMemberData] = (await Promise.all([
@@ -174,6 +184,16 @@ export async function loadLayoutSSR(
   return { relayInitialRecords, layoutState: layoutStateWithNum };
 }
 
+/** 쿠키 문자열 디코드 (layout·deriveLayoutState 공통) */
+function decodeSelectedTeamCookie(raw: string | null): string | null {
+  if (raw == null) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
 /** FindTeamMember 결과 + 쿠키로 LayoutState 파생 (레이아웃 전용 로직) */
 function deriveLayoutState(
   userData: findUserByIdQuery$data | null,
@@ -186,6 +206,25 @@ function deriveLayoutState(
     : null;
 
   if (!teamMemberData?.findTeamMember?.length) {
+    // 쿼리 실패(null)만 쿠키 폴백: 빈 배열([])은 진짜 무소속이므로 이전 쿠키를 붙이지 않음
+    if (teamMemberData === null && selectedTeamIdFromCookie) {
+      const decoded = decodeSelectedTeamCookie(selectedTeamIdFromCookie);
+      const initialSelectedTeamId =
+        decoded != null && decoded !== ""
+          ? normalizeRelayTeamGlobalId(decoded)
+          : null;
+      if (initialSelectedTeamId != null) {
+        return {
+          ...EMPTY_LAYOUT_STATE,
+          userId,
+          initialUser,
+          initialSelectedTeamId,
+          initialSelectedTeamIdNum: parseNumericIdFromRelayGlobalId(
+            initialSelectedTeamId,
+          ),
+        };
+      }
+    }
     return {
       ...EMPTY_LAYOUT_STATE,
       userId,
@@ -201,13 +240,7 @@ function deriveLayoutState(
   const hasAnyTeamMembership = teamsWithInfo.length > 0;
   const cookieDecoded =
     selectedTeamIdFromCookie != null
-      ? (() => {
-          try {
-            return decodeURIComponent(selectedTeamIdFromCookie);
-          } catch {
-            return selectedTeamIdFromCookie;
-          }
-        })()
+      ? decodeSelectedTeamCookie(selectedTeamIdFromCookie)
       : null;
 
   const cookieMatchedMember =

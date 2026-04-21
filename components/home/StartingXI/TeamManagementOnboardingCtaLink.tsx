@@ -28,11 +28,7 @@ export function TeamManagementOnboardingCtaLink({
 
   return (
     <Suspense fallback={null}>
-      <TeamManagementOnboardingCtaLinkInner
-        userId={userId}
-        href={href}
-        className={className}
-      >
+      <TeamManagementOnboardingCtaLinkInner href={href} className={className}>
         {children}
       </TeamManagementOnboardingCtaLinkInner>
     </Suspense>
@@ -40,18 +36,16 @@ export function TeamManagementOnboardingCtaLink({
 }
 
 function TeamManagementOnboardingCtaLinkInner({
-  userId,
   href,
   className,
   children,
 }: {
-  userId: number;
   href: string;
   className: string;
   children: ReactNode;
 }) {
   const { canAccessTeamManagementRoute } =
-    useTeamManagementCapabilitiesForUser(userId);
+    useTeamManagementCapabilitiesForUser();
 
   if (canAccessTeamManagementRoute) {
     return (

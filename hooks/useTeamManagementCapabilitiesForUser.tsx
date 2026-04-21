@@ -17,14 +17,12 @@ export type TeamManagementCapabilities = {
 };
 
 /**
- * 로그인 확정(userId 있음) 컴포넌트 전용.
+ * 로그인 확정 컴포넌트 전용(부모에서 userId null이면 쿼리 호출하지 않도록 분기).
  * FindTeamMember는 Layout SSR과 동일 쿼리이므로 store-or-network로 중복 네트워크를 피합니다.
  */
-export function useTeamManagementCapabilitiesForUser(
-  userId: number,
-): TeamManagementCapabilities {
+export function useTeamManagementCapabilitiesForUser(): TeamManagementCapabilities {
   const { selectedTeamId } = useSelectedTeamId();
-  const members = useFindTeamMemberForHeader(userId);
+  const members = useFindTeamMemberForHeader();
 
   return useMemo(() => {
     const role = resolveTeamMemberRoleForSelectedTeam(

@@ -2,8 +2,8 @@ import { env } from "@/lib/env";
 import { postBackendSSR } from "@/utils/ssrBackendFetch";
 
 const FIND_TEAM_MEMBER_QUERY = `
-  query FindTeamMember($userId: Int!) {
-    findTeamMember(userId: $userId) {
+  query FindTeamMember {
+    findTeamMember {
       id
       teamId
       team {
@@ -26,17 +26,16 @@ export type TeamMemberForHeader = {
 };
 
 /**
- * SSR에서 유저의 팀 멤버십 목록을 가져옵니다.
+ * SSR에서 인증 헤더(Bearer) 기준 유저의 팀 멤버십 목록을 가져옵니다.
  * layout에서 유저 조회와 함께 호출해 선택 팀 초기값/쿠키 세팅에 사용합니다.
  */
 export async function fetchFindTeamMemberSSR(
-  userId: number,
   accessToken: string,
 ): Promise<TeamMemberForHeader[]> {
   const url = `${env.BACKEND_URL}/graphql`;
   const body = JSON.stringify({
     query: FIND_TEAM_MEMBER_QUERY,
-    variables: { userId },
+    variables: {},
   });
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

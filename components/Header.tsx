@@ -144,7 +144,6 @@ const GlobalHeader = (props: GlobalHeaderProps) => {
               }
             >
               <GlobalHeaderNavWithCapabilities
-                userId={userId}
                 pathname={pathname}
                 menuItems={menuItems}
                 isMenuOpen={isMenuOpen}

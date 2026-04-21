@@ -5,8 +5,8 @@ import { graphql } from "react-relay";
  * Layout SSR 로더 및 헤더 팀 셀렉터에서 동일 쿼리 사용.
  */
 export const FindTeamMemberQuery = graphql`
-  query findTeamMemberQuery($userId: Int!) {
-    findTeamMember(userId: $userId) {
+  query findTeamMemberQuery {
+    findTeamMember {
       __typename
       id
       teamId

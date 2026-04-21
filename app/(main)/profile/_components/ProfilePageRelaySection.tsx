@@ -32,7 +32,7 @@ export default function ProfilePageRelaySection() {
 function ProfilePageRelayBody({ userId }: { userId: number }) {
   const data = useLazyLoadQuery<profileFindTeamMemberQuery>(
     ProfileFindTeamMemberQuery,
-    { userId },
+    {},
     { fetchPolicy: "store-or-network" },
   );
 

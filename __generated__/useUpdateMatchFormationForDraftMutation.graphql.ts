@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7e921fa199af77fa9287909fa7703643>>
+ * @generated SignedSource<<ab9858dae45018d9f156178467f8fc73>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,6 @@ import { ConcreteRequest } from 'relay-runtime';
 export type UpdateMatchFormationInput = {
   id: number;
   tactics: any;
-  userId: number;
 };
 export type useUpdateMatchFormationForDraftMutation$variables = {
   input: UpdateMatchFormationInput;

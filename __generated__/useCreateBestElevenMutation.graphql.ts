@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3cfde846f109267a2792879001cd1048>>
+ * @generated SignedSource<<6a4c1dee0a227cdb8f72bc32e5674fe3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,6 @@ import { ConcreteRequest } from 'relay-runtime';
 export type CreateBestElevenInput = {
   tactics?: any | null | undefined;
   teamId: number;
-  userId: number;
 };
 export type useCreateBestElevenMutation$variables = {
   input: CreateBestElevenInput;

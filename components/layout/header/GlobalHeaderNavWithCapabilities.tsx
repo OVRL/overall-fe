@@ -14,7 +14,6 @@ import {
 } from "@/lib/navigation/filterMenuItemsByTeamRole";
 
 type GlobalHeaderNavWithCapabilitiesProps = {
-  userId: number;
   pathname: string;
   menuItems: readonly NavMenuItem[];
   isMenuOpen: boolean;
@@ -29,7 +28,6 @@ type GlobalHeaderNavWithCapabilitiesProps = {
  * Relay useLazyLoadQuery는 한 번만 호출되도록 데스크톱·모바일을 한 컴포넌트에서 처리합니다.
  */
 export function GlobalHeaderNavWithCapabilities({
-  userId,
   pathname,
   menuItems,
   isMenuOpen,
@@ -38,7 +36,7 @@ export function GlobalHeaderNavWithCapabilities({
   hamburger,
 }: GlobalHeaderNavWithCapabilitiesProps) {
   const { showRegisterGame, canAccessTeamManagementRoute } =
-    useTeamManagementCapabilitiesForUser(userId);
+    useTeamManagementCapabilitiesForUser();
 
   const visibleMenuItems = useMemo(
     () =>

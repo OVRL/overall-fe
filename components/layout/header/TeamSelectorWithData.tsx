@@ -18,11 +18,11 @@ import { useUserId } from "@/hooks/useUserId";
 const DEFAULT_TEAM_IMAGE = "/images/ovr.png";
 
 /**
- * findTeamMember(userId) 결과를 TeamSelector용 TeamOption[]으로 변환합니다.
+ * findTeamMember 결과를 TeamSelector용 TeamOption[]으로 변환합니다.
  * 초기 선택값/팀 1개 처리는 layout SSR에서 하고, 여기서는 목록에 없는 선택만 정리합니다.
  */
-function useTeamSelectorData(userId: number) {
-  const members = useFindTeamMemberForHeader(userId);
+function useTeamSelectorData() {
+  const members = useFindTeamMemberForHeader();
   const { selectedTeamId, setSelectedTeamId } = useSelectedTeamId();
 
   const teams: TeamOption[] = useMemo(() => {
@@ -55,17 +55,15 @@ function useTeamSelectorData(userId: number) {
 }
 
 function TeamSelectorWithDataInner({
-  userId,
   onAfterSelect,
   onAfterCreateTeam,
 }: {
-  userId: number;
   onAfterSelect?: () => void;
   onAfterCreateTeam?: () => void;
 }) {
   const router = useRouter();
   const { teams, members, selectedTeamId, setSelectedTeamId } =
-    useTeamSelectorData(userId);
+    useTeamSelectorData();
 
   const handleSelect = (teamId: string) => {
     const member = members.find(
@@ -131,7 +129,6 @@ export function TeamSelectorWithData({
 
   return (
     <TeamSelectorWithDataInner
-      userId={userId}
       onAfterSelect={onAfterSelect}
       onAfterCreateTeam={onAfterCreateTeam}
     />

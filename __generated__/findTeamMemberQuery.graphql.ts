@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d3f8b3ea56cd0b4b733c2a953986100b>>
+ * @generated SignedSource<<8ae1e0cdae96eca3a4503f3d3d94df02>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,9 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
-export type findTeamMemberQuery$variables = {
-  userId: number;
-};
+export type findTeamMemberQuery$variables = Record<PropertyKey, never>;
 export type findTeamMemberQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
@@ -33,44 +31,31 @@ export type findTeamMemberQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "userId"
-  }
-],
-v1 = {
+var v0 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v3 = [
+v2 = [
   {
     "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "userId",
-        "variableName": "userId"
-      }
-    ],
+    "args": null,
     "concreteType": "TeamMemberModel",
     "kind": "LinkedField",
     "name": "findTeamMember",
     "plural": true,
     "selections": [
+      (v0/*: any*/),
       (v1/*: any*/),
-      (v2/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -86,8 +71,8 @@ v3 = [
         "name": "team",
         "plural": false,
         "selections": [
+          (v0/*: any*/),
           (v1/*: any*/),
-          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -118,32 +103,32 @@ v3 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
     "name": "findTeamMemberQuery",
-    "selections": (v3/*: any*/),
+    "selections": (v2/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Operation",
     "name": "findTeamMemberQuery",
-    "selections": (v3/*: any*/)
+    "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "01a35b828472a370b4f770dfec6f5680",
+    "cacheID": "8e5933dd590942fd38dbf871df6b9c91",
     "id": null,
     "metadata": {},
     "name": "findTeamMemberQuery",
     "operationKind": "query",
-    "text": "query findTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    role\n  }\n}\n"
+    "text": "query findTeamMemberQuery {\n  findTeamMember {\n    __typename\n    id\n    teamId\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    role\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "74bfb8a2bb01e01f148b3db0e1af3c49";
+(node as any).hash = "980a0c9dc461ca34e09e7b55f6359cac";
 
 export default node;

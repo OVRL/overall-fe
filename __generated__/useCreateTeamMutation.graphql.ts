@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e703c844db62956cb75204205f89641a>>
+ * @generated SignedSource<<35a8ba694ed47d53cca7aecc9d3ef442>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,6 @@ export type CreateTeamInput = {
   historyStartDate: any;
   homeUniform: UniformDesign;
   name: string;
-  userId: number;
 };
 export type useCreateTeamMutation$variables = {
   emblem?: any | null | undefined;

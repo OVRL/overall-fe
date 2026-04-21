@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<af9d5788faffb0f7b292d77d9d231ce9>>
+ * @generated SignedSource<<18d94c05a94305c093a56e0309a64d23>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,6 @@ export type SaveMatchFormationDraftInput = {
   matchId: number;
   tactics?: any | null | undefined;
   teamId: number;
-  userId: number;
 };
 export type useSaveMatchFormationDraftMutation$variables = {
   input: SaveMatchFormationDraftInput;

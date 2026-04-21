@@ -6,8 +6,8 @@ import { graphql } from "react-relay";
  * 동일 스토어에 병합됩니다(store-or-network).
  */
 export const ProfileFindTeamMemberQuery = graphql`
-  query profileFindTeamMemberQuery($userId: Int!) {
-    findTeamMember(userId: $userId) {
+  query profileFindTeamMemberQuery {
+    findTeamMember {
       __typename
       id
       teamId

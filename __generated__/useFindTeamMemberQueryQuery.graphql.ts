@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<77f664e1f9ace542e84b507c8d37e440>>
+ * @generated SignedSource<<2d678ec3eb8c0a1fb4759463b3d11d03>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,9 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type useFindTeamMemberQueryQuery$variables = {
-  userId: number;
-};
+export type useFindTeamMemberQueryQuery$variables = Record<PropertyKey, never>;
 export type useFindTeamMemberQueryQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
@@ -27,21 +25,8 @@ export type useFindTeamMemberQueryQuery = {
 const node: ConcreteRequest = (function(){
 var v0 = [
   {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "userId"
-  }
-],
-v1 = [
-  {
     "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "userId",
-        "variableName": "userId"
-      }
-    ],
+    "args": null,
     "concreteType": "TeamMemberModel",
     "kind": "LinkedField",
     "name": "findTeamMember",
@@ -74,32 +59,32 @@ v1 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
     "name": "useFindTeamMemberQueryQuery",
-    "selections": (v1/*: any*/),
+    "selections": (v0/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Operation",
     "name": "useFindTeamMemberQueryQuery",
-    "selections": (v1/*: any*/)
+    "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "0b224c59ee42251fc8aa1fc076493837",
+    "cacheID": "f6d94887dff6453d0207d745f8c4a8b8",
     "id": null,
     "metadata": {},
     "name": "useFindTeamMemberQueryQuery",
     "operationKind": "query",
-    "text": "query useFindTeamMemberQueryQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n  }\n}\n"
+    "text": "query useFindTeamMemberQueryQuery {\n  findTeamMember {\n    __typename\n    id\n    teamId\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "b4606b5e211c3a9c6d06d7c1736edcd4";
+(node as any).hash = "4f7a7829c9b8f844faf45319ad01c966";
 
 export default node;

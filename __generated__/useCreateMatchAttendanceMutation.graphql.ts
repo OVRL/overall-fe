@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0f280a5966b05d1b0807e8c54d326af2>>
+ * @generated SignedSource<<5cdca36231c2013123b74b419a2f0f13>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,6 @@ export type CreateMatchAttendanceInput = {
   attendanceStatus: AttendanceStatus;
   matchId: number;
   teamId: number;
-  userId: number;
 };
 export type useCreateMatchAttendanceMutation$variables = {
   input: CreateMatchAttendanceInput;

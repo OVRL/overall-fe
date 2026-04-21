@@ -19,8 +19,13 @@ export function getServerEnvironment(
   return new Environment({
     network,
     store,
+    // Relay가 일부 경로에서 node를 null로 넘길 수 있음 — 방어하지 않으면
+    // "Cannot read properties of null (reading 'id')" (SSR findTeamMemberQuery 등)
     getDataID: (node: { [key: string]: any }, type: string) => {
-      return node.id ? `${type}:${node.id}` : null;
+      if (node == null || typeof node !== "object") return null;
+      const id = node.id;
+      if (id == null) return null;
+      return `${type}:${id}`;
     },
     isServer: true,
   } as any);

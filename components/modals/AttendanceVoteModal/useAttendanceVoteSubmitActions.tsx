@@ -98,7 +98,6 @@ export function useAttendanceVoteSubmitActions(
           input: {
             matchId,
             teamId: createdTeamId,
-            userId,
             attendanceStatus,
           },
         },

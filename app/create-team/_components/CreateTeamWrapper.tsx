@@ -54,7 +54,7 @@ const CreateTeamWrapper = () => {
       if (userId != null) {
         try {
           await observableToPromise(
-            fetchQuery(environment, FindTeamMemberQuery, { userId }),
+            fetchQuery(environment, FindTeamMemberQuery, {}),
           );
           if (teamIdNum != null) {
             await observableToPromise(

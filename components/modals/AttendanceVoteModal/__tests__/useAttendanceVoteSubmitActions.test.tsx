@@ -112,7 +112,6 @@ describe("useAttendanceVoteSubmitActions", () => {
     expect(mockExecuteCreate.mock.calls[0][0].variables.input).toMatchObject({
       matchId: 99,
       teamId: 10,
-      userId: 42,
       attendanceStatus: "ATTEND",
     });
     expect(mockExecuteUpdate).not.toHaveBeenCalled();

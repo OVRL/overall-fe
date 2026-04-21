@@ -95,7 +95,7 @@ export async function verifyFormationMatchAccessSSR(
     return { ok: false };
   }
 
-  const members = await fetchFindTeamMemberSSR(userId, accessToken);
+  const members = await fetchFindTeamMemberSSR(accessToken);
   const selectedTeamIdFromCookie =
     cookieStore.get(SELECTED_TEAM_ID_COOKIE_KEY)?.value ?? null;
   const createdTeamId = resolveCreatedTeamIdForSession(

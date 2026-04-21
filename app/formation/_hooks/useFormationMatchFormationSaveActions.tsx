@@ -137,7 +137,6 @@ export function useFormationMatchFormationSaveActions(
         variables: {
           input: {
             id: confirmedId,
-            userId: uid,
             tactics,
           },
         },
@@ -162,7 +161,6 @@ export function useFormationMatchFormationSaveActions(
         variables: {
           input: {
             id: draftId,
-            userId: uid,
             tactics,
           },
         },
@@ -181,7 +179,6 @@ export function useFormationMatchFormationSaveActions(
         input: {
           matchId: matchIdRef.current,
           teamId: teamIdRef.current,
-          userId: uid,
           tactics,
         },
       },
@@ -250,7 +247,6 @@ export function useFormationMatchFormationSaveActions(
         variables: {
           input: {
             id: confirmedId,
-            userId,
             tactics,
           },
         },
@@ -288,13 +284,12 @@ export function useFormationMatchFormationSaveActions(
         variables: {
           input: {
             id: draftId,
-            userId,
             tactics,
           },
         },
         onCompleted: () => {
           commitConfirm({
-            variables: { draftId, userId },
+            variables: { draftId },
             onCompleted: (res) => {
               const row = res.confirmMatchFormation;
               if (row == null) {
@@ -340,7 +335,6 @@ export function useFormationMatchFormationSaveActions(
         variables: {
           input: {
             id: confirmedId,
-            userId,
             tactics,
           },
         },
@@ -375,7 +369,6 @@ export function useFormationMatchFormationSaveActions(
         input: {
           matchId,
           teamId,
-          userId,
           tactics,
         },
       },

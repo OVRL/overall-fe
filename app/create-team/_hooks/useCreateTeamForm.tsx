@@ -81,7 +81,6 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
           historyStartDate,
           homeUniform,
           awayUniform,
-          userId, // useUserId()가 Relay 글로벌 ID("UserModel:21")에서 추출한 숫자
           email: user.email,
         },
         emblem: data.emblemFile ?? null, // 선택 사항. 있으면 uploadables로 전달

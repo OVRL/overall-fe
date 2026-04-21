@@ -62,11 +62,10 @@ export function HamburgerMenuContent({ onClose }: HamburgerMenuContentProps) {
         <span>내 정보</span>
       </Link>
 
-      {/* 로그인 시에만 findTeamMember(userId) — Relay는 캐시 미스 시 suspend */}
+      {/* 로그인 시에만 findTeamMember — Relay는 캐시 미스 시 suspend */}
       {userId !== null ? (
         <Suspense fallback={<HamburgerTeamListSkeleton />}>
           <HamburgerTeamListSection
-            userId={userId}
             selectedTeamId={selectedTeamId}
             onTeamSelect={handleTeamSelect}
           />
@@ -121,11 +120,9 @@ function HamburgerTeamListSkeleton() {
 
 /** useLazyLoadQuery 호출 분리: suspend 시 상위 메뉴는 그대로, 이 구간만 fallback */
 function HamburgerTeamListSection({
-  userId,
   selectedTeamId,
   onTeamSelect,
 }: {
-  userId: number;
   selectedTeamId: string | null;
   onTeamSelect: (
     teamId: string,
@@ -133,7 +130,7 @@ function HamburgerTeamListSection({
     teamImageUrl: string | null,
   ) => void;
 }) {
-  const members = useFindTeamMemberForHeader(userId);
+  const members = useFindTeamMemberForHeader();
 
   const teams = useMemo(() => {
     return members

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<15c56d56ab7404da3a8907b09b707c21>>
+ * @generated SignedSource<<9c35dc5649f3fdce5f19ef7b131960c1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,9 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 export type Foot = "B" | "L" | "R" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
 export type Role = "COACH" | "MANAGER" | "PLAYER" | "%future added value";
-export type profileFindTeamMemberQuery$variables = {
-  userId: number;
-};
+export type profileFindTeamMemberQuery$variables = Record<PropertyKey, never>;
 export type profileFindTeamMemberQuery$data = {
   readonly findTeamMember: ReadonlyArray<{
     readonly __typename: "TeamMemberModel";
@@ -79,80 +77,67 @@ export type profileFindTeamMemberQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "userId"
-  }
-],
-v1 = {
+var v0 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v3 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "teamId",
   "storageKey": null
 },
-v4 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "userId",
   "storageKey": null
 },
-v5 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "foot",
   "storageKey": null
 },
-v6 = {
+v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "preferredNumber",
   "storageKey": null
 },
-v7 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v8 = [
+v7 = [
   {
     "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "userId",
-        "variableName": "userId"
-      }
-    ],
+    "args": null,
     "concreteType": "TeamMemberModel",
     "kind": "LinkedField",
     "name": "findTeamMember",
     "plural": true,
     "selections": [
+      (v0/*: any*/),
       (v1/*: any*/),
       (v2/*: any*/),
-      (v3/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -167,7 +152,7 @@ v8 = [
         "name": "profileImg",
         "storageKey": null
       },
-      (v4/*: any*/),
+      (v3/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -175,7 +160,7 @@ v8 = [
         "name": "role",
         "storageKey": null
       },
-      (v5/*: any*/),
+      (v4/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -183,7 +168,7 @@ v8 = [
         "name": "introduction",
         "storageKey": null
       },
-      (v6/*: any*/),
+      (v5/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -199,9 +184,9 @@ v8 = [
         "name": "team",
         "plural": false,
         "selections": [
+          (v0/*: any*/),
           (v1/*: any*/),
-          (v2/*: any*/),
-          (v7/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -220,8 +205,8 @@ v8 = [
         "name": "user",
         "plural": false,
         "selections": [
-          (v2/*: any*/),
-          (v7/*: any*/),
+          (v1/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -250,8 +235,8 @@ v8 = [
             "name": "favoritePlayer",
             "storageKey": null
           },
+          (v4/*: any*/),
           (v5/*: any*/),
-          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -295,7 +280,7 @@ v8 = [
                 "name": "siggName",
                 "storageKey": null
               },
-              (v7/*: any*/),
+              (v6/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -366,7 +351,7 @@ v8 = [
             "name": "goals",
             "storageKey": null
           },
-          (v2/*: any*/),
+          (v1/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -395,7 +380,7 @@ v8 = [
             "name": "ovr",
             "storageKey": null
           },
-          (v3/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -403,7 +388,7 @@ v8 = [
             "name": "updatedAt",
             "storageKey": null
           },
-          (v4/*: any*/),
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -420,32 +405,32 @@ v8 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
     "name": "profileFindTeamMemberQuery",
-    "selections": (v8/*: any*/),
+    "selections": (v7/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [],
     "kind": "Operation",
     "name": "profileFindTeamMemberQuery",
-    "selections": (v8/*: any*/)
+    "selections": (v7/*: any*/)
   },
   "params": {
-    "cacheID": "ea6b14f7d91a43116a4595da4805c0bb",
+    "cacheID": "4329dc3d650f79e601b78ff7c57f215f",
     "id": null,
     "metadata": {},
     "name": "profileFindTeamMemberQuery",
     "operationKind": "query",
-    "text": "query profileFindTeamMemberQuery(\n  $userId: Int!\n) {\n  findTeamMember(userId: $userId) {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    foot\n    introduction\n    preferredNumber\n    preferredPosition\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      id\n      name\n      birthDate\n      profileImage\n      activityArea\n      favoritePlayer\n      foot\n      preferredNumber\n      mainPosition\n      subPositions\n      region {\n        code\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
+    "text": "query profileFindTeamMemberQuery {\n  findTeamMember {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    foot\n    introduction\n    preferredNumber\n    preferredPosition\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      id\n      name\n      birthDate\n      profileImage\n      activityArea\n      favoritePlayer\n      foot\n      preferredNumber\n      mainPosition\n      subPositions\n      region {\n        code\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "142becc9b815b1de7843fd5ecd99bc02";
+(node as any).hash = "5704229a95efbae8b54b00e48af569dd";
 
 export default node;

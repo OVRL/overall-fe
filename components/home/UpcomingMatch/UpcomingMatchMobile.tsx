@@ -80,21 +80,19 @@ function MobileUpcomingMatchActions({
 }
 
 function MobileUpcomingMatchActionsWithCapabilities({
-  userId,
   formationHref,
   primary,
   onAttendanceVote,
   onCopyTeamCode,
   showFormationSetupOverride,
 }: {
-  userId: number;
   formationHref: string;
   primary: HomePrimaryCta;
   onAttendanceVote: () => void;
   onCopyTeamCode: () => void;
   showFormationSetupOverride?: boolean;
 }) {
-  const { showRegisterGame } = useTeamManagementCapabilitiesForUser(userId);
+  const { showRegisterGame } = useTeamManagementCapabilitiesForUser();
   const showFormationSetup =
     showFormationSetupOverride !== undefined
       ? showFormationSetupOverride
@@ -158,7 +156,6 @@ function MobileMainSection({
           }
         >
           <MobileUpcomingMatchActionsWithCapabilities
-            userId={userId}
             formationHref={formationHref}
             primary={panel.primary}
             onAttendanceVote={onAttendanceVote}

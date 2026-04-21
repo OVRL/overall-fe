@@ -32,23 +32,15 @@ export function TeamManagementAccessGuard({
 
   return (
     <Suspense fallback={null}>
-      <TeamManagementAccessGuardInner userId={userId}>
-        {children}
-      </TeamManagementAccessGuardInner>
+      <TeamManagementAccessGuardInner>{children}</TeamManagementAccessGuardInner>
     </Suspense>
   );
 }
 
-function TeamManagementAccessGuardInner({
-  userId,
-  children,
-}: {
-  userId: number;
-  children: ReactNode;
-}) {
+function TeamManagementAccessGuardInner({ children }: { children: ReactNode }) {
   const { selectedTeamId } = useSelectedTeamId();
   const { canAccessTeamManagementRoute } =
-    useTeamManagementCapabilitiesForUser(userId);
+    useTeamManagementCapabilitiesForUser();
   const router = useRouter();
 
   useEffect(() => {
