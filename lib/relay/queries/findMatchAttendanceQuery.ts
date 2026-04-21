@@ -12,6 +12,21 @@ export const FindMatchAttendanceQuery = graphql`
         profileImage
       }
       attendanceStatus
+      match {
+        id
+        matchDate
+        startTime
+        endTime
+        opponentTeam {
+          name
+          homeUniform
+        }
+        teamName
+        description
+        voteDeadline
+        quarterCount
+        quarterDuration
+      }
     }
     matchMercenaries(matchId: $matchId) {
       id

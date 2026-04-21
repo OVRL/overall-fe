@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { INITIAL_PLAYERS } from "@/data/players";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { X, Shield } from "lucide-react";
+import { X } from "lucide-react";
 
 // ──────────────────────────────────────────────
 // Types & Constants
@@ -21,39 +20,18 @@ interface MOMPlayer {
   image: string;
 }
 
-const ORB_ICONS = ["🏆", "⭐", "🎖️"];
-const RANK_LABEL = ["1위", "2위", "3위"];
+const ORB_ICONS = ["🏆", "⭐", "🎖️", "🎖️", "🎖️", "🎖️"];
 
-// 보누치 카드 스타일의 더 정교한 10각형 형태
-const PREMIUM_CLIP_PATH = "polygon(50% 0%, 95% 8%, 100% 35%, 100% 70%, 95% 92%, 50% 100%, 5% 92%, 0% 70%, 0% 35%, 5% 8%)";
+interface MOMVoteBoardProps {
+  results: any[];
+  onClose: () => void;
+}
 
 // ──────────────────────────────────────────────
 // Utils
 // ──────────────────────────────────────────────
-const getRandomMOM = (): MOMPlayer[] => {
-  const shuffled = [...INITIAL_PLAYERS].sort(() => 0.5 - Math.random());
-  const selected = shuffled.slice(0, 3);
-  
-  const votes = [78, 58, 34];
-  return selected.map((p, i) => ({
-    rank: i + 1,
-    id: p.id,
-    name: p.name,
-    position: p.position,
-    number: p.number ?? 0,
-    goals: Math.floor(Math.random() * 3),
-    assists: Math.floor(Math.random() * 3),
-    clean: p.position === "GK" || p.position === "CB" || p.position === "LB" || p.position === "RB" ? (Math.random() > 0.5 ? 1 : 0) : 0,
-    votes: votes[i],
-    image: p.image || "/images/player/default.webp",
-  }));
-};
 
-interface MOMVoteBoardProps {
-  onClose: () => void;
-}
-
-export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
+export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
   const [showVideo, setShowVideo] = useState(true);
   const [showBoard, setShowBoard] = useState(false);
   const [momPlayers, setMomPlayers] = useState<MOMPlayer[]>([]);
@@ -64,8 +42,28 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    setMomPlayers(getRandomMOM());
-  }, []);
+    const totalVotes = results.reduce((acc, r) => acc + r.voteCount, 0) || 1;
+    const mapped = results.map((r, i) => {
+      // 동률 처리: 이전 항목보다 득표수가 같으면 같은 순위 부여
+      let rank = 1;
+      for (let j = 0; j < i; j++) {
+        if (results[j].voteCount > r.voteCount) rank++;
+      }
+      return {
+      rank,
+      id: r.candidateUserId || r.candidateMercenaryId || i,
+      name: r.candidateUser?.name || r.candidateMercenary?.name || "알 수 없음",
+      position: r.candidateUser?.mainPosition || "상대팀/용병",
+      number: r.candidateUser?.preferredNumber ?? 0,
+      goals: 0,
+      assists: 0,
+      clean: 0,
+      votes: Math.round((r.voteCount / totalVotes) * 100),
+      image: r.candidateUser?.profileImage || "/images/player/default.webp",
+      };
+    });
+    setMomPlayers(mapped);
+  }, [results]);
 
   useEffect(() => {
     if (showVideo) {
@@ -192,14 +190,14 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
       setTimeout(launchConfetti, 700);
     }
 
-    if (nextSet.size === 3) {
+    if (momPlayers.length > 0 && nextSet.size === momPlayers.length) {
       setAllFlipped(true);
     }
   };
 
   const handleMainBtn = () => {
     if (!allFlipped) {
-      [0, 1, 2].forEach(i => flipCard(i));
+      momPlayers.forEach((_, i) => flipCard(i));
     } else {
       onClose();
     }
@@ -217,6 +215,12 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
         @keyframes btnShimmer-mom{0%{left:-60%}100%{left:140%}}
         @keyframes fadeDown-mom{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeUp-mom{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        /* OVR 로고: 안쪽에서 바깥쪽 3D 회전 (rotateY) - 천천히 */
+        @keyframes spin-ovr{
+          0%{transform:perspective(800px) rotateY(0deg);}
+          100%{transform:perspective(800px) rotateY(360deg);}
+        }
+        .spin-ovr{animation:spin-ovr 5s linear infinite;}
 
         .card-inner-mom {
           width:100%; height:100%;
@@ -226,23 +230,11 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
         }
         .flipped-mom .card-inner-mom { transform: rotateY(180deg); }
 
-        .premium-card-shape {
-          clip-path: ${PREMIUM_CLIP_PATH};
-        }
-
         .shimmer-active-mom::before {
           content:''; position:absolute;
           top:-50%; left:-80%; width:55%; height:200%;
-          background:linear-gradient(105deg,transparent 20%,rgba(255,215,0,0.38) 50%,transparent 80%);
+          background:linear-gradient(105deg,transparent 20%,rgba(184,255,18,0.3) 50%,transparent 80%);
           animation:shimmerSweep-mom 2s linear infinite;
-        }
-        
-        .pop-out-image {
-          transition: transform 0.8s cubic-bezier(.22,1,.36,1);
-          transform: translateZ(30px) scale(1.1);
-        }
-        .flipped-mom .pop-out-image {
-          transform: translateZ(-30px) scale(1.02) rotateY(180deg);
         }
 
         /* 모바일 스크롤 바 숨기기 */
@@ -321,95 +313,115 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
           {/* 모바일 1인 1카드 스크롤 + PC 가로 고정 레이아웃 */}
           <div className="flex-1 overflow-y-auto sm:overflow-visible snap-y snap-mandatory hide-scrollbar pb-16 sm:pb-0 px-4">
             <div className="flex flex-col sm:flex-row gap-6 sm:gap-[clamp(20px,4vw,40px)] items-center justify-center min-h-max sm:min-h-0 sm:flex-nowrap sm:w-max sm:mx-auto pt-8 sm:pt-0">
-              {[0, 1, 2].map((i) => {
-                const p = momPlayers[i];
-                if (!p) return null;
+              {momPlayers.map((p, i) => {
                 const isFlipped = flippedSet.has(i);
-                
-                const entryDelay = i === 2 ? "delay-300" : i === 1 ? "delay-600" : "delay-900";
+                // 마지막 카드(최하위)가 먼저 등장하고, 첫 카드(1위)가 가장 늦게 등장
+                const animDelay = `${(momPlayers.length - 1 - i) * 300}ms`;
 
                 return (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={cn(
                       "relative perspective-distant cursor-pointer animate-[fallIn-mom_1.2s_cubic-bezier(.16,1,.3,1)_both] snap-center shrink-0",
-                      entryDelay,
                       isFlipped && "flipped-mom"
                     )}
-                    style={{ 
-                      width: 'clamp(230px, 60vw, 250px)', 
-                      height: 'clamp(340px, 55vh, 400px)' 
+                    style={{
+                      animationDelay: animDelay,
+                      width: 'clamp(220px, 70vw, 304px)',
+                      height: 'clamp(288px, 91.8vw, 399px)'
                     }}
                     onClick={() => flipCard(i)}
                   >
                     <div className="card-inner-mom w-full h-full relative overflow-visible">
-                      {/* FRONT */}
-                      <div 
-                          className="card-face absolute inset-0 premium-card-shape bg-linear-to-br from-[#0c1840] via-[#050b26] to-[#020514] border-[1px] border-yellow-500/20 shadow-xl overflow-hidden flex flex-col items-center justify-center gap-3 transition-all duration-300 backface-hidden hover:scale-[1.02] hover:border-yellow-400/50"
+                      {/* FRONT — OVR 카드 (이미지 기준) */}
+                      <div className="card-face absolute inset-0 rounded-2xl overflow-hidden backface-hidden hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                        style={{ boxShadow: '0 0 0 2px rgba(184,255,18,0.45), 0 0 30px rgba(184,255,18,0.2)' }}
                       >
-                        <div className="w-[70px] h-[70px] rounded-full bg-radial-[circle_at_38%_32%] from-cyan-400/20 to-transparent border border-cyan-400/25 flex items-center justify-center text-[30px] shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                          {ORB_ICONS[i]}
+                        {/* 배경: normal-green.webp 크리스탈 패턴 */}
+                        <div className="absolute inset-0 bg-[url('/images/card-bgs/normal-green.webp')] bg-cover bg-center"></div>
+                        <div className="absolute inset-0 bg-black/35"></div>
+                        {/* 네온 테두리 내부 글로우 */}
+                        <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: 'inset 0 0 20px rgba(184,255,18,0.15)' }}></div>
+                        {/* 중앙: 스피닝 OVR MOM Board 로고 */}
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2">
+                          <img
+                            src="/images/OVR_MOM_Board.png"
+                            alt="OVR"
+                            className="spin-ovr w-[90px] h-[90px] object-contain"
+                            style={{ filter: 'drop-shadow(0 0 14px rgba(184,255,18,0.9)) drop-shadow(0 0 4px #b8ff12)' }}
+                          />
                         </div>
-                        <div className="text-[10px] tracking-[4px] text-cyan-400/50 font-black uppercase">Premium Card</div>
-                        <div className="font-['Cinzel'] text-[28px] text-yellow-500/10 font-black">MOM</div>
                       </div>
 
-                      {/* BACK - 축소된 보누치 스타일 (TOTY 제거 및 OVR 마크 추가) */}
-                      <div className="card-face absolute inset-0 transition-all duration-500 rotate-y-180 backface-hidden overflow-visible">
-                         <div 
-                            className={cn(
-                                "absolute inset-0 premium-card-shape flex flex-col p-0 overflow-hidden shadow-2xl bg-linear-to-b from-[#0a1a45] to-[#010410]"
-                            )}
-                            style={{ border: `1.5px solid ${p.rank === 1 ? '#ffd700' : p.rank === 2 ? '#c0c0c0' : '#cd7f32'}` }}
-                         >
-                            <div className="absolute inset-0 bg-[url('/images/card-bgs/normal-blue.webp')] bg-cover bg-center opacity-40 mix-blend-screen"></div>
-                            <div className={cn("absolute inset-0 pointer-events-none", p.rank === 1 && "shimmer-active-mom")}></div>
-                            
-                            <div className="absolute top-0 left-0 w-[70px] md:w-[85px] h-full bg-white/5 border-r border-white/10 backdrop-blur-sm"></div>
+                      {/* BACK — 선수 카드 */}
+                      <div
+                        className="card-face absolute inset-0 rounded-2xl overflow-hidden backface-hidden shadow-2xl"
+                        style={{
+                          transform: 'rotateY(180deg)',
+                          border: `2px solid ${p.rank === 1 ? '#b8ff12' : p.rank === 2 ? '#c0c0c0' : '#cd7f32'}`,
+                          boxShadow: `0 0 0 2px ${p.rank === 1 ? 'rgba(184,255,18,0.5)' : p.rank === 2 ? 'rgba(192,192,192,0.4)' : 'rgba(205,127,50,0.4)'}, 0 8px 32px rgba(0,0,0,0.8)`
+                        }}
+                      >
+                        {/* 배경: normal-green.webp */}
+                        <div className="absolute inset-0 bg-[url('/images/card-bgs/normal-green.webp')] bg-cover bg-center"></div>
+                        <div className="absolute inset-0 bg-black/20"></div>
 
-                            <div className="absolute top-8 left-0 w-[70px] md:w-[85px] z-10 flex flex-col items-center translate-z-20">
-                                <span className="text-4xl md:text-6xl font-['Cinzel'] font-black text-white drop-shadow-[0_4px_12px_rgba(0,0,0,1)] leading-none italic tracking-tighter">98</span>
-                                <span className="text-[13px] md:text-[18px] font-black text-yellow-400 mt-1 tracking-widest drop-shadow-lg uppercase">{p.position}</span>
-                                
-                                <div className="mt-6 flex flex-col items-center gap-3">
-                                    {/* 국기 (대한민국 예시) */}
-                                    <div className="w-8 h-5 md:w-11 md:h-7 bg-black/40 border border-white/20 flex items-center justify-center overflow-hidden rounded-sm shadow-lg">
-                                        <div className="w-full h-full bg-linear-to-r from-blue-600 via-white to-red-600 opacity-90"></div>
-                                    </div>
-                                    
-                                    {/* OVR 기본 마크 (TOTY 제거 및 쉴드 아이콘 대체) */}
-                                    <div className="w-8 h-8 md:w-11 md:h-11 rounded-full bg-linear-to-br from-yellow-500/20 to-transparent border border-yellow-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(255,215,0,0.1)]">
-                                        <Shield size={16} className="text-yellow-500/60" />
-                                    </div>
-                                </div>
-                            </div>
+                        {/* 선수 이미지: 카드 전체 채움 */}
+                        <div className="absolute inset-0" style={{ zIndex: 10 }}>
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="w-full h-full object-cover object-top"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        </div>
 
-                            <div className="absolute bottom-6 left-0 w-full z-10 flex flex-col items-center">
-                                <div className="w-[92%] h-12 md:h-16 flex items-center justify-between px-4 md:px-7 bg-linear-to-b from-blue-900/90 to-black/98 backdrop-blur-3xl border border-white/10 rounded-lg shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
-                                    <div className="flex flex-col items-start min-w-[35px]">
-                                        <span className="text-[7px] font-black text-yellow-400 tracking-tighter opacity-80 uppercase">Rank</span>
-                                        <span className="font-['Cinzel'] text-[11px] md:text-[18px] font-black text-white leading-none italic">{RANK_LABEL[i]}</span>
-                                    </div>
-                                    {/* 모바일 가시성 강화를 위한 텍스트 크기 확대 (sm 미만 text-base) */}
-                                    <h2 className="font-['Black_Han_Sans'] text-base sm:text-sm md:text-[19px] text-white tracking-widest leading-none drop-shadow-xl text-center px-2 flex-1 break-keep">
-                                        {p.name}
-                                    </h2>
-                                    <div className="flex flex-col items-end min-w-[35px]">
-                                        <span className="text-[7px] font-black text-white/40 tracking-tighter uppercase">Votes</span>
-                                        {/* 모바일 가시성 강화를 위한 텍스트 크기 확대 (sm 미만 text-sm) */}
-                                        <span className="font-['Cinzel'] text-sm sm:text-[11px] md:text-[18px] font-black text-yellow-400 leading-none italic">{p.votes}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                         </div>
+                        {/* 1위 shimmer — 이미지 위 */}
+                        <div
+                          className={cn("absolute inset-0 pointer-events-none", p.rank === 1 && "shimmer-active-mom")}
+                          style={{ zIndex: 11 }}
+                        />
 
-                         <div className="absolute inset-0 z-20 flex items-end justify-center pointer-events-none overflow-visible">
-                            <img 
-                              src={p.image} 
-                              alt={p.name}
-                              className="pop-out-image w-[112%] h-[112%] object-contain filter drop-shadow(0 25px 40px rgba(0,0,0,0.85)) -translate-y-7 md:-translate-y-14 translate-x-3 md:translate-x-6"
-                            />
-                         </div>
+                        {/* 상단 그라디언트 오버레이 */}
+                        <div
+                          className="absolute top-0 left-0 right-0 h-[45%] pointer-events-none"
+                          style={{ zIndex: 20, background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)' }}
+                        />
+
+                        {/* 왼쪽 상단: 등번호 + 포지션 */}
+                        <div className="absolute top-3 left-3 flex flex-col items-start leading-none" style={{ zIndex: 30 }}>
+                          {p.number > 0 && (
+                            <span
+                              className="font-['Cinzel'] font-black text-white leading-none"
+                              style={{ fontSize: 'clamp(26px, 6vw, 38px)', textShadow: '0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8)' }}
+                            >
+                              {p.number}
+                            </span>
+                          )}
+                          <span
+                            className="text-[11px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded"
+                            style={{
+                              marginTop: p.number > 0 ? '4px' : '0',
+                              color: '#131312',
+                              background: p.rank === 1 ? '#b8ff12' : p.rank === 2 ? '#d4d4d4' : '#cd7f32',
+                            }}
+                          >
+                            {p.position || "FW"}
+                          </span>
+                        </div>
+
+                        {/* 하단 그라디언트 오버레이 */}
+                        <div
+                          className="absolute bottom-0 left-0 right-0 h-[35%] pointer-events-none"
+                          style={{ zIndex: 20, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 60%, transparent 100%)' }}
+                        />
+
+                        {/* 하단 이름 */}
+                        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center px-3 pb-3 pt-2" style={{ zIndex: 30 }}>
+                          <span className="font-['Black_Han_Sans'] text-white tracking-wider text-center" style={{ fontSize: 'clamp(13px, 3vw, 16px)' }}>
+                            {p.name}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -429,7 +441,7 @@ export default function MOMVoteBoard({ onClose }: MOMVoteBoardProps) {
                     : "bg-linear-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-black"
             )}
           >
-            <span className="relative z-10">{allFlipped ? "COMPLETE" : "REVEAL ALL"}</span>
+            <span className="relative z-10">{allFlipped || momPlayers.length === 0 ? "CLOSE" : "REVEAL ALL"}</span>
             <div className="absolute top-[-50%] left-[-60%] w-[40%] h-[200%] bg-linear-to-r from-transparent via-white/50 to-transparent animate-[btnShimmer-mom_2.5s_linear_infinite]"></div>
           </button>
         </div>

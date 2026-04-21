@@ -8,9 +8,10 @@ import Button from "@/components/ui/Button";
 import useModal from "@/hooks/useModal";
 import { FindMatchAttendanceQuery } from "@/lib/relay/queries/findMatchAttendanceQuery";
 import { toast } from "@/lib/toast";
-import { MomVoteMockMatchInfoCard } from "./MomVoteMockMatchInfoCard";
+import { MomVoteMatchInfoCard } from "./MomVoteMockMatchInfoCard";
 import { MomVoteRankPicker } from "./MomVoteRankPicker";
 import { buildPlayerOptions, optionsExcludingOthers } from "./momVotePickerUtils";
+import { useCreateMatchMomMutation } from "./hooks/useCreateMatchMomMutation";
 
 const WRAPPER_CLASS =
   "md:w-100 max-w-[22rem] gap-y-4 p-5 bg-surface-card border-border-card";
@@ -27,6 +28,9 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
     { matchId, teamId },
     { fetchPolicy: "store-or-network" },
   );
+
+  const { executeMutation, isInFlight } = useCreateMatchMomMutation();
+  const matchInfo = data.findMatchAttendance?.[0]?.match;
 
   const allOptions = useMemo(
     () => buildPlayerOptions(data.findMatchAttendance ?? []),
@@ -48,10 +52,21 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
     new Set([top1, top2, top3]).size === 3;
   const canSubmit = distinct && allOptions.length >= 3;
 
-  const onVote = () => {
+  const onVote = async () => {
     if (!canSubmit) return;
-    toast.info("MOM 투표 API 연동 전입니다.");
-    hideModal();
+    try {
+      const candidateUserIds = [Number(top1), Number(top2), Number(top3)];
+      await executeMutation({
+        matchId,
+        teamId,
+        candidateUserIds,
+      });
+      toast.success("MOM 투표가 완료되었습니다!");
+      hideModal();
+    } catch (error) {
+      console.error("[MomVote] Failed to vote:", error);
+      toast.error("투표 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -59,7 +74,14 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
       <div className="flex flex-col gap-5 -mt-2">
         <section className="flex flex-col gap-2">
           <p className="text-sm font-semibold text-Label-Primary">경기 정보</p>
-          <MomVoteMockMatchInfoCard />
+          <MomVoteMatchInfoCard 
+            matchDate={matchInfo?.matchDate}
+            startTime={matchInfo?.startTime || ""}
+            opponentName={matchInfo?.opponentTeam?.name}
+            teamName={matchInfo?.teamName}
+            description={matchInfo?.description}
+            voteDeadline={matchInfo?.voteDeadline}
+          />
         </section>
 
         <section className="flex flex-col gap-4 mb-20">
@@ -107,10 +129,10 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
           variant="primary"
           size="xl"
           className="font-semibold"
-          disabled={!canSubmit}
+          disabled={!canSubmit || isInFlight}
           onClick={onVote}
         >
-          투표하기
+          {isInFlight ? "투표 중..." : "투표하기"}
         </Button>
       </div>
     </ModalLayout>
