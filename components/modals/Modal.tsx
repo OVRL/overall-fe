@@ -6,11 +6,18 @@ type Props<T> = {
   Component: ComponentType<T>;
   modalProps: T;
   hide: () => void;
+  /** false면 배경(오버레이) 클릭으로 닫지 않음 */
+  closeOnBackdropClick?: boolean;
 };
 
 export const ModalHideContext = createContext(() => {});
 
-const Modal = <T extends object>({ Component, modalProps, hide }: Props<T>) => {
+const Modal = <T extends object>({
+  Component,
+  modalProps,
+  hide,
+  closeOnBackdropClick = true,
+}: Props<T>) => {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -41,7 +48,12 @@ const Modal = <T extends object>({ Component, modalProps, hide }: Props<T>) => {
         )}
         onClick={(e) => {
           // 배경(백드롭) 클릭 시에만 닫기. 모달 콘텐츠 클릭 시 버블링으로 닫히는 것 방지
-          if (e.target === e.currentTarget) hide();
+          if (
+            e.target === e.currentTarget &&
+            closeOnBackdropClick
+          ) {
+            hide();
+          }
         }}
       >
         <Component {...modalProps} />

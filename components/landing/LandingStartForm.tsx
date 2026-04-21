@@ -1,58 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { fetchQuery } from "relay-runtime";
+import { useRelayEnvironment } from "react-relay";
 import Button, { buttonVariants } from "../ui/Button";
 import Link from "../Link";
 import { cn } from "@/lib/utils";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { useUserStore } from "@/contexts/UserContext";
-import { useCreateTeamMemberMutation } from "./_hooks/useCreateTeamMemberMutation";
+import useModal from "@/hooks/useModal";
 import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
+import { observableToPromise } from "@/lib/relay/observableToPromise";
+import { FindTeamByInviteCodeQuery } from "@/lib/relay/queries/findTeamByInviteCodeQuery";
 import { toast } from "@/lib/toast";
 
 const LandingStartForm = () => {
-  const router = useBridgeRouter();
-  const user = useUserStore((state) => state.user);
   const [inviteCode, setInviteCode] = useState("");
-  const { executeMutation, isInFlight } = useCreateTeamMemberMutation();
+  const [isOpeningTeamModal, setIsOpeningTeamModal] = useState(false);
+  const environment = useRelayEnvironment();
+  const { openModal } = useModal("TEAM_INFO");
+  const mountedRef = useRef(true);
+  const submitLockRef = useRef(false);
 
-  const canSubmit = inviteCode.trim().length > 0 && !isInFlight;
+  // next/dynamic 청크를 랜딩 진입 시 미리 받아 두어, 제출 시와 병렬로 기다릴 때 유리하게 함
+  useEffect(() => {
+    void import("@/components/modals/TeamInfoModal/TeamInfoModal");
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const canSubmit = inviteCode.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user?.email) return;
     const code = inviteCode.trim();
-    if (!code) return;
+    if (!code || isOpeningTeamModal || submitLockRef.current) return;
 
-    executeMutation({
-      variables: {
-        input: {
-          email: user.email,
-          inviteCode: code,
-        },
-      },
-      onCompleted: () => {
-        try {
-          router.replace("/");
-        } catch (err) {
-          // 프로덕션 빌드에서 Minified exception 대신 실제 에러 확인용
-          console.error("[LandingStartForm] onCompleted 에러:", err);
-          toast.error(
-            err instanceof Error
-              ? err.message
-              : "페이지 이동 중 오류가 발생했습니다.",
-          );
+    submitLockRef.current = true;
+    void (async () => {
+      setIsOpeningTeamModal(true);
+      try {
+        // 모달 청크 + 팀 조회를 병렬로 끝낸 뒤 스토어에 데이터가 있을 때만 모달을 열어, 스피너 한 번에 본문까지 표시
+        await Promise.all([
+          import("@/components/modals/TeamInfoModal/TeamInfoModal"),
+          observableToPromise(
+            fetchQuery(
+              environment,
+              FindTeamByInviteCodeQuery,
+              { inviteCode: code },
+              { fetchPolicy: "network-only" },
+            ),
+          ),
+        ]);
+        if (!mountedRef.current) return;
+        openModal({ inviteCode: code, prefetchedAtOpen: true });
+      } catch (err) {
+        if (mountedRef.current) {
+          toast.error(getGraphQLErrorMessage(err));
         }
-      },
-      onError: (error) => {
-        toast.error(
-          getGraphQLErrorMessage(error, "팀 가입에 실패했습니다."),
-        );
-      },
-    });
+      } finally {
+        submitLockRef.current = false;
+        if (mountedRef.current) {
+          setIsOpeningTeamModal(false);
+        }
+      }
+    })();
   };
 
   return (
@@ -94,13 +110,13 @@ const LandingStartForm = () => {
         type="submit"
         size="xl"
         variant={canSubmit ? "primary" : "ghost"}
-        disabled={!canSubmit}
+        disabled={!canSubmit || isOpeningTeamModal}
+        aria-busy={isOpeningTeamModal}
+        aria-label={
+          isOpeningTeamModal ? "팀 정보를 불러오는 중입니다." : undefined
+        }
       >
-        {isInFlight ? (
-          <LoadingSpinner label="가입 중입니다." size="sm" />
-        ) : (
-          "시작하기"
-        )}
+        가입 신청하기
       </Button>
 
       <div className="border-border-card w-full font-pretendard">
