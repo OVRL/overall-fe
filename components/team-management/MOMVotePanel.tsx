@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Settings, Check, Clock, Bell, Info, ShieldCheck, Zap, Plus, Minus, Hourglass, Layout, Trophy, Star, Medal, X, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { toast } from "sonner";
+import { Settings, Info, Zap, X, ChevronDown, ChevronUp, User } from "lucide-react";
 import MOMVoteBoard from "./MOMVoteBoard";
-import { INITIAL_PLAYERS } from "@/data/players";
 import { cn } from "@/lib/utils";
+import { useLazyLoadQuery } from "react-relay";
+import { FindMatchQuery } from "@/lib/relay/queries/findMatchQuery";
+import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { FindMatchMomQuery } from "@/lib/relay/queries/findMatchMomQuery";
+import type { findMatchQuery } from "@/__generated__/findMatchQuery.graphql";
+import type { findMatchMomQuery } from "@/__generated__/findMatchMomQuery.graphql";
+import { useQueryLoader, usePreloadedQuery } from "react-relay";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 
 // ──────────────────────────────────────────────
 // Sub-components
@@ -29,53 +37,15 @@ interface MatchCard {
   status: VoteStatus;
   totalVotes?: number;
   deadline?: string;
+  deadlineTs?: number;
   scheduledAt?: string;
   top3?: VotePlayer[];
   liveVotes?: { name: string; position: string; votes: number; maxVotes: number; backNumber?: number }[];
+  matchId: number;
+  teamId: number;
 }
 
-const MOCK_MATCHES: MatchCard[] = [
-  {
-    id: "1",
-    date: "2026. 2. 25.",
-    opponent: "레알 마드리드",
-    score: "0 - 0",
-    status: "scheduled",
-    scheduledAt: "2026. 3. 17. 19:00",
-  },
-  {
-    id: "2",
-    date: "2026. 2. 25.",
-    opponent: "레알 마드리드",
-    score: "1 - 1",
-    status: "ongoing",
-    totalVotes: 25,
-    deadline: "2026. 2. 21. 18:00까지",
-    liveVotes: [
-      { name: "정수현", position: "MF", votes: 12, maxVotes: 25, backNumber: 7 },
-      { name: "호날두", position: "FW", votes: 8, maxVotes: 25, backNumber: 10 },
-      { name: "손흥민", position: "FW", votes: 5, maxVotes: 25, backNumber: 7 },
-    ],
-  },
-  {
-    id: "3",
-    date: "2026. 2. 25.",
-    opponent: "레알 마드리드",
-    score: "3 - 1",
-    status: "completed",
-    totalVotes: 48,
-    top3: [
-      { backNumber: 20, name: "김정수", votes: 24 },
-      { backNumber: 10, name: "호날두", votes: 14 },
-      { backNumber: 8, name: "제라드", votes: 7 },
-    ],
-    liveVotes: [
-      { name: "김정수", position: "FW", votes: 24, maxVotes: 24, backNumber: 20 },
-      { name: "호날두", position: "MF", votes: 14, maxVotes: 24, backNumber: 10 },
-      { name: "제라드", position: "DF", votes: 7, maxVotes: 24, backNumber: 8 },
-    ]
-  },
-];
+// MOCK_MATCHES 제거
 
 const StatusBadge = ({ status }: { status: VoteStatus }) => {
   if (status === "scheduled")
@@ -338,27 +308,59 @@ function ScheduledCard({ match }: { match: MatchCard }) {
   );
 }
 
+// 진행중 카드 헤더 우측: 총 투표수 + 마감시간
+function OngoingVoteSummary({ queryRef, deadline }: { queryRef: any; deadline: string }) {
+  const data = usePreloadedQuery<findMatchMomQuery>(FindMatchMomQuery, queryRef);
+  const results = data.findMatchMom ?? [];
+  const totalVotes = results.reduce((acc, r) => acc + r.voteCount, 0);
+
+  return (
+    <div className="flex flex-col items-end">
+      <span className="text-[14px] font-semibold text-white">{totalVotes}표</span>
+      <span className="text-[11px] text-[#a6a5a5]">{deadline}</span>
+    </div>
+  );
+}
+
 function OngoingCard({ match }: { match: MatchCard }) {
   const [expanded, setExpanded] = useState(false);
+  const [queryRef, loadQuery] = useQueryLoader<findMatchMomQuery>(FindMatchMomQuery);
+
+  // 마운트 시 즉시 로드 → 접힌 상태에서도 총 투표수 표시
+  useEffect(() => {
+    if (!queryRef) {
+      loadQuery({ matchId: match.matchId, teamId: match.teamId });
+    }
+  }, [queryRef, loadQuery, match.matchId, match.teamId]);
 
   return (
     <div className="flex flex-col rounded-[12px] bg-[#1a1a1a] border border-[#3e3e3e] overflow-hidden">
-      <div 
-        onClick={() => setExpanded(!expanded)} 
-        className="p-6 min-h-[102px] flex flex-col md:flex-row justify-between items-center cursor-pointer transition-colors hover:bg-white/[0.03]"
+      <div
+        onClick={() => setExpanded(!expanded)}
+        className="p-6 min-h-[102px] flex flex-col md:flex-row justify-between items-center cursor-pointer transition-colors hover:bg-white/3"
       >
-        <CardHeader 
-          match={match} 
+        <CardHeader
+          match={match}
           rightContent={
-            <div className="flex items-center justify-between w-full md:w-auto mt-2 md:mt-0 gap-6">
-              <div className="flex items-center gap-6 justify-end w-full md:w-auto">
-                  <div className="flex flex-col items-end">
-                    <span className="text-[14px] font-semibold text-white">{match.totalVotes}표</span>
-                    <span className="text-[11px] text-[#a6a5a5] font-regular">{match.deadline}</span>
-                  </div>
-                  <div className="w-[24px] h-[24px] text-gray-400">
-                    {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                  </div>
+            <div className="flex items-center gap-6 justify-end w-full md:w-auto mt-2 md:mt-0">
+              {queryRef ? (
+                <Suspense
+                  fallback={
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="h-4 w-10 bg-white/5 rounded animate-pulse" />
+                      <div className="h-3 w-24 bg-white/5 rounded animate-pulse" />
+                    </div>
+                  }
+                >
+                  <OngoingVoteSummary queryRef={queryRef} deadline={match.deadline ?? ""} />
+                </Suspense>
+              ) : (
+                <div className="flex flex-col items-end">
+                  <span className="text-[11px] text-[#a6a5a5]">{match.deadline}</span>
+                </div>
+              )}
+              <div className="w-[24px] h-[24px] text-gray-400 shrink-0">
+                {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
               </div>
             </div>
           }
@@ -368,62 +370,113 @@ function OngoingCard({ match }: { match: MatchCard }) {
       {expanded && (
         <div className="px-6 py-6 border-t border-[#3e3e3e] bg-[#131312]">
           <p className="text-[14px] font-bold text-white mb-4">현재 투표 현황</p>
-          <div className="space-y-4">
-            {match.liveVotes?.map((lv, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] text-white font-medium">{lv.backNumber}. {lv.name}</span>
-                    <span className="text-[11px] text-[#a6a5a5] bg-[#252525] px-1.5 py-0.5 rounded-sm">{lv.position}</span>
-                  </div>
-                  <span className="text-[14px] font-bold text-white">{lv.votes}표</span>
-                </div>
-                <div className="h-[6px] bg-[#252525] rounded-full overflow-hidden">
-                  <div
-                    className={cn("h-full rounded-full",
-                      i === 0 ? "bg-[#b8ff12]" : 
-                      i === 1 ? "bg-[#898989]" : "bg-white/50"
-                    )}
-                    style={{ width: `${Math.round((lv.votes / lv.maxVotes) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          {!queryRef ? (
+            <div className="h-20 flex items-center justify-center">
+              <span className="text-gray-500 animate-pulse">불러오는 중...</span>
+            </div>
+          ) : (
+            <Suspense fallback={<div className="h-20 flex items-center justify-center"><span className="text-gray-500 animate-pulse">불러오는 중...</span></div>}>
+              <OngoingVoteResults queryRef={queryRef} />
+            </Suspense>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function CompletedCard({ match }: { match: MatchCard }) {
+function OngoingVoteResults({ queryRef }: { queryRef: any }) {
+  const data = usePreloadedQuery<findMatchMomQuery>(FindMatchMomQuery, queryRef);
+  const results = data.findMatchMom ?? [];
+  const totalVotes = results.reduce((acc, r) => acc + r.voteCount, 0);
+  const maxVotes = Math.max(...results.map(r => r.voteCount), 1);
+
+  return (
+    <div className="space-y-4">
+      {results.map((lv, i) => (
+        <div key={i} className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[14px] text-white font-medium">
+                {lv.candidateUser?.name || lv.candidateMercenary?.name}
+              </span>
+              <span className="text-[11px] text-[#a6a5a5] bg-[#252525] px-1.5 py-0.5 rounded-sm">
+                {lv.candidateUser?.mainPosition || "용병"}
+              </span>
+            </div>
+            <span className="text-[14px] font-bold text-white">{lv.voteCount}표</span>
+          </div>
+          <div className="h-[6px] bg-[#252525] rounded-full overflow-hidden">
+            <div
+              className={cn("h-full rounded-full",
+                i === 0 ? "bg-[#b8ff12]" :
+                i === 1 ? "bg-[#898989]" : "bg-white/50"
+              )}
+              style={{ width: `${Math.round((lv.voteCount / (totalVotes || maxVotes)) * 100)}%` }}
+            />
+          </div>
+        </div>
+      ))}
+      {results.length === 0 && (
+        <p className="text-sm text-gray-500 text-center py-4">아직 투표 데이터가 없습니다.</p>
+      )}
+    </div>
+  );
+}
+
+// TOP3 요약 (접힌 상태 헤더 우측)
+function CompletedTop3Summary({ queryRef }: { queryRef: any }) {
+  const data = usePreloadedQuery<findMatchMomQuery>(FindMatchMomQuery, queryRef);
+  const results = (data.findMatchMom ?? []).slice(0, 3);
+
+  if (results.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-3 lg:gap-5">
+      {results.map((r, i) => {
+        const name = r.candidateUser?.name || r.candidateMercenary?.name || "알 수 없음";
+        const num = r.candidateUser?.preferredNumber;
+        return (
+          <div key={i} className="flex items-center gap-1.5">
+            <User size={13} className="text-[#a6a5a5] shrink-0" />
+            <span className="text-[13px] text-white font-medium whitespace-nowrap">
+              {num != null ? `${num}. ${name}` : name}
+            </span>
+            <span className="text-[12px] text-[#a6a5a5] whitespace-nowrap">{r.voteCount}표</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CompletedCard({ match, onReveal }: { match: MatchCard, onReveal: (results: any) => void }) {
   const [expanded, setExpanded] = useState(false);
+  const [queryRef, loadQuery] = useQueryLoader<findMatchMomQuery>(FindMatchMomQuery);
+
+  // 마운트 시 즉시 로드 → 접힌 상태에서도 TOP3 표시
+  useEffect(() => {
+    if (!queryRef) {
+      loadQuery({ matchId: match.matchId, teamId: match.teamId });
+    }
+  }, [queryRef, loadQuery, match.matchId, match.teamId]);
 
   return (
     <div className="flex flex-col rounded-[12px] bg-[#131312] border border-[#3e3e3e] overflow-hidden">
-      <div 
-        onClick={() => setExpanded(!expanded)} 
+      <div
+        onClick={() => setExpanded(!expanded)}
         className="p-6 min-h-[102px] flex flex-col md:flex-row justify-between items-center cursor-pointer transition-colors hover:bg-white/[0.03]"
       >
-        <CardHeader 
-          match={match} 
+        <CardHeader
+          match={match}
           rightContent={
-            <div className="flex items-center justify-between lg:justify-end gap-2 md:gap-4 w-full md:w-auto mt-2 md:mt-0 overflow-x-auto lg:overflow-x-visible scrollbar-hide">
-              <div className="flex items-center gap-[6px] md:gap-[10px] py-1">
-                {match.top3?.map((p, i) => (
-                  <div key={i} className="flex items-center shrink-0 gap-[6px] md:gap-[8px] px-2 md:px-[12px] py-1 md:py-[8px] rounded-[8px] border border-[#252525] bg-[#1a1a1a]">
-                      <Trophy size={14} className="text-white md:w-4 md:h-4 shrink-0" />
-                      <div className="flex flex-col gap-0.5 md:gap-[2px] items-start leading-none">
-                        <div className="flex items-start gap-[4px] font-semibold text-[11px] md:text-[14px] text-white whitespace-nowrap">
-                          <span>{p.backNumber}.</span>
-                          <span>{p.name}</span>
-                        </div>
-                        <span className="text-[9px] md:text-[11px] text-[#a6a5a5] whitespace-nowrap">{p.votes}표</span>
-                      </div>
-                  </div>
-                ))}
-              </div>
-              <div className="w-[24px] h-[24px] ml-1 md:ml-2 text-gray-400 shrink-0">
+            <div className="flex items-center justify-between lg:justify-end gap-3 w-full md:w-auto mt-2 md:mt-0">
+              {queryRef && (
+                <Suspense fallback={<div className="h-5 w-48 bg-white/5 rounded animate-pulse" />}>
+                  <CompletedTop3Summary queryRef={queryRef} />
+                </Suspense>
+              )}
+              <div className="w-[24px] h-[24px] text-gray-400 shrink-0">
                 {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
               </div>
             </div>
@@ -433,37 +486,67 @@ function CompletedCard({ match }: { match: MatchCard }) {
 
       {expanded && (
         <div className="px-6 py-6 border-t border-[#3e3e3e] bg-[#1a1a1a]">
-          {/* 모바일 뷰 전용 최종 스코어 */}
-          {/* 모바일 뷰 전용 최종 결과 (스코어 제외) */}
-          <div className="md:hidden flex items-center justify-between mb-4 border-b border-[#3e3e3e] pb-4">
-             <span className="text-[13px] text-gray-400">경기 결과</span>
-             <span className="text-[16px] font-bold text-white whitespace-nowrap">투표 마감</span>
-          </div>
-          <p className="text-[14px] font-bold text-white mb-4">전체 투표 결과</p>
-          <div className="grid gap-4">
-            {match.liveVotes?.sort((a,b)=>b.votes-a.votes).map((lv, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className={cn("font-semibold text-[14px]", i < 3 ? "text-[#b8ff12]" : "text-white")}>{lv.backNumber}. {lv.name}</span>
-                    <span className="text-[11px] text-[#a6a5a5] bg-[#252525] px-1.5 py-0.5 rounded-sm">{lv.position}</span>
-                  </div>
-                  <span className="text-[14px] font-bold text-white">{lv.votes}표</span>
-                </div>
-                <div className="h-[6px] bg-[#252525] rounded-full overflow-hidden">
-                    <div 
-                        className={cn("h-full rounded-full",
-                          i === 0 ? "bg-[#b8ff12]" : 
-                          i === 1 ? "bg-[#898989]" : "bg-white/50"
-                        )}
-                        style={{ width: `${Math.round((lv.votes/lv.maxVotes)*100)}%` }}
-                    />
-                </div>
-              </div>
-            ))}
-          </div>
+          {!queryRef ? (
+            <div className="h-20 flex items-center justify-center">
+              <span className="text-gray-500 animate-pulse">불러오는 중...</span>
+            </div>
+          ) : (
+            <Suspense fallback={<div className="h-20 flex items-center justify-center"><span className="text-gray-500 animate-pulse">불러오는 중...</span></div>}>
+              <CompletedVoteResults queryRef={queryRef} onReveal={onReveal} />
+            </Suspense>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+function CompletedVoteResults({ queryRef, onReveal }: { queryRef: any, onReveal: (results: any) => void }) {
+  const data = usePreloadedQuery<findMatchMomQuery>(FindMatchMomQuery, queryRef);
+  const results = data.findMatchMom ?? [];
+  const maxVotes = Math.max(...results.map(r => r.voteCount), 1);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-[14px] font-bold text-white">전체 투표 결과</p>
+        <button
+          onClick={() => onReveal(results)}
+          className="flex items-center gap-2 text-[#b8ff12] text-[13px] font-semibold"
+        >
+          <Zap size={16} />
+          시네마틱 결과 다시보기
+        </button>
+      </div>
+      <div className="grid gap-4">
+        {results.map((lv, i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className={cn("font-semibold text-[14px]", i < 3 ? "text-[#b8ff12]" : "text-white")}>
+                  {lv.candidateUser?.name || lv.candidateMercenary?.name}
+                </span>
+                <span className="text-[11px] text-[#a6a5a5] bg-[#252525] px-1.5 py-0.5 rounded-sm">
+                  {lv.candidateUser?.mainPosition || "용병"}
+                </span>
+              </div>
+              <span className="text-[14px] font-bold text-white">{lv.voteCount}표</span>
+            </div>
+            <div className="h-[6px] bg-[#252525] rounded-full overflow-hidden">
+              <div
+                className={cn("h-full rounded-full",
+                  i === 0 ? "bg-[#b8ff12]" :
+                  i === 1 ? "bg-[#898989]" : "bg-white/50"
+                )}
+                style={{ width: `${Math.round((lv.voteCount / maxVotes) * 100)}%` }}
+              />
+            </div>
+          </div>
+        ))}
+        {results.length === 0 && (
+          <p className="text-sm text-gray-500 text-center py-4">투표 결과가 없습니다.</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -472,14 +555,80 @@ function CompletedCard({ match }: { match: MatchCard }) {
 // Main Panel
 // ──────────────────────────────────────────────
 export default function MOMVotePanel() {
-  const [matches] = useState<MatchCard[]>(MOCK_MATCHES);
+  const { selectedTeamIdNum } = useSelectedTeamId();
+  const data = useLazyLoadQuery<findMatchQuery>(
+    FindMatchQuery,
+    { createdTeamId: selectedTeamIdNum ?? 0 },
+    { fetchPolicy: "store-or-network" }
+  );
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [boardResults, setBoardResults] = useState<any[] | null>(null);
+
+  const matches: MatchCard[] = (data.findMatch ?? []).filter((m: any): m is NonNullable<typeof m> => m != null).map((m: any) => {
+    const now = Date.now();
+
+    // 날짜 파싱 안정성 강화: matchDate가 ISO 전체 문자열일 경우 날짜만 추출
+    const dateStr = typeof m.matchDate === 'string' && m.matchDate.includes('T')
+      ? m.matchDate.split('T')[0] 
+      : m.matchDate;
+    
+    const startTimeStr = m.startTime || "00:00";
+    const startTs = new Date(`${dateStr}T${startTimeStr}`).getTime();
+    
+    // 유효하지 않은 날짜인 경우 현재 시간으로 대체 (정렬 밀림 방지)
+    const validStartTs = isNaN(startTs) ? now : startTs;
+    
+    const deadlineTs = m.voteDeadline 
+      ? new Date(m.voteDeadline).getTime() 
+      : validStartTs + 24 * 60 * 60 * 1000;
+    
+    const validDeadlineTs = isNaN(deadlineTs) ? validStartTs + 24 * 60 * 60 * 1000 : deadlineTs;
+
+    let status: VoteStatus = "scheduled";
+    if (now >= validDeadlineTs) {
+      status = "completed";
+    } else if (now >= validStartTs) {
+      status = "ongoing";
+    }
+
+    let score = "-";
+    try {
+      if (m.description) {
+        const parsed = JSON.parse(m.description);
+        if (parsed.score) score = `${parsed.score.home} - ${parsed.score.away}`;
+      }
+    } catch {}
+
+    const matchDateFormatted = m.matchDate ? new Date(m.matchDate).toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short'
+    }) : "-";
+
+    return {
+      id: String(m.id),
+      matchId: parseNumericIdFromRelayGlobalId(m.id) ?? 0,
+      teamId: selectedTeamIdNum ?? 0,
+      date: matchDateFormatted,
+      opponent: m.opponentTeam?.name || m.teamName || "상대팀 미정",
+      score,
+      status,
+      totalVotes: 0,
+      deadline: m.voteDeadline
+        ? new Date(m.voteDeadline).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) + "까지"
+        : "자동 마감 예정",
+      deadlineTs: validDeadlineTs,
+      scheduledAt: matchDateFormatted + " " + (m.startTime?.slice(0, 5) || "-"),
+    };
+  }).sort((a, b) => b.deadlineTs! - a.deadlineTs!);
 
   const hasOngoingVote = matches.some(m => m.status === "ongoing");
 
-  const handleSaveSettings = (data: any) => {
-    console.log("Saving global settings:", data);
+  const handleSaveSettings = (settings: any) => {
+    console.log("Saving global settings:", settings);
+    toast.info("환경설정 저장 API 연동 준비 중입니다.");
   };
 
   return (
@@ -504,10 +653,14 @@ export default function MOMVotePanel() {
     </div>
 
     <div className="px-4 md:px-6 pb-24 w-full flex flex-col gap-4">
-      {matches.map((match) => {
+      {matches.length === 0 ? (
+         <div className="py-20 text-center text-gray-500">
+            등록된 경기 데이터가 없습니다.
+         </div>
+      ) : matches.map((match) => {
         if (match.status === "scheduled") return <ScheduledCard key={match.id} match={match} />;
         if (match.status === "ongoing") return <OngoingCard key={match.id} match={match} />;
-        return <CompletedCard key={match.id} match={match} />;
+        return <CompletedCard key={match.id} match={match} onReveal={(res) => setBoardResults(res)} />;
       })}
 
       {isSettingsOpen && (
@@ -519,6 +672,13 @@ export default function MOMVotePanel() {
       )}
 
       {isInfoOpen && <InfoModal onClose={() => setIsInfoOpen(false)} />}
+      
+      {boardResults && (
+        <MOMVoteBoard 
+          results={boardResults}
+          onClose={() => setBoardResults(null)} 
+        />
+      )}
     </div>
     </>
   );

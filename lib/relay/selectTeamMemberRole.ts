@@ -17,7 +17,7 @@ export function resolveTeamMemberRoleForSelectedTeam(
 ): TeamMemberRole | null {
   if (selectedTeamId == null) return null;
   const row = members.find(
-    (m) => m.team != null && isSameTeamId(selectedTeamId, m.team.id),
+    (m) => m != null && m.team != null && isSameTeamId(selectedTeamId, m.team.id),
   );
   if (row == null) return null;
   return teamMemberRoleFromGraphQL(row.role);

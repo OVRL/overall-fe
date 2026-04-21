@@ -15,5 +15,7 @@ export function useFindTeamMemberForHeader() {
     { fetchPolicy: "store-or-network" },
   );
 
-  return data?.findTeamMember ?? [];
+  return (data?.findTeamMember ?? []).filter(
+    (m): m is NonNullable<typeof m> => m != null,
+  );
 }
