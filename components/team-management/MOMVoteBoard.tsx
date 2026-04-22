@@ -40,6 +40,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
   const particleCanvasRef = useRef<HTMLCanvasElement>(null);
   const celebrationCanvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [sideFlash, setSideFlash] = useState(false);
 
   useEffect(() => {
     const totalVotes = results.reduce((acc, r) => acc + r.voteCount, 0) || 1;
@@ -126,7 +127,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
     };
   }, []);
 
-  // 2. Celebration (Confetti) Effect
+  // 2. Celebration (Confetti) Effect — FC Online 스타일
   const launchConfetti = () => {
     const cel = celebrationCanvasRef.current;
     if (!cel) return;
@@ -137,9 +138,16 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
     cel.width = window.innerWidth;
     cel.height = window.innerHeight;
 
+    // 사이드 플래시 트리거
+    setSideFlash(true);
+    setTimeout(() => setSideFlash(false), 1500);
+
     let conf: any[] = [];
-    const cols = ["#ffd700", "#fff200", "#ffaa00", "#ffffff", "#00b4dc", "#ff6b6b", "#4ecdc4"];
-    for (let i = 0; i < 200; i++) {
+    // FC Online 스타일: 빨간/금빛 중심
+    const cols = ["#ff0000", "#ff3300", "#ff6600", "#ffd700", "#ffffff", "#ff1744", "#ffcc00"];
+
+    // 상단 중앙 폭죽
+    for (let i = 0; i < 180; i++) {
       conf.push({
         x: Math.random() * cel.width,
         y: -10 - Math.random() * 280,
@@ -153,6 +161,36 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         a: 1,
       });
     }
+    // 좌측 사이드 폭죽
+    for (let i = 0; i < 80; i++) {
+      conf.push({
+        x: -10,
+        y: Math.random() * cel.height * 0.6,
+        w: Math.random() * 8 + 3,
+        h: Math.random() * 12 + 4,
+        color: cols[Math.floor(Math.random() * cols.length)],
+        vx: Math.random() * 7 + 2,
+        vy: (Math.random() - 0.3) * 4,
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 7,
+        a: 1,
+      });
+    }
+    // 우측 사이드 폭죽
+    for (let i = 0; i < 80; i++) {
+      conf.push({
+        x: cel.width + 10,
+        y: Math.random() * cel.height * 0.6,
+        w: Math.random() * 8 + 3,
+        h: Math.random() * 12 + 4,
+        color: cols[Math.floor(Math.random() * cols.length)],
+        vx: -(Math.random() * 7 + 2),
+        vy: (Math.random() - 0.3) * 4,
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 7,
+        a: 1,
+      });
+    }
 
     const animC = () => {
       cCtx.clearRect(0, 0, cel.width, cel.height);
@@ -160,7 +198,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         c.x += c.vx;
         c.y += c.vy;
         c.rot += c.rotV;
-        if (c.y > cel.height) c.a -= 0.04;
+        if (c.y > cel.height || c.x < -60 || c.x > cel.width + 60) c.a -= 0.04;
         cCtx.save();
         cCtx.globalAlpha = Math.max(0, c.a);
         cCtx.translate(c.x, c.y);
@@ -215,6 +253,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         @keyframes btnShimmer-mom{0%{left:-60%}100%{left:140%}}
         @keyframes fadeDown-mom{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeUp-mom{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes sideFlash-mom{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
         /* OVR 로고: 안쪽에서 바깥쪽 3D 회전 (rotateY) - 천천히 */
         @keyframes spin-ovr{
           0%{transform:perspective(800px) rotateY(0deg);}
@@ -280,8 +319,22 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         </div>
       )}
 
-      <div className="absolute inset-0 z-0 bg-radial-[ellipse_100%_80%_at_50%_30%] from-[#050c26] to-[#01020a]"></div>
-      <div className="absolute inset-0 z-1 bg-[radial-gradient(circle,rgba(255,215,0,0.03)_1px,transparent_1px)] bg-size-[28px_28px]"></div>
+      {/* 배경: landing_bg.webp + 오버레이 */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/landing_bg.webp')" }}></div>
+        <div className="absolute inset-0 bg-black/70"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,215,0,0.02)_1px,transparent_1px)] bg-size-[28px_28px]"></div>
+      </div>
+      {/* FC Online 스타일: 좌우 빨간 배경 패널 */}
+      <div className="absolute left-0 top-0 bottom-0 w-[15%] z-2 bg-linear-to-r from-red-950/80 via-red-900/30 to-transparent pointer-events-none"></div>
+      <div className="absolute right-0 top-0 bottom-0 w-[15%] z-2 bg-linear-to-l from-red-950/80 via-red-900/30 to-transparent pointer-events-none"></div>
+      {/* FC Online 폭죽 사이드 플래시 */}
+      {sideFlash && (
+        <>
+          <div className="absolute left-0 top-0 bottom-0 w-[22%] z-45 pointer-events-none bg-linear-to-r from-red-600/75 to-transparent animate-[sideFlash-mom_1.5s_ease_both]"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-[22%] z-45 pointer-events-none bg-linear-to-l from-red-600/75 to-transparent animate-[sideFlash-mom_1.5s_ease_both]"></div>
+        </>
+      )}
       <canvas ref={particleCanvasRef} className="absolute inset-0 z-3 pointer-events-none"></canvas>
 
       <button
@@ -435,13 +488,13 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
           <button
             onClick={handleMainBtn}
             className={cn(
-              "relative overflow-hidden px-12 py-3.5 md:py-5 rounded-xl font-['Black_Han_Sans'] text-lg md:text-2xl tracking-[0.4em] transition-all duration-300 transform active:scale-95 group shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/5",
+              "relative overflow-hidden px-12 py-3.5 md:py-5 rounded-xl font-['Black_Han_Sans'] text-lg md:text-2xl tracking-[0.4em] transition-all duration-300 transform active:scale-95 group shadow-[0_20px_50px_rgba(0,0,0,0.6)] border",
               allFlipped
-                ? "bg-linear-to-br from-[#1e3a8a] to-[#000000] text-white"
-                : "bg-linear-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-black"
+                ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                : "bg-primary border-primary/30 text-black hover:opacity-90 shadow-lg shadow-primary/30"
             )}
           >
-            <span className="relative z-10">{allFlipped || momPlayers.length === 0 ? "CLOSE" : "REVEAL ALL"}</span>
+            <span className="relative z-10">{allFlipped || momPlayers.length === 0 ? "CLOSE" : "전체오픈"}</span>
             <div className="absolute top-[-50%] left-[-60%] w-[40%] h-[200%] bg-linear-to-r from-transparent via-white/50 to-transparent animate-[btnShimmer-mom_2.5s_linear_infinite]"></div>
           </button>
         </div>

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"top-.*right\\\\|position.*absolute.*mobile\" /c/Users/alves/Desktop/업무용폴더/개발업무/2026/ovr/overall-fe/components/team-management/*.tsx)"
+    ]
+  }
+}
