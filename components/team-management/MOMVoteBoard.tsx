@@ -50,16 +50,16 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         if (results[j].voteCount > r.voteCount) rank++;
       }
       return {
-      rank,
-      id: r.candidateUserId || r.candidateMercenaryId || i,
-      name: r.candidateUser?.name || r.candidateMercenary?.name || "알 수 없음",
-      position: r.candidateUser?.mainPosition || "상대팀/용병",
-      number: r.candidateUser?.preferredNumber ?? 0,
-      goals: 0,
-      assists: 0,
-      clean: 0,
-      votes: Math.round((r.voteCount / totalVotes) * 100),
-      image: r.candidateUser?.profileImage || "/images/player/default.webp",
+        rank,
+        id: r.candidateUserId || r.candidateMercenaryId || i,
+        name: r.candidateUser?.name || r.candidateMercenary?.name || "알 수 없음",
+        position: r.candidateUser?.mainPosition || "상대팀/용병",
+        number: r.candidateUser?.preferredNumber ?? 0,
+        goals: 0,
+        assists: 0,
+        clean: 0,
+        votes: Math.round((r.voteCount / totalVotes) * 100),
+        image: r.candidateUser?.profileImage || "/images/player/default.webp",
       };
     });
     setMomPlayers(mapped);
@@ -69,10 +69,10 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
     if (showVideo) {
       const timer = setTimeout(() => {
         if (!showBoard) {
-            setShowVideo(false);
-            setShowBoard(true);
+          setShowVideo(false);
+          setShowBoard(true);
         }
-      }, 4500); 
+      }, 4500);
       return () => clearTimeout(timer);
     }
   }, [showVideo, showBoard]);
@@ -140,18 +140,18 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
     let conf: any[] = [];
     const cols = ["#ffd700", "#fff200", "#ffaa00", "#ffffff", "#00b4dc", "#ff6b6b", "#4ecdc4"];
     for (let i = 0; i < 200; i++) {
-        conf.push({
-            x: Math.random() * cel.width,
-            y: -10 - Math.random() * 280,
-            w: Math.random() * 10 + 4,
-            h: Math.random() * 14 + 5,
-            color: cols[Math.floor(Math.random() * cols.length)],
-            vx: (Math.random() - 0.5) * 5,
-            vy: Math.random() * 5 + 2,
-            rot: Math.random() * 360,
-            rotV: (Math.random() - 0.5) * 7,
-            a: 1,
-        });
+      conf.push({
+        x: Math.random() * cel.width,
+        y: -10 - Math.random() * 280,
+        w: Math.random() * 10 + 4,
+        h: Math.random() * 14 + 5,
+        color: cols[Math.floor(Math.random() * cols.length)],
+        vx: (Math.random() - 0.5) * 5,
+        vy: Math.random() * 5 + 2,
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 7,
+        a: 1,
+      });
     }
 
     const animC = () => {
@@ -181,7 +181,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
 
   const flipCard = (idx: number) => {
     if (flippedSet.has(idx)) return;
-    
+
     const nextSet = new Set(flippedSet);
     nextSet.add(idx);
     setFlippedSet(nextSet);
@@ -244,9 +244,9 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
 
       {/* 시네마틱 오프닝 영상 - 최상단 배치 + 대각선 컷 */}
       {showVideo && (
-        <div 
-            className="fixed inset-0 z-[10000] bg-black flex items-center justify-center overflow-hidden"
-            style={{ clipPath: "polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%)" }}
+        <div
+          className="fixed inset-0 z-[10000] bg-black flex items-center justify-center overflow-hidden"
+          style={{ clipPath: "polygon(0 0, 100% 0, 100% 88%, 88% 100%, 0 100%)" }}
         >
           <video
             ref={videoRef}
@@ -259,19 +259,19 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
               setShowBoard(true);
             }}
             onError={() => {
-                setShowVideo(false);
-                setShowBoard(true);
+              setShowVideo(false);
+              setShowBoard(true);
             }}
           >
             <source src="/videos/MOMTOP3_Chapion.mp4" type="video/mp4" />
           </video>
-          
+
           <div className="absolute bottom-[-30px] right-[-30px] w-48 h-48 md:w-80 md:h-80 bg-linear-to-tl from-yellow-500/15 via-transparent to-transparent rotate-45 pointer-events-none border-l-[1.5px] border-yellow-500/35 shadow-[0_0_40px_rgba(255,215,0,0.08)]"></div>
           <div className="absolute bottom-8 right-8 md:bottom-14 md:right-14 z-[10001] flex flex-col items-end opacity-20 pointer-events-none select-none">
             <span className="text-[10px] md:text-[14px] font-black text-white tracking-[0.6em] italic">SOOP FC CINEMATIC</span>
           </div>
 
-          <button 
+          <button
             onClick={() => { setShowVideo(false); setShowBoard(true); }}
             className="absolute bottom-8 left-8 z-[10002] text-white/50 hover:text-white transition-colors text-[10px] tracking-widest font-bold bg-black/60 px-5 py-2.5 rounded-full border border-white/20"
           >
@@ -284,7 +284,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
       <div className="absolute inset-0 z-1 bg-[radial-gradient(circle,rgba(255,215,0,0.03)_1px,transparent_1px)] bg-size-[28px_28px]"></div>
       <canvas ref={particleCanvasRef} className="absolute inset-0 z-3 pointer-events-none"></canvas>
 
-      <button 
+      <button
         onClick={onClose}
         className="absolute top-6 right-6 z-[110] w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-95 shadow-2xl"
       >
@@ -309,7 +309,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
           )}>
             {allFlipped ? "🎉 모든 MOM이 공개되었습니다!" : "▼ 카드를 선택하거나 스크롤하여 확인하세요 ▼"}
           </div>
-          
+
           {/* 모바일 1인 1카드 스크롤 + PC 가로 고정 레이아웃 */}
           <div className="flex-1 overflow-y-auto sm:overflow-visible snap-y snap-mandatory hide-scrollbar pb-16 sm:pb-0 px-4">
             <div className="flex flex-col sm:flex-row gap-6 sm:gap-[clamp(20px,4vw,40px)] items-center justify-center min-h-max sm:min-h-0 sm:flex-nowrap sm:w-max sm:mx-auto pt-8 sm:pt-0">
@@ -345,7 +345,7 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
                         {/* 중앙: 스피닝 OVR MOM Board 로고 */}
                         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2">
                           <img
-                            src="/images/OVR_MOM_Board.png"
+                            src="/images/logoani2.webp"
                             alt="OVR"
                             className="spin-ovr w-[90px] h-[90px] object-contain"
                             style={{ filter: 'drop-shadow(0 0 14px rgba(184,255,18,0.9)) drop-shadow(0 0 4px #b8ff12)' }}
@@ -432,13 +432,13 @@ export default function MOMVoteBoard({ results, onClose }: MOMVoteBoardProps) {
         </section>
 
         <div className="text-center py-6 px-4 animate-[fadeUp-mom_1s_1.8s_ease_both] flex-shrink-0">
-          <button 
+          <button
             onClick={handleMainBtn}
             className={cn(
-                "relative overflow-hidden px-12 py-3.5 md:py-5 rounded-xl font-['Black_Han_Sans'] text-lg md:text-2xl tracking-[0.4em] transition-all duration-300 transform active:scale-95 group shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/5",
-                allFlipped 
-                    ? "bg-linear-to-br from-[#1e3a8a] to-[#000000] text-white" 
-                    : "bg-linear-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-black"
+              "relative overflow-hidden px-12 py-3.5 md:py-5 rounded-xl font-['Black_Han_Sans'] text-lg md:text-2xl tracking-[0.4em] transition-all duration-300 transform active:scale-95 group shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/5",
+              allFlipped
+                ? "bg-linear-to-br from-[#1e3a8a] to-[#000000] text-white"
+                : "bg-linear-to-br from-[#fbbf24] via-[#f59e0b] to-[#d97706] text-black"
             )}
           >
             <span className="relative z-10">{allFlipped || momPlayers.length === 0 ? "CLOSE" : "REVEAL ALL"}</span>
