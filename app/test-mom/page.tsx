@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import MomOverlay from '@/components/ui/mom/MomOverlay';
+import React from 'react';
+import { useMomResultOverlay } from '@/components/ui/mom/useMomResultOverlay';
 import { GachaCardProps } from '@/components/ui/mom/GachaCard';
 
 // MatchMomVoteResultModel 와 유사한 형태의 더미 데이터 설정
@@ -30,7 +30,7 @@ const MOCK_CANDIDATES: GachaCardProps[] = [
 ];
 
 export default function MomTestPage() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { open } = useMomResultOverlay();
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white">
@@ -42,18 +42,11 @@ export default function MomTestPage() {
       </p>
 
       <button 
-        onClick={() => setIsOpen(true)}
+        onClick={() => open(MOCK_CANDIDATES)}
         className="px-6 py-3 bg-[#c8fd48] text-black font-bold rounded-lg hover:bg-[#b5e638] transition-colors"
       >
         MOM 결과 보기
       </button>
-
-      {isOpen && (
-        <MomOverlay 
-          candidates={MOCK_CANDIDATES} 
-          onClose={() => setIsOpen(false)} 
-        />
-      )}
     </div>
   );
 }

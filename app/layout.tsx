@@ -5,6 +5,7 @@ import RelayProvider from "@/components/RelayProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { GlobalPortalProvider } from "@/components/GlobalPortal";
 import Modals from "@/components/modals/Modals";
+import MomResultOverlayHost from "@/components/ui/mom/MomResultOverlayHost";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TransitionProvider } from "@/components/providers/TransitionProvider";
 import { PageTransition } from "@/components/providers/PageTransition";
@@ -171,6 +172,7 @@ export default async function RootLayout({
                       <div id="modal-root"></div>
                       <PageTransition>{children}</PageTransition>
                       <Modals />
+                      <MomResultOverlayHost />
                     </GlobalPortalProvider>
                     <Toaster />
                   </SelectedTeamProvider>
