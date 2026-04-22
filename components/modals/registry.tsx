@@ -126,6 +126,10 @@ const MomVoteModal = dynamic(() => import("./MomVoteModal/MomVoteModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const TeamInfoModal = dynamic(() => import("./TeamInfoModal/TeamInfoModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 export const MODAL_REGISTRY: ModalComponentMap = {
   DEFAULT_IMAGE_SELECT: DefaultImageModal,
@@ -150,4 +154,5 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   FORMATION_CHECK_LINEUP: FormationCheckLineupModal,
   EDIT_PROFILE: EditProfileModal,
   PROFILE_EDIT_SUB_POSITIONS: ProfileSubPositionPickerModal,
+  TEAM_INFO: TeamInfoModal,
 } as ModalComponentMap;

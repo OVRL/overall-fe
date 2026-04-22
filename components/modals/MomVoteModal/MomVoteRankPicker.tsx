@@ -9,6 +9,8 @@ type MomVoteRankPickerProps = {
   options: { label: string; value: string }[];
   value: string | undefined;
   onChange: (value: string) => void;
+  /** true면 후보 변경 불가 */
+  disabled?: boolean;
   placeholder?: string;
 };
 
@@ -18,6 +20,7 @@ export function MomVoteRankPicker({
   options,
   value,
   onChange,
+  disabled = false,
   placeholder = "선택해주세요",
 }: MomVoteRankPickerProps) {
   const triggerId = `mom-vote-top${rank}`;
@@ -38,7 +41,9 @@ export function MomVoteRankPicker({
         options={options}
         value={value}
         onChange={onChange}
+        disabled={disabled}
         placeholder={placeholder}
+        menuStrategy="overlay"
       />
     </div>
   );

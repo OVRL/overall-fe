@@ -23,6 +23,7 @@ const Modals = () => {
               key={modal.id}
               Component={Component as React.ComponentType<unknown>}
               modalProps={modal.props}
+              closeOnBackdropClick={modal.closeOnBackdropClick !== false}
             />
           );
         })}

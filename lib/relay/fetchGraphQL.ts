@@ -162,5 +162,15 @@ export const fetchQuery = async (
     throw new GraphQLHttpError(response.status, errorPayload?.errors);
   }
 
+  // HTTP 200 + GraphQL errors[] — Relay 네트워크는 그대로 반환해 fetchQuery가 예외 없이 끝날 수 있음.
+  // 랜딩 초대 코드 조회는 반드시 catch/토스트로 잡히도록 이 쿼리만 명시적으로 실패 처리합니다.
+  if (
+    params.name === "findTeamByInviteCodeQuery" &&
+    Array.isArray(errorPayload.errors) &&
+    errorPayload.errors.length > 0
+  ) {
+    throw new GraphQLHttpError(response.status, errorPayload.errors);
+  }
+
   return payload as GraphQLResponse;
 };

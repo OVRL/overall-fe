@@ -1,6 +1,10 @@
 "use client";
 
-import { ModalKey, ModalPropsMap } from "@/components/modals/types";
+import {
+  ModalKey,
+  ModalPropsMap,
+  OpenModalOptions,
+} from "@/components/modals/types";
 import { useModalStore } from "@/contexts/ModalContext";
 import { useCallback, useContext, useRef } from "react";
 import { ModalHideContext } from "@/components/modals/Modal";
@@ -18,7 +22,10 @@ import { ModalHideContext } from "@/components/modals/Modal";
 
 type CalledByModalInner = { hideModal: () => void };
 type CalledByModalOuter<T extends ModalKey> = {
-  openModal: (props: ModalPropsMap[T]) => void;
+  openModal: (
+    props: ModalPropsMap[T],
+    options?: OpenModalOptions,
+  ) => void;
   hideModal: () => void;
 };
 
@@ -35,9 +42,9 @@ function useModal<T extends ModalKey>(
   const modalIdRef = useRef<string | null>(null);
 
   const openModal = useCallback(
-    (props: ModalPropsMap[T]) => {
+    (props: ModalPropsMap[T], options?: OpenModalOptions) => {
       if (key) {
-        modalIdRef.current = showModal(key, props);
+        modalIdRef.current = showModal(key, props, options);
       }
     },
     [key, showModal],

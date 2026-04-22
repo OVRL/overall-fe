@@ -1,8 +1,6 @@
 import { env } from "./lib/env";
 
-const assetCdn = new URL(
-  env.NEXT_PUBLIC_ASSET_CDN_ORIGIN.replace(/\/$/, ""),
-);
+const assetCdn = new URL(env.NEXT_PUBLIC_ASSET_CDN_ORIGIN.replace(/\/$/, ""));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

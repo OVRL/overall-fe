@@ -72,6 +72,12 @@ export interface ModalPropsMap {
     teamId: number;
   };
   TEAM_CREATED: Record<string, never>;
+  /** 랜딩 — 팀 코드 입력 후 팀 정보 확인(초대 코드 조회 UI, 데이터는 추후 API 연동) */
+  TEAM_INFO: {
+    inviteCode: string;
+    /** true면 열기 전에 fetchQuery로 스토어를 채운 경우 — 모달은 store-only로 읽어 Suspense 없이 한 번에 표시 */
+    prefetchedAtOpen?: boolean;
+  };
   EDIT_GAME: {
     matchId: number;
     teamId: number;
@@ -112,10 +118,18 @@ export type ModalComponentMap = {
   [K in ModalKey]: ComponentType<ModalPropsMap[K]>;
 };
 
+/** showModal / openModal 호출 시 래퍼 동작 옵션 */
+export type OpenModalOptions = {
+  /** false면 어두운 배경(오버레이) 클릭 시 닫히지 않음. 기본 true */
+  closeOnBackdropClick?: boolean;
+};
+
 export type ModalInstance = {
   [K in ModalKey]: {
     id: string;
     key: K;
     props: ModalPropsMap[K];
+    /** undefined면 true와 동일 */
+    closeOnBackdropClick?: boolean;
   };
 }[ModalKey];
