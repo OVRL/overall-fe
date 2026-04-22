@@ -28,7 +28,10 @@ export const useModalStore = create<ModalState>((set) => ({
           id,
           key,
           props, // any casting removed, assuming correct props passed
-          closeOnBackdropClick: options?.closeOnBackdropClick ?? true,
+          // ALERT는 기본적으로 배경 클릭으로 닫지 않음(명시 옵션으로 재정의 가능)
+          closeOnBackdropClick:
+            options?.closeOnBackdropClick ??
+            (key === "ALERT" ? false : true),
         } as ModalInstance, // Explicit cast to union if inference fails or to satisfy union
       ],
     }));

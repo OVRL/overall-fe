@@ -8,8 +8,13 @@ import type { Player } from "@/types/formation";
 import type { InHouseDraftTeamByPlayerKey } from "@/types/inHouseDraftTeam";
 
 export interface ModalPropsMap {
-  // 예시:
-  // ALERT: { message: string };
+  /** 단일 확인 버튼 알림 (배경 클릭으로 닫기 기본 비활성 — ModalContext) */
+  ALERT: {
+    title: string;
+    description?: string;
+    confirmText?: string;
+    onConfirm: () => void;
+  };
   CONFIRM: {
     title: string;
     description?: string;

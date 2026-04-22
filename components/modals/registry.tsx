@@ -14,6 +14,10 @@ const GlobalConfirmModal = dynamic(() => import("./GlobalConfirmModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
 });
+const GlobalAlertModal = dynamic(() => import("./GlobalAlertModal"), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 const EditGameModal = dynamic(() => import("./EditGameModal/EditGameModal"), {
   ssr: false,
   loading: () => <ModalLoadingFallback />,
@@ -146,6 +150,7 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   MOM_VOTE: MomVoteModal,
   TEAM_CREATED: TeamCreatedModal,
   FORMATION_VENUE_MAP: FormationVenueMapModal,
+  ALERT: GlobalAlertModal,
   CONFIRM: GlobalConfirmModal,
   EDIT_GAME: EditGameModal,
   PLAYER_SEARCH: PlayerSearchModal,
