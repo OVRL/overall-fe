@@ -24,6 +24,7 @@ import { canUseTeamManagementStaffFeatures } from "@/lib/permissions/teamMemberR
 import { errorMessageRequiresSessionClear } from "@/lib/auth/graphqlSessionClear";
 import { redirect } from "next/navigation";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { isNativeWebViewUserAgent } from "@/lib/native/webViewUserAgent";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -56,6 +57,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const requestHeaders = await headers();
+  const userAgent = requestHeaders.get("user-agent");
+  const isNativeWebView = isNativeWebViewUserAgent(userAgent);
   const isPrivateRoute = requestHeaders.get("x-is-private-route") === "true";
 
   const cookieStore = await cookies();
@@ -128,7 +131,11 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html
+      lang="ko"
+      suppressHydrationWarning
+      data-native-webview={isNativeWebView ? "true" : undefined}
+    >
       <body
         className={`${pretendard.variable} w-full min-h-dvh h-screen antialiased overflow-x-hidden flex flex-col`}
       >

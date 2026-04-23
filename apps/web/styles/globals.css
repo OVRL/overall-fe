@@ -3,3 +3,20 @@
 
 @import "@overall/design-system/styles/shared-tokens.css";
 @import "@overall/design-system/styles/globals.web.css";
+
+/*
+ * 인앱 WebView: 일반 텍스트 드래그 선택 하이라이트 완화.
+ * RootLayout 에서 UA(Overall_RN)로 `data-native-webview` 설정.
+ */
+html[data-native-webview="true"] body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html[data-native-webview="true"] input,
+html[data-native-webview="true"] textarea,
+html[data-native-webview="true"] select,
+html[data-native-webview="true"] [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}

@@ -8,5 +8,6 @@
  *
  * 웹에서 SSR 시 navigator.userAgent.includes(' Overall_RN')으로
  * 네이티브 앱 환경을 딜레이 없이 판단할 수 있음.
+ * (마커 상수는 apps/web/lib/native/webViewUserAgent.ts 와 문자열 일치를 유지한다.)
  */
 export const APPLICATION_NAME_FOR_USER_AGENT = " Overall_RN";

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { isNativeWebViewUserAgent } from "@/lib/native/webViewUserAgent";
 
 declare global {
   interface Window {
@@ -47,7 +48,7 @@ export const useBridge = () => {
   const [isNativeApp, setIsNativeApp] = useState(() => {
     if (typeof window !== "undefined") {
       return (
-        navigator.userAgent.includes("Overall_RN") ||
+        isNativeWebViewUserAgent(navigator.userAgent) ||
         !!window.ReactNativeWebView
       );
     }
