@@ -1,0 +1,228 @@
+import { renderHook, act } from "@testing-library/react";
+import { useFormationManager } from "../useFormationManager";
+import { Player, QuarterData } from "@/types/formation";
+
+describe("useFormationManager", () => {
+  const mockPlayerA = { id: 1, name: "선수 A" } as Player;
+  const mockPlayerB = { id: 2, name: "선수 B" } as Player;
+
+  it("빈 포지션에 선수를 배치할 수 있어야 한다", () => {
+    const { result } = renderHook(() => useFormationManager());
+
+    act(() => {
+      // 기본 초기화된 1쿼터(ID: 1)에 배치한다고 가정
+      result.current.assignPlayer(1, 0, mockPlayerA);
+    });
+
+    const quarter = result.current.quarters.find((q) => q.id === 1);
+    expect(quarter?.lineup?.[0]).toEqual(mockPlayerA);
+    expect(quarter?.teamA?.[0]).toEqual(mockPlayerA);
+  });
+
+  it("이미 쿼터에 배치된 선수를 빈 포지션으로 이동시키면 기존 위치에서 제거되어야 한다", () => {
+    const { result } = renderHook(() => useFormationManager());
+
+    // 먼저 선수 A를 0번 위치에 배치
+    act(() => {
+      result.current.assignPlayer(1, 0, mockPlayerA);
+    });
+
+    // 선수 A를 1번 위치로 이동
+    act(() => {
+      result.current.assignPlayer(1, 1, mockPlayerA);
+    });
+
+    const quarter = result.current.quarters.find((q) => q.id === 1);
+    expect(quarter?.lineup?.[0]).toBeUndefined();
+    expect(quarter?.lineup?.[1]).toEqual(mockPlayerA);
+    expect(quarter?.teamA?.[0]).toBeUndefined();
+    expect(quarter?.teamA?.[1]).toEqual(mockPlayerA);
+  });
+
+  it("같은 쿼터 내에서 선수가 있는 위치로 드래그하면 두 선수의 위치가 서로 바뀌어야 한다(Swap)", () => {
+    const { result } = renderHook(() => useFormationManager());
+
+    // 선수 A를 0번, 선수 B를 1번에 배치
+    act(() => {
+      result.current.assignPlayer(1, 0, mockPlayerA);
+      result.current.assignPlayer(1, 1, mockPlayerB);
+    });
+
+    let quarter = result.current.quarters.find((q) => q.id === 1);
+    expect(quarter?.lineup?.[0]).toEqual(mockPlayerA);
+    expect(quarter?.lineup?.[1]).toEqual(mockPlayerB);
+    expect(quarter?.teamA?.[0]).toEqual(mockPlayerA);
+    expect(quarter?.teamA?.[1]).toEqual(mockPlayerB);
+
+    // 0번 위치의 선수 A를 1번 위치(선수 B가 있는 곳)로 드랍하여 스왑 실행
+    act(() => {
+      result.current.assignPlayer(1, 1, mockPlayerA);
+    });
+
+    quarter = result.current.quarters.find((q) => q.id === 1);
+    // 스왑 후: 0번 위치에는 선수 B가, 1번 위치에는 선수 A가 있어야 함
+    expect(quarter?.lineup?.[0]).toEqual(mockPlayerB);
+    expect(quarter?.lineup?.[1]).toEqual(mockPlayerA);
+    expect(quarter?.teamA?.[0]).toEqual(mockPlayerB);
+    expect(quarter?.teamA?.[1]).toEqual(mockPlayerA);
+  });
+
+  it("내전(IN_HOUSE)에서 inHouseSubTeam B이면 teamB·lineup에만 반영된다", () => {
+    const initialQuarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+    const { result } = renderHook(() => useFormationManager(initialQuarters));
+
+    act(() => {
+      result.current.assignPlayer(1, 2, mockPlayerA, { inHouseSubTeam: "B" });
+    });
+
+    const quarter = result.current.quarters[0];
+    expect(quarter.teamB?.[2]).toEqual(mockPlayerA);
+    expect(quarter.lineup?.[2]).toEqual(mockPlayerA);
+    expect(quarter.teamA?.[2]).toBeUndefined();
+  });
+
+  it("팀원과 용병의 숫자 id가 같아도 슬롯 중복 제거·이동이 섞이지 않는다", () => {
+    const teamMember = {
+      id: 5,
+      name: "팀원",
+      rosterKind: "TEAM_MEMBER" as const,
+    } as Player;
+    const mercenary = {
+      id: 5,
+      name: "용병",
+      rosterKind: "MERCENARY" as const,
+      mercenaryId: 5,
+    } as Player;
+
+    const { result } = renderHook(() => useFormationManager());
+
+    act(() => {
+      result.current.assignPlayer(1, 0, teamMember);
+      result.current.assignPlayer(1, 1, mercenary);
+    });
+
+    act(() => {
+      result.current.assignPlayer(1, 2, mercenary);
+    });
+
+    const quarter = result.current.quarters.find((q) => q.id === 1);
+    expect(quarter?.lineup?.[0]).toEqual(teamMember);
+    expect(quarter?.lineup?.[1]).toBeUndefined();
+    expect(quarter?.lineup?.[2]).toEqual(mercenary);
+  });
+
+  it("getAssignedQuarters는 숫자 id가 같아도 roster가 다르면 다른 선수로 본다", () => {
+    const merc = {
+      id: 7,
+      name: "용병",
+      rosterKind: "MERCENARY" as const,
+      mercenaryId: 7,
+    } as Player;
+    const initialQuarters: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: { 0: merc },
+        teamA: { 0: merc },
+        teamB: {},
+      },
+    ];
+    const { result } = renderHook(() => useFormationManager(initialQuarters));
+
+    expect(result.current.getAssignedQuarters(merc)).toEqual([1]);
+    expect(
+      result.current.getAssignedQuarters({
+        id: 7,
+        name: "팀원",
+      } as Player),
+    ).toEqual([]);
+  });
+
+  it("resetQuarters를 호출하면 초기 상태로 되돌아가야 한다", () => {
+    // 임의의 초기 상태 설정
+    const initialQuarters: QuarterData[] = [{
+      id: 1, type: "IN_HOUSE", formation: "4-3-3", matchup: { home: "A", away: "B" }, lineup: {}
+    }];
+
+    const { result } = renderHook(() => useFormationManager(initialQuarters));
+
+    // 선수를 배치하여 상태를 변경
+    act(() => {
+      result.current.assignPlayer(1, 0, mockPlayerA);
+      result.current.assignPlayer(1, 1, mockPlayerB);
+    });
+
+    expect(result.current.quarters[0].lineup?.[0]).toEqual(mockPlayerA);
+
+    // 초기화 함수 호출
+    act(() => {
+      result.current.resetQuarters();
+    });
+
+    // 라인업이 모두 비워져야(초기 상태) 한다
+    expect(result.current.quarters[0].lineup).toEqual({});
+  });
+
+  it("ssrFormationSourceRevision이 바뀌면 quarters를 새 initial과 맞춘다", () => {
+    const initialA: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-3-3",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+    const initialB: QuarterData[] = [
+      {
+        id: 1,
+        type: "IN_HOUSE",
+        formation: "4-4-2",
+        matchup: { home: "A", away: "B" },
+        lineup: {},
+        teamA: {},
+        teamB: {},
+      },
+    ];
+
+    const { result, rerender } = renderHook(
+      (props: { initial: QuarterData[]; rev: string }) =>
+        useFormationManager(props.initial, props.rev),
+      {
+        initialProps: {
+          initial: initialA,
+          rev: "10:1:2026-01-01T00:00:00.000Z",
+        },
+      },
+    );
+
+    expect(result.current.quarters[0].formation).toBe("4-3-3");
+
+    act(() => {
+      result.current.assignPlayer(1, 0, mockPlayerA);
+    });
+    expect(result.current.quarters[0].lineup?.[0]).toEqual(mockPlayerA);
+
+    rerender({
+      initial: initialB,
+      rev: "10:1:2026-01-02T00:00:00.000Z",
+    });
+
+    expect(result.current.quarters[0].formation).toBe("4-4-2");
+    expect(result.current.quarters[0].lineup?.[0]).toBeUndefined();
+  });
+});

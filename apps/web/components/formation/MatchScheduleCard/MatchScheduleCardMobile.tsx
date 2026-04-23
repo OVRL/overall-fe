@@ -1,0 +1,56 @@
+"use client";
+
+import React from "react";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import calendar from "@/public/icons/calendar.svg";
+import Dropdown from "@/components/ui/Dropdown";
+import matchLineup from "@/public/icons/title_matchlineup.svg";
+
+interface MatchScheduleCardMobileProps {
+  matchDate: string;
+}
+
+const MatchScheduleCardMobile: React.FC<MatchScheduleCardMobileProps> = ({
+  matchDate,
+}) => {
+  return (
+    <div className="flex flex-col gap-6 md:hidden">
+      <div className="flex flex-col gap-6 items-center w-full">
+        <div className="flex flex-col gap-6 items-center w-full">
+          <div className="h-8.5 w-48 relative shrink-0">
+            <Icon src={matchLineup} alt="로고" nofill width={192} height={34} />
+          </div>
+          <div className="flex gap-3 items-center w-[184px]">
+            <Button variant="primary" size="m">
+              매칭
+            </Button>
+            <Button variant="line" size="m">
+              내전
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3 items-center w-full justify-center">
+        <div className="flex gap-2.5 items-center min-w-0 shrink-0">
+          <div className="w-5 h-5 shrink-0 relative text-Fill_Tertiary">
+            <Icon src={calendar} width={24} height={24} />
+          </div>
+          <span className="font-semibold text-[#f7f8f8] text-base leading-6 whitespace-nowrap">
+            경기 일정
+          </span>
+        </div>
+
+        <Dropdown
+          options={[{ label: "2026-02-03(목)", value: "2026-02-03" }]}
+          onChange={() => {}}
+          value="2026-02-03"
+          placeholder="날짜 선택"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default MatchScheduleCardMobile;

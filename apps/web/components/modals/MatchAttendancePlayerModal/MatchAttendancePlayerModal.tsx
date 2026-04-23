@@ -1,0 +1,88 @@
+import { useId, Suspense } from "react";
+import ModalLayout from "../ModalLayout";
+import Button from "@/components/ui/Button";
+import SearchInputSection from "./SearchInputSection";
+import PlayerListSection from "./PlayerListSection";
+
+import { usePlayerSearch } from "@/hooks/usePlayerSearch";
+
+export interface MatchAttendancePlayerModalProps {
+  matchId: number;
+  teamId: number;
+}
+
+const MatchAttendancePlayerModalContent = ({
+  matchId,
+  teamId,
+}: MatchAttendancePlayerModalProps) => {
+  const id = useId();
+  const {
+    inputValue,
+    setInputValue,
+    debouncedKeyword,
+    searchResults,
+    pendingTeamMembers,
+    pendingMercenaryCreates,
+    pendingMercenaryDeletes,
+    existingMercenaries,
+    mercenaryDraft,
+    totalPendingCount,
+    isSearching,
+    toggleTeamMemberAttendance,
+    toggleMercenaryDraftRegister,
+    toggleMercenaryExistingRemove,
+    handleComplete,
+  } = usePlayerSearch({ matchId, teamId });
+
+  return (
+    <>
+      <div className="flex-1 flex flex-col gap-y-8">
+        <SearchInputSection
+          id={id}
+          value={inputValue}
+          onChange={setInputValue}
+        />
+        <div className="flex flex-col flex-1 min-h-[200px] max-h-[400px] overflow-hidden">
+          <PlayerListSection
+            keyword={debouncedKeyword}
+            isSearching={isSearching}
+            results={searchResults}
+            existingMercenaries={existingMercenaries}
+            mercenaryDraft={mercenaryDraft}
+            pendingTeamMembers={pendingTeamMembers}
+            pendingMercenaryCreates={pendingMercenaryCreates}
+            pendingMercenaryDeletes={pendingMercenaryDeletes}
+            onToggleTeamMember={toggleTeamMemberAttendance}
+            onToggleMercenaryDraft={toggleMercenaryDraftRegister}
+            onToggleMercenaryRemove={toggleMercenaryExistingRemove}
+          />
+        </div>
+        <Button
+          variant="primary"
+          size="xl"
+          onClick={handleComplete}
+          disabled={totalPendingCount === 0}
+          className="mt-auto"
+        >
+          완료{" "}
+          {totalPendingCount > 0 ? `(${totalPendingCount}건 변경)` : ""}
+        </Button>
+      </div>
+    </>
+  );
+};
+
+/** 포메이션 화면 전용: 해당 매치 참석 여부·용병 추가 등을 처리하는 모달 */
+const MatchAttendancePlayerModal = (props: MatchAttendancePlayerModalProps) => {
+  return (
+    <ModalLayout title="참석 선수 관리">
+      <Suspense
+        fallback={<div className="p-4 text-center">불러오는 중...</div>}
+      >
+        <MatchAttendancePlayerModalContent {...props} />
+      </Suspense>
+    </ModalLayout>
+  );
+};
+
+export default MatchAttendancePlayerModal;

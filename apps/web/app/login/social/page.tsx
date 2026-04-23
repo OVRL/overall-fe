@@ -1,0 +1,18 @@
+import SocialButtons from "@/components/ui/SocialButtons";
+import LoginLogo from "@/components/login/LoginLogo";
+
+export default function LoginSocialPage() {
+  return (
+    <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
+      <div className="absolute inset-0 z-0 flex items-end justify-center">
+        <div className="absolute inset-0 bg-linear-to-br from-dark-olive/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/30" />
+      </div>
+      <LoginLogo />
+
+      <div className="relative z-10 w-full p-6 pb-12 lg:pb-20 flex flex-col gap-2 max-w-sm mx-auto animate-in slide-in-from-bottom duration-500 fade-in">
+        <SocialButtons />
+      </div>
+    </main>
+  );
+}

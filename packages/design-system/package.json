@@ -1,0 +1,11 @@
+{
+  "name": "@overall/design-system",
+  "version": "0.0.0",
+  "private": true,
+  "description": "공유 디자인 토큰·Tailwind v4 @theme·웹/NativeWind(RN) 진입 CSS",
+  "exports": {
+    "./styles/shared-tokens.css": "./styles/shared-tokens.css",
+    "./styles/globals.web.css": "./styles/globals.web.css",
+    "./nativewind.theme.cjs": "./nativewind.theme.cjs"
+  }
+}

@@ -1,0 +1,8 @@
+module.exports = {
+  src: "./",
+  language: "typescript",
+  schema: "./schema.graphql",
+  artifactDirectory: "./__generated__",
+  eagerEsModules: true,
+  excludes: ["**/node_modules/**", "**/__mocks__/**", "**/__generated__/**"],
+};

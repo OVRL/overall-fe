@@ -1,0 +1,266 @@
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { RelayEnvironmentProvider } from "react-relay";
+import { createMockEnvironment } from "relay-test-utils";
+import RegisterGameModal from "../RegisterGameModal";
+import { getRegisterGameDefaultValues } from "../schema";
+import type { RegisterGameValues } from "../schema";
+import { toast } from "@/lib/toast";
+import "@testing-library/jest-dom";
+
+const mockHideModal = jest.fn();
+const mockOpenAddressModal = jest.fn();
+const mockHideAddressModal = jest.fn();
+const mockOpenTeamSearchModal = jest.fn();
+const mockResetToDefaults = jest.fn();
+
+jest.mock("@/hooks/useModal", () => ({
+  __esModule: true,
+  default: (key?: string) => {
+    if (key === "DETAIL_ADDRESS_SEARCH") {
+      return {
+        openModal: mockOpenAddressModal,
+        hideModal: mockHideAddressModal,
+      };
+    }
+    if (key === "TEAM_SEARCH") {
+      return { openModal: mockOpenTeamSearchModal };
+    }
+    return { hideModal: mockHideModal };
+  },
+}));
+
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () =>
+    function MockNaverMap() {
+      return <div data-testid="naver-map" />;
+    },
+}));
+
+jest.mock("@/hooks/useUserId", () => ({
+  useUserId: () => 1,
+}));
+
+jest.mock("@/components/providers/SelectedTeamProvider", () => ({
+  useSelectedTeamId: () => ({
+    selectedTeamId: "1",
+    selectedTeamIdNum: 1,
+    isSoloTeam: false,
+  }),
+}));
+
+jest.mock("../hooks/useCreateMatchMutation", () => ({
+  useCreateMatchMutation: () => ({
+    executeMutation: jest.fn((config: { onCompleted?: () => void }) => {
+      config.onCompleted?.();
+    }),
+    isInFlight: false,
+  }),
+}));
+
+// 제출 후 findMatch refetch(await)가 끝나야 hideModal이 호출되므로, 테스트에선 즉시 이행
+jest.mock("@/lib/relay/observableToPromise", () => ({
+  observableToPromise: jest.fn(() => Promise.resolve(null)),
+}));
+
+const defaultFormValues = getRegisterGameDefaultValues();
+
+jest.mock("react-hook-form", () => {
+  const actual = jest.requireActual("react-hook-form");
+  const defaults = jest
+    .requireActual("../schema")
+    .getRegisterGameDefaultValues();
+  return {
+    ...actual,
+    useWatch: (opts: { name: string }) => {
+      if (opts.name === "matchType") return "MATCH";
+      if (opts.name === "venue") return defaults.venue;
+      return undefined;
+    },
+    Controller: (props: {
+      name: keyof RegisterGameValues;
+      control: unknown;
+      render: (opts: {
+        field: { value: unknown; onChange: (v: unknown) => void };
+        fieldState: { error?: { message?: string } };
+      }) => React.ReactElement;
+    }) => {
+      const value = (defaults as Record<string, unknown>)[props.name] ?? "";
+      return props.render({
+        field: { value, onChange: jest.fn() },
+        fieldState: {},
+      });
+    },
+  };
+});
+
+jest.mock("../hooks/useRegisterGameForm", () => ({
+  useRegisterGameForm: jest.fn(),
+}));
+
+const mockUseRegisterGameForm = jest.requireMock(
+  "../hooks/useRegisterGameForm",
+).useRegisterGameForm;
+
+function createMockForm(overrides = {}) {
+  const register = jest.fn(() => ({
+    onChange: jest.fn(),
+    onBlur: jest.fn(),
+    ref: jest.fn(),
+  }));
+  const setValue = jest.fn();
+  const getValues = jest.fn((name?: string) => {
+    if (name != null) return (defaultFormValues as Record<string, unknown>)[name];
+    return defaultFormValues;
+  });
+  const handleSubmit = jest.fn((onValid: (data: unknown) => void) => (e: React.FormEvent) => {
+    e?.preventDefault();
+    onValid(defaultFormValues);
+  });
+  return {
+    control: {},
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { isValid: true },
+    ...overrides,
+  };
+}
+
+describe("RegisterGameModal", () => {
+  let relayEnvironment: ReturnType<typeof createMockEnvironment>;
+
+  function renderModal() {
+    return render(
+      <RelayEnvironmentProvider environment={relayEnvironment}>
+        <RegisterGameModal />
+      </RelayEnvironmentProvider>,
+    );
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    relayEnvironment = createMockEnvironment();
+    mockUseRegisterGameForm.mockReturnValue({
+      ...createMockForm(),
+      resetToDefaults: mockResetToDefaults,
+    });
+  });
+
+  it("모달 타이틀과 주요 섹션이 렌더링된다", () => {
+    renderModal();
+
+    expect(screen.getByText("경기 등록")).toBeInTheDocument();
+    expect(screen.getByText("경기 성격")).toBeInTheDocument();
+    expect(screen.getByText("일정")).toBeInTheDocument();
+    expect(screen.getByText("경기 장소")).toBeInTheDocument();
+    expect(screen.getByText("쿼터")).toBeInTheDocument();
+    expect(screen.getByText("투표 마감 일정")).toBeInTheDocument();
+    expect(screen.getByText("메모")).toBeInTheDocument();
+  });
+
+  it("등록·취소 버튼이 렌더링된다", () => {
+    renderModal();
+
+    expect(screen.getByRole("button", { name: "등록" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "취소" })).toBeInTheDocument();
+  });
+
+  it("취소 버튼 클릭 시 resetToDefaults와 hideModal이 호출된다", () => {
+    renderModal();
+
+    fireEvent.click(screen.getByRole("button", { name: "취소" }));
+
+    expect(mockResetToDefaults).toHaveBeenCalledTimes(1);
+    expect(mockHideModal).toHaveBeenCalledTimes(1);
+  });
+
+  it("폼 제출 시 handleSubmit 콜백이 호출된 뒤 hideModal이 호출된다", async () => {
+    const handleSubmitFn = jest.fn((onValid: (data: unknown) => void) => (e: React.FormEvent) => {
+      e?.preventDefault();
+      onValid(defaultFormValues);
+    });
+    mockUseRegisterGameForm.mockReturnValue({
+      ...createMockForm({ handleSubmit: handleSubmitFn }),
+      resetToDefaults: mockResetToDefaults,
+    });
+
+    renderModal();
+    fireEvent.click(screen.getByRole("button", { name: "등록" }));
+
+    expect(handleSubmitFn).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockHideModal).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("폼 검증 실패 시 첫 필드 에러 메시지로 toast.error를 띄우고 hideModal은 호출되지 않는다", () => {
+    const expectedMessage =
+      "종료 일시는 시작 일시보다 이전일 수 없습니다.";
+    const handleSubmitFn = jest.fn(
+      (
+        _onValid: (data: unknown) => void,
+        onInvalid?: (errors: unknown) => void,
+      ) =>
+        (e: React.FormEvent) => {
+          e?.preventDefault();
+          onInvalid?.({
+            endDate: {
+              type: "custom",
+              message: expectedMessage,
+            },
+          });
+        },
+    );
+    mockUseRegisterGameForm.mockReturnValue({
+      ...createMockForm({ handleSubmit: handleSubmitFn }),
+      resetToDefaults: mockResetToDefaults,
+    });
+
+    renderModal();
+    fireEvent.click(screen.getByRole("button", { name: "등록" }));
+
+    expect(toast.error).toHaveBeenCalledTimes(1);
+    expect(toast.error).toHaveBeenCalledWith(expectedMessage);
+    expect(mockHideModal).not.toHaveBeenCalled();
+  });
+
+  it("폼 검증 실패 시 에러 메시지가 없으면 공통 안내 toast.error를 띄운다", () => {
+    const handleSubmitFn = jest.fn(
+      (
+        _onValid: (data: unknown) => void,
+        onInvalid?: (errors: unknown) => void,
+      ) =>
+        (e: React.FormEvent) => {
+          e?.preventDefault();
+          onInvalid?.({ root: { type: "custom" } });
+        },
+    );
+    mockUseRegisterGameForm.mockReturnValue({
+      ...createMockForm({ handleSubmit: handleSubmitFn }),
+      resetToDefaults: mockResetToDefaults,
+    });
+
+    renderModal();
+    fireEvent.click(screen.getByRole("button", { name: "등록" }));
+
+    expect(toast.error).toHaveBeenCalledWith(
+      "필수 항목을 확인한 뒤 다시 시도해 주세요.",
+    );
+    expect(mockHideModal).not.toHaveBeenCalled();
+  });
+
+  it("경기 성격이 매칭일 때 상대팀 입력 필드가 노출된다", () => {
+    mockUseRegisterGameForm.mockReturnValue({
+      ...createMockForm(),
+      resetToDefaults: mockResetToDefaults,
+    });
+    renderModal();
+
+    expect(
+      screen.getByPlaceholderText("상대팀 명을 입력하세요"),
+    ).toBeInTheDocument();
+  });
+});

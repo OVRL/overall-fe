@@ -1,0 +1,5 @@
+/* Tailwind 엔트리는 앱 디렉터리에서만 로드해 postcss가 `tailwindcss` 패키지를 해석합니다. */
+@import "tailwindcss";
+
+@import "@overall/design-system/styles/shared-tokens.css";
+@import "@overall/design-system/styles/globals.web.css";

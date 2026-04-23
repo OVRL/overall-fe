@@ -1,0 +1,77 @@
+@import "./styles/theme.css";
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center; /* Center align by default */
+}
+
+th,
+td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--glass-border);
+  white-space: nowrap;
+}
+
+th {
+  background: rgba(30, 41, 59, 0.9);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+td input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  text-align: center;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+td input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+}
+
+/* Formula column specific */
+.cell-formula {
+  color: var(--text-accent);
+  font-weight: 600;
+}

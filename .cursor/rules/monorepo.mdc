@@ -1,0 +1,27 @@
+---
+description: 모노레포 전역 — 웹(apps/web)·네이티브(apps/native)·패키지(packages/design-system)
+alwaysApply: true
+---
+
+## 공통
+
+- Git **단일 원격 저장소**는 [`OVRL/overall-fe`](https://github.com/OVRL/overall-fe) 이다 (모노레포 루트가 저장소 루트).
+- 모노레포 루트는 `overall/overall/` 이다. Next 웹은 `apps/web`, Expo 네이티브는 `apps/native`, 디자인 토큰·스타일 계약은 `packages/design-system` 을 기준으로 본다.
+- **공유 패키지를 어디까지 둘지, 토큰·타입 중심으로 기대치를 잡는 법**은 항상 `.cursor/rules/monorepo-shared-packages.mdc` 를 따른다.
+- 백엔드는 Nest.js(AWS EC2), 웹 프론트는 Vercel hobby 배포다. 물리 서버가 분리되어 있음을 전제로 한다.
+
+## apps/web (Next.js 16, Relay, GraphQL)
+
+- 포메이션 **명단 뷰 모드 / 팀 드래프트** 관련 코드 수정 시 `apps/web/docs/formation-roster-view-mode-team-draft.md` 해당 섹션을 같은 작업에서 최신화한다.
+- 파일이 200줄을 넘으면 컴포넌트·hook 분리를 검토한다.
+- exception-edge-case-advisor-ko 서브에이전트로 뮤테이션 흐름의 예외·엣지 케이스를 검토한다.
+
+## apps/native (Expo, 풀 웹뷰)
+
+- 앱 내부는 풀 웹뷰 구성이다. 웹뷰 쪽 수정은 네이티브 코드에 직접 손대기보다, 웹(`apps/web`) 변경 가이드를 프롬프트에 명확히 적는 편을 권장한다.
+
+## 스타일·토큰 (웹 Tailwind v4)
+
+- 웹은 Tailwind v4. `apps/web/styles/globals.css`에서 `@import "tailwindcss"` 후 `shared-tokens.css`·`globals.web.css`(웹 오버라이드) 순으로 합친다. `@import "tailwindcss"`는 패키지 CSS 안에 두지 않는다(postcss 해석 경로 오류 방지).
+- spacing은 px 계산보다 Tailwind 토큰(rem)을 쓴다. 새 컬러는 oklch로 토큰에 추가한다.
+- 상세 규칙은 `.cursor/MONOREPO-AGENT-BUNDLE.md` 의 Styling 섹션을 참고한다.

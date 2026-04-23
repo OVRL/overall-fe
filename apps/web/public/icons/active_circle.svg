@@ -1,0 +1,14 @@
+<svg width="45" height="12" viewBox="0 0 45 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes spin-horizontal {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -100; }
+    }
+    .animated-stripes {
+      stroke-dasharray: 8 16;
+      animation: spin-horizontal 2s linear infinite;
+    }
+  </style>
+  <ellipse cx="22.5" cy="6" rx="21.5" ry="5" stroke="#B8FF12" stroke-width="2"/>
+  <ellipse cx="22.5" cy="6" rx="21.5" ry="5" stroke="#FFFFFF" stroke-width="2" opacity="0.8" class="animated-stripes"/>
+</svg>
