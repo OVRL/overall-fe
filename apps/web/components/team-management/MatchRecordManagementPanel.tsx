@@ -2,14 +2,13 @@ import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import { cn, getValidImageSrc } from "@/lib/utils";
-import { Edit2, Trash2, ChevronDown, Plus, X, Swords } from "lucide-react";
+import { Edit2, Trash2, ChevronDown, Plus, X, Swords, Mic, Type, Users, ChevronRight, ArrowLeft } from "lucide-react";
 import InHouseMatchPanel from "./InHouseMatchPanel";
 import { useMatchRecordsQuery } from "./hooks/useMatchRecordsQuery";
 import { useDeleteMatchMutation } from "./hooks/useDeleteMatchMutation";
 import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
 import { useUpdateMatchMutation } from "./hooks/useUpdateMatchMutation";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
-import { prepare, layout } from '@chenglou/pretext';
 
 const ENEMY_PLAYERS = [
     "메시", "호날두", "음바페", "홀란드", "호나우두", "펠레", "마라도나", "지단", "베르캄프", "앙리",
@@ -19,6 +18,111 @@ const ENEMY_PLAYERS = [
     "아구에로", "오언", "시어러", "인자기", "비야", "토레스", "로벤", "리베리", "제라드", "램파드", "사비",
     "이니에스타", "피구", "손흥민", "베컴",
 ];
+
+// ─── 한국어 퍼지 매칭 유틸리티 ───────────────────────────────────────────────
+const CHOSUNG_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNGSUNG_LIST = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONGSUNG_LIST = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function decomposeKorean(str: string): string {
+    let result = '';
+    for (const char of str) {
+        const code = char.charCodeAt(0);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+            const offset = code - 0xAC00;
+            const cho = Math.floor(offset / (21 * 28));
+            const jung = Math.floor((offset % (21 * 28)) / 28);
+            const jong = offset % 28;
+            result += CHOSUNG_LIST[cho] + JUNGSUNG_LIST[jung] + (jong ? JONGSUNG_LIST[jong] : '');
+        } else {
+            result += char;
+        }
+    }
+    return result;
+}
+
+function calculateKoreanSimilarity(a: string, b: string): number {
+    if (a === b) return 1;
+    if (!a || !b) return 0;
+    const jamoA = decomposeKorean(a);
+    const jamoB = decomposeKorean(b);
+    const maxLen = Math.max(jamoA.length, jamoB.length);
+    if (maxLen === 0) return 1;
+    let matches = 0;
+    const bArr = jamoB.split('');
+    for (const j of jamoA.split('')) {
+        const idx = bArr.indexOf(j);
+        if (idx !== -1) { matches++; bArr.splice(idx, 1); }
+    }
+    return matches / maxLen;
+}
+
+function fuzzyMatchPlayer(input: string, players: Player[]): Player | undefined {
+    const cleaned = input.replace(/이$|가$|이가$|은$|는$|을$|를$|이에요$|이야$|했어요$|했다$|했습니다$/, '').trim();
+    if (!cleaned) return undefined;
+    const exact = players.find(p => p.name === cleaned);
+    if (exact) return exact;
+    const contains = players.find(p => p.name.includes(cleaned) || cleaned.includes(p.name));
+    if (contains) return contains;
+    const best = players.map(p => ({ player: p, score: calculateKoreanSimilarity(cleaned, p.name) }))
+        .sort((a, b) => b.score - a.score)[0];
+    return (best && best.score > 0.45) ? best.player : undefined;
+}
+
+function parseVoiceInput(text: string, interimText: string, players: Player[]) {
+    const fullText = (text + ' ' + interimText).trim();
+    if (!fullText) return { goal: undefined, assist: undefined, preAssist: undefined, rawGoal: '', rawAssist: '', rawPreAssist: '' };
+
+    let rawGoal = '', rawAssist = '', rawPreAssist = '';
+
+    // 붙여쓰기 형식 우선: [이름]골[이름]어시[이름]기점
+    const noSpace = fullText.replace(/\s/g, '');
+    let rem = noSpace;
+    const gm = rem.match(/^(.+?)(?:골|득점)/);
+    if (gm) { rawGoal = gm[1]; rem = rem.slice(gm[0].length); }
+    const am = rem.match(/^(.+?)(?:어시|도움|어시스트)/);
+    if (am) { rawAssist = am[1]; rem = rem.slice(am[0].length); }
+    const pm = rem.match(/^(.+?)기점/);
+    if (pm) rawPreAssist = pm[1];
+
+    // 붙여쓰기 파싱 실패 시 → 띄어쓰기 형식
+    if (!rawGoal) {
+        const tokens = fullText.trim().split(/\s+/);
+        let role: 'none' | 'goal' | 'assist' | 'preAssist' = 'none';
+        for (const token of tokens) {
+            const t = token.replace(/이$|가$|이가$|은$|는$|을$|를$|이에요$|이야$|했어요$|했다$|했습니다$/, '');
+            if (/골$|득점$/.test(t)) {
+                rawGoal = t.replace(/골$|득점$/, ''); role = 'goal';
+            } else if (/어시$|도움$|어시스트$/.test(t)) {
+                rawAssist = t.replace(/어시$|도움$|어시스트$/, ''); role = 'assist';
+            } else if (/기점$/.test(t)) {
+                rawPreAssist = t.replace(/기점$/, ''); role = 'preAssist';
+            } else if (['골', '득점'].includes(t)) {
+                role = 'goal';
+            } else if (['어시', '도움', '어시스트'].includes(t)) {
+                role = 'assist';
+            } else if (t === '기점') {
+                role = 'preAssist';
+            } else if (t) {
+                if (role === 'goal' && !rawGoal) rawGoal = t;
+                else if (role === 'assist' && !rawAssist) rawAssist = t;
+                else if (role === 'preAssist' && !rawPreAssist) rawPreAssist = t;
+                else if (role === 'none') { rawGoal = t; role = 'goal'; }
+            }
+        }
+    }
+
+    const clean = (n: string) => n.replace(/이$|가$|이가$|은$|는$|을$|를$/, '').trim();
+    return {
+        goal: rawGoal ? fuzzyMatchPlayer(clean(rawGoal), players) : undefined,
+        assist: rawAssist ? fuzzyMatchPlayer(clean(rawAssist), players) : undefined,
+        preAssist: rawPreAssist ? fuzzyMatchPlayer(clean(rawPreAssist), players) : undefined,
+        rawGoal: clean(rawGoal),
+        rawAssist: clean(rawAssist),
+        rawPreAssist: clean(rawPreAssist),
+    };
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface Player {
     id: string;
@@ -79,552 +183,394 @@ interface PlayerSelectModalProps {
     currentQuarter: number;
 }
 
-const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, onShowSummary, players, currentQuarter }: PlayerSelectModalProps) => {
-    const [mode, setMode] = useState<"SELECT" | "TEXT">("SELECT");
-    const [textInput, setTextInput] = useState("");
+const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, currentQuarter }: PlayerSelectModalProps) => {
+    type ModalMode = "METHOD_SELECT" | "VOICE" | "TEXT" | "SELECT";
+    const [mode, setMode] = useState<ModalMode>("METHOD_SELECT");
+    const [selectedMethod, setSelectedMethod] = useState<"VOICE" | "TEXT" | "SELECT">("VOICE");
+
+    // 음성 상태
+    const [isListening, setIsListening] = useState(false);
+    const [transcript, setTranscript] = useState("");
+    const [interimTranscript, setInterimTranscript] = useState("");
+    const recognitionRef = React.useRef<any>(null);
+
+    // 텍스트 입력 상태
+    const [goalText, setGoalText] = useState("");
+    const [assistText, setAssistText] = useState("");
+    const [preAssistText, setPreAssistText] = useState("");
+
+    // 선수 선택 상태
     const [selectedGoal, setSelectedGoal] = useState<string>("none");
     const [selectedAssist, setSelectedAssist] = useState<string>("none");
     const [selectedPreAssist, setSelectedPreAssist] = useState<string>("none");
-    const [suggestions, setSuggestions] = useState<{ label: string; value: string }[]>([]);
-    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
-    const [showLocalSummary, setShowLocalSummary] = useState(false);
-    const scrollRef = React.useRef<HTMLDivElement>(null);
 
-    // 모바일 지원: ResizeObserver & Pretext 연동 textarea 동적 높이
-    const inputRef = React.useRef<HTMLTextAreaElement>(null);
-    const [textareaHeight, setTextareaHeight] = useState(192);
-
+    // 모달 열릴 때 상태 초기화
     React.useEffect(() => {
-        if (mode !== "TEXT" || !inputRef.current) return;
-
-        const updateHeight = () => {
-            if (!inputRef.current) return;
-            const width = inputRef.current.clientWidth - 32; // p-4 (여백 32px)
-            try {
-                // 모바일 기기를 고려하여 안전한 폰트 스택과 넉넉한 줄단차(24) 적용
-                const prepared = prepare(textInput || ' ', '14px ui-sans-serif, system-ui, sans-serif', { whiteSpace: 'pre-wrap' });
-                const { height } = layout(prepared, Math.max(width, 100), 24);
-                // 최소 192px 유지 및 터치 하단 가림 방지를 위한 +40 여유분
-                setTextareaHeight(Math.max(192, height + 40));
-            } catch (error) {
-                console.error("Reflow calc error", error);
-            }
-        };
-
-        const observer = new ResizeObserver(() => {
-            updateHeight();
-        });
-
-        observer.observe(inputRef.current);
-        updateHeight(); // 트리거 (textInput 변경 등) 보정
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [textInput, mode]);
-
-    // 선택 모드와 텍스트 모드 동기화 로직
-    React.useEffect(() => {
-        if (mode !== "SELECT") return;
-
-        const goalPlayer = players.find(p => p.id === selectedGoal)?.name;
-        const assistPlayer = players.find(p => p.id === selectedAssist)?.name;
-        const preAssistPlayer = players.find(p => p.id === selectedPreAssist)?.name;
-
-        const parts = [];
-        if (goalPlayer) parts.push(`${goalPlayer}골`);
-
-        if (assistPlayer) parts.push(`${assistPlayer}어시`);
-        if (preAssistPlayer) parts.push(`${preAssistPlayer}기점`);
-
-        if (parts.length > 0) {
-            setTextInput(`${currentQuarter}Q ${parts.join(" ")}`);
+        if (isOpen) {
+            setMode("METHOD_SELECT");
+            setSelectedMethod("VOICE");
+            setTranscript(""); setInterimTranscript("");
+            setGoalText(""); setAssistText(""); setPreAssistText("");
+            setSelectedGoal("none"); setSelectedAssist("none"); setSelectedPreAssist("none");
+            setIsListening(false);
         } else {
-            setTextInput("");
+            try { recognitionRef.current?.stop(); } catch (_) {}
         }
-    }, [selectedGoal, selectedAssist, selectedPreAssist, mode, currentQuarter, players]);
+    }, [isOpen]);
 
-    // 제안 로직 고도화
-    React.useEffect(() => {
-        if (mode !== "TEXT" || !textInput.trim()) {
-            setSuggestions([]);
-            setSelectedSuggestionIndex(0);
-            return;
-        }
-
-        const lines = textInput.split("\n");
-        const lastLine = lines[lines.length - 1];
-
-        // 현재 라인에서 마지막 토큰 추출 (공백 기준)
-        const tokens = lastLine.trim().split(/\s+/);
-        const lastToken = tokens[tokens.length - 1] || "";
-
-        if (!lastToken) {
-            setSuggestions([]);
-            return;
-        }
-
-        const newSuggestions: { label: string; value: string }[] = [];
-
-        // 1. 숫자만 입력된 경우 Q 제안
-        if (/^\d+$/.test(lastToken)) {
-            newSuggestions.push({ label: `${lastToken}Q`, value: "Q " });
-        }
-
-        // 현재 라인에 이미 등장한 선수들 찾기
-        const playersOnLine = players.filter(p => lastLine.includes(p.name)).map(p => p.name);
-
-        // 2. 정확히 이름과 일치하면 다음 액션 제안 (골 -> 어시 -> 기점)
-        const exactPlayer = players.find(p => p.name === lastToken);
-        if (exactPlayer) {
-            const hasGoal = lastLine.includes("득점") || lastLine.includes("골");
-            const hasAssist = lastLine.includes("어시");
-
-            if (!hasGoal) newSuggestions.push({ label: "골", value: "골 " });
-            else if (!hasAssist) newSuggestions.push({ label: "어시", value: "어시 " });
-            else newSuggestions.push({ label: "기점", value: "기점 " });
-        } else {
-            // 3. 선수 이름 매칭 시도 (부분 일치)
-            const matchedPlayers = players
-                .filter(p => !playersOnLine.includes(p.name) && p.name.startsWith(lastToken))
-                .slice(0, 3);
-
-            matchedPlayers.forEach(p => {
-                newSuggestions.push({
-                    label: p.name,
-                    value: p.name.slice(lastToken.length) + " "
-                });
-            });
-        }
-
-        setSuggestions(newSuggestions.slice(0, 3));
-        setSelectedSuggestionIndex(0);
-    }, [textInput, mode, players]);
-
-    // 텍스트 파싱 로직
-    const parsedSummary = React.useMemo(() => {
-        if (!textInput.trim()) return [];
-
-        const lines = textInput.split(/\n| /); // 뉴라인이나 공백으로 분리
-        let currentQuarter = 1;
-        const results: (ScoreLog & { quarter: number })[] = [];
-
-        const quarterRegex = /(\d+)[qQ]/;
-        const goalRegex = /([^득점골어시기점\s\n]+?)\s*(?:득점|골)/;
-        const assistRegex = /([^득점골어시기점\s\n]+?)\s*어시/;
-        const preAssistRegex = /([^득점골어시기점\s\n]+?)\s*기점/;
-
-        textInput.split(/\n/).forEach((line: string) => {
-            const qMatch = line.match(quarterRegex);
-            if (qMatch) {
-                currentQuarter = parseInt(qMatch[1]);
+    // 음성인식 시작/중지
+    const startListening = () => {
+        const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SR) { alert("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요."); return; }
+        try { recognitionRef.current?.stop(); } catch (_) {}
+        const recognition = new SR();
+        recognitionRef.current = recognition;
+        recognition.lang = 'ko-KR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        recognition.onstart = () => setIsListening(true);
+        recognition.onresult = (e: any) => {
+            let interim = '', final = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                e.results[i].isFinal ? (final += e.results[i][0].transcript) : (interim += e.results[i][0].transcript);
             }
-
-            const goalEvents = line.split(/(?=.+?득점)/);
-            goalEvents.forEach((event: string) => {
-                const g = event.match(goalRegex);
-                if (g) {
-                    const playerName = g[1].trim();
-                    const player = players.find(p => p.name.includes(playerName));
-
-                    const a = event.match(assistRegex);
-                    const assistPlayer = a ? players.find(p => p.name.includes(a[1].trim())) : undefined;
-
-                    const pa = event.match(preAssistRegex);
-                    const preAssistPlayer = pa ? players.find(p => p.name.includes(pa[1].trim())) : undefined;
-
-                    results.push({
-                        id: crypto.randomUUID(),
-                        type: "goal",
-                        player,
-                        assist: assistPlayer,
-                        preAssist: preAssistPlayer,
-                        quarter: currentQuarter
-                    });
-                }
-            });
-        });
-
-        return results;
-    }, [textInput, players]);
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (mode === "TEXT") {
-            if (suggestions.length > 0) {
-                if (e.key === "Tab" || e.key === "Enter") {
-                    e.preventDefault();
-                    const toApply = suggestions[selectedSuggestionIndex] || suggestions[0];
-                    setTextInput(prev => prev + toApply.value);
-                    setTimeout(() => {
-                        inputRef.current?.focus();
-                    }, 0);
-                } else if (e.key === "ArrowRight") {
-                    e.preventDefault();
-                    setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length);
-                } else if (e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
-                }
-            } else if (e.key === "Tab") {
-                e.preventDefault();
-            }
-        }
+            if (final) { setTranscript(prev => (prev + ' ' + final).trim()); setInterimTranscript(''); }
+            else setInterimTranscript(interim);
+        };
+        recognition.onerror = () => { setIsListening(false); setInterimTranscript(''); };
+        recognition.onend = () => { setIsListening(false); setInterimTranscript(''); };
+        recognition.start();
     };
+    const stopListening = () => { try { recognitionRef.current?.stop(); } catch (_) {} setIsListening(false); };
 
-    // 파싱 미리보기 자동 스크롤
-    React.useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTo({
-                top: scrollRef.current.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-    }, [parsedSummary.length]);
-
+    // 선택 모드 핸들러
     const handleGoalChange = (id: string) => {
         setSelectedGoal(id);
         if (selectedAssist === id) setSelectedAssist("none");
         if (selectedPreAssist === id) setSelectedPreAssist("none");
     };
-
     const handleAssistChange = (id: string) => {
         setSelectedAssist(id);
-        if (id !== "none") {
-            if (selectedGoal === id) setSelectedGoal("none");
-            if (selectedPreAssist === id) setSelectedPreAssist("none");
-        }
+        if (id !== "none" && selectedGoal === id) setSelectedGoal("none");
+        if (id !== "none" && selectedPreAssist === id) setSelectedPreAssist("none");
     };
-
     const handlePreAssistChange = (id: string) => {
         setSelectedPreAssist(id);
-        if (id !== "none") {
-            if (selectedGoal === id) setSelectedGoal("none");
-            if (selectedAssist === id) setSelectedAssist("none");
+        if (id !== "none" && selectedGoal === id) setSelectedGoal("none");
+        if (id !== "none" && selectedAssist === id) setSelectedAssist("none");
+    };
+
+    // 음성 파싱 결과 (실시간)
+    const voiceParsed = React.useMemo(
+        () => parseVoiceInput(transcript, interimTranscript, players),
+        [transcript, interimTranscript, players]
+    );
+
+    // 텍스트 입력 자동완성
+    const getPlayerSuggestions = (input: string) =>
+        input.trim()
+            ? players.filter(p => p.name.includes(input.trim()) || calculateKoreanSimilarity(input.trim(), p.name) > 0.4).slice(0, 4)
+            : [];
+    const goalSuggestions = React.useMemo(() => getPlayerSuggestions(goalText), [goalText, players]);
+    const assistSuggestions = React.useMemo(() => getPlayerSuggestions(assistText), [assistText, players]);
+    const preAssistSuggestions = React.useMemo(() => getPlayerSuggestions(preAssistText), [preAssistText, players]);
+
+    // 저장 핸들러
+    const handleSave = () => {
+        if (mode === "SELECT") {
+            if (selectedGoal === "none") { alert("득점자를 선택해주세요."); return; }
+            onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist });
+        } else if (mode === "TEXT") {
+            if (!goalText.trim()) { alert("득점자를 입력해주세요."); return; }
+            onSaveText([{ id: crypto.randomUUID(), type: "goal", quarter: currentQuarter,
+                player: fuzzyMatchPlayer(goalText, players),
+                assist: assistText ? fuzzyMatchPlayer(assistText, players) : undefined,
+                preAssist: preAssistText ? fuzzyMatchPlayer(preAssistText, players) : undefined }]);
+        } else if (mode === "VOICE") {
+            if (!transcript.trim()) { alert("먼저 음성을 입력해주세요."); return; }
+            onSaveText([{ id: crypto.randomUUID(), type: "goal", quarter: currentQuarter,
+                player: voiceParsed.goal, assist: voiceParsed.assist, preAssist: voiceParsed.preAssist }]);
         }
+        onClose();
     };
 
     if (!isOpen) return null;
 
+    const MODAL_TITLE: Record<string, string> = {
+        METHOD_SELECT: "득점 선수 입력",
+        VOICE: "득점 선수 음성 입력",
+        TEXT: "득점 선수 텍스트 입력",
+        SELECT: "득점 선수 선택",
+    };
+
+    const PlayerRow = ({ icon, label, value, onChange, suggestions }: {
+        icon: string; label: string; value: string;
+        onChange: (v: string) => void; suggestions: Player[];
+    }) => (
+        <section>
+            <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">{icon}</span>
+                <span className="text-sm font-bold text-white">{label}</span>
+            </div>
+            <div className="relative">
+                <input
+                    type="text" value={value} onChange={e => onChange(e.target.value)}
+                    placeholder="선수 이름"
+                    className="w-full bg-[#2a2a2a] border border-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 placeholder:text-gray-600 transition-all"
+                />
+                {suggestions.length > 0 && value.trim() && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#2a2a2a] border border-white/10 rounded-2xl overflow-hidden z-10 shadow-2xl">
+                        {suggestions.map(p => (
+                            <button key={p.id} onClick={() => onChange(p.name)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left">
+                                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                                    <Image src={getValidImageSrc(p.profileImage)} alt={p.name} width={28} height={28} className="object-cover" />
+                                </div>
+                                <span className="text-sm text-white font-medium">{p.name}</span>
+                                {p.name !== value.trim() && (
+                                    <span className="text-[10px] text-primary ml-auto">AI 추천</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md bg-[#1e1e1e] rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
-                    <div className="w-6" />
-                    <h2 className="text-base font-bold text-white">득점 정보 입력</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
-                        <X size={20} />
-                    </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md bg-[#1e1e1e] rounded-3xl border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
+                {/* 헤더 */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 shrink-0">
+                    {mode !== "METHOD_SELECT" ? (
+                        <button onClick={() => setMode("METHOD_SELECT")} className="text-gray-500 hover:text-white transition-colors">
+                            <ArrowLeft size={20} />
+                        </button>
+                    ) : <div className="w-5" />}
+                    <h2 className="text-base font-bold text-white">{MODAL_TITLE[mode]}</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
                 </div>
 
-                <div className="p-6 space-y-6">
-                    {/* 입력 방식 선택 탭 */}
-                    <div className="flex p-1 bg-black/40 rounded-2xl border border-white/5">
-                        <button
-                            onClick={() => setMode("SELECT")}
-                            className={cn(
-                                "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
-                                mode === "SELECT" ? "bg-primary text-black" : "text-gray-500 hover:text-white"
-                            )}
-                        >
-                            선택해서 넣기
-                        </button>
-                        <button
-                            onClick={() => setMode("TEXT")}
-                            className={cn(
-                                "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
-                                mode === "TEXT" ? "bg-primary text-black" : "text-gray-500 hover:text-white"
-                            )}
-                        >
-                            텍스트로 넣기
-                        </button>
-                    </div>
+                {/* 본문 */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="p-6">
 
-                    {mode === "SELECT" ? (
-                        <div className="space-y-8">
-                            {/* 득점 */}
-                            <section>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-sm font-medium text-gray-400">득점</span>
-                                    <span className="text-sm font-bold text-primary">
-                                        {selectedGoal === "own-goal" ? "자책골" : players.find(p => p.id === selectedGoal)?.name}
-                                    </span>
+                        {/* ── 방법 선택 ── */}
+                        {mode === "METHOD_SELECT" && (
+                            <div className="space-y-3">
+                                {([
+                                    { method: "VOICE" as const, icon: Mic, title: "AI 음성 인식 입력", desc: "마이크로 득점 정보를 말합니다." },
+                                    { method: "TEXT" as const, icon: Type, title: "텍스트 입력", desc: "득점자 이름을 직접 입력합니다" },
+                                    { method: "SELECT" as const, icon: Users, title: "선수 선택", desc: "선수 목록에서 터치하여 선택합니다." },
+                                ]).map(({ method, icon: Icon, title, desc }) => (
+                                    <button key={method} onClick={() => setSelectedMethod(method)}
+                                        className={cn(
+                                            "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left",
+                                            selectedMethod === method ? "border-white/20 bg-white/5" : "border-white/5 hover:border-white/10"
+                                        )}>
+                                        <div className="w-12 h-12 rounded-xl bg-[#2a2a2a] flex items-center justify-center shrink-0">
+                                            <Icon size={22} className="text-gray-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-bold text-sm text-white">{title}</div>
+                                            <div className="text-[11px] text-gray-500 mt-0.5">{desc}</div>
+                                        </div>
+                                        <ChevronRight size={16} className="text-gray-600" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* ── 음성 입력 ── */}
+                        {mode === "VOICE" && (
+                            <div className="space-y-6">
+                                <div className="flex flex-col items-center gap-4 py-4">
+                                    <button
+                                        onClick={isListening ? stopListening : startListening}
+                                        className={cn(
+                                            "w-32 h-32 rounded-full flex items-center justify-center transition-all shadow-2xl",
+                                            isListening
+                                                ? "bg-primary shadow-primary/40 scale-110"
+                                                : "bg-primary hover:scale-105 shadow-primary/20"
+                                        )}
+                                    >
+                                        <Mic size={52} className="text-black" />
+                                    </button>
+                                    <p className="text-sm font-bold text-white">
+                                        {isListening ? "듣는 중... 클릭하여 중지" : "마이크를 클릭하세요"}
+                                    </p>
+                                    {isListening && (
+                                        <div className="flex gap-1 items-end h-6">
+                                            {[10, 16, 10, 20, 12].map((h, i) => (
+                                                <div key={i} className="w-1.5 bg-primary rounded-full animate-bounce"
+                                                    style={{ height: h, animationDelay: `${i * 80}ms` }} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+
+                                {/* 예시 */}
+                                <div className="bg-[#252525] rounded-2xl p-4 border border-white/5">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span>💡</span>
+                                        <span className="text-xs font-bold text-white">음성 입력 예시</span>
+                                    </div>
+                                    <ul className="space-y-1.5">
+                                        {['"뺑슨이 득점했어요"', '"빅루트가 골 뺑슨이 도움"', '"골 뺑슨 어시 알베스 기점 랜디"'].map((ex, i) => (
+                                            <li key={i} className="flex items-center gap-2 text-[12px] text-gray-400">
+                                                <span className="w-1 h-1 rounded-full bg-gray-600 shrink-0" />{ex}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* 음성 텍스트 표시 */}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-base">⚽</span>
+                                        <span className="text-sm font-bold text-white">득점/도움/기점</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={transcript}
+                                        onChange={e => setTranscript(e.target.value)}
+                                        placeholder="선수 이름"
+                                        className="w-full bg-[#2a2a2a] border border-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 placeholder:text-gray-600 transition-all"
+                                    />
+                                    {interimTranscript && (
+                                        <p className="text-xs text-gray-500 italic px-4 mt-1">{interimTranscript}...</p>
+                                    )}
+                                </div>
+
+                                {/* AI 파싱 결과 */}
+                                {(voiceParsed.rawGoal || voiceParsed.rawAssist || voiceParsed.rawPreAssist) && (
+                                    <div className="bg-black/30 rounded-2xl p-4 border border-white/5 space-y-2.5">
+                                        <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">AI 인식 결과</div>
+                                        {[
+                                            { label: "득점", raw: voiceParsed.rawGoal, matched: voiceParsed.goal },
+                                            { label: "도움", raw: voiceParsed.rawAssist, matched: voiceParsed.assist },
+                                            { label: "기점", raw: voiceParsed.rawPreAssist, matched: voiceParsed.preAssist },
+                                        ].filter(r => r.raw).map(({ label, raw, matched }) => (
+                                            <div key={label} className="flex items-center gap-3">
+                                                <span className="text-[10px] text-gray-500 w-8 shrink-0">{label}</span>
+                                                {matched ? (
+                                                    <>
+                                                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
+                                                            <Image src={getValidImageSrc(matched.profileImage)} alt={matched.name} width={24} height={24} className="object-cover" />
+                                                        </div>
+                                                        <span className="text-xs font-bold text-primary">{matched.name}</span>
+                                                        {matched.name !== raw && (
+                                                            <span className="text-[9px] text-gray-500 ml-auto">"{raw}" → AI 매칭</span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <span className="text-xs font-bold text-red-400">"{raw}" (등록 선수 없음)</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── 텍스트 입력 ── */}
+                        {mode === "TEXT" && (
+                            <div className="space-y-6">
+                                <PlayerRow icon="⚽" label="득점" value={goalText} onChange={setGoalText} suggestions={goalSuggestions} />
+                                <PlayerRow icon="👟" label="도움" value={assistText} onChange={setAssistText} suggestions={assistSuggestions} />
+                                <PlayerRow icon="⛳" label="기점" value={preAssistText} onChange={setPreAssistText} suggestions={preAssistSuggestions} />
+                            </div>
+                        )}
+
+                        {/* ── 선수 선택 ── */}
+                        {mode === "SELECT" && (
+                            <div className="space-y-8">
+                                {/* 득점 */}
+                                <section>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-base">⚽</span>
+                                        <span className="text-sm font-medium text-gray-400">득점</span>
+                                        <span className="text-sm font-bold text-primary">{players.find(p => p.id === selectedGoal)?.name || ""}</span>
+                                    </div>
+                                    <div className="flex gap-4 overflow-x-auto pb-4">
                                         {players.map(player => (
-                                            <button
-                                                key={player.id}
-                                                onClick={() => handleGoalChange(player.id)}
-                                                className="flex flex-col items-center gap-2 shrink-0 group"
-                                            >
-                                                <div className={cn(
-                                                    "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
-                                                    selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
-                                                )}>
+                                            <button key={player.id} onClick={() => handleGoalChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
+                                                <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
                                                     <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
                                                 </div>
-                                                <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>
-                                                    {player.name}
-                                                </span>
+                                                <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
                                             </button>
                                         ))}
                                     </div>
                                 </section>
-
-                            {/* 도움 섹션 */}
-                            <section>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-sm font-medium text-gray-400">도움</span>
-                                    <span className="text-sm font-bold text-primary">
-                                        {selectedAssist === "none" ? "없음" : players.find(p => p.id === selectedAssist)?.name}
-                                    </span>
-                                </div>
-                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button
-                                        onClick={() => handleAssistChange("none")}
-                                        className={cn(
-                                            "flex flex-col items-center gap-2 shrink-0 group",
-                                            selectedAssist === "none" ? "opacity-100" : "opacity-60"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
-                                            selectedAssist === "none" ? "border-primary scale-105" : "border-transparent"
-                                        )}>
-                                            <span className={cn("text-xs font-bold", selectedAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
-                                        </div>
-                                    </button>
-                                    {players.map(player => (
-                                        <button
-                                            key={player.id}
-                                            onClick={() => handleAssistChange(player.id)}
-                                            className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
-                                            <div className={cn(
-                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
-                                                selectedAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
-                                            )}>
-                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
-                                            </div>
-                                            <span className={cn("text-[10px] font-medium transition-colors", selectedAssist === player.id ? "text-white" : "text-gray-500")}>
-                                                {player.name}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
-                            {/* 기점 섹션 */}
-                            <section>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-sm font-medium text-gray-400">기점</span>
-                                    <span className="text-sm font-bold text-primary">
-                                        {selectedPreAssist === "none" ? "없음" : players.find(p => p.id === selectedPreAssist)?.name}
-                                    </span>
-                                </div>
-                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                                    <button
-                                        onClick={() => handlePreAssistChange("none")}
-                                        className={cn(
-                                            "flex flex-col items-center gap-2 shrink-0 group",
-                                            selectedPreAssist === "none" ? "opacity-100" : "opacity-60"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center transition-all",
-                                            selectedPreAssist === "none" ? "border-primary scale-105" : "border-transparent"
-                                        )}>
-                                            <span className={cn("text-xs font-bold", selectedPreAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
-                                        </div>
-                                    </button>
-                                    {players.map(player => (
-                                        <button
-                                            key={player.id}
-                                            onClick={() => handlePreAssistChange(player.id)}
-                                            className="flex flex-col items-center gap-2 shrink-0 group disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
-                                            <div className={cn(
-                                                "w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all",
-                                                selectedPreAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100"
-                                            )}>
-                                                <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
-                                            </div>
-                                            <span className={cn("text-[10px] font-medium transition-colors", selectedPreAssist === player.id ? "text-white" : "text-gray-500")}>
-                                                {player.name}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">텍스트 입력 (카톡 스타일)</label>
-                                        <div className="group relative flex items-center justify-center cursor-help">
-                                            <div className="w-4 h-4 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-black border border-primary/30">!</div>
-                                            <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[280px] bg-[#333] text-white text-[11px] font-medium p-3 rounded-xl shadow-2xl z-[100] transition-all border border-white/10 leading-relaxed pointer-events-none">
-                                                <span className="text-primary font-bold">Tab</span> 이나 <span className="text-primary font-bold">Enter</span> 키를 누르면 자동으로 입력됩니다.<br />
-                                                검색 결과가 여러 명일 경우 <span className="text-primary font-bold">방향키(좌/우)</span>로 선택할 수 있습니다.
-                                            </div>
-                                        </div>
+                                {/* 도움 */}
+                                <section>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-base">👟</span>
+                                        <span className="text-sm font-medium text-gray-400">도움</span>
+                                        <span className="text-sm font-bold text-primary">{selectedAssist === "none" ? "없음" : players.find(p => p.id === selectedAssist)?.name}</span>
                                     </div>
-                                    <span className="text-[10px] text-primary/60 font-medium">예시: 1Q 메시골 호날두어시</span>
-                                </div>
-                                <div className="relative group">
-                                    <textarea
-                                        ref={inputRef}
-                                        className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-gray-700 relative z-10 scrollbar-hide"
-                                        placeholder="입력 예시:&#10;1Q 메시골 호날두어시 이니에스타기점&#10;2Q&#10;음바페득점 벨링엄어시 손흥민기점"
-                                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', height: `${textareaHeight}px` }}
-                                        value={textInput}
-                                        onChange={(e) => setTextInput(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* 파싱 미리보기 - 높이 고정으로 점핑 방지 */}
-                            <div className="space-y-4 bg-black/20 p-4 rounded-2xl border border-white/5 min-h-[160px] flex flex-col">
-                                <div className="flex items-center justify-between shrink-0">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">파싱 미리보기</label>
-                                    <button
-                                        onClick={() => setShowLocalSummary(true)}
-                                        className="px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[10px] text-primary font-black hover:bg-primary/20 transition-all shadow-sm"
-                                        disabled={parsedSummary.length === 0}
-                                    >
-                                        전체보기
-                                    </button>
-                                </div>
-                                <div 
-                                    ref={scrollRef}
-                                    className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2 max-h-[120px]"
-                                >
-                                    {parsedSummary.length === 0 ? (
-                                        <div className="flex items-center justify-center h-full text-[11px] text-gray-600 font-medium italic">
-                                            입력된 득점 이벤트가 없습니다.
-                                        </div>
-                                    ) : (
-                                        parsedSummary.map((item, idx) => (
-                                            <div key={idx} className="bg-white/5 border border-white/5 rounded-xl px-4 py-3 flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-[10px] font-black text-primary">{item.quarter}Q</span>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs font-bold text-white">득점: {item.player?.name || "알 수 없음"}</span>
-                                                        <span className="text-[10px] text-gray-500">
-                                                            어시: {item.assist?.name || "-"} / 기점: {item.preAssist?.name || "-"}
-                                                        </span>
-                                                    </div>
+                                    <div className="flex gap-4 overflow-x-auto pb-4">
+                                        <button onClick={() => handleAssistChange("none")} className={cn("flex flex-col items-center gap-2 shrink-0", selectedAssist === "none" ? "opacity-100" : "opacity-60")}>
+                                            <div className={cn("w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center", selectedAssist === "none" ? "border-primary scale-105" : "border-transparent")}>
+                                                <span className={cn("text-xs font-bold", selectedAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
+                                            </div>
+                                        </button>
+                                        {players.map(player => (
+                                            <button key={player.id} onClick={() => handleAssistChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
+                                                <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
+                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
                                                 </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* 로컬 파싱 요약 모달 */}
-                            {showLocalSummary && (
-                                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-                                    <div className="w-full max-w-lg bg-[#1a1a1a] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-                                        <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
-                                            <div className="flex flex-col gap-1">
-                                                <h2 className="text-lg font-black text-white">쿼터별 데이터 요약</h2>
-                                                <p className="text-[10px] text-gray-500 font-medium">현재 입력 중인 데이터를 확인합니다</p>
-                                            </div>
-                                            <button onClick={() => setShowLocalSummary(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-all">
-                                                <X size={20} />
+                                                <span className={cn("text-[10px] font-medium transition-colors", selectedAssist === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
                                             </button>
-                                        </div>
-                                        <div className="p-8 overflow-y-auto space-y-8 scrollbar-hide">
-                                            {[1, 2, 3, 4].map(q => {
-                                                const quarterData = parsedSummary.filter(item => item.quarter === q);
-                                                if (quarterData.length === 0) return null;
-                                                return (
-                                                    <div key={q} className="relative pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-primary/30 before:rounded-full">
-                                                        <div className="flex items-center gap-3 mb-4">
-                                                            <span className="text-xs font-black text-primary px-2 py-0.5 rounded bg-primary/10">{q}Q</span>
-                                                            <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">{quarterData.length} GOALS</span>
-                                                        </div>
-                                                        <div className="space-y-3">
-                                                            {quarterData.map((item, idx) => (
-                                                                <div key={idx} className="flex flex-col gap-1 bg-white/2 rounded-2xl p-4 border border-white/5">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                                                                        <span className="text-sm font-bold text-white">득점: {item.player?.name || "알 수 없음"}</span>
-                                                                    </div>
-                                                                    {(item.assist || item.preAssist) && (
-                                                                        <div className="flex gap-3 ml-3.5">
-                                                                            {item.assist && <span className="text-[11px] text-gray-500 font-medium"><span className="text-primary/60 mr-1">어시:</span> {item.assist.name}</span>}
-                                                                            {item.preAssist && <span className="text-[11px] text-gray-500 font-medium"><span className="text-primary/60 mr-1">기점:</span> {item.preAssist.name}</span>}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                            {parsedSummary.length === 0 && (
-                                                <div className="py-20 text-center text-gray-700 font-bold uppercase tracking-widest text-xs">No parsed data available</div>
-                                            )}
-                                        </div>
+                                        ))}
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                </section>
+                                {/* 기점 */}
+                                <section>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-base">⛳</span>
+                                        <span className="text-sm font-medium text-gray-400">기점</span>
+                                        <span className="text-sm font-bold text-primary">{selectedPreAssist === "none" ? "없음" : players.find(p => p.id === selectedPreAssist)?.name}</span>
+                                    </div>
+                                    <div className="flex gap-4 overflow-x-auto pb-4">
+                                        <button onClick={() => handlePreAssistChange("none")} className={cn("flex flex-col items-center gap-2 shrink-0", selectedPreAssist === "none" ? "opacity-100" : "opacity-60")}>
+                                            <div className={cn("w-14 h-14 rounded-2xl bg-[#2a2a2a] border-2 flex items-center justify-center", selectedPreAssist === "none" ? "border-primary scale-105" : "border-transparent")}>
+                                                <span className={cn("text-xs font-bold", selectedPreAssist === "none" ? "text-primary" : "text-gray-500")}>없음</span>
+                                            </div>
+                                        </button>
+                                        {players.map(player => (
+                                            <button key={player.id} onClick={() => handlePreAssistChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
+                                                <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedPreAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
+                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                                </div>
+                                                <span className={cn("text-[10px] font-medium transition-colors", selectedPreAssist === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+                        )}
+
+                    </div>
                 </div>
 
-                <div className="px-6 space-y-4">
-                    {/* 자동완성 제안 바 - 모바일 최우선 배치 (높이 고정으로 점핑 완벽 방지) */}
-                    <div className={cn(
-                        "h-[40px] flex items-center transition-all",
-                        mode === "TEXT" && suggestions.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none h-[0px] md:h-[40px] overflow-hidden"
-                    )}>
-                        <div className="flex gap-2 w-full p-2 bg-black/40 rounded-xl border border-white/5 overflow-x-auto scrollbar-hide">
-                            {suggestions.map((s, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        setTextInput(prev => prev + s.value);
-                                        inputRef.current?.focus();
-                                    }}
-                                    className={cn(
-                                        "px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all",
-                                        selectedSuggestionIndex === idx
-                                            ? "bg-primary text-black scale-105 shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]"
-                                            : "bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20"
-                                    )}
-                                >
-                                    {s.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex gap-3 pb-6">
-                        <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
-                            취소
+                {/* 하단 버튼 */}
+                <div className="px-6 pb-6 pt-4 flex gap-3 shrink-0 border-t border-white/5">
+                    <button onClick={onClose} className="flex-1 py-4 rounded-xl bg-[#2a2a2a] text-gray-400 text-sm font-bold hover:bg-[#333] transition-colors">
+                        취소
+                    </button>
+                    {mode === "METHOD_SELECT" ? (
+                        <button onClick={() => setMode(selectedMethod)} className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity">
+                            다음
                         </button>
-                        <button
-                            onClick={() => {
-                                if (mode === "SELECT") {
-                                    if (selectedGoal === "none") {
-                                        alert("득점자를 선택해주세요.");
-                                        return;
-                                    }
-                                    onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist });
-                                } else {
-                                    onSaveText(parsedSummary);
-                                }
-                                onClose();
-                            }}
-                            className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity"
-                        >
+                    ) : (
+                        <button onClick={handleSave} className="flex-1 py-4 rounded-xl bg-primary text-black text-sm font-bold hover:opacity-90 transition-opacity">
                             저장
                         </button>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
