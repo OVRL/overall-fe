@@ -1,15 +1,25 @@
 # EAS로 iOS/Android 빌드 후 Firebase App Distribution에 업로드합니다.
-# 트리거: Actions 탭에서 수동 실행(workflow_dispatch)만.
+#
+# 트리거
+#   - push: main/develop 에서 apps/native/ 경로 변경 시 자동 (iOS·Android 둘 다 빌드·배포)
+#   - workflow_dispatch: Actions에서 수동 (플랫폼·그룹·릴리즈 노트 선택)
 #
 # 필요한 GitHub Secrets (저장소 Settings → Secrets and variables → Actions):
 #   EXPO_TOKEN              https://expo.dev/accounts/[계정]/settings/access-tokens
 #   FIREBASE_TOKEN          로컬에서 `firebase login:ci` 로 발급 (CI용, 레포에 커밋 금지)
 #   FIREBASE_IOS_APP_ID     Firebase 콘솔 → 프로젝트 설정 → iOS 앱 ID (1:...:ios:...)
 #   FIREBASE_ANDROID_APP_ID Firebase 콘솔 → Android 앱 ID (1:...:android:...)
-# 선택: FIREBASE_DISTRIBUTION_GROUPS (비어 있으면 입력값 또는 testers)
 name: EAS Build → Firebase App Distribution
 
 on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/native/**"
+      - ".github/workflows/eas-firebase-app-distribution.yml"
+      # 문서만 바뀐 커밋은 자동 실행에서 제외
+      - "!apps/native/**/*.md"
+      - "!apps/native/docs/**"
   workflow_dispatch:
     inputs:
       platform:
@@ -38,7 +48,10 @@ permissions:
 
 jobs:
   ios:
-    if: ${{ inputs.platform == 'ios' || inputs.platform == 'both' }}
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both'))
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,9 +59,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -89,12 +101,22 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           ARTIFACT_PATH: ${{ runner.temp }}/app.ipa
           FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
-          FIREBASE_DISTRIBUTION_GROUPS: ${{ inputs.distribution_group }}
-          RELEASE_NOTES: ${{ inputs.release_notes }}
-        run: node scripts/firebase-distribute.mjs ios
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
+            export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+          else
+            export FIREBASE_DISTRIBUTION_GROUPS="testers"
+            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+          fi
+          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
+          node scripts/firebase-distribute.mjs ios
 
   android:
-    if: ${{ inputs.platform == 'android' || inputs.platform == 'both' }}
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both'))
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -102,9 +124,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -145,6 +166,13 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           ARTIFACT_PATH: ${{ runner.temp }}/app.apk
           FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
-          FIREBASE_DISTRIBUTION_GROUPS: ${{ inputs.distribution_group }}
-          RELEASE_NOTES: ${{ inputs.release_notes }}
-        run: node scripts/firebase-distribute.mjs android
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
+            export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+          else
+            export FIREBASE_DISTRIBUTION_GROUPS="testers"
+            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+          fi
+          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
+          node scripts/firebase-distribute.mjs android
