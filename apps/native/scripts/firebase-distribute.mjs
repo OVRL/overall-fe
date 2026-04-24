@@ -51,22 +51,26 @@ function loadOptionalEnvFile() {
 }
 
 function printHelp() {
-  console.log(`
-사용법:
-  node scripts/firebase-distribute.mjs <android|ios>
-
-필수 환경 변수:
-  ARTIFACT_PATH             업로드할 파일 경로 (.apk / .aab / .ipa)
-  FIREBASE_ANDROID_APP_ID   Firebase 콘솔의 Android 앱 ID (android 일 때)
-  FIREBASE_IOS_APP_ID       Firebase 콘솔의 iOS 앱 ID (ios 일 때)
-
-선택:
-  FIREBASE_DISTRIBUTION_GROUPS   콤마 없이 하나의 그룹명, 또는 "a,b" (기본: testers)
-  RELEASE_NOTES                  릴리즈 노트 문자열
-  FIREBASE_TOKEN                 CI/GitHub Actions: `firebase login:ci` 로 발급한 토큰 (환경 변수만 설정하면 Firebase CLI가 인식)
-
-선택 파일: apps/native/.env.firebase.local (위 변수들을 한 번에 설정)
-`);
+  console.log(
+    [
+      "",
+      "사용법:",
+      "  node scripts/firebase-distribute.mjs <android|ios>",
+      "",
+      "필수 환경 변수:",
+      "  ARTIFACT_PATH             업로드할 파일 경로 (.apk / .aab / .ipa)",
+      "  FIREBASE_ANDROID_APP_ID   Firebase 콘솔의 Android 앱 ID (android 일 때)",
+      "  FIREBASE_IOS_APP_ID       Firebase 콘솔의 iOS 앱 ID (ios 일 때)",
+      "",
+      "선택:",
+      '  FIREBASE_DISTRIBUTION_GROUPS   콤마 없이 하나의 그룹명, 또는 "a,b" (기본: testers)',
+      "  RELEASE_NOTES                  릴리즈 노트 문자열",
+      "  FIREBASE_TOKEN                 CI/GitHub Actions: 'firebase login:ci' 로 발급한 토큰 (환경 변수만 설정하면 Firebase CLI가 인식)",
+      "",
+      "선택 파일: apps/native/.env.firebase.local (위 변수들을 한 번에 설정)",
+      "",
+    ].join("\n")
+  );
 }
 
 const platform = process.argv[2];

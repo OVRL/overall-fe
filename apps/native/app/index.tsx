@@ -2,13 +2,16 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
 import { Stack, useNavigation } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   ActivityIndicator,
   BackHandler,
+  Pressable,
   Platform,
   StatusBar,
   StyleSheet,
+  Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,6 +59,9 @@ export default function App() {
   const syncViewportInjectTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
+  const [isRootLayoutDone, setIsRootLayoutDone] = useState(false);
+  const [isWebViewFirstLoadDone, setIsWebViewFirstLoadDone] = useState(false);
+  const [isSplashTimedOut, setIsSplashTimedOut] = useState(false);
   const [chromeMode, setChromeMode] = useState<"safe" | "fullscreen">(
     "fullscreen",
   );
@@ -94,6 +100,36 @@ export default function App() {
     },
     [],
   );
+
+  // WebView 준비가 길어질 때 스플래시가 영원히 고정되는 상황을 방지
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setIsSplashTimedOut(true);
+    }, 15000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const isAppReadyForSplashHide =
+    isRootLayoutDone && isWebViewCookiePrepDone && isWebViewFirstLoadDone;
+
+  const onLayoutRootView = useCallback(() => {
+    setIsRootLayoutDone(true);
+    if (isAppReadyForSplashHide) {
+      void SplashScreen.hideAsync();
+    }
+  }, [isAppReadyForSplashHide]);
+
+  useEffect(() => {
+    if (isAppReadyForSplashHide) {
+      void SplashScreen.hideAsync();
+    }
+  }, [isAppReadyForSplashHide]);
+
+  useEffect(() => {
+    if (isSplashTimedOut) {
+      void SplashScreen.hideAsync();
+    }
+  }, [isSplashTimedOut]);
 
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
@@ -180,6 +216,7 @@ export default function App() {
     (e: { nativeEvent: { url: string } }) => {
       const url = e.nativeEvent.url;
       if (!isSameWebAppOrigin(url, webOrigin)) return;
+      setIsWebViewFirstLoadDone(true);
       webViewRef.current?.injectJavaScript(
         INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
       );
@@ -188,81 +225,92 @@ export default function App() {
   );
 
   return (
-    <View style={[styles.screenRoot, { backgroundColor }]}>
+    <View style={[styles.screenRoot, { backgroundColor }]} onLayout={onLayoutRootView}>
       <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
       <SafeAreaView
         edges={chromeMode === "safe" ? ["top"] : []}
         style={[styles.container, { backgroundColor }]}
       >
         <Stack.Screen options={{ headerShown: false }} />
-        {!isWebViewCookiePrepDone ? (
+        {nativeChrome?.mode === "topbar" ? (
+          <NativeWebTopBar
+            config={nativeChrome.topbar}
+            chromeMode={chromeMode}
+            onLeftPress={() =>
+              injectWebChromeMessage({
+                type: "NATIVE_TOPBAR_PRESS",
+                payload: { side: "left" },
+              })
+            }
+            onRightPress={() =>
+              injectWebChromeMessage({
+                type: "NATIVE_TOPBAR_PRESS",
+                payload: { side: "right" },
+              })
+            }
+          />
+        ) : null}
+        {nativeChrome?.mode === "global" ? (
+          <NativeWebGlobalHeader
+            config={nativeChrome.global}
+            chromeMode={chromeMode}
+            onLogoPress={() =>
+              injectWebChromeMessage({
+                type: "NATIVE_GLOBAL_HEADER_PRESS",
+                payload: { action: "logo" },
+              })
+            }
+            onHamburgerPress={() =>
+              injectWebChromeMessage({
+                type: "NATIVE_GLOBAL_HEADER_PRESS",
+                payload: { action: "hamburger" },
+              })
+            }
+          />
+        ) : null}
+
+        {isWebViewCookiePrepDone ? (
+          <WebView
+            ref={webViewRef}
+            source={
+              __DEV__
+                ? {
+                    uri: webOrigin,
+                    headers: {
+                      Cookie: buildDevCookieHeader(),
+                    },
+                  }
+                : { uri: webOrigin }
+            }
+            style={styles.webview}
+            javaScriptEnabled={true}
+            onMessage={onMessage}
+            onNavigationStateChange={onNavigationStateChange}
+            domStorageEnabled={true}
+            startInLoadingState={true}
+            allowsBackForwardNavigationGestures={true}
+            contentInsetAdjustmentBehavior="never"
+            onLoadEnd={onLoadEnd}
+            injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
+            applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
+          />
+        ) : isSplashTimedOut ? (
           <View style={styles.prepFallback}>
             <ActivityIndicator color="#ffffff" />
+            <Text style={styles.prepFallbackTitle}>웹을 불러오는 중입니다…</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setIsSplashTimedOut(false);
+                setIsWebViewFirstLoadDone(false);
+                void SplashScreen.preventAutoHideAsync();
+              }}
+              style={styles.prepFallbackButton}
+            >
+              <Text style={styles.prepFallbackButtonText}>다시 시도</Text>
+            </Pressable>
           </View>
-        ) : (
-          <>
-            {nativeChrome?.mode === "topbar" ? (
-              <NativeWebTopBar
-                config={nativeChrome.topbar}
-                chromeMode={chromeMode}
-                onLeftPress={() =>
-                  injectWebChromeMessage({
-                    type: "NATIVE_TOPBAR_PRESS",
-                    payload: { side: "left" },
-                  })
-                }
-                onRightPress={() =>
-                  injectWebChromeMessage({
-                    type: "NATIVE_TOPBAR_PRESS",
-                    payload: { side: "right" },
-                  })
-                }
-              />
-            ) : null}
-            {nativeChrome?.mode === "global" ? (
-              <NativeWebGlobalHeader
-                config={nativeChrome.global}
-                chromeMode={chromeMode}
-                onLogoPress={() =>
-                  injectWebChromeMessage({
-                    type: "NATIVE_GLOBAL_HEADER_PRESS",
-                    payload: { action: "logo" },
-                  })
-                }
-                onHamburgerPress={() =>
-                  injectWebChromeMessage({
-                    type: "NATIVE_GLOBAL_HEADER_PRESS",
-                    payload: { action: "hamburger" },
-                  })
-                }
-              />
-            ) : null}
-            <WebView
-              ref={webViewRef}
-              source={
-                __DEV__
-                  ? {
-                      uri: webOrigin,
-                      headers: {
-                        Cookie: buildDevCookieHeader(),
-                      },
-                    }
-                  : { uri: webOrigin }
-              }
-              style={styles.webview}
-              javaScriptEnabled={true}
-              onMessage={onMessage}
-              onNavigationStateChange={onNavigationStateChange}
-              domStorageEnabled={true}
-              startInLoadingState={true}
-              allowsBackForwardNavigationGestures={true}
-              contentInsetAdjustmentBehavior="never"
-              onLoadEnd={onLoadEnd}
-              injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
-              applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
-            />
-          </>
-        )}
+        ) : null}
 
         <CameraModal
           visible={isCameraVisible}
@@ -294,5 +342,24 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    gap: 12,
+    paddingHorizontal: 24,
+  },
+  prepFallbackTitle: {
+    color: "#ffffff",
+    fontSize: 14,
+  },
+  prepFallbackButton: {
+    marginTop: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  prepFallbackButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
