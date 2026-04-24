@@ -63,7 +63,7 @@ function printHelp() {
       "  FIREBASE_IOS_APP_ID       Firebase 콘솔의 iOS 앱 ID (ios 일 때)",
       "",
       "선택:",
-      '  FIREBASE_DISTRIBUTION_GROUPS   콤마 없이 하나의 그룹명, 또는 "a,b" (기본: testers)',
+      '  FIREBASE_DISTRIBUTION_GROUPS   콤마 없이 하나의 그룹명, 또는 "a,b" (비우면 업로드만 하고 배포는 건너뜀)',
       "  RELEASE_NOTES                  릴리즈 노트 문자열",
       "  FIREBASE_TOKEN                 CI/GitHub Actions: 'firebase login:ci' 로 발급한 토큰 (환경 변수만 설정하면 Firebase CLI가 인식)",
       "",
@@ -105,7 +105,7 @@ if (!fs.existsSync(artifactPath)) {
   process.exit(1);
 }
 
-const groups = process.env.FIREBASE_DISTRIBUTION_GROUPS ?? "testers";
+const groups = process.env.FIREBASE_DISTRIBUTION_GROUPS ?? "";
 const notes = process.env.RELEASE_NOTES ?? "";
 
 const args = [
@@ -115,9 +115,12 @@ const args = [
   artifactPath,
   "--app",
   appId,
-  "--groups",
-  groups,
 ];
+
+// 그룹이 비어있으면 업로드만 하고 배포는 건너뜁니다.
+if (groups.trim()) {
+  args.push("--groups", groups);
+}
 
 if (notes) {
   args.push("--release-notes", notes);
