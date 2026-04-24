@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559046707980",
+    "project_id": "overall-70106",
+    "storage_bucket": "overall-70106.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559046707980:android:aefbdb003dc5a22efa9729",
+        "android_client_info": {
+          "package_name": "com.overall.Overall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAudnpUJ6qtJ4-CIEOlNk-N-X5WRVzzWWk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

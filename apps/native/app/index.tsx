@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import { Stack, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   BackHandler,
   Platform,
@@ -21,6 +22,19 @@ import PhotoPickerBottomSheet, {
 } from "../components/PhotoPickerBottomSheet";
 import { BridgeMessage } from "../types/bridge";
 import { handleBridgeMessage } from "../utils/bridgeHandler";
+import { useWebViewPreAuth } from "@/hooks/useWebViewPreAuth";
+import {
+  clearNativeAuthStorage,
+  persistAuthCookiesFromWebView,
+  shouldClearNativeAuthFromNavigation,
+  shouldSyncCookiesFromWebView,
+} from "@/lib/nativeWebSession";
+import { inferWebViewChromeModeFromUrl } from "@/lib/inferWebViewChromeModeFromUrl";
+import {
+  INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
+  isSameWebAppOrigin,
+} from "@/lib/webViewViewportSync";
+import { getWebAppOrigin } from "@/lib/webAuthConfig";
 import { APPLICATION_NAME_FOR_USER_AGENT } from "../utils/webViewUserAgent";
 
 const BACKGROUND = {
@@ -101,7 +115,12 @@ export default function App() {
   const navigation = useNavigation();
   const colorScheme = useColorScheme() ?? "light";
   const backgroundColor = BACKGROUND[colorScheme];
+  const webOrigin = getWebAppOrigin();
+  const isWebViewCookiePrepDone = useWebViewPreAuth(webOrigin);
   const webViewRef = useRef<WebView>(null);
+  const syncViewportInjectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const [chromeMode, setChromeMode] = useState<"safe" | "fullscreen">(
     "fullscreen"
   );
@@ -111,6 +130,24 @@ export default function App() {
   const [fileInputReqId, setFileInputReqId] = useState<string | null>(null);
   const [cameraOpenedFromFileInput, setCameraOpenedFromFileInput] =
     useState(false);
+
+  // Android 8+ 기본 알림 채널 (푸시 표시에 필요)
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    void Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (syncViewportInjectTimerRef.current != null) {
+        clearTimeout(syncViewportInjectTimerRef.current);
+      }
+    },
+    [],
+  );
 
   // Deep Link Handling
   useEffect(() => {
@@ -349,6 +386,11 @@ export default function App() {
         style={[styles.container, { backgroundColor }]}
       >
         <Stack.Screen options={{ headerShown: false }} />
+        {!isWebViewCookiePrepDone ? (
+          <View style={styles.prepFallback}>
+            <ActivityIndicator color="#ffffff" />
+          </View>
+        ) : (
         <WebView
           ref={webViewRef}
           source={
@@ -360,19 +402,67 @@ export default function App() {
             //       },
             //     }
             //   : { uri: "http://localhost:3000" }
-            { uri: "https://ovr-log.com" }
+            { uri: webOrigin }
           }
           style={styles.webview}
           javaScriptEnabled={true}
           onMessage={onMessage}
+          onNavigationStateChange={(navState) => {
+            const url = navState.url;
+            setChromeMode(inferWebViewChromeModeFromUrl(url, webOrigin));
+            if (
+              isSameWebAppOrigin(url, webOrigin) &&
+              !navState.loading &&
+              webViewRef.current
+            ) {
+              if (syncViewportInjectTimerRef.current != null) {
+                clearTimeout(syncViewportInjectTimerRef.current);
+              }
+              syncViewportInjectTimerRef.current = setTimeout(() => {
+                syncViewportInjectTimerRef.current = null;
+                webViewRef.current?.injectJavaScript(
+                  INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
+                );
+              }, 80);
+            }
+            if (shouldClearNativeAuthFromNavigation(url)) {
+              void (async () => {
+                try {
+                  await clearNativeAuthStorage();
+                } catch (e) {
+                  console.warn("[Native] 로그아웃 동기화(저장소 비우기) 실패:", e);
+                }
+              })();
+              return;
+            }
+            if (shouldSyncCookiesFromWebView(url, webOrigin)) {
+              void (async () => {
+                try {
+                  await persistAuthCookiesFromWebView(webOrigin);
+                } catch (e) {
+                  console.warn("[Native] 쿠키→SecureStore 동기화 실패:", e);
+                }
+              })();
+            }
+          }}
           // Essential for some OAuth flows or heavy sites
           domStorageEnabled={true}
           startInLoadingState={true}
           allowsBackForwardNavigationGestures={true}
+          // iOS: 스크롤뷰가 safe area로 contentInset 을 붙이면 복귀 후 높이가 어긋날 수 있음
+          contentInsetAdjustmentBehavior="never"
+          onLoadEnd={(e) => {
+            const url = e.nativeEvent.url;
+            if (!isSameWebAppOrigin(url, webOrigin)) return;
+            webViewRef.current?.injectJavaScript(
+              INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
+            );
+          }}
           // Inject a flag so web knows it's in RN
           injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
           applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
         />
+        )}
 
         <CameraModal
           visible={isCameraVisible}
@@ -402,5 +492,10 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+  },
+  prepFallback: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

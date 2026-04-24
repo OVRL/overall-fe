@@ -6,6 +6,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { handleBridgeMessage } from "../utils/bridgeHandler";
 import { decrementStackDepth } from "../utils/navigationStack";
+import { inferWebViewChromeModeFromUrl } from "@/lib/inferWebViewChromeModeFromUrl";
+import {
+  INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
+  isSameWebAppOrigin,
+} from "@/lib/webViewViewportSync";
+import { getWebAppOrigin } from "@/lib/webAuthConfig";
 import { APPLICATION_NAME_FOR_USER_AGENT } from "../utils/webViewUserAgent";
 
 const BACKGROUND = {
@@ -20,6 +26,7 @@ export default function WebViewScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const backgroundColor = BACKGROUND[colorScheme];
   const webViewRef = useRef<WebView>(null);
+  const webOrigin = getWebAppOrigin();
   const [chromeMode, setChromeMode] = useState<"safe" | "fullscreen">(
     "fullscreen"
   );
@@ -56,10 +63,23 @@ export default function WebViewScreen() {
           domStorageEnabled={true}
           startInLoadingState={true}
           allowsBackForwardNavigationGestures={true}
+          contentInsetAdjustmentBehavior="never"
+          onLoadEnd={(e) => {
+            const loaded = e.nativeEvent.url;
+            if (!isSameWebAppOrigin(loaded, webOrigin)) return;
+            webViewRef.current?.injectJavaScript(
+              INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
+            );
+          }}
           injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
           cacheMode="LOAD_CACHE_ELSE_NETWORK"
           cacheEnabled={true}
           applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
+          onNavigationStateChange={(navState) => {
+            setChromeMode(
+              inferWebViewChromeModeFromUrl(navState.url, webOrigin),
+            );
+          }}
         />
       </SafeAreaView>
     </View>

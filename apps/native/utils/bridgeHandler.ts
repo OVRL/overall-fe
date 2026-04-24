@@ -1,4 +1,5 @@
 import { WebView } from "react-native-webview";
+import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import * as Haptics from "expo-haptics";
 import { Linking } from "react-native";
@@ -33,10 +34,27 @@ export const handleBridgeMessage = async (
 
   try {
     switch (type) {
-      case "GET_PUSH_TOKEN":
-        const tokenData = await Notifications.getExpoPushTokenAsync();
+      case "GET_PUSH_TOKEN": {
+        // Expo 푸시(Android FCM)는 EAS projectId와 연결된 토큰이 필요합니다.
+        const projectId =
+          Constants.expoConfig?.extra?.eas?.projectId ??
+          Constants.easConfig?.projectId;
+        if (!projectId) {
+          sendResponse(
+            {
+              error:
+                "EAS projectId가 없습니다. app.json의 extra.eas.projectId를 확인하세요.",
+            },
+            "ERROR"
+          );
+          break;
+        }
+        const tokenData = await Notifications.getExpoPushTokenAsync({
+          projectId,
+        });
         sendResponse({ token: tokenData.data });
         break;
+      }
 
       case "VIBRATE":
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 16.0.0"
+    "version": ">= 18.3.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -8,14 +9,19 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
+      "distribution": "internal"
+    },
+    "firebase": {
+      "extends": "preview",
       "android": {
         "buildType": "apk"
       }
     },
-    "firebase": {
-      "extends": "preview"
-    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
     "production": {}
   }
 }

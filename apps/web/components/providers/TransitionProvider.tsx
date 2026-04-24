@@ -12,7 +12,7 @@ export const TransitionProvider = ({
   children: React.ReactNode;
 }) => {
   const { isNativeApp } = useBridge();
-  
+
   // 클라이언트의 경우 즉시 창 너비를 초기화하여 useEffect 내 동기적 setState 린트 에러를 방지합니다.
   const [windowWidth, setWindowWidth] = useState(() => {
     if (typeof window !== "undefined") return window.innerWidth;
@@ -44,9 +44,7 @@ export const TransitionProvider = ({
 
   return (
     <Ssgoi key={platform} config={config} usePathname={usePathname}>
-      <div style={{ position: "relative", minHeight: "100vh" }}>
-        {children}
-      </div>
+      <div style={{ position: "relative", minHeight: "100vh" }}>{children}</div>
     </Ssgoi>
   );
 };

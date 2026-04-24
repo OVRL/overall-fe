@@ -2,6 +2,10 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## 문서 (비개발자·배포)
+
+- **[Firebase App Distribution으로 테스트 앱 나누기 (단계별)](./docs/FIREBASE_APP_DISTRIBUTION_GUIDE.md)** — Firebase 설정, EAS 빌드·업로드, **푸시(FCM / Expo Push)** 까지 순서대로 안내합니다.
+
 ## Get started
 
 1. Install dependencies

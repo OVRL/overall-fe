@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Firebase Admin / FCM V1 서비스 계정(JSON은 Git에 올리지 말 것)
+*firebase-adminsdk*.json
+*-firebase-adminsdk*.json
+
 # Native
 .kotlin/
 *.orig.*
@@ -26,12 +30,16 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+# Firebase CLI
+firebase-debug.log
+
 # macOS
 .DS_Store
 *.pem
 
 # local env files
 .env*.local
+.env.firebase.local
 
 # typescript
 *.tsbuildinfo
