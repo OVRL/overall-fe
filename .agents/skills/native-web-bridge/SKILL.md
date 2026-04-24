@@ -45,6 +45,7 @@ description: >-
 | Native 핸들러 | `apps/native/utils/bridgeHandler.ts` 및 하위 핸들러 | 웹에서는 `sendToNative` / `requestWithResponse` |
 | 초기 플래그 주입 | `injectedJavaScriptBeforeContentLoaded` (`window.isNativeApp = true`) — `webview.tsx`, `index.tsx` | 브라우저 탭에서는 없음 · 클라이언트에서만 의미 있음 |
 | 페이지 전환(앱 느낌) | (웹 번들) `@ssgoi/react` | `TransitionProvider`, `PageTransition`, `lib/transitions/config.ts`; 플랫폼 분기에 `useBridge` 사용 |
+| 네이티브 헤더 노출 URL | `apps/native/lib/nativeWebChromePaths.ts` | `apps/web/lib/native/nativeWebChromePaths.ts` — `(main)` 글로벌 / 온보딩·팀 생성 Topbar |
 
 **중요:** 앱 여부 판별에 **`Overall_RN` 이름의 전용 쿠키는 사용하지 않는다.** 인증·팀 선택 등은 일반 HTTP 쿠키이며, **WebView 식별은 UA 마커와 브리지**가 표준 패턴이다.
 
@@ -72,5 +73,6 @@ description: >-
 
 ## 참고 문서·파일
 
+- **인앱 상단 크롬(글로벌/탑바) 경로·브리지**: `apps/web/docs/NATIVE_WEB_VIEW_CHROME.md`
 - 네이티브 스펙 초안: `apps/native/docs/RNWebView_Auth_Implementation_Spec.md`
 - 웹 브리지 예시(STT 등): `apps/web/docs/STT_Bridge_Spec.md` (해당 기능이 있을 때)

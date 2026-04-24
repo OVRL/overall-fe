@@ -4,14 +4,14 @@ import { Ssgoi } from "@ssgoi/react";
 import { useMemo, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getTransitionConfig, PlatformType } from "@/lib/transitions/config";
-import { useBridge } from "@/hooks/bridge/useBridge";
+import { useNativeChromePressMessageBridge } from "@/hooks/bridge/useNativeChromePressMessageBridge";
 
 export const TransitionProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const { isNativeApp } = useBridge();
+  const { isNativeApp } = useNativeChromePressMessageBridge();
 
   // 클라이언트의 경우 즉시 창 너비를 초기화하여 useEffect 내 동기적 setState 린트 에러를 방지합니다.
   const [windowWidth, setWindowWidth] = useState(() => {
@@ -38,8 +38,10 @@ export const TransitionProvider = ({
   const config = useMemo(() => getTransitionConfig(platform), [platform]);
 
   useEffect(() => {
-    console.log("Current Environment Platform:", platform);
-    console.log("Current Transition Config:", config);
+    if (process.env.NODE_ENV === "development") {
+      console.log("Current Environment Platform:", platform);
+      console.log("Current Transition Config:", config);
+    }
   }, [platform, config]);
 
   return (

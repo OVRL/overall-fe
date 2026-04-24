@@ -1,0 +1,150 @@
+# EAS로 iOS/Android 빌드 후 Firebase App Distribution에 업로드합니다.
+# 트리거: Actions 탭에서 수동 실행(workflow_dispatch)만.
+#
+# 필요한 GitHub Secrets (저장소 Settings → Secrets and variables → Actions):
+#   EXPO_TOKEN              https://expo.dev/accounts/[계정]/settings/access-tokens
+#   FIREBASE_TOKEN          로컬에서 `firebase login:ci` 로 발급 (CI용, 레포에 커밋 금지)
+#   FIREBASE_IOS_APP_ID     Firebase 콘솔 → 프로젝트 설정 → iOS 앱 ID (1:...:ios:...)
+#   FIREBASE_ANDROID_APP_ID Firebase 콘솔 → Android 앱 ID (1:...:android:...)
+# 선택: FIREBASE_DISTRIBUTION_GROUPS (비어 있으면 입력값 또는 testers)
+name: EAS Build → Firebase App Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "빌드·배포할 플랫폼"
+        required: true
+        type: choice
+        options:
+          - both
+          - ios
+          - android
+      distribution_group:
+        description: "Firebase App Distribution 테스터 그룹 이름"
+        required: false
+        default: testers
+      release_notes:
+        description: "릴리즈 노트 (선택)"
+        required: false
+        default: ""
+
+concurrency:
+  group: eas-firebase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    if: ${{ inputs.platform == 'ios' || inputs.platform == 'both' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/native
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: pnpm install (모노레포)
+        working-directory: ${{ github.workspace }}
+        run: pnpm install --frozen-lockfile
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build iOS (firebase 프로필, 완료까지 대기)
+        run: eas build --platform ios --profile firebase --non-interactive --wait --json > eas-build-ios.json
+
+      - name: 아카이브 URL 추출
+        id: artifact
+        working-directory: ${{ github.workspace }}
+        run: |
+          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-ios.json)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: IPA 다운로드
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          curl -fL --retry 3 --retry-delay 5 \
+            -H "Authorization: Bearer $EXPO_TOKEN" \
+            "${{ steps.artifact.outputs.url }}" \
+            -o "${{ runner.temp }}/app.ipa"
+
+      - name: Firebase App Distribution 업로드 (iOS)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          ARTIFACT_PATH: ${{ runner.temp }}/app.ipa
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+          FIREBASE_DISTRIBUTION_GROUPS: ${{ inputs.distribution_group }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: node scripts/firebase-distribute.mjs ios
+
+  android:
+    if: ${{ inputs.platform == 'android' || inputs.platform == 'both' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/native
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: pnpm install (모노레포)
+        working-directory: ${{ github.workspace }}
+        run: pnpm install --frozen-lockfile
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build Android (firebase 프로필, 완료까지 대기)
+        run: eas build --platform android --profile firebase --non-interactive --wait --json > eas-build-android.json
+
+      - name: 아카이브 URL 추출
+        id: artifact
+        working-directory: ${{ github.workspace }}
+        run: |
+          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-android.json)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: APK 다운로드
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          curl -fL --retry 3 --retry-delay 5 \
+            -H "Authorization: Bearer $EXPO_TOKEN" \
+            "${{ steps.artifact.outputs.url }}" \
+            -o "${{ runner.temp }}/app.apk"
+
+      - name: Firebase App Distribution 업로드 (Android)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          ARTIFACT_PATH: ${{ runner.temp }}/app.apk
+          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_DISTRIBUTION_GROUPS: ${{ inputs.distribution_group }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: node scripts/firebase-distribute.mjs android

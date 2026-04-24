@@ -7,7 +7,9 @@ export type BridgeActionType =
   | "OPEN_SETTINGS"
   | "GET_LOCATION"
   | "ROUTE_CHANGE"
-  | "SET_WEBVIEW_CHROME";
+  | "SET_WEBVIEW_CHROME"
+  | "SET_NATIVE_TOPBAR"
+  | "SET_NATIVE_GLOBAL_HEADER";
 
 export interface BridgePayload {
   url?: string;
@@ -18,6 +20,17 @@ export interface BridgePayload {
    * - fullscreen: 상태바 아래 여백 없이 상단까지 확장(언더 상태바)
    */
   chromeMode?: "safe" | "fullscreen";
+  /** 인앱 상단 네이티브 탑바(웹 TopbarHeader 대체) */
+  visible?: boolean;
+  transparent?: boolean;
+  title?: string | null;
+  centerMatchLineupLogo?: boolean;
+  showLeft?: boolean;
+  rightMode?: "none" | "label";
+  rightLabel?: string | null;
+  rightDisabled?: boolean;
+  /** 글로벌 헤더 전용 */
+  showHamburger?: boolean;
   [key: string]: any;
 }
 

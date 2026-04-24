@@ -4,6 +4,8 @@ import * as Notifications from "expo-notifications";
 import * as Haptics from "expo-haptics";
 import { Linking } from "react-native";
 import { BridgeMessage, BridgeResponse } from "../types/bridge";
+import type { NativeTopBarState } from "../types/nativeTopBar";
+import type { NativeWebChrome } from "../types/nativeChrome";
 import { handleGetLocation } from "./locationHandler";
 import { router } from "expo-router";
 import { CommonActions } from "@react-navigation/native";
@@ -15,6 +17,13 @@ export const handleBridgeMessage = async (
   navigation?: any,
   options?: {
     onSetWebViewChrome?: (mode: "safe" | "fullscreen") => void;
+    /** 탑바·글로벌 헤더 중 하나만 표시 — null 이면 둘 다 숨김 */
+    onSetNativeWebChrome?: (chrome: NativeWebChrome | null) => void;
+    /**
+     * 숨김 브리지가 탑바/글로벌 서로를 덮어쓰지 않도록, 해당 모드일 때만 chrome 을 제거한다.
+     * 미지정 시 기존처럼 `onSetNativeWebChrome(null)` 로 전체를 비운다.
+     */
+    onClearNativeWebChromeIfMode?: (mode: "global" | "topbar") => void;
   }
 ) => {
   const { type, payload, reqId } = message;
@@ -116,6 +125,47 @@ export const handleBridgeMessage = async (
         } else {
           console.warn("[Bridge] Invalid chromeMode:", mode);
         }
+        break;
+      }
+
+      case "SET_NATIVE_TOPBAR": {
+        if (payload?.visible !== true) {
+          if (options?.onClearNativeWebChromeIfMode) {
+            options.onClearNativeWebChromeIfMode("topbar");
+          } else {
+            options?.onSetNativeWebChrome?.(null);
+          }
+          break;
+        }
+        const next: NativeTopBarState = {
+          transparent: Boolean(payload.transparent),
+          title: typeof payload.title === "string" ? payload.title : null,
+          centerMatchLineupLogo: payload.centerMatchLineupLogo === true,
+          showLeft: payload.showLeft !== false,
+          rightMode: payload.rightMode === "label" ? "label" : "none",
+          rightLabel:
+            typeof payload.rightLabel === "string" ? payload.rightLabel : null,
+          rightDisabled: payload.rightDisabled === true,
+        };
+        options?.onSetNativeWebChrome?.({ mode: "topbar", topbar: next });
+        break;
+      }
+
+      case "SET_NATIVE_GLOBAL_HEADER": {
+        if (payload?.visible !== true) {
+          if (options?.onClearNativeWebChromeIfMode) {
+            options.onClearNativeWebChromeIfMode("global");
+          } else {
+            options?.onSetNativeWebChrome?.(null);
+          }
+          break;
+        }
+        options?.onSetNativeWebChrome?.({
+          mode: "global",
+          global: {
+            showHamburger: payload.showHamburger !== false,
+          },
+        });
         break;
       }
 

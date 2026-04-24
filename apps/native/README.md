@@ -4,7 +4,8 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## 문서 (비개발자·배포)
 
-- **[Firebase App Distribution으로 테스트 앱 나누기 (단계별)](./docs/FIREBASE_APP_DISTRIBUTION_GUIDE.md)** — Firebase 설정, EAS 빌드·업로드, **푸시(FCM / Expo Push)** 까지 순서대로 안내합니다.
+- **[Firebase App Distribution으로 테스트 앱 나누기 (단계별)](./docs/FIREBASE_APP_DISTRIBUTION_GUIDE.md)** — Firebase 설정, EAS 빌드·업로드, **푸시(FCM / Expo Push)** 까지 순서대로 안내합니다.  
+- **GitHub Actions**: 저장소 루트 [`.github/workflows/eas-firebase-app-distribution.yml`](../../.github/workflows/eas-firebase-app-distribution.yml) — EAS 빌드 후 Firebase App Distribution 자동 업로드(수동 실행).
 
 ## Get started
 

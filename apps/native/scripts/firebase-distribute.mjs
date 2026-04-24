@@ -63,6 +63,7 @@ function printHelp() {
 선택:
   FIREBASE_DISTRIBUTION_GROUPS   콤마 없이 하나의 그룹명, 또는 "a,b" (기본: testers)
   RELEASE_NOTES                  릴리즈 노트 문자열
+  FIREBASE_TOKEN                 CI/GitHub Actions: `firebase login:ci` 로 발급한 토큰 (환경 변수만 설정하면 Firebase CLI가 인식)
 
 선택 파일: apps/native/.env.firebase.local (위 변수들을 한 번에 설정)
 `);

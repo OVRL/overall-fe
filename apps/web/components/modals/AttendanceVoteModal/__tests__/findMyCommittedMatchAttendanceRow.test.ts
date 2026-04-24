@@ -34,12 +34,14 @@ describe("findMyCommittedMatchAttendanceRow", () => {
   });
 
   it("attendanceStatus가 null이면 해당 사용자 행은 확정 투표로 보지 않는다", () => {
-    expect(
-      findMyCommittedMatchAttendanceRow(
-        [row({ userId: 2, attendanceStatus: null })],
-        2,
-      ),
-    ).toBeNull();
+    const pendingRow = {
+      id: 1,
+      userId: 2,
+      matchId: 1,
+      user: null,
+      attendanceStatus: null,
+    } as unknown as MatchAttendanceRow;
+    expect(findMyCommittedMatchAttendanceRow([pendingRow], 2)).toBeNull();
   });
 
   it("일치하는 userId가 없으면 null이다", () => {
