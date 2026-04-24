@@ -12,8 +12,10 @@ if (!path) {
 }
 
 const raw = fs.readFileSync(path, "utf8");
-const d = JSON.parse(raw);
-const art = d.artifacts ?? d.build?.artifacts ?? {};
+const parsed = JSON.parse(raw);
+// `eas build --json` 은 단일 객체 또는 배열(여러 빌드)을 반환할 수 있습니다.
+const d = Array.isArray(parsed) ? parsed[0] : parsed;
+const art = d?.artifacts ?? d?.build?.artifacts ?? {};
 const url =
   art.applicationArchiveUrl ??
   art.url ??
@@ -22,7 +24,7 @@ const url =
 
 if (!url || typeof url !== "string") {
   console.error("JSON에서 artifacts.applicationArchiveUrl (또는 url)을 찾지 못했습니다.");
-  console.error(JSON.stringify(d, null, 2).slice(0, 4000));
+  console.error(JSON.stringify(parsed, null, 2).slice(0, 4000));
   process.exit(1);
 }
 
