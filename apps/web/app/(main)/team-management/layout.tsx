@@ -31,8 +31,8 @@ export default function TeamManagementLayout({
 
   return (
     <TeamManagementAccessGuard>
-      <div className="flex-1 bg-surface-primary min-h-screen">
-        <div className="flex min-h-screen">
+      <div className="flex-1 bg-surface-primary flex flex-col min-h-screen">
+        <div className="flex flex-1 min-h-0">
           {/* 좌측 사이드바 (데스크탑) */}
           <div className="hidden xl:flex flex-col self-stretch text-white">
             <TeamManagementSidebar
@@ -42,7 +42,7 @@ export default function TeamManagementLayout({
           </div>
 
           {/* 메인 콘텐츠 영역 */}
-          <main className="flex-1 overflow-auto pb-20 md:pb-24 xl:pb-0">
+          <main className="flex-1 min-h-0 overflow-y-auto pb-20 md:pb-24 xl:pb-0">
             {children}
           </main>
 

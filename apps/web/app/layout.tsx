@@ -131,6 +131,7 @@ export default async function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body
         className={`${pretendard.variable} w-full min-h-dvh h-screen antialiased overflow-x-hidden flex flex-col`}
+        suppressHydrationWarning
       >
         {/* Google Tag Manager (noscript) */}
         <noscript>

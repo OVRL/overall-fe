@@ -9,6 +9,9 @@ import { useDeleteMatchMutation } from "./hooks/useDeleteMatchMutation";
 import { usePlayerManagementQuery } from "./hooks/usePlayerManagementQuery";
 import { useUpdateMatchMutation } from "./hooks/useUpdateMatchMutation";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import ImgPlayer from "@/components/ui/ImgPlayer";
+import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
+import { getTeamMemberProfileImageRawUrl, getTeamMemberProfileImageFallbackUrl } from "@/lib/playerPlaceholderImage";
 
 const ENEMY_PLAYERS = [
     "메시", "호날두", "음바페", "홀란드", "호나우두", "펠레", "마라도나", "지단", "베르캄프", "앙리",
@@ -128,6 +131,7 @@ interface Player {
     id: string;
     name: string;
     profileImage: string;
+    fallbackImage?: string;
 }
 
 interface ScoreLog {
@@ -325,7 +329,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                             <button key={p.id} onClick={() => onChange(p.name)}
                                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left">
                                 <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                                    <Image src={getValidImageSrc(p.profileImage)} alt={p.name} width={28} height={28} className="object-cover" />
+                                    <ImgPlayer src={p.profileImage || undefined} fallbackSrc={p.fallbackImage} alt={p.name} />
                                 </div>
                                 <span className="text-sm text-white font-medium">{p.name}</span>
                                 {p.name !== value.trim() && (
@@ -458,7 +462,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                                                 {matched ? (
                                                     <>
                                                         <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
-                                                            <Image src={getValidImageSrc(matched.profileImage)} alt={matched.name} width={24} height={24} className="object-cover" />
+                                                            <ImgPlayer src={matched.profileImage || undefined} fallbackSrc={matched.fallbackImage} alt={matched.name} />
                                                         </div>
                                                         <span className="text-xs font-bold text-primary">{matched.name}</span>
                                                         {matched.name !== raw && (
@@ -498,7 +502,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                                         {players.map(player => (
                                             <button key={player.id} onClick={() => handleGoalChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
                                                 <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedGoal === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
-                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                                    <ImgPlayer src={player.profileImage || undefined} fallbackSrc={player.fallbackImage} alt={player.name} />
                                                 </div>
                                                 <span className={cn("text-[10px] font-medium transition-colors", selectedGoal === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
                                             </button>
@@ -521,7 +525,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                                         {players.map(player => (
                                             <button key={player.id} onClick={() => handleAssistChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
                                                 <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
-                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                                    <ImgPlayer src={player.profileImage || undefined} fallbackSrc={player.fallbackImage} alt={player.name} />
                                                 </div>
                                                 <span className={cn("text-[10px] font-medium transition-colors", selectedAssist === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
                                             </button>
@@ -544,7 +548,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                                         {players.map(player => (
                                             <button key={player.id} onClick={() => handlePreAssistChange(player.id)} className="flex flex-col items-center gap-2 shrink-0 group">
                                                 <div className={cn("w-14 h-14 rounded-2xl overflow-hidden border-2 transition-all", selectedPreAssist === player.id ? "border-primary scale-105" : "border-transparent opacity-60 group-hover:opacity-100")}>
-                                                    <Image src={getValidImageSrc(player.profileImage)} alt={player.name} width={56} height={56} className="object-cover" />
+                                                    <ImgPlayer src={player.profileImage || undefined} fallbackSrc={player.fallbackImage} alt={player.name} />
                                                 </div>
                                                 <span className={cn("text-[10px] font-medium transition-colors", selectedPreAssist === player.id ? "text-white" : "text-gray-500")}>{player.name}</span>
                                             </button>
@@ -589,11 +593,18 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const [logToDelete, setLogToDelete] = useState<{ matchId: string; quarter: number; logId: string; description: string } | null>(null);
 
     // 실제 팀 멤버 데이터 매핑
-    const teamPlayers: Player[] = React.useMemo(() => (playersData.findManyTeamMember.members || []).map((m: any) => ({
-        id: String(m.id),
-        name: m.user?.name || "알 수 없음",
-        profileImage: m.user?.profileImage || "/images/player/img_player_1.webp"
-    })), [playersData.findManyTeamMember.members]);
+    const teamPlayers: Player[] = React.useMemo(() => (playersData.findManyTeamMember.members || []).map((m: any) => {
+        const normalizedMemberId = m.id != null ? (parseNumericIdFromRelayGlobalId(m.id) ?? 0) : 0;
+        const memberForImage = { ...m, id: normalizedMemberId || 0 };
+        const rawUrl = getTeamMemberProfileImageRawUrl(memberForImage as any);
+        const fallbackUrl = getTeamMemberProfileImageFallbackUrl(memberForImage as any);
+        return {
+            id: String(m.id),
+            name: m.user?.name || "알 수 없음",
+            profileImage: rawUrl,
+            fallbackImage: fallbackUrl,
+        };
+    }), [playersData.findManyTeamMember.members]);
     // API 데이터를 로컬 상태와 결합 (확장 여부 관리용 및 로그 데이터 복원)
     const initialMatches: MatchRecord[] = React.useMemo(() => (data.findMatch || []).map((m: any) => {
         let savedData = { score: { home: 0, away: 0 }, logs: { 1: [], 2: [], 3: [], 4: [] } };

@@ -5,6 +5,7 @@ import { X, Copy, Check, Settings } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Dropdown from "@/components/ui/Dropdown";
+import { EmblemImage } from "@/components/ui/EmblemImage";
 import { getValidImageSrc, cn } from "@/lib/utils";
 import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
@@ -20,8 +21,7 @@ import useModal from "@/hooks/useModal";
 import locationIcon from "@/public/icons/location.svg";
 import closeIcon from "@/public/icons/close.svg";
 import Icon from "@/components/ui/Icon";
-import TextField from "@/components/ui/TextField";
-import ProfileAvatar from "@/components/ui/ProfileAvatar";
+import ImgPlayer from "@/components/ui/ImgPlayer";
 import { useUserId, parseUserId } from "@/hooks/useUserId";
 import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
 import { 
@@ -45,6 +45,7 @@ interface TeamMember {
   joinedAt: string;
   role: MemberRole;
   profileImage: string;
+  fallbackImage: string;
 }
 
 // ──────────────────────────────────────────────
@@ -195,6 +196,7 @@ interface TeamInfoModalProps {
     locationName: string;
     description: string;
     emblemSrc: string;
+    emblemFile: File | null;
     homeDesign: UniformDesign;
     awayDesign: UniformDesign;
   }) => void;
@@ -212,22 +214,32 @@ function TeamInfoModal({
   onClose,
   onSave,
 }: TeamInfoModalProps) {
-  const { openModal } = useModal("ADDRESS_SEARCH");
+  const { openModal: openAddressModal } = useModal("ADDRESS_SEARCH");
+  const { openModal: openEmblemCropModal } = useModal("EDIT_EMBLEM_IMAGE");
   const [teamName, setTeamName] = useState(initTeamName);
   const [locationName, setLocationName] = useState(initLocationName);
   const [locationCode, setLocationCode] = useState(initLocationCode);
   const [description, setDescription] = useState(initDesc);
   const [emblemSrc, setEmblemSrc] = useState(initEmblem);
+  const [emblemFile, setEmblemFile] = useState<File | null>(null);
   const [homeDesign, setHomeDesign] = useState<UniformDesign>(initHome);
   const [awayDesign, setAwayDesign] = useState<UniformDesign>(initAway);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 파일 선택 → 로컬 미리보기
+  // 파일 선택 → 크롭 모달 오픈
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setEmblemSrc(url);
+    const objectUrl = URL.createObjectURL(file);
+    openEmblemCropModal({
+      initialImage: objectUrl,
+      onSave: (croppedPreviewUrl, croppedFile) => {
+        setEmblemSrc(croppedPreviewUrl);
+        setEmblemFile(croppedFile);
+      },
+    });
+    // 같은 파일 재선택 가능하도록 초기화
+    e.target.value = "";
   };
 
   return (
@@ -262,7 +274,7 @@ function TeamInfoModal({
               type="button"
               className="w-full cursor-pointer text-left outline-none"
               onClick={() =>
-                openModal({
+                openAddressModal({
                   onComplete: ({ address, code }) => {
                     setLocationName(address);
                     setLocationCode(code);
@@ -303,13 +315,12 @@ function TeamInfoModal({
           <div className="flex flex-col gap-3">
             <label className="text-sm font-semibold text-gray-400">클럽 엠블럼</label>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0">
-                <Image
-                  src={getValidImageSrc(emblemSrc, "/images/teamemblum_default.webp")}
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0 relative">
+                <EmblemImage
+                  src={emblemSrc}
                   alt="엠블럼"
-                  width={48}
-                  height={48}
-                  className="object-cover w-full h-full"
+                  fill
+                  sizes="48px"
                 />
               </div>
               {/* 숨겨진 파일 input - 모바일:앨범, PC:파일탐색기 모두 지원 */}
@@ -349,7 +360,7 @@ function TeamInfoModal({
             variant="primary"
             size="m"
             onClick={() =>
-              onSave({ teamName, locationCode, locationName, description, emblemSrc, homeDesign, awayDesign })
+              onSave({ teamName, locationCode, locationName, description, emblemSrc, emblemFile, homeDesign, awayDesign })
             }
             className="rounded-xl font-bold"
           >
@@ -811,6 +822,7 @@ function TeamSettingsPanelInner({
     locationName: string;
     description: string;
     emblemSrc: string;
+    emblemFile: File | null;
     homeDesign: UniformDesign;
     awayDesign: UniformDesign;
   }) => {
@@ -818,7 +830,7 @@ function TeamSettingsPanelInner({
       alert("팀 정보를 불러올 수 없어 수정할 수 없습니다.");
       return;
     }
-  
+
     const numericTeamId = parseNumericIdFromRelayGlobalId(teamData.id);
     if (!numericTeamId) {
       alert("팀 ID가 올바르지 않습니다.");
@@ -836,16 +848,21 @@ function TeamSettingsPanelInner({
 
     // 백엔드 mutation 응답에서 region 객체를 제대로 채워주지 않을 경우를 대비해 스토어를 직접 변경
     updateTeam({
-      variables: { input },
+      // multipart spec: 파일 업로드 변수는 operations.variables 안에 null 플레이스홀더가 있어야
+      // 서버(graphql-upload)가 파일을 올바른 변수에 주입할 수 있음
+      variables: { input, ...(newData.emblemFile ? { emblem: null } : {}) },
+      uploadables: newData.emblemFile ? { emblem: newData.emblemFile } : undefined,
       updater: (store) => {
         const payload = store.getRootField("updateTeam");
         if (!payload) return;
-        
-        // 새로 저장한 region 객체 레코드를 생성 (client-side only)
-        const regionRecord = store.create(`client:region:${newData.locationCode}`, "RegionSearchModel");
+
+        // store.create는 이미 존재하는 key에서 throw하므로 get으로 먼저 확인
+        const regionKey = `client:region:${newData.locationCode}`;
+        const regionRecord =
+          store.get(regionKey) ?? store.create(regionKey, "RegionSearchModel");
         regionRecord.setValue(newData.locationCode, "code");
         regionRecord.setValue(newData.locationName, "name");
-        
+
         payload.setLinkedRecord(regionRecord, "region");
       },
       onCompleted: () => {
@@ -869,7 +886,7 @@ function TeamSettingsPanelInner({
     ? new Date(teamData.historyStartDate).toLocaleDateString()
     : "";
   const description = teamData.description ?? "";
-  const emblemSrc = teamData.emblem ?? "/images/ovr.png";
+  const emblemSrc = teamData.emblem ?? "";
   const homeDesign = (teamData.homeUniform as UniformDesign) ?? "SOLID_RED";
   const awayDesign = (teamData.awayUniform as UniformDesign) ?? "STRIPE_BLUE";
 
@@ -933,13 +950,12 @@ function TeamSettingsPanelInner({
 
           <div className="px-4 md:px-8 pb-10 mt-6 flex sm:flex-row flex-col gap-8 md:gap-12 items-start">
             {/* 팀 엠블럼 */}
-            <div className="w-[84px] h-[84px] md:w-[100px] md:h-[100px] rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0">
-              <Image
-                src={getValidImageSrc(emblemSrc, "/images/teamemblum_default.webp")}
+            <div className="w-[84px] h-[84px] md:w-[100px] md:h-[100px] rounded-full overflow-hidden bg-[#2a2a2a] border border-white/10 shrink-0 relative">
+              <EmblemImage
+                src={emblemSrc}
                 alt="Team Logo"
-                width={100}
-                height={100}
-                className="object-cover w-full h-full"
+                fill
+                sizes="100px"
               />
             </div>
 
@@ -1001,12 +1017,11 @@ function TeamSettingsPanelInner({
                   <tr key={member.id} className="hover:bg-white/3 transition-colors whitespace-nowrap">
                     <td className="px-3 md:px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 relative flex items-center justify-center">
-                          <ProfileAvatar
+                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 bg-[#2a2a2a]">
+                          <ImgPlayer
                             src={member.profileImage || undefined}
-                            fallbackSrc={(member as any).fallbackImage}
+                            fallbackSrc={member.fallbackImage}
                             alt={member.name}
-                            size={36}
                           />
                         </div>
                         <span className="text-white font-medium truncate max-w-[80px] md:max-w-[100px] text-xs md:text-sm">
