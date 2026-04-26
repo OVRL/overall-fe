@@ -37,10 +37,10 @@ export function useTeamInviteCode(teamId: number | null) {
         onError(error) {
           if (isAlreadyExistsInviteCodeError(error)) {
             fetchInviteCodeByTeam(teamId)
-              .then((code) => {
-                if (code != null) {
-                  setInviteCode(code);
-                  onSuccess(code);
+              .then((snap) => {
+                if (snap != null) {
+                  setInviteCode(snap.code);
+                  onSuccess(snap.code);
                 } else {
                   onError();
                 }

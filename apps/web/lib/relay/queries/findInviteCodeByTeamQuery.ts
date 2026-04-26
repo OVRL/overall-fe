@@ -8,6 +8,7 @@ export const FindInviteCodeByTeamQuery = graphql`
   query findInviteCodeByTeamQuery($teamId: Int!) {
     findInviteCodeByTeam(teamId: $teamId) {
       code
+      expiredAt
     }
   }
 `;

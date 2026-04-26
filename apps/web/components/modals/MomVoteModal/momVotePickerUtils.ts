@@ -1,6 +1,19 @@
-import type { findMatchAttendanceQuery } from "@/__generated__/findMatchAttendanceQuery.graphql";
+import type { AttendanceStatus } from "@/__generated__/momVoteModalQuery.graphql";
 
 export type MomVoteCandidateOption = { label: string; value: string };
+
+/**
+ * `buildMomVoteCandidateOptions`가 읽는 필드만 정의합니다.
+ * `findMatchAttendance`를 여러 쿼리에서 다르게 선택해도(예: `match` 중첩 없음) 호환됩니다.
+ */
+export type MomVoteAttendanceRow = {
+  readonly attendanceStatus: AttendanceStatus;
+  readonly matchId: number;
+  readonly userId: number;
+  readonly user: {
+    readonly name: string | null | undefined;
+  } | null | undefined;
+};
 
 /**
  * MOM 후보 목록: 해당 경기에서 참석(ATTEND)으로 확정된 팀원만 (용병은 드롭다운에 포함하지 않음).
@@ -13,7 +26,7 @@ export type BuildMomVoteCandidateOptionsParams = {
 };
 
 export function buildMomVoteCandidateOptions(
-  rows: findMatchAttendanceQuery["response"]["findMatchAttendance"],
+  rows: readonly MomVoteAttendanceRow[],
   expectedMatchId: number,
   params?: BuildMomVoteCandidateOptionsParams,
 ): MomVoteCandidateOption[] {
