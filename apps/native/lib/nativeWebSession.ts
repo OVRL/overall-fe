@@ -3,11 +3,17 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 /** RNWebView_Auth_Implementation_Spec: SecureStore 키와 동일한 이름 사용 */
-const SECURE_KEYS = {
+export const SECURE_KEYS = {
   accessToken: "accessToken",
   refreshToken: "refreshToken",
   userId: "userId",
 } as const;
+
+/** 네이티브 로그인 셸 등에서 세션 존재 여부 판별 */
+export async function hasNativeAuthSession(): Promise<boolean> {
+  const refresh = await SecureStore.getItemAsync(SECURE_KEYS.refreshToken);
+  return Boolean(refresh && refresh.length > 0);
+}
 
 /** iOS WKWebView 쿠키 저장소와 맞추기 위해 WebKit API 사용 (README useWebKit) */
 function useWebKitCookieStore(): boolean {
