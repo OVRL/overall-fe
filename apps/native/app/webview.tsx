@@ -27,7 +27,7 @@ const BACKGROUND = {
 export default function WebViewScreen() {
   const navigation = useNavigation();
   const { url } = useLocalSearchParams<{ url: string }>();
-  const colorScheme = useColorScheme() ?? "light";
+  const colorScheme = useColorScheme() ?? "dark";
   const backgroundColor = BACKGROUND[colorScheme];
   const webViewRef = useRef<WebView>(null);
   const webOrigin = getWebAppOrigin();

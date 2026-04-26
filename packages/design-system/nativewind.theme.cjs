@@ -34,6 +34,10 @@ module.exports = {
       green: {
         600: "oklch(91.85% 0.2357 127.4)",
       },
+      /** 다크 메인 캔버스 bg-primary — 네이티브 스플래시와 동일, Tailwind `bg-bg-primary` */
+      bg: {
+        primary: "#131312",
+      },
     },
   },
 };

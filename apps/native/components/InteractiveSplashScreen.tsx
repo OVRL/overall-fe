@@ -1,112 +1,68 @@
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Image } from "expo-image";
 import React, { useEffect } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
 
-const BACKGROUND = {
-  light: "#ffffff",
-  dark: "#000000",
-} as const;
+/** 다크 모드 메인 캔버스 bg-primary (RN에서 oklch 미지원 시 밝게 깨지는 이슈 방지 — hex 고정) */
+const BG_BG_PRIMARY = "#131312";
 
-const SPLASH_DURATION_MS = 2200;
+const LOGO_SIZE = 240;
 
-type Props = {
-  onFinish: () => void;
-};
-
-export default function InteractiveSplashScreen({ onFinish }: Props) {
-  const colorScheme = useColorScheme() ?? "light";
-  const backgroundColor = BACKGROUND[colorScheme];
-
-  const scale = useSharedValue(0.85);
+/**
+ * 커스텀 전면 스플래시: 애니메이션 WebP 로고 + bg-bg-primary 배경.
+ * 표시 여부는 부모가 마운트/언마운트로 제어합니다.
+ */
+export default function InteractiveSplashScreen() {
   const opacity = useSharedValue(0);
-  const progressWidth = useSharedValue(0);
+  const scale = useSharedValue(0.94);
 
   useEffect(() => {
-    // 로고: 페이드인 + 살짝 스케일 업
-    opacity.value = withTiming(1, { duration: 400 });
-    scale.value = withSpring(1, {
-      damping: 14,
-      stiffness: 120,
-    });
-
-    // 하단 프로그레스 바: 일정 시간 동안 채워짐
-    progressWidth.value = withDelay(
-      300,
-      withTiming(1, { duration: SPLASH_DURATION_MS - 500 })
-    );
-  }, [opacity, scale, progressWidth]);
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      onFinish();
-    }, SPLASH_DURATION_MS);
-    return () => clearTimeout(t);
-  }, [onFinish]);
+    opacity.value = withTiming(1, { duration: 380 });
+    scale.value = withSpring(1, { damping: 16, stiffness: 140 });
+  }, [opacity, scale]);
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ scale: scale.value }],
   }));
 
-  const progressAnimatedStyle = useAnimatedStyle(() => ({
-    width: `${progressWidth.value * 100}%`,
-  }));
-
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View
+      style={styles.root}
+      accessibilityLabel="Overall 스플래시"
+    >
       <Animated.View style={[styles.logoWrap, logoAnimatedStyle]}>
         <Image
-          source={require("../assets/images/splash-icon.png")}
+          source={require("../assets/images/login_logo.webp")}
           style={styles.logo}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </Animated.View>
-      <View style={styles.progressTrack}>
-        <Animated.View
-          style={[
-            styles.progressBar,
-            { backgroundColor: colorScheme === "dark" ? "#fff" : "#000" },
-            progressAnimatedStyle,
-          ]}
-        />
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  root: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100000,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: BG_BG_PRIMARY,
   },
   logoWrap: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
     alignItems: "center",
     justifyContent: "center",
   },
   logo: {
-    width: 200,
-    height: 200,
-  },
-  progressTrack: {
-    position: "absolute",
-    bottom: 80,
-    left: 48,
-    right: 48,
-    height: 3,
-    borderRadius: 2,
-    overflow: "hidden",
-    backgroundColor: "rgba(128,128,128,0.3)",
-  },
-  progressBar: {
-    height: "100%",
-    borderRadius: 2,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
   },
 });

@@ -17,5 +17,6 @@ export function useColorScheme() {
     return colorScheme;
   }
 
-  return 'light';
+  // 앱 기본은 다크 — SSR/하이드레이션 전에도 라이트 플래시 방지
+  return 'dark';
 }
