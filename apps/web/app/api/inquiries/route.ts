@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, phone, email, category, title, content } = body;
 
-    if (!name || !email || !title || !content) {
+    // partnership 카테고리는 email 없이 phone만으로 가능
+    const isPartnership = category === "partnership";
+    if (!name || (!email && !isPartnership) || !title || !content) {
       return NextResponse.json(
         { error: "필수 항목을 입력해주세요." },
         { status: 400 },

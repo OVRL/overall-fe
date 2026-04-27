@@ -25,6 +25,24 @@ interface Team {
 }
 
 export default function AdminTeamsPage() {
+  // ─── Avatar 컴포넌트 (이미지 로드 실패 시 이니셜로 fallback) ───
+  function EmblemAvatar({ src, name, size = "8", rounded = "lg" }: { src: string | null; name: string | null; size?: string; rounded?: string }) {
+    const [err, setErr] = useState(false);
+    const cls = `h-${size} w-${size}`;
+    if (src && !err) {
+      return <img src={src} alt="" className={`${cls} rounded-${rounded} object-cover`} onError={() => setErr(true)} />;
+    }
+    return <div className={`flex ${cls} items-center justify-center rounded-${rounded} bg-gray-900 text-xs font-bold text-gray-500`}>{name?.[0] ?? "?"}</div>;
+  }
+
+  function MemberAvatar({ src, name }: { src: string | null; name: string | null }) {
+    const [err, setErr] = useState(false);
+    if (src && !err) {
+      return <img src={src} alt="" className="h-full w-full object-cover" onError={() => setErr(true)} />;
+    }
+    return <div className="flex h-full w-full items-center justify-center text-xs font-bold text-gray-500">{name?.[0] ?? "?"}</div>;
+  }
+
   const { email } = useAdminAuth();
   const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const teamIdFromUrl = searchParams?.get("teamId");
@@ -220,17 +238,7 @@ export default function AdminTeamsPage() {
                   {/* Mobile */}
                   <div className="md:hidden">
                     <div className="flex items-center gap-3">
-                      {team.emblem ? (
-                        <img
-                          src={team.emblem}
-                          alt=""
-                          className="h-8 w-8 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-xs font-bold text-gray-500">
-                          {team.name?.[0] ?? "?"}
-                        </div>
-                      )}
+                      <EmblemAvatar src={team.emblem} name={team.name} />
                       <div>
                         <p className="text-sm font-medium text-Label-Primary">
                           {team.name ?? "이름 없음"}
@@ -245,13 +253,7 @@ export default function AdminTeamsPage() {
                   {/* Desktop */}
                   <span className="hidden text-xs text-gray-500 md:block col-span-1">{team.id}</span>
                   <div className="hidden md:flex md:items-center md:gap-3 col-span-4">
-                    {team.emblem ? (
-                      <img src={team.emblem} alt="" className="h-8 w-8 rounded-lg object-cover" />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-xs font-bold text-gray-500">
-                        {team.name?.[0] ?? "?"}
-                      </div>
-                    )}
+                    <EmblemAvatar src={team.emblem} name={team.name} />
                     <span className="text-sm font-medium text-Label-Primary">
                       {team.name ?? "이름 없음"}
                     </span>
@@ -296,13 +298,7 @@ export default function AdminTeamsPage() {
             <div className="p-6 space-y-8">
               {/* Profile Card */}
               <div className="flex flex-col items-center text-center gap-4">
-                {selectedTeam.emblem ? (
-                  <img src={selectedTeam.emblem} alt="" className="h-24 w-24 rounded-2xl object-cover ring-4 ring-gray-900/50" />
-                ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gray-900 text-3xl font-bold text-gray-700">
-                    {selectedTeam.name?.[0] ?? "?"}
-                  </div>
-                )}
+                <EmblemAvatar src={selectedTeam.emblem} name={selectedTeam.name} size="24" rounded="2xl" />
                 <div>
                   <h3 className="text-2xl font-bold text-Label-Primary">{selectedTeam.name}</h3>
                   <p className="text-sm text-gray-500 mt-1">
@@ -381,7 +377,7 @@ export default function AdminTeamsPage() {
                   {selectedTeam.members?.map((member: any) => (
                     <div key={member.id} className="flex items-center gap-3 px-4 py-3">
                       <div className="h-8 w-8 rounded-full bg-gray-900 overflow-hidden border border-white/5">
-                        <img src={member.user?.profileImage || "/images/player/img_player_1.webp"} alt="" className="h-full w-full object-cover" />
+                        <MemberAvatar src={member.user?.profileImage ?? null} name={member.user?.name ?? null} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-Label-Primary truncate">{member.user?.name}</p>

@@ -20,3 +20,32 @@ html[data-native-webview="true"] [contenteditable="true"] {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* ─── 모달 슬라이드 업 애니메이션 ─── */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+/* ─── shake 애니메이션 (캡차 오류) ─── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
