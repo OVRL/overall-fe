@@ -19,7 +19,7 @@ const EmailLoginForm = ({ onSubmit }: EmailLoginFormProps) => {
     control,
     formState: { errors, isValid },
   } = useForm<LoginSchemaType>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema as never),
     mode: "onChange",
     defaultValues: {
       email: "",

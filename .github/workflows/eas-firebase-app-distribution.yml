@@ -1,0 +1,178 @@
+# EAS로 iOS/Android 빌드 후 Firebase App Distribution에 업로드합니다.
+#
+# 트리거
+#   - push: main/develop 에서 apps/native/ 경로 변경 시 자동 (iOS·Android 둘 다 빌드·배포)
+#   - workflow_dispatch: Actions에서 수동 (플랫폼·그룹·릴리즈 노트 선택)
+#
+# 필요한 GitHub Secrets (저장소 Settings → Secrets and variables → Actions):
+#   EXPO_TOKEN              https://expo.dev/accounts/[계정]/settings/access-tokens
+#   FIREBASE_TOKEN          로컬에서 `firebase login:ci` 로 발급 (CI용, 레포에 커밋 금지)
+#   FIREBASE_IOS_APP_ID     Firebase 콘솔 → 프로젝트 설정 → iOS 앱 ID (1:...:ios:...)
+#   FIREBASE_ANDROID_APP_ID Firebase 콘솔 → Android 앱 ID (1:...:android:...)
+name: EAS Build → Firebase App Distribution
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "apps/native/**"
+      - ".github/workflows/eas-firebase-app-distribution.yml"
+      # 문서만 바뀐 커밋은 자동 실행에서 제외
+      - "!apps/native/**/*.md"
+      - "!apps/native/docs/**"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "빌드·배포할 플랫폼"
+        required: true
+        type: choice
+        options:
+          - both
+          - ios
+          - android
+      distribution_group:
+        description: "Firebase App Distribution 테스터 그룹 이름"
+        required: false
+        default: testers
+      release_notes:
+        description: "릴리즈 노트 (선택)"
+        required: false
+        default: ""
+
+concurrency:
+  group: eas-firebase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both'))
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/native
+    steps:
+      - uses: actions/checkout@v4
+
+      # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: pnpm install (모노레포)
+        working-directory: ${{ github.workspace }}
+        run: pnpm install --frozen-lockfile
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build iOS (firebase 프로필, 완료까지 대기)
+        run: eas build --platform ios --profile firebase --non-interactive --wait --json > eas-build-ios.json
+
+      - name: 아카이브 URL 추출
+        id: artifact
+        working-directory: ${{ github.workspace }}
+        run: |
+          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-ios.json)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: IPA 다운로드
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          curl -fL --retry 3 --retry-delay 5 \
+            -H "Authorization: Bearer $EXPO_TOKEN" \
+            "${{ steps.artifact.outputs.url }}" \
+            -o "${{ runner.temp }}/app.ipa"
+
+      - name: Firebase App Distribution 업로드 (iOS)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          ARTIFACT_PATH: ${{ runner.temp }}/app.ipa
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
+            export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+          else
+            export FIREBASE_DISTRIBUTION_GROUPS="testers"
+            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+          fi
+          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
+          node scripts/firebase-distribute.mjs ios
+
+  android:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both'))
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/native
+    steps:
+      - uses: actions/checkout@v4
+
+      # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: pnpm install (모노레포)
+        working-directory: ${{ github.workspace }}
+        run: pnpm install --frozen-lockfile
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build Android (firebase 프로필, 완료까지 대기)
+        run: eas build --platform android --profile firebase --non-interactive --wait --json > eas-build-android.json
+
+      - name: 아카이브 URL 추출
+        id: artifact
+        working-directory: ${{ github.workspace }}
+        run: |
+          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-android.json)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: APK 다운로드
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          curl -fL --retry 3 --retry-delay 5 \
+            -H "Authorization: Bearer $EXPO_TOKEN" \
+            "${{ steps.artifact.outputs.url }}" \
+            -o "${{ runner.temp }}/app.apk"
+
+      - name: Firebase App Distribution 업로드 (Android)
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          ARTIFACT_PATH: ${{ runner.temp }}/app.apk
+          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
+            export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+          else
+            export FIREBASE_DISTRIBUTION_GROUPS="testers"
+            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+          fi
+          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
+          node scripts/firebase-distribute.mjs android

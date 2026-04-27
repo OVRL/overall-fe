@@ -8,7 +8,7 @@ import {
 
 export function useRegisterGameForm() {
   const form = useForm<RegisterGameValues>({
-    resolver: zodResolver(registerGameSchema) as never,
+    resolver: zodResolver(registerGameSchema as never),
     mode: "onChange",
     defaultValues: getRegisterGameDefaultValues(),
   });

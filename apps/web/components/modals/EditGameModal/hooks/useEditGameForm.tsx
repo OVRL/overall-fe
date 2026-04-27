@@ -8,7 +8,7 @@ import { useEffect } from "react";
 
 export function useEditGameForm(initialValues: RegisterGameValues | null) {
   const form = useForm<RegisterGameValues>({
-    resolver: zodResolver(registerGameSchema) as never,
+    resolver: zodResolver(registerGameSchema as never),
     mode: "onChange",
     defaultValues: initialValues || undefined,
   });

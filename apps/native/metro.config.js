@@ -11,4 +11,25 @@ const config = getDefaultConfig(projectRoot);
 const monorepoRoot = path.resolve(projectRoot, "../..");
 config.watchFolders = [monorepoRoot];
 
+// pnpm 모노레포에서 Metro가 루트의 다른 react(예: 웹 19.2.x) 쪽으로 섞이면
+// Fabric의 `ReactFabric` shim 로드가 깨질 수 있음 — 앱 루트 node_modules를 우선한다.
+// https://docs.expo.dev/guides/monorepos/
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, "node_modules"),
+  path.resolve(monorepoRoot, "node_modules"),
+];
+
+// 동일 앱 번들 안에서 react / react-native는 반드시 한 벌만 쓰이도록 고정
+const reactRoot = path.dirname(
+  require.resolve("react/package.json", { paths: [projectRoot] })
+);
+const reactNativeRoot = path.dirname(
+  require.resolve("react-native/package.json", { paths: [projectRoot] })
+);
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  react: reactRoot,
+  "react-native": reactNativeRoot,
+};
+
 module.exports = withNativeWind(config, { input: path.join(projectRoot, "global.css") });

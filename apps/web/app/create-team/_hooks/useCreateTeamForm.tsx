@@ -48,7 +48,8 @@ export const useCreateTeamForm = (options?: CreateTeamFormOptions) => {
   const onSuccess = options?.onSuccess;
 
   const form = useForm<CreateTeamValues>({
-    resolver: zodResolver(createTeamSchema),
+    // Zod 4 스키마와 @hookform/resolvers/zod 기대 타입 불일치
+    resolver: zodResolver(createTeamSchema as never),
     mode: "onChange",
     defaultValues: {
       clubName: "",

@@ -13,6 +13,9 @@
         "buildType": "apk"
       }
     },
+    "firebase": {
+      "extends": "preview"
+    },
     "production": {}
   }
 }

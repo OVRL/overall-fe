@@ -1,53 +1,27 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { isNativeWebViewUserAgent } from "@/lib/native/webViewUserAgent";
+import type {
+  BridgeMessage,
+  BridgeResponse,
+  BridgeResponseType,
+  WebViewChromeMode,
+} from "./bridgeTypes";
 
-declare global {
-  interface Window {
-    ReactNativeWebView?: {
-      postMessage: (message: string) => void;
-    };
-  }
-  interface DocumentEventMap {
-    message: MessageEvent;
-  }
-}
-
-// 요청 타입 (Web -> Native)
-export type BridgeActionType =
-  | "GET_PUSH_TOKEN"
-  | "OPEN_CAMERA"
-  | "REQUEST_PERMISSIONS"
-  | "VIBRATE"
-  | "OPEN_SETTINGS"
-  | "GET_LOCATION"
-  | "ROUTE_CHANGE"
-  | "OPEN_PHOTO_PICKER"
-  | "SET_WEBVIEW_CHROME";
-
-export type WebViewChromeMode = "safe" | "fullscreen";
-
-// 응답 타입 (Native -> Web)
-export type BridgeResponseType =
-  | "PUSH_TOKEN_RESULT"
-  | "LOCATION_RESULT"
-  | "PERMISSIONS_RESULT"
-  | "PHOTO_PICKER_RESULT"
-  | "ERROR";
-
-interface BridgeMessage<T = unknown> {
-  type: BridgeActionType | BridgeResponseType;
-  payload?: T;
-  reqId?: string;
-}
-
-interface BridgeResponse<T = unknown> extends BridgeMessage<T> {
-  error?: string;
-}
+export type {
+  BridgeActionType,
+  BridgeMessage,
+  BridgeResponse,
+  BridgeResponseType,
+  WebViewChromeMode,
+} from "./bridgeTypes";
 
 export const useBridge = () => {
+  const pendingToNativeRef = useRef<BridgeMessage[]>([]);
+
   const [isNativeApp, setIsNativeApp] = useState(() => {
     if (typeof window !== "undefined") {
       return (
-        navigator.userAgent.includes("Overall_RN") ||
+        isNativeWebViewUserAgent(navigator.userAgent) ||
         !!window.ReactNativeWebView
       );
     }
@@ -55,26 +29,47 @@ export const useBridge = () => {
   });
 
   useEffect(() => {
-    // User-Agent나 window.ReactNativeWebView가 뒤늦게 주입되는 경우를 위한 fallback
     if (!isNativeApp) {
       const timer = setTimeout(() => {
         if (typeof window !== "undefined" && window.ReactNativeWebView) {
           setIsNativeApp(true);
         }
-      }, 50); // 안전한 스케줄링을 위해 짧은 지연 시간 추가
+      }, 50);
       return () => clearTimeout(timer);
     }
   }, [isNativeApp]);
 
-  const sendToNative = useCallback((message: BridgeMessage) => {
-    if (typeof window !== "undefined" && window.ReactNativeWebView) {
+  const flushPendingToNative = useCallback(() => {
+    if (typeof window === "undefined" || !window.ReactNativeWebView) return;
+    const batch = pendingToNativeRef.current;
+    if (batch.length === 0) return;
+    pendingToNativeRef.current = [];
+    for (const message of batch) {
       window.ReactNativeWebView.postMessage(JSON.stringify(message));
-    } else {
-      console.warn(
-        "[Bridge] Not running in a Native WebView. Message ignored:",
-        message,
-      );
     }
+  }, []);
+
+  useEffect(() => {
+    if (!isNativeApp) return;
+    flushPendingToNative();
+    const id = window.setInterval(flushPendingToNative, 50);
+    return () => window.clearInterval(id);
+  }, [isNativeApp, flushPendingToNative]);
+
+  const sendToNative = useCallback((message: BridgeMessage) => {
+    if (typeof window === "undefined") return;
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify(message));
+      return;
+    }
+    if (isNativeWebViewUserAgent(navigator.userAgent)) {
+      pendingToNativeRef.current.push(message);
+      return;
+    }
+    console.warn(
+      "[Bridge] Not running in a Native WebView. Message ignored:",
+      message,
+    );
   }, []);
 
   const requestWithResponse = useCallback(
@@ -99,7 +94,6 @@ export const useBridge = () => {
 
         const listener = (event: MessageEvent) => {
           try {
-            // The data arrives as a string containing a JSON string, or just a JSON string
             const dataStr =
               typeof event.data === "string" ? event.data : undefined;
             if (!dataStr) return;
@@ -118,12 +112,11 @@ export const useBridge = () => {
               }
             }
           } catch {
-            // Ignore parsing errors for other messages
+            // 다른 메시지 파싱 오류 무시
           }
         };
 
         window.addEventListener("message", listener);
-        // Required for Android compatibility
         document.addEventListener("message", listener);
 
         sendToNative(requestMessage);
@@ -160,7 +153,7 @@ export const useBridge = () => {
     return requestWithResponse<{ base64: string; mimeType: string }>(
       { type: "OPEN_PHOTO_PICKER" },
       "PHOTO_PICKER_RESULT",
-      600000, // 10분 (갤러리/카메라 선택 시간 고려)
+      600000,
     );
   }, [requestWithResponse]);
 
@@ -185,4 +178,3 @@ export const useBridge = () => {
     setWebViewChrome,
   };
 };
-
