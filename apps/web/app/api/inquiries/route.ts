@@ -9,8 +9,9 @@ import {
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const status = searchParams.get("status") as InquiryStatus | null;
+  const category = searchParams.get("category") as InquiryCategory | null;
 
-  const items = inquiryStore.findAll(status ?? undefined);
+  const items = inquiryStore.findAll(status ?? undefined, category ?? undefined);
   return NextResponse.json({
     items,
     totalCount: inquiryStore.totalCount,

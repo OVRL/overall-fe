@@ -72,13 +72,15 @@ class InquiryStore {
     return inquiry;
   }
 
-  findAll(status?: InquiryStatus): Inquiry[] {
+  findAll(status?: InquiryStatus, category?: InquiryCategory): Inquiry[] {
     const all = Array.from(this.items.values()).sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-    if (status) return all.filter((i) => i.status === status);
-    return all;
+    let filtered = all;
+    if (status) filtered = filtered.filter((i) => i.status === status);
+    if (category) filtered = filtered.filter((i) => i.category === category);
+    return filtered;
   }
 
   findById(id: string): Inquiry | undefined {
