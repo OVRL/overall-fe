@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e3b712f5c09f13b5d52e9a7577c24144>>
+ * @generated SignedSource<<d95a76a3f3c3f048dc4e6ff2cbbc97c5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -35,7 +35,11 @@ export type useUpdateTeamMutation$data = {
     readonly name: string | null | undefined;
     readonly region: {
       readonly code: string;
+      readonly dongName: string | null | undefined;
       readonly name: string;
+      readonly riName: string | null | undefined;
+      readonly sidoName: string;
+      readonly siggName: string | null | undefined;
     } | null | undefined;
   };
 };
@@ -119,6 +123,34 @@ v3 = [
             "name": "code",
             "storageKey": null
           },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "sidoName",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "siggName",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "dongName",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "riName",
+            "storageKey": null
+          },
           (v2/*: any*/)
         ],
         "storageKey": null
@@ -179,16 +211,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "6dcd25311f6a95ac0ed27899a6e1e103",
+    "cacheID": "e49c580f05cf6df4d91b46dcd2599c4d",
     "id": null,
     "metadata": {},
     "name": "useUpdateTeamMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateTeamMutation(\n  $input: UpdateTeamInput!\n  $emblem: Upload\n) {\n  updateTeam(input: $input, emblem: $emblem) {\n    id\n    name\n    emblem\n    activityArea\n    region {\n      code\n      name\n    }\n    homeUniform\n    awayUniform\n    historyStartDate\n    description\n  }\n}\n"
+    "text": "mutation useUpdateTeamMutation(\n  $input: UpdateTeamInput!\n  $emblem: Upload\n) {\n  updateTeam(input: $input, emblem: $emblem) {\n    id\n    name\n    emblem\n    activityArea\n    region {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n    homeUniform\n    awayUniform\n    historyStartDate\n    description\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "03a37d1be21cec2e0ccf3d5c9722b157";
+(node as any).hash = "152fd3400beb43fc2048273452120226";
 
 export default node;

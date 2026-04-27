@@ -5,6 +5,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 ## 문서 (비개발자·배포)
 
 - **[Firebase App Distribution으로 테스트 앱 나누기 (단계별)](./docs/FIREBASE_APP_DISTRIBUTION_GUIDE.md)** — Firebase 설정, EAS 빌드·업로드, **푸시(FCM / Expo Push)** 까지 순서대로 안내합니다.  
+- **[WebView 네트워크 불안정 대응 (예정 작업 스펙)](./docs/WEBVIEW_NETWORK_RESILIENCE_SPEC.md)** — 단절·셀↔Wi‑Fi 전환 등 엣지 케이스, 현재 갭, 권장 구현 순서·체크리스트(구현 전 설계 문서).  
 - **GitHub Actions**: [`.github/workflows/eas-firebase-app-distribution.yml`](../../.github/workflows/eas-firebase-app-distribution.yml) — `apps/native/` 변경 시 **자동** 빌드·Firebase 업로드, 또는 Actions에서 **수동** 실행.
 
 ## Get started

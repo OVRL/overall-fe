@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<52b3909a1d878e20befd4f4c1700ee5f>>
+ * @generated SignedSource<<eb88e36c4ac58c0669d6727b958216ee>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -37,7 +37,11 @@ export type useTeamSettingsQuery$data = {
         readonly name: string | null | undefined;
         readonly region: {
           readonly code: string;
+          readonly dongName: string | null | undefined;
           readonly name: string;
+          readonly riName: string | null | undefined;
+          readonly sidoName: string;
+          readonly siggName: string | null | undefined;
         } | null | undefined;
       } | null | undefined;
       readonly user: {
@@ -242,6 +246,34 @@ v3 = [
                     "name": "code",
                     "storageKey": null
                   },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "sidoName",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "siggName",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "dongName",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "riName",
+                    "storageKey": null
+                  },
                   (v2/*: any*/)
                 ],
                 "storageKey": null
@@ -281,16 +313,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "1a41023ba369a1436ebb41cdb3870d5e",
+    "cacheID": "05ed21fa2c4cae53fea6a429e872af67",
     "id": null,
     "metadata": {},
     "name": "useTeamSettingsQuery",
     "operationKind": "query",
-    "text": "query useTeamSettingsQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 100) {\n    members {\n      id\n      foot\n      preferredNumber\n      preferredPosition\n      role\n      joinedAt\n      profileImg\n      user {\n        id\n        name\n        profileImage\n        birthDate\n      }\n      team {\n        id\n        name\n        emblem\n        activityArea\n        description\n        historyStartDate\n        homeUniform\n        awayUniform\n        region {\n          code\n          name\n        }\n      }\n    }\n    totalCount\n  }\n}\n"
+    "text": "query useTeamSettingsQuery(\n  $teamId: Int!\n) {\n  findManyTeamMember(teamId: $teamId, limit: 100) {\n    members {\n      id\n      foot\n      preferredNumber\n      preferredPosition\n      role\n      joinedAt\n      profileImg\n      user {\n        id\n        name\n        profileImage\n        birthDate\n      }\n      team {\n        id\n        name\n        emblem\n        activityArea\n        description\n        historyStartDate\n        homeUniform\n        awayUniform\n        region {\n          code\n          sidoName\n          siggName\n          dongName\n          riName\n          name\n        }\n      }\n    }\n    totalCount\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "233627a793834c615b6a9773f0ede10f";
+(node as any).hash = "f319e163d9ecba6e1392dc76f7c364ec";
 
 export default node;
