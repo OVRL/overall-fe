@@ -34,7 +34,7 @@ export default function TermsPage() {
         <article className="rounded-[1.25rem] border border-border-card bg-surface-card p-5 md:p-8 space-y-8">
           <div>
             <h1 className="text-2xl font-bold text-white mb-1">이용약관</h1>
-            <p className="text-xs text-Label-Tertiary">시행일: 2026년 1월 1일</p>
+            <p className="text-xs text-Label-Tertiary">시행일: 2026년 5월 1일</p>
           </div>
 
           {/* 제1조 */}
@@ -54,13 +54,13 @@ export default function TermsPage() {
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>이 약관에서 사용하는 용어의 정의는 다음과 같습니다.</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-2">
+              <ul className="list-disc list-inside space-y-1.5 pl-2 marker:text-gray-500">
                 <li>&quot;서비스&quot;란 회사가 제공하는 축구팀 관리 플랫폼 및 관련 제반 서비스를 의미합니다.</li>
                 <li>&quot;이용자&quot;란 이 약관에 동의하고 서비스를 이용하는 모든 자를 말합니다.</li>
                 <li>&quot;회원&quot;이란 서비스에 회원가입하여 아이디(ID)를 부여받은 이용자를 말합니다.</li>
                 <li>&quot;팀&quot;이란 회원이 서비스 내에서 생성하거나 가입한 축구팀 단위를 말합니다.</li>
                 <li>&quot;콘텐츠&quot;란 회원이 서비스 내에서 게시한 텍스트, 이미지, 데이터 등 일체의 정보를 말합니다.</li>
-              </ol>
+              </ul>
             </div>
           </section>
 
@@ -85,13 +85,12 @@ export default function TermsPage() {
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 이용계약은 이용자가 약관의 내용에 동의한 후 회원가입을 완료함으로써 성립됩니다.</p>
               <p>② 회사는 소셜 로그인(카카오, 구글, 네이버 등) 방식을 통한 회원가입을 지원하며, 해당 제3자 서비스의 이용약관이 추가로 적용될 수 있습니다.</p>
-              <p>③ 회사는 다음 각 호에 해당하는 경우 이용계약의 성립을 유보하거나 거절할 수 있습니다.
-              </p>
-              <ol className="list-decimal list-inside space-y-1 pl-2">
+              <p>③ 회사는 다음 각 호에 해당하는 경우 이용계약의 성립을 유보하거나 거절할 수 있습니다.</p>
+              <ul className="list-disc list-inside space-y-1 pl-2 marker:text-gray-500">
                 <li>타인의 명의를 사용하여 신청한 경우</li>
                 <li>허위 정보를 기재한 경우</li>
                 <li>관련 법령에 위반되거나 사회의 안녕질서 또는 미풍양속을 해할 우려가 있는 경우</li>
-              </ol>
+              </ul>
             </div>
           </section>
 
@@ -102,7 +101,7 @@ export default function TermsPage() {
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 회사는 다음과 같은 서비스를 제공합니다.</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-2">
+              <ul className="list-disc list-inside space-y-1.5 pl-2 marker:text-gray-500">
                 <li>축구팀 생성 및 관리 서비스</li>
                 <li>팀 선수 등록 및 포지션 관리 서비스</li>
                 <li>경기 일정 및 결과 기록 서비스</li>
@@ -110,7 +109,7 @@ export default function TermsPage() {
                 <li>베스트 일레븐(Best 11) 구성 서비스</li>
                 <li>맨 오브 더 매치(MOM) 투표 서비스</li>
                 <li>기타 회사가 개발 또는 제휴를 통해 이용자에게 제공하는 서비스</li>
-              </ol>
+              </ul>
               <p>② 회사는 기술적·운영적 필요에 의해 제공 중인 서비스의 일부 또는 전부를 변경할 수 있으며, 변경 시 사전에 공지합니다.</p>
             </div>
           </section>
@@ -122,16 +121,16 @@ export default function TermsPage() {
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 이용자는 다음 각 호의 행위를 해서는 안 됩니다.</p>
-              <ol className="list-decimal list-inside space-y-1.5 pl-2">
+              <ul className="list-disc list-inside space-y-1.5 pl-2 marker:text-gray-500">
                 <li>타인의 개인정보를 도용하거나 허위 정보를 등록하는 행위</li>
                 <li>서비스 운영을 고의로 방해하거나 불안정하게 만드는 행위</li>
                 <li>저작권 등 지식재산권을 침해하는 콘텐츠를 게시하는 행위</li>
                 <li>타인에 대한 명예훼손, 모욕, 개인정보 침해 등의 행위</li>
-                <li>음란물, 폭력적 콘텐츠 등 공序良俗(공서양속)에 반하는 콘텐츠를 게시하는 행위</li>
+                <li>음란물, 폭력적 콘텐츠 등 공서양속(공공의 질서와 선량한 풍속)에 반하는 콘텐츠를 게시하는 행위</li>
                 <li>서비스를 이용하여 영리 목적의 광고, 홍보 등 상업적 활동을 하는 행위</li>
                 <li>자동화된 수단(봇, 스크레이퍼 등)을 통해 서비스에 접근하는 행위</li>
                 <li>관련 법령에 위반되는 일체의 행위</li>
-              </ol>
+              </ul>
               <p>② 회사는 이용자가 상기 금지 행위를 한 경우 이용계약을 해지하거나 서비스 이용을 제한할 수 있습니다.</p>
             </div>
           </section>
@@ -145,13 +144,25 @@ export default function TermsPage() {
               <p>① 이용자가 서비스 내에 게시한 콘텐츠에 대한 저작권은 해당 이용자에게 귀속됩니다.</p>
               <p>② 이용자는 서비스 내에 콘텐츠를 게시함으로써 회사에 대해 서비스 운영, 홍보, 개선을 위한 목적으로 해당 콘텐츠를 사용할 수 있는 비독점적·전 세계적·무상의 라이선스를 부여합니다.</p>
               <p>③ 이용자가 게시한 콘텐츠로 인해 발생하는 모든 분쟁 및 법적 문제에 대한 책임은 해당 이용자에게 있습니다.</p>
+              <p>④ 회사는 이용자가 서비스 내에 입력한 경기 기록, 팀 스탯 등의 데이터를 비식별화(익명화)하여 통계 자료 생성, 분석 리포트 제작 및 서비스 개선 목적으로 활용할 수 있습니다.</p>
             </div>
           </section>
 
           {/* 제8조 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-Label-Primary border-l-2 border-green-600 pl-3">
-              제8조 (개인정보 보호)
+              제8조 (유료 서비스 및 결제)
+            </h2>
+            <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
+              <p>① 회사가 제공하는 서비스는 기본적으로 무료로 제공되나, 일부 프리미엄 기능이나 추가 서비스는 유료로 제공될 수 있습니다.</p>
+              <p>② 유료 서비스의 이용 요금, 결제 방식 및 환불 등에 관한 구체적인 사항은 유료 서비스 결제 전 화면 또는 별도의 정책을 통해 고지하며, 관련 법령을 준수합니다.</p>
+            </div>
+          </section>
+
+          {/* 제9조 */}
+          <section className="space-y-3">
+            <h2 className="text-base font-semibold text-Label-Primary border-l-2 border-green-600 pl-3">
+              제9조 (개인정보 보호)
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 회사는 관련 법령에 따라 이용자의 개인정보를 보호하며, 개인정보의 수집·이용에 관해서는 별도의 개인정보 처리방침을 통해 안내합니다.</p>
@@ -159,10 +170,10 @@ export default function TermsPage() {
             </div>
           </section>
 
-          {/* 제9조 */}
+          {/* 제10조 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-Label-Primary border-l-2 border-green-600 pl-3">
-              제9조 (서비스 중단)
+              제10조 (서비스 중단)
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 회사는 시스템 점검, 보수, 교체 또는 고장, 통신 두절 등의 사유가 발생한 경우 서비스 제공을 일시적으로 중단할 수 있습니다.</p>
@@ -171,22 +182,24 @@ export default function TermsPage() {
             </div>
           </section>
 
-          {/* 제10조 */}
+          {/* 제11조 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-Label-Primary border-l-2 border-green-600 pl-3">
-              제10조 (면책조항)
+              제11조 (면책조항)
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 회사는 천재지변, 전쟁, 기간통신사업자의 서비스 중지 등 불가항력적인 사유로 서비스를 제공할 수 없는 경우 책임이 면제됩니다.</p>
               <p>② 회사는 이용자의 귀책사유로 발생한 서비스 이용 장애에 대해 책임을 지지 않습니다.</p>
-              <p>③ 회사는 이용자가 서비스를 통해 기대하는 수익이나 성과를 얻지 못한 것에 대해 책임을 지지 않습니다.</p>
+              <p>③ 회사는 이용자가 직접 입력한 팀 정보, 경기 결과 및 개인 스탯의 사실 여부와 정확성에 대해 보증하지 않으며, 이로 인해 발생한 사용자 간 또는 팀 간의 분쟁에 개입하거나 책임지지 않습니다.</p>
+              <p>④ 서비스는 축구팀 관리를 보조하는 플랫폼일 뿐이며, 서비스를 통해 조직된 오프라인 경기, 훈련 및 기타 활동 중 발생하는 신체적 부상, 사고, 물적 손해에 대하여 회사는 어떠한 책임도 지지 않습니다.</p>
+              <p>⑤ 회사는 이용자가 서비스를 통해 기대하는 수익이나 성과를 얻지 못한 것에 대해 책임을 지지 않습니다.</p>
             </div>
           </section>
 
-          {/* 제11조 */}
+          {/* 제12조 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-Label-Primary border-l-2 border-green-600 pl-3">
-              제11조 (분쟁 해결)
+              제12조 (분쟁 해결)
             </h2>
             <div className="text-sm text-Label-Tertiary leading-relaxed space-y-2">
               <p>① 이 약관과 관련된 분쟁에 대해서는 대한민국 법률을 준거법으로 합니다.</p>
