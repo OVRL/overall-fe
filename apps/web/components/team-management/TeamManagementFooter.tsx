@@ -40,8 +40,8 @@ export default function TeamManagementFooter({
     if (isModalOpen) return null;
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-gray-800 flex items-center overflow-x-auto scrollbar-hide h-16 md:h-20 xl:hidden z-50 pb-safe">
-            <div className="flex items-center min-w-full px-2 md:px-6 md:justify-around">
+        <nav className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-gray-800 flex items-center overflow-x-auto scrollbar-hide xl:hidden z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', minHeight: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}>
+            <div className="flex items-center min-w-full px-2 md:px-6 md:justify-around h-16 md:h-20">
                 {menuItems.map((item) => (
                     <Link
                         key={item.id}

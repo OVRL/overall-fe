@@ -880,7 +880,9 @@ function TeamSettingsPanelInner({
   }
 
   const teamName = teamData.name ?? "";
-  const locationName = teamData.region?.name || teamData.activityArea || "";
+  // region.name이 순수 숫자(지역코드)인 경우 표시하지 않음
+  const rawLocationName = teamData.region?.name || "";
+  const locationName = /^\d+$/.test(rawLocationName) ? "" : rawLocationName;
   const locationCode = teamData.region?.code || teamData.activityArea || "";
   const foundedDate = teamData.historyStartDate  
     ? new Date(teamData.historyStartDate).toLocaleDateString()

@@ -185,6 +185,42 @@ function GlobalSettingsModal({
             )}
           </div>
 
+          {/* 카카오 알림톡 미리보기 */}
+          <div className="flex flex-col gap-[8px]">
+            <p className="text-[12px] font-bold text-[#a6a5a5] px-1">카카오톡 알림 미리보기</p>
+            <div className="bg-[#F9E000]/5 border border-[#F9E000]/20 rounded-[12px] p-[16px]">
+              {/* 카카오 알림톡 메시지 UI */}
+              <div className="bg-white rounded-[10px] overflow-hidden shadow-sm">
+                {/* 헤더 */}
+                <div className="bg-[#FEE500] px-[14px] py-[10px] flex items-center gap-2">
+                  <svg width="16" height="15" viewBox="0 0 18 17" fill="none">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.134 0 7c0 2.493 1.607 4.677 4.023 5.946L3.1 16.5a.3.3 0 0 0 .453.316L7.9 13.88C8.26 13.927 8.627 13.95 9 13.95c4.971 0 9-3.134 9-7S13.971 0 9 0z" fill="#381E1F"/>
+                  </svg>
+                  <span className="text-[11px] font-bold text-[#381E1F]">카카오톡 알림톡</span>
+                  <span className="ml-auto text-[10px] text-[#381E1F]/60">Overall</span>
+                </div>
+                {/* 메시지 본문 */}
+                <div className="px-[14px] py-[12px] flex flex-col gap-[8px]">
+                  <p className="text-[12px] font-bold text-[#111]">⚽ MOM 투표가 시작되었습니다!</p>
+                  <div className="w-full h-px bg-[#eee]" />
+                  <div className="text-[11px] text-[#333] leading-[1.7] whitespace-pre-line">{`[Overall] FC 오버롤 MOM 투표
+
+경기: vs 상대팀  |  2026.04.24 (목)
+투표 마감: 04.25 (금) 오후 11:59
+
+이번 경기의 MVP를 선택해주세요!
+팀원 모두의 참여가 결과를 만듭니다.`}</div>
+                  <div className="w-full h-px bg-[#eee]" />
+                  {/* CTA 버튼 */}
+                  <button className="w-full h-[36px] bg-[#FEE500] rounded-[6px] flex items-center justify-center">
+                    <span className="text-[12px] font-bold text-[#381E1F]">투표하러 가기 →</span>
+                  </button>
+                </div>
+              </div>
+              <p className="text-[10px] text-[#a6a5a5] text-center mt-2">* 실제 발송될 카카오 알림톡 미리보기입니다</p>
+            </div>
+          </div>
+
           {/* 리마인드 설정 리스트 */}
           {[
             { key: "start", label: "투표 시작 알림", desc: "경기 시작 시점 즉시 카톡 발송" },

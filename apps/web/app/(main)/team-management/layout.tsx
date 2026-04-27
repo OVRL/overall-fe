@@ -42,7 +42,7 @@ export default function TeamManagementLayout({
           </div>
 
           {/* 메인 콘텐츠 영역 */}
-          <main className="flex-1 min-h-0 overflow-y-auto pb-20 md:pb-24 xl:pb-0">
+          <main className="flex-1 min-h-0 overflow-y-auto pb-28 md:pb-32 xl:pb-0" style={{ paddingBottom: 'calc(var(--pb-main, 7rem) + env(safe-area-inset-bottom, 0px))' }}>
             {children}
           </main>
 

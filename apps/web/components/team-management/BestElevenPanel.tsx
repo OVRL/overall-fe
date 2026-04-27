@@ -35,7 +35,6 @@ import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId"
 import { useBestElevenQuery } from "./hooks/useBestElevenQuery";
 import { useCreateBestElevenMutation } from "./hooks/useCreateBestElevenMutation";
 import { useDeleteBestElevenMutation } from "./hooks/useDeleteBestElevenMutation";
-import { useUpdateTeamMemberMutation } from "./hooks/useUpdateTeamMemberMutation";
 import { Suspense } from "react";
 import { type FormationType } from "@/constants/formation";
 import { getValidImageSrc, cn } from "@/lib/utils";
@@ -223,7 +222,6 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const { executeMutation: createBestEleven, isInFlight: isSaving } =
     useCreateBestElevenMutation();
   const { executeMutation: deleteBestEleven } = useDeleteBestElevenMutation();
-  const { executeMutation: updateMember } = useUpdateTeamMemberMutation();
 
   // 선수 목록 변환 (TeamMemberModel -> Player) — tactics `teamMemberId`와 맞추기 위해 숫자 PK 사용
   const allPlayers: Player[] = React.useMemo(() => {
@@ -366,6 +364,13 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const [currentQuarterId, setCurrentQuarterId] = useState<number | null>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerDetail, setSelectedPlayerDetail] = useState<Player | null>(null);
+
+  // allPlayers 로드 시 첫 번째 선수를 자동 선택
+  useEffect(() => {
+    if (allPlayers.length > 0 && selectedPlayerDetail === null) {
+      setSelectedPlayerDetail(allPlayers[0]);
+    }
+  }, [allPlayers]);
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   // 모바일: 탭으로 선택된 포지션 슬롯
@@ -461,13 +466,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     const lineup = quarters[0]?.lineup ?? {};
     const hasAnySlotPlayer = Object.values(lineup).some((p) => p != null);
     
-    const newManagerMemberId = manager.memberId;
-
-    if (
-      !hasAnySlotPlayer &&
-      bestElevenToClean.length === 0 &&
-      newManagerMemberId === initialManagerId
-    ) {
+    if (!hasAnySlotPlayer && bestElevenToClean.length === 0) {
       alert("변경사항이 없습니다.");
       return;
     }
@@ -478,25 +477,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     );
 
     try {
-      // 1단계: 감독 변경 사항 반영
-      if (newManagerMemberId !== initialManagerId) {
-        // 기존 감독 강등 (있었을 경우)
-        if (initialManagerId) {
-          const oldManagerNumId = parseNumericIdFromRelayGlobalId(initialManagerId);
-          if (oldManagerNumId) {
-            await updateMember({ id: oldManagerNumId, role: "PLAYER" });
-          }
-        }
-        // 신규 감독 승급
-        if (newManagerMemberId) {
-          const newManagerNumId = parseNumericIdFromRelayGlobalId(newManagerMemberId);
-          if (newManagerNumId) {
-            await updateMember({ id: newManagerNumId, role: "MANAGER" });
-          }
-        }
-      }
-
-      // 2단계: 기존 베스트 일레븐 데이터 삭제 (중복 키 방지)
+      // 기존 베스트 일레븐 데이터 삭제 (중복 키 방지)
       if (bestElevenToClean.length > 0) {
         console.log(`[BestEleven] Attempting to clean up ${bestElevenToClean.length} records...`);
         for (const entry of bestElevenToClean) {
@@ -700,7 +681,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                 <div className="relative z-20 flex">
                   <div className="flex-1">
                     <div className="text-7xl font-black text-white leading-none tracking-tighter mb-2 italic">
-                      {selectedPlayerDetail?.overall || 0}
+                      {selectedPlayerDetail?.number ?? 0}
                     </div>
                     {/* 최근경기 MOM 뱃지 추가 (조건부) */}
                     {(selectedPlayerDetail?.isMom ?? stats.isMom) && (
@@ -795,7 +776,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
       {/* 하단 저장 바 */}
       {hasChanges && !isModalOpen && (
-        <div className="fixed bottom-16 md:bottom-20 xl:bottom-0 left-0 right-0 z-60 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 h-16 md:h-20 px-4 md:px-8 flex items-center justify-between gap-3 box-border">
+        <div className="fixed left-0 right-0 z-60 bg-[#0e0e0e]/95 backdrop-blur-3xl border-t border-white/5 px-4 md:px-8 flex items-center justify-between gap-3 box-border h-16 md:h-20" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}>
           <div className="text-[10px] md:text-sm font-bold text-white tracking-tight truncate max-w-[40%] sm:max-w-none">
             변경사항이 있습니다.
           </div>
