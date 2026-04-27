@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "dev": "expo start",
+    "dev": "expo start --no-dev-client",
     "start": "expo start",
     "typecheck": "tsc --noEmit",
     "reset-project": "node ./scripts/reset-project.js",

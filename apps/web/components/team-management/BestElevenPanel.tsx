@@ -297,17 +297,29 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   // 상태 초기화
   const [quarters, setQuarters] = useState<QuarterData[]>(getInitialQuarters);
 
-  // 감독 정보 찾기 (정적 변수들 먼저 선언)
+  // 감독 정보 찾기 — 저장된 tactics의 managerTeamMemberId 우선, 없으면 역할 기반
   const initialManagerMember = useMemo(() => {
     const members = data.findManyTeamMember?.members ?? [];
-    // 1. 현재 접속 유저가 매니저인 경우 우선
+    // 1. 베스트11 tactics에 저장된 감독 ID 우선
+    const primary = pickPrimaryBestElevenRow(bestElevenRows);
+    const savedManagerId = (primary?.tactics as any)?.managerTeamMemberId;
+    if (savedManagerId) {
+      const saved = members.find((m: any) => {
+        const numId = parseNumericIdFromRelayGlobalId(m.id);
+        return String(numId) === String(savedManagerId);
+      });
+      if (saved) return saved;
+    }
+    // 2. 현재 접속 유저가 매니저인 경우
     const meAsManager = members.find((m: any) => m.role === "MANAGER" && m.userId === editorUserId);
     if (meAsManager) return meAsManager;
-    // 2. 아니면 첫 번째 매니저
+    // 3. 아니면 첫 번째 매니저
     return members.find((m: any) => m.role === "MANAGER");
-  }, [data.findManyTeamMember?.members, editorUserId]);
-  
-  const initialManagerId = initialManagerMember?.id ? String(initialManagerMember.id) : null;
+  }, [data.findManyTeamMember?.members, bestElevenRows, editorUserId]);
+
+  const initialManagerId = initialManagerMember?.id
+    ? String(parseNumericIdFromRelayGlobalId(initialManagerMember.id) ?? initialManagerMember.id)
+    : null;
 
   // 팀 전체 매치 기록 기반 승/무/패 산출
   const teamStats = useMemo(() => {
@@ -475,6 +487,10 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       quarters,
       "MATCH",
     );
+    // 감독 정보를 tactics 문서에 포함 (베스트11 전용 감독, 실제 팀 권한과 무관)
+    if (manager.memberId) {
+      (tacticsDoc as any).managerTeamMemberId = manager.memberId;
+    }
 
     try {
       // 기존 베스트 일레븐 데이터 삭제 (중복 키 방지)

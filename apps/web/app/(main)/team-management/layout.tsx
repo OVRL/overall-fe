@@ -24,6 +24,7 @@ export default function TeamManagementLayout({
     if (pathname.includes("/team-management/invitation")) return "invitation";
     if (pathname.includes("/team-management/mom")) return "mom-vote";
     if (pathname.includes("/team-management/deleted-players")) return "deleted-players";
+    if (pathname.includes("/team-management/past-records")) return "past-records";
     return "settings";
   };
 

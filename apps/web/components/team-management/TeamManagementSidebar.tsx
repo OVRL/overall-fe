@@ -12,7 +12,8 @@ export type TeamManagementMenu =
     | "best-eleven"
     | "invitation"
     | "mom-vote"
-    | "deleted-players";
+    | "deleted-players"
+    | "past-records";
 
 interface MenuItem {
     id: TeamManagementMenu;
@@ -21,7 +22,7 @@ interface MenuItem {
     href: string;
 }
 
-import { Settings, ClipboardList, Users, UserPlus, FileCheck, Award, UserMinus } from "lucide-react";
+import { Settings, ClipboardList, Users, UserPlus, FileCheck, Award, UserMinus, History } from "lucide-react";
 
 // SVG 아이콘 컴포넌트들 대신 Lucide-react 아이콘을 사용하도록 래핑
 const SettingsIcon = ({ active }: { active: boolean }) => <Settings size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
@@ -31,6 +32,7 @@ const BestElevenIcon = ({ active }: { active: boolean }) => <Award size={20} str
 const InvitationIcon = ({ active }: { active: boolean }) => <UserPlus size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 const MatchRecordIcon = ({ active }: { active: boolean }) => <ClipboardList size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 const DeletedPlayersIcon = ({ active }: { active: boolean }) => <UserMinus size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
+const PastRecordsIcon = ({ active }: { active: boolean }) => <History size={20} strokeWidth={1.4} color={active ? "#000" : "#888"} />;
 
 // Pretext context initialization (if needed for more complex layouts, 
 // but here we primarily use it for the tablet horizontal menu logic as requested)
@@ -79,6 +81,12 @@ const menuItems: MenuItem[] = [
         icon: null,
         href: "/team-management/best11",
     },
+    {
+        id: "past-records",
+        label: "과거 기록 연동",
+        icon: null,
+        href: "/team-management/past-records",
+    },
 ];
 
 const getIcon = (id: TeamManagementMenu, active: boolean) => {
@@ -90,6 +98,7 @@ const getIcon = (id: TeamManagementMenu, active: boolean) => {
         case "best-eleven": return <BestElevenIcon active={active} />;
         case "invitation": return <InvitationIcon active={active} />;
         case "deleted-players": return <DeletedPlayersIcon active={active} />;
+        case "past-records": return <PastRecordsIcon active={active} />;
     }
 };
 

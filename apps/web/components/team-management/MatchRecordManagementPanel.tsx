@@ -72,6 +72,16 @@ function fuzzyMatchPlayer(input: string, players: Player[]): Player | undefined 
     return (best && best.score > 0.45) ? best.player : undefined;
 }
 
+function fuzzyMatchPlayerAll(input: string, players: Player[]): Player[] {
+    const cleaned = input.replace(/이$|가$|이가$|은$|는$|을$|를$|이에요$|이야$|했어요$|했다$|했습니다$/, '').trim();
+    if (!cleaned) return [];
+    const exact = players.filter(p => p.name === cleaned);
+    if (exact.length > 0) return exact;
+    const contains = players.filter(p => p.name.includes(cleaned) || cleaned.includes(p.name));
+    if (contains.length > 0) return contains;
+    return players.filter(p => calculateKoreanSimilarity(cleaned, p.name) > 0.45);
+}
+
 function parseVoiceInput(text: string, interimText: string, players: Player[]) {
     const fullText = (text + ' ' + interimText).trim();
     if (!fullText) return { goal: undefined, assist: undefined, preAssist: undefined, rawGoal: '', rawAssist: '', rawPreAssist: '' };
@@ -198,10 +208,8 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
     const [interimTranscript, setInterimTranscript] = useState("");
     const recognitionRef = React.useRef<any>(null);
 
-    // 텍스트 입력 상태
-    const [goalText, setGoalText] = useState("");
-    const [assistText, setAssistText] = useState("");
-    const [preAssistText, setPreAssistText] = useState("");
+    // 텍스트 입력 상태 (단일 입력창)
+    const [textInput, setTextInput] = useState("");
 
     // 선수 선택 상태
     const [selectedGoal, setSelectedGoal] = useState<string>("none");
@@ -214,7 +222,7 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
             setMode("METHOD_SELECT");
             setSelectedMethod("VOICE");
             setTranscript(""); setInterimTranscript("");
-            setGoalText(""); setAssistText(""); setPreAssistText("");
+            setTextInput("");
             setSelectedGoal("none"); setSelectedAssist("none"); setSelectedPreAssist("none");
             setIsListening(false);
         } else {
@@ -271,14 +279,14 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
         [transcript, interimTranscript, players]
     );
 
-    // 텍스트 입력 자동완성
-    const getPlayerSuggestions = (input: string) =>
-        input.trim()
-            ? players.filter(p => p.name.includes(input.trim()) || calculateKoreanSimilarity(input.trim(), p.name) > 0.4).slice(0, 4)
-            : [];
-    const goalSuggestions = React.useMemo(() => getPlayerSuggestions(goalText), [goalText, players]);
-    const assistSuggestions = React.useMemo(() => getPlayerSuggestions(assistText), [assistText, players]);
-    const preAssistSuggestions = React.useMemo(() => getPlayerSuggestions(preAssistText), [preAssistText, players]);
+    // 텍스트 입력 실시간 파싱 (줄별 복수 득점 지원)
+    const textParsedLines = React.useMemo(() => {
+        return textInput
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(line => ({ line, parsed: parseVoiceInput(line, "", players) }));
+    }, [textInput, players]);
 
     // 저장 핸들러
     const handleSave = () => {
@@ -286,11 +294,33 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
             if (selectedGoal === "none") { alert("득점자를 선택해주세요."); return; }
             onSave({ goalId: selectedGoal, assistId: selectedAssist, preAssistId: selectedPreAssist });
         } else if (mode === "TEXT") {
-            if (!goalText.trim()) { alert("득점자를 입력해주세요."); return; }
-            onSaveText([{ id: crypto.randomUUID(), type: "goal", quarter: currentQuarter,
-                player: fuzzyMatchPlayer(goalText, players),
-                assist: assistText ? fuzzyMatchPlayer(assistText, players) : undefined,
-                preAssist: preAssistText ? fuzzyMatchPlayer(preAssistText, players) : undefined }]);
+            if (!textInput.trim()) { alert("득점 정보를 입력해주세요."); return; }
+            const validLines = textParsedLines.filter(l => l.parsed.rawGoal);
+            if (validLines.length === 0) { alert("득점자를 입력해주세요.\n예: 알베스 골 빅루트 어시"); return; }
+
+            // 이름이 매칭되지 않을 때 복수 후보 확인
+            const checkAmbiguous = (rawName: string, matched: Player | undefined, label: string) => {
+                if (rawName && !matched) {
+                    const candidates = fuzzyMatchPlayerAll(rawName, players);
+                    if (candidates.length > 1) {
+                        alert(`"${rawName}"과 비슷한 선수가 여러 명 있습니다.\n${candidates.map(p => p.name).join(', ')}\n${label} 이름을 확인해주세요.`);
+                        return false;
+                    }
+                }
+                return true;
+            };
+            for (const { parsed } of validLines) {
+                if (!checkAmbiguous(parsed.rawGoal, parsed.goal, "득점자")) return;
+                if (!checkAmbiguous(parsed.rawAssist, parsed.assist, "도움 선수")) return;
+            }
+            onSaveText(validLines.map(({ parsed }) => ({
+                id: crypto.randomUUID(),
+                type: "goal" as const,
+                quarter: currentQuarter,
+                player: parsed.goal,
+                assist: parsed.assist,
+                preAssist: parsed.preAssist,
+            })));
         } else if (mode === "VOICE") {
             if (!transcript.trim()) { alert("먼저 음성을 입력해주세요."); return; }
             onSaveText([{ id: crypto.randomUUID(), type: "goal", quarter: currentQuarter,
@@ -482,9 +512,66 @@ const PlayerSelectModal = ({ isOpen, onClose, onSave, onSaveText, players, curre
                         {/* ── 텍스트 입력 ── */}
                         {mode === "TEXT" && (
                             <div className="space-y-6">
-                                <PlayerRow icon="⚽" label="득점" value={goalText} onChange={setGoalText} suggestions={goalSuggestions} />
-                                <PlayerRow icon="👟" label="도움" value={assistText} onChange={setAssistText} suggestions={assistSuggestions} />
-                                <PlayerRow icon="⛳" label="기점" value={preAssistText} onChange={setPreAssistText} suggestions={preAssistSuggestions} />
+                                <section>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-base">⚽</span>
+                                        <span className="text-sm font-bold text-white">득점/도움</span>
+                                        <span className="text-[10px] text-gray-500 ml-auto">줄바꿈으로 여러 골 입력 가능</span>
+                                    </div>
+                                    <textarea
+                                        value={textInput}
+                                        onChange={e => setTextInput(e.target.value)}
+                                        placeholder={"예시)\n알베스 골 빅루트 어시\n백지민 골 김정수 어시\n손흥민 득점"}
+                                        rows={5}
+                                        className="w-full bg-[#2a2a2a] border border-white/5 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 placeholder:text-gray-600 transition-all resize-none leading-relaxed"
+                                    />
+                                </section>
+                                <section>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">입력 결과</div>
+                                        {textParsedLines.filter(l => l.parsed.rawGoal).length > 0 && (
+                                            <span className="text-[10px] text-primary font-bold">
+                                                {textParsedLines.filter(l => l.parsed.rawGoal).length}골 등록 예정
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="bg-black/30 rounded-2xl p-4 border border-white/5 space-y-4">
+                                        {!textInput.trim() ? (
+                                            <div className="text-xs text-gray-600">득점 정보를 입력하면 결과가 표시됩니다</div>
+                                        ) : textParsedLines.length === 0 ? (
+                                            <div className="text-xs text-gray-600">-</div>
+                                        ) : (
+                                            textParsedLines.map(({ line, parsed }, idx) => (
+                                                <div key={idx} className="space-y-2">
+                                                    {idx > 0 && <div className="border-t border-white/5" />}
+                                                    <div className="text-[9px] text-gray-600 font-bold uppercase tracking-wider">#{idx + 1} 득점</div>
+                                                    {[
+                                                        { label: "골", raw: parsed.rawGoal, matched: parsed.goal },
+                                                        { label: "도움", raw: parsed.rawAssist, matched: parsed.assist },
+                                                        { label: "기점", raw: parsed.rawPreAssist, matched: parsed.preAssist },
+                                                    ].filter(r => r.label === "골" || r.raw).map(({ label, raw, matched }) => (
+                                                        <div key={label} className="flex items-center gap-3">
+                                                            <span className="text-[10px] text-gray-500 w-8 shrink-0">{label}</span>
+                                                            {matched ? (
+                                                                <>
+                                                                    <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
+                                                                        <ImgPlayer src={matched.profileImage || undefined} fallbackSrc={matched.fallbackImage} alt={matched.name} />
+                                                                    </div>
+                                                                    <span className="text-xs font-bold text-primary">{matched.name}</span>
+                                                                    {raw && matched.name !== raw && (
+                                                                        <span className="text-[9px] text-gray-500 ml-auto">"{raw}" → AI 매칭</span>
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-500">{raw ? `"${raw}" (미매칭)` : "-"}</span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </section>
                             </div>
                         )}
 

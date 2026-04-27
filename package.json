@@ -7,7 +7,7 @@
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=overall-fe",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck"
