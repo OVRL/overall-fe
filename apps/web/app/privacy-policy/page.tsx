@@ -51,9 +51,15 @@ export default function PrivacyPolicyPage() {
                   <tr className="border-b border-[#252525]">
                     <th
                       scope="col"
-                      className="py-3 pr-4 font-semibold text-white align-top w-[50%]"
+                      className="py-3 pr-4 font-semibold text-white align-top w-[40%]"
                     >
                       수집 및 이용 목적
+                    </th>
+                    <th
+                      scope="col"
+                      className="py-3 pr-4 font-semibold text-white align-top w-[15%]"
+                    >
+                      구분
                     </th>
                     <th
                       scope="col"
@@ -63,7 +69,7 @@ export default function PrivacyPolicyPage() {
                     </th>
                     <th
                       scope="col"
-                      className="py-3 font-semibold text-white align-top w-[25%]"
+                      className="py-3 font-semibold text-white align-top w-[20%]"
                     >
                       보유 및 이용 기간
                     </th>
@@ -71,20 +77,48 @@ export default function PrivacyPolicyPage() {
                 </thead>
                 <tbody className="text-[#A6A5A5]">
                   <tr className="border-b border-[#252525]">
-                    <td className="py-4 pr-4 align-top leading-relaxed">
+                    <td className="py-4 pr-4 align-top leading-relaxed" rowSpan={2}>
                       회원 가입 의사 확인, 이용자 식별, 서비스 통계·최적화,
                       부정·무단 이용 방지
                     </td>
                     <td className="py-4 pr-4 align-top leading-relaxed">
-                      이름, 이메일, 휴대전화번호, 비밀번호
+                      <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#B8FF12]/10 text-[#B8FF12]">필수</span>
                     </td>
-                    <td className="py-4 align-top leading-relaxed">
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      이름, 이메일, 카카오계정(전화번호)
+                    </td>
+                    <td className="py-4 align-top leading-relaxed" rowSpan={2}>
                       회원 탈퇴 시 즉시 파기
                     </td>
                   </tr>
                   <tr className="border-b border-[#252525]">
                     <td className="py-4 pr-4 align-top leading-relaxed">
+                      <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#555]/30 text-[#A6A5A5]">선택</span>
+                    </td>
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      성별, 생일, 출생 연도, 연령대
+                    </td>
+                  </tr>
+                  <tr className="border-b border-[#252525]">
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      서비스 내 이용자 간 소셜 활동(팀 매칭, 팀원 초대, 친구에게 알림 전송)
+                    </td>
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#555]/30 text-[#A6A5A5]">선택</span>
+                    </td>
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      카카오톡 친구 목록, 카카오톡 메시지 전송 권한
+                    </td>
+                    <td className="py-4 align-top leading-relaxed">
+                      이용 목적 달성 즉시 파기
+                    </td>
+                  </tr>
+                  <tr className="border-b border-[#252525]">
+                    <td className="py-4 pr-4 align-top leading-relaxed">
                       서비스 이용에 따른 CS(고객상담) 처리, 공지사항 전달
+                    </td>
+                    <td className="py-4 pr-4 align-top leading-relaxed">
+                      <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#B8FF12]/10 text-[#B8FF12]">필수</span>
                     </td>
                     <td className="py-4 pr-4 align-top leading-relaxed">
                       서비스 이용기록, 접속 로그, 쿠키, IP 정보
@@ -95,6 +129,32 @@ export default function PrivacyPolicyPage() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-base font-semibold text-white">
+              3. 카카오톡 친구 목록 및 메시지 전송 권한 이용 안내
+            </h2>
+            <div className="rounded-[0.875rem] border border-[#252525] bg-surface-card p-6 space-y-3 text-sm text-[#A6A5A5] leading-relaxed">
+              <p>
+                회사는 카카오 로그인을 통해 제공되는 <strong className="text-white">카카오톡 친구 목록</strong> 및{" "}
+                <strong className="text-white">메시지 전송</strong> 권한을 아래 목적으로만 사용합니다.
+              </p>
+              <ul className="list-disc list-inside space-y-2 pl-2">
+                <li>
+                  서비스 내 이용자 간 소셜 활동 지원: 팀원 초대, 팀 매칭 알림, 경기 일정 공유 등
+                </li>
+                <li>
+                  친구 목록은 본인이 앱과 연결되어 있으며 친구 목록 제공에 동의한 카카오 사용자에 한해 제공됩니다.
+                </li>
+                <li>
+                  메시지 전송은 이용자가 명시적으로 요청한 경우에만 발송되며, 광고·마케팅 목적으로는 사용되지 않습니다.
+                </li>
+              </ul>
+              <p className="text-xs text-[#666]">
+                ※ 카카오톡 메시지 API는 일 기본 쿼터 내에서만 사용되며, 서비스 내 사용자 간 소셜 활동 범위를 초과하여 사용하지 않습니다.
+              </p>
             </div>
           </section>
 

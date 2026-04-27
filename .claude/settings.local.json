@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(pnpm --filter overall-fe typecheck)"
+      "Bash(pnpm --filter overall-fe typecheck)",
+      "Bash(grep -A 10 \"rejectJoinRequestMutation\\\\|acceptJoinRequestMutation\\\\|graphql\\\\`\" /c/Users/alves/Desktop/업무용폴더/개발업무/2026/overall/overall-fe/apps/web/components/team-management/InvitationPanel.tsx)"
     ]
   }
 }
