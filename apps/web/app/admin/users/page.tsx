@@ -101,6 +101,27 @@ export default function AdminUsersPage() {
     }
   }
 
+  // 이미지 오류 처리: src를 null로 만들어 이니셜 아바타로 fallback
+  function UserAvatar({ src, name, size = 8 }: { src: string | null; name: string | null; size?: number }) {
+    const [imgError, setImgError] = useState(false);
+    const cls = `h-${size} w-${size}`;
+    if (src && !imgError) {
+      return (
+        <img
+          src={src}
+          alt=""
+          className={`${cls} rounded-full object-cover`}
+          onError={() => setImgError(true)}
+        />
+      );
+    }
+    return (
+      <div className={`flex ${cls} items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-gray-500`}>
+        {name?.[0]?.toUpperCase() ?? "?"}
+      </div>
+    );
+  }
+
   function getProviderColor(provider: string | null): string {
     if (!provider) return "bg-gray-600/10 text-gray-500";
     switch (provider.toLowerCase()) {
@@ -243,17 +264,7 @@ export default function AdminUsersPage() {
                     <div className="md:hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          {user.profileImage ? (
-                            <img
-                              src={user.profileImage}
-                              alt=""
-                              className="h-8 w-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-gray-500">
-                              {user.name?.[0] ?? "?"}
-                            </div>
-                          )}
+                          <UserAvatar src={user.profileImage} name={user.name} />
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium text-Label-Primary">
@@ -296,17 +307,7 @@ export default function AdminUsersPage() {
                       {user.id}
                     </span>
                     <div className="hidden md:flex md:items-center md:gap-3 col-span-3">
-                      {user.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt=""
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-gray-500">
-                          {user.name?.[0] ?? "?"}
-                        </div>
-                      )}
+                      <UserAvatar src={user.profileImage} name={user.name} />
                       <span className="truncate text-sm font-medium text-Label-Primary">
                         {user.name ?? "이름 없음"}
                       </span>
