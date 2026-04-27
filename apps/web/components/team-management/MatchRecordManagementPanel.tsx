@@ -162,7 +162,11 @@ interface MatchRecord {
     };
     result: "win" | "draw" | "loss";
     expanded: boolean;
-    logs: Record<number, ScoreLog[]>; // 쿼터별 로그
+    logs: Record<number, ScoreLog[]>;
+    matchDate?: string;
+    venueAddress?: string;
+    quarterCount?: number;
+    quarterDuration?: number;
 }
 
 const MOCK_PLAYERS: Player[] = [
@@ -676,6 +680,7 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<"RECORD" | "IN_HOUSE">("RECORD");
+
     const [showFullSummary, setShowFullSummary] = useState(false);
     const [logToDelete, setLogToDelete] = useState<{ matchId: string; quarter: number; logId: string; description: string } | null>(null);
 
@@ -712,6 +717,10 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
                 savedData.score.home < savedData.score.away ? "loss" : "draw") as "win" | "draw" | "loss",
             expanded: false,
             logs: savedData.logs,
+            matchDate: m.matchDate,
+            venueAddress: m.venue?.address,
+            quarterCount: m.quarterCount ?? 4,
+            quarterDuration: m.quarterDuration ?? 15,
         };
     }), [data.findMatch]);
 
@@ -726,6 +735,19 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
     React.useEffect(() => {
         setMatches(initialMatches);
     }, [initialMatches]);
+
+    const myTeamName = React.useMemo(() => {
+        const members = playersData.findManyTeamMember.members ?? [];
+        return (members[0] as any)?.team?.name ?? "우리팀";
+    }, [playersData.findManyTeamMember.members]);
+
+    const managerName = React.useMemo(() => {
+        const members = playersData.findManyTeamMember.members ?? [];
+        const owner = members.find((m: any) => m.role === "OWNER");
+        return (owner as any)?.user?.name ?? "";
+    }, [playersData.findManyTeamMember.members]);
+
+
 
     const toggleExpand = (id: string) => {
         setMatches(prev => prev.map(m => m.id === id ? { ...m, expanded: !m.expanded } : m));
@@ -815,9 +837,11 @@ function MatchRecordManagementPanelInner({ teamId }: { teamId: number }) {
 
     return (
         <>
+
             <div className="px-4 md:px-6 pt-6 pb-4 flex items-center justify-between">
                 <h1 className="text-xl font-bold text-white">경기 기록 관리</h1>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+
                     <Button
                         variant="primary"
                         size="s"

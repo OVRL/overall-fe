@@ -14,6 +14,7 @@ import type { rejectJoinRequestMutation } from "@/__generated__/rejectJoinReques
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { toast } from "sonner";
 
+
 type FilterType = "all" | "pending" | "approved" | "rejected" | "transfer";
 
 interface DeletedMember {
@@ -33,101 +34,6 @@ type ModalState = {
   userId: number;
   userName: string;
 } | null;
-
-// ──────────────────────────────────────────────
-// 카카오톡 초대 미리보기 모달
-// ──────────────────────────────────────────────
-function KakaoInvitePreviewModal({ onClose, onSend }: { onClose: () => void; onSend: () => void }) {
-  return (
-    <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm mx-auto bg-[#1a1a1a] rounded-t-3xl md:rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-        {/* 핸들 (모바일) */}
-        <div className="flex justify-center pt-3 pb-1 md:hidden">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>
-
-        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-          <p className="text-[15px] font-bold text-white">카카오톡 초대 미리보기</p>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-[#a6a5a5] hover:text-white rounded-full hover:bg-white/8 transition-colors text-xl">&times;</button>
-        </div>
-
-        {/* 카카오톡 채팅방 시뮬레이션 */}
-        <div className="px-5 pb-5 pt-3">
-          {/* 카카오톡 채팅 배경 */}
-          <div className="bg-[#B2C7D9] rounded-2xl overflow-hidden">
-            {/* 채팅방 상단바 */}
-            <div className="bg-[#96B2C8] px-4 py-2.5 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#FF5F57]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#FFBD2E]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-[#28CA41]" />
-              <span className="ml-2 text-[11px] text-white/70 font-medium">FC 오버롤 단톡방</span>
-            </div>
-
-            {/* 메시지 영역 */}
-            <div className="px-4 py-4 flex flex-col gap-3">
-              {/* 시스템 날짜 표시 */}
-              <div className="flex justify-center">
-                <span className="text-[10px] text-white/50 bg-black/20 px-2.5 py-0.5 rounded-full">2026년 4월 24일 목요일</span>
-              </div>
-
-              {/* Overall 봇 메시지 */}
-              <div className="flex items-start gap-2">
-                {/* 프로필 */}
-                <div className="w-8 h-8 rounded-full bg-[#131312] border border-white/10 flex items-center justify-center shrink-0">
-                  <span className="text-[10px] font-bold text-[#b8ff12]">OVR</span>
-                </div>
-                <div className="flex flex-col gap-1 max-w-[230px]">
-                  <span className="text-[11px] text-[#555] font-medium">Overall</span>
-                  {/* 링크 카드 */}
-                  <div className="bg-white rounded-2xl rounded-tl-sm overflow-hidden shadow-sm">
-                    {/* 카드 썸네일 */}
-                    <div className="bg-[#131312] h-[90px] flex items-center justify-center gap-2">
-                      <span className="text-[22px] font-black text-[#b8ff12] tracking-tight">OVERALL</span>
-                    </div>
-                    {/* 카드 텍스트 */}
-                    <div className="px-3 py-2.5">
-                      <p className="text-[12px] font-bold text-[#111] leading-snug">⚽ FC 오버롤 팀원 모집 중!</p>
-                      <p className="text-[10px] text-[#888] mt-0.5 leading-relaxed">같이 공 찰 팀원을 찾고 있어요.<br/>지금 바로 가입하고 함께 뛰어요!</p>
-                      <div className="mt-2 pt-2 border-t border-[#eee]">
-                        <p className="text-[10px] text-[#aaa] truncate">ovr-log.com/invite/abc123</p>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-[#888] self-end">오후 3:24</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 안내 문구 */}
-          <p className="text-[11px] text-[#a6a5a5] text-center mt-3 leading-relaxed">
-            위와 같은 형태로 카카오톡에 공유됩니다
-          </p>
-
-          {/* 액션 버튼 */}
-          <div className="flex gap-2.5 mt-4">
-            <button
-              onClick={onClose}
-              className="flex-1 h-[44px] rounded-xl bg-white/8 text-[13px] font-semibold text-[#a6a5a5] hover:bg-white/12 transition-colors"
-            >
-              취소
-            </button>
-            <button
-              onClick={onSend}
-              className="flex-1 h-[44px] rounded-xl bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <svg width="15" height="14" viewBox="0 0 18 17" fill="none">
-                <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.134 0 7c0 2.493 1.607 4.677 4.023 5.946L3.1 16.5a.3.3 0 0 0 .453.316L7.9 13.88C8.26 13.927 8.627 13.95 9 13.95c4.971 0 9-3.134 9-7S13.971 0 9 0z" fill="#381E1F"/>
-              </svg>
-              <span className="text-[13px] font-bold text-[#381E1F]">카카오톡으로 공유</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ──────────────────────────────────────────────
 // 방출 이력 모달
@@ -334,8 +240,6 @@ function JoinRequestList({ teamId }: { teamId: number }) {
   const [selectedPlayer, setSelectedPlayer] = useState<DeletedMember | null>(null);
   const [modal, setModal] = useState<ModalState>(null);
   const [rejectReason, setRejectReason] = useState("");
-  const [showKakaoPreview, setShowKakaoPreview] = useState(false);
-
   const data = useLazyLoadQuery<findTeamJoinRequestQuery>(
     FindTeamJoinRequestQuery,
     { teamId },
@@ -392,42 +296,6 @@ function JoinRequestList({ teamId }: { teamId: number }) {
           )}
         </div>
       </div>
-
-      {/* ── 카카오톡 초대 섹션 (당근/토스 스타일 한 줄 row) ── */}
-      <div className="px-4 md:px-6 pb-4">
-        <button
-          onClick={() => setShowKakaoPreview(true)}
-          className="w-full bg-[#1a1a1a] border border-white/8 rounded-2xl px-4 py-3.5 flex items-center gap-3 hover:bg-[#202020] active:bg-[#242424] transition-colors group"
-        >
-          {/* 카카오 아이콘 */}
-          <div className="w-9 h-9 rounded-full bg-[#FEE500] flex items-center justify-center shrink-0">
-            <svg width="17" height="16" viewBox="0 0 18 17" fill="none">
-              <path fillRule="evenodd" clipRule="evenodd" d="M9 0C4.029 0 0 3.134 0 7c0 2.493 1.607 4.677 4.023 5.946L3.1 16.5a.3.3 0 0 0 .453.316L7.9 13.88C8.26 13.927 8.627 13.95 9 13.95c4.971 0 9-3.134 9-7S13.971 0 9 0z" fill="#381E1F"/>
-            </svg>
-          </div>
-          {/* 텍스트 */}
-          <div className="flex flex-col items-start min-w-0">
-            <span className="text-[14px] font-semibold text-white leading-tight">카카오톡으로 초대 보내기</span>
-            <span className="text-[12px] text-[#a6a5a5] leading-tight mt-0.5">링크를 공유해 새 팀원을 모집하세요</span>
-          </div>
-          {/* 화살표 */}
-          <svg className="ml-auto shrink-0 text-[#555] group-hover:text-[#888] transition-colors" width="7" height="12" viewBox="0 0 7 12" fill="none">
-            <path d="M1 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
-      {/* 카카오 초대 미리보기 모달 */}
-      {showKakaoPreview && (
-        <KakaoInvitePreviewModal
-          onClose={() => setShowKakaoPreview(false)}
-          onSend={() => {
-            // TODO: Kakao.Share.sendDefault() 연동
-            setShowKakaoPreview(false);
-            alert("카카오톡 공유 기능은 준비 중입니다.");
-          }}
-        />
-      )}
 
       <div className="px-4 md:px-6 pb-8 flex flex-col h-full overflow-hidden">
         {/* 필터 탭 */}
