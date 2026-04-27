@@ -29,6 +29,10 @@ const teamSettingsQuery = graphql`
           awayUniform
           region {
             code
+            sidoName
+            siggName
+            dongName
+            riName
             name
           }
         }

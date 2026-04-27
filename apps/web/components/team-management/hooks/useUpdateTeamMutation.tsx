@@ -11,6 +11,10 @@ const updateTeamMutation = graphql`
       activityArea
       region {
         code
+        sidoName
+        siggName
+        dongName
+        riName
         name
       }
       homeUniform

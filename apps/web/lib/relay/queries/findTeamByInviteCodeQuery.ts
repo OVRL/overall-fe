@@ -15,8 +15,11 @@ export const FindTeamByInviteCodeQuery = graphql`
       homeUniform
       awayUniform
       region {
+        code
         sidoName
         siggName
+        dongName
+        riName
         name
       }
     }

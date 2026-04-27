@@ -28,6 +28,10 @@ import {
   getTeamMemberProfileImageRawUrl, 
   getTeamMemberProfileImageFallbackUrl 
 } from "@/lib/playerPlaceholderImage";
+import {
+  formatRegionSearchDisplay,
+  isAdministrativeRegionCodeLike,
+} from "@/lib/region/formatRegionSearchDisplay";
 
 // ──────────────────────────────────────────────
 // Types
@@ -624,7 +628,7 @@ function TeamSettingsPanelInner({
 
   // 팀 정보 (첫 번째 멤버의 team 정보를 통해 가져옴)
   const teamData = teamMemberConnection.members[0]?.team;
-  
+
   // 뮤테이션 훅
   const { executeMutation: updateTeam } = useUpdateTeamMutation();
   const { executeMutation: updateMember, isInFlight: isUpdatingMember } = useUpdateTeamMemberMutation();
@@ -880,10 +884,31 @@ function TeamSettingsPanelInner({
   }
 
   const teamName = teamData.name ?? "";
-  // region.name이 순수 숫자(지역코드)인 경우 표시하지 않음
-  const rawLocationName = teamData.region?.name || "";
-  const locationName = /^\d+$/.test(rawLocationName) ? "" : rawLocationName;
+  const rawTeamActivity =
+    typeof teamData.activityArea === "string"
+      ? teamData.activityArea.trim()
+      : "";
+  const teamActivityAreaCode =
+    teamData.region?.code != null
+      ? String(teamData.region.code).trim()
+      : "";
+  const regionLabel = formatRegionSearchDisplay(teamData.region ?? null);
+  /** API가 `activityArea`에 행정코드만 넣는 경우 UI에는 지역명을 쓰고, 코드 문자열을 이름처럼 노출하지 않는다. */
+  const activityFromTeamIsProbablyCode =
+    teamActivityAreaCode !== "" && rawTeamActivity === teamActivityAreaCode;
+  const rawActivityLooksLikeAdminCode =
+    isAdministrativeRegionCodeLike(rawTeamActivity);
+  const locationName =
+    regionLabel ||
+    (!activityFromTeamIsProbablyCode &&
+    !rawActivityLooksLikeAdminCode &&
+    rawTeamActivity
+      ? rawTeamActivity
+      : "");
+  const activityRegionLabel =
+    locationName.trim() || "—";
   const locationCode = teamData.region?.code || teamData.activityArea || "";
+
   const foundedDate = teamData.historyStartDate  
     ? new Date(teamData.historyStartDate).toLocaleDateString()
     : "";
@@ -971,7 +996,7 @@ function TeamSettingsPanelInner({
               <div className="flex flex-col gap-4">
                 <div>
                   <p className="text-xs md:text-sm font-semibold text-[#8b8b8b] mb-2">주요 활동 지역</p>
-                  <p className="text-sm md:text-base font-normal text-white">{locationName}</p>
+                  <p className="text-sm md:text-base font-normal text-white">{activityRegionLabel}</p>
                 </div>
                 <div>
                   <p className="text-xs md:text-sm font-semibold text-[#8b8b8b] mb-1">창단일</p>
