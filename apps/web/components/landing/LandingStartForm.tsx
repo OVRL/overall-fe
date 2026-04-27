@@ -13,13 +13,14 @@ import { observableToPromise } from "@/lib/relay/observableToPromise";
 import { FindTeamByInviteCodeQuery } from "@/lib/relay/queries/findTeamByInviteCodeQuery";
 import { toast } from "@/lib/toast";
 
-const LandingStartForm = () => {
-  const [inviteCode, setInviteCode] = useState("");
+const LandingStartForm = ({ initialInviteCode }: { initialInviteCode?: string } = {}) => {
+  const [inviteCode, setInviteCode] = useState(initialInviteCode ?? "");
   const [isOpeningTeamModal, setIsOpeningTeamModal] = useState(false);
   const environment = useRelayEnvironment();
   const { openModal } = useModal("TEAM_INFO");
   const mountedRef = useRef(true);
   const submitLockRef = useRef(false);
+  const autoSubmittedRef = useRef(false);
 
   // next/dynamic 청크를 랜딩 진입 시 미리 받아 두어, 제출 시와 병렬로 기다릴 때 유리하게 함
   useEffect(() => {
@@ -33,18 +34,28 @@ const LandingStartForm = () => {
     };
   }, []);
 
+  // 초대 링크로 진입 시 코드 자동 입력 후 팀 조회 실행
+  useEffect(() => {
+    if (!initialInviteCode || autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
+    setInviteCode(initialInviteCode);
+    const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+    // 렌더 후 한 프레임 뒤에 실행해 Relay 환경이 준비된 상태에서 호출
+    const id = setTimeout(() => {
+      handleSubmitCode(initialInviteCode);
+    }, 300);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialInviteCode]);
+
   const canSubmit = inviteCode.trim().length > 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = inviteCode.trim();
+  const handleSubmitCode = (code: string) => {
     if (!code || isOpeningTeamModal || submitLockRef.current) return;
-
     submitLockRef.current = true;
     void (async () => {
       setIsOpeningTeamModal(true);
       try {
-        // 모달 청크 + 팀 조회를 병렬로 끝낸 뒤 스토어에 데이터가 있을 때만 모달을 열어, 스피너 한 번에 본문까지 표시
         await Promise.all([
           import("@/components/modals/TeamInfoModal/TeamInfoModal"),
           observableToPromise(
@@ -64,11 +75,14 @@ const LandingStartForm = () => {
         }
       } finally {
         submitLockRef.current = false;
-        if (mountedRef.current) {
-          setIsOpeningTeamModal(false);
-        }
+        if (mountedRef.current) setIsOpeningTeamModal(false);
       }
     })();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSubmitCode(inviteCode.trim());
   };
 
   return (

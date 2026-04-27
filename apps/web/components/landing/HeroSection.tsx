@@ -3,7 +3,7 @@
 import Image from "next/image";
 import GradationBg from "./GradationBg";
 import LandingStartForm from "./LandingStartForm";
-const HeroSection = () => {
+const HeroSection = ({ initialInviteCode }: { initialInviteCode?: string } = {}) => {
   return (
     <section className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden">
       <Image
@@ -49,7 +49,7 @@ const HeroSection = () => {
         </div>
         <div className="pointer-events-auto absolute inset-0 flex items-center justify-center px-4 pb-safe pt-safe lg:relative z-20 lg:inset-auto lg:h-auto xl:h-153 lg:w-[400px] xl:w-107.5 lg:shrink-0 lg:items-center xl:items-stretch lg:justify-center xl:justify-start lg:p-0 lg:px-6">
           <div className="w-full max-w-107.5 lg:h-full lg:max-w-none">
-            <LandingStartForm />
+            <LandingStartForm initialInviteCode={initialInviteCode} />
           </div>
         </div>
       </div>

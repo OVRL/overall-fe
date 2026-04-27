@@ -17,11 +17,25 @@ type InviteSnapshot = {
   status: LoadStatus;
 };
 
+const SITE_ORIGIN = "https://ovr-log.com";
+
 function writeInviteCodeToClipboard(code: string) {
   void navigator.clipboard.writeText(code).then(
     () => toast.success("코드가 복사되었습니다."),
     () => toast.error("복사에 실패했습니다."),
   );
+}
+
+function writeInviteLinkToClipboard(code: string) {
+  const link = `${SITE_ORIGIN}/invite/${code}`;
+  void navigator.clipboard.writeText(link).then(
+    () => toast.success("초대 링크가 복사되었습니다."),
+    () => toast.error("복사에 실패했습니다."),
+  );
+}
+
+export function buildInviteLink(code: string) {
+  return `${SITE_ORIGIN}/invite/${code}`;
 }
 
 /**
@@ -149,11 +163,34 @@ export function useInviteCodeForTeam(teamId: number | null) {
       });
   }, [teamId, snapshot, executeMutation]);
 
+  const copyLink = useCallback(() => {
+    if (teamId == null) return;
+    const snap = snapshot?.teamId === teamId ? snapshot : null;
+    const code = snap?.code;
+    const expiredAt = snap?.expiredAt;
+    if (code == null) return;
+
+    if (expiredAt == null || !isInviteExpired(expiredAt)) {
+      writeInviteLinkToClipboard(code);
+      return;
+    }
+
+    void runCreateInviteCodeForTeam(teamId, executeMutation)
+      .then((next) => {
+        setSnapshot({ teamId, status: "ready", code: next.code, expiredAt: next.expiredAt });
+        writeInviteLinkToClipboard(next.code);
+      })
+      .catch(() => {
+        toast.error("초대 링크를 갱신하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      });
+  }, [teamId, snapshot, executeMutation]);
+
   return {
     inviteCode,
     isLoading,
     isInFlight,
     requestCreateInviteCode,
     copyCode,
+    copyLink,
   };
 }
