@@ -3,7 +3,7 @@
 import React, { Fragment, Suspense, useState, useCallback } from "react";
 import StartingXI from "@/components/home/StartingXI";
 import HomeStartingXIWithBestEleven from "@/components/home/StartingXI/HomeStartingXIWithBestEleven";
-import PlayerRosterPanel from "@/components/home/Roster/PlayerRosterPanel";
+import HomePlayerRosterSlot from "@/components/home/Roster/HomePlayerRosterSlot";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { Player } from "@/types/player";
 import Skeleton from "@/components/ui/Skeleton";
@@ -76,7 +76,7 @@ export default function SquadManager({
         key="home-squad-roster"
         className="relative overflow-hidden max-lg:w-full h-full flex justify-center bg-surface-card border border-border-card rounded-xl shadow-card"
       >
-        <PlayerRosterPanel className="w-92 md:w-92 lg:w-84 xl:w-90 2xl:w-98.2" />
+        <HomePlayerRosterSlot className="w-92 md:w-92 lg:w-84 xl:w-90 2xl:w-98.2" />
       </div>
     </div>
   );

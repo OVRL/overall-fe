@@ -6,6 +6,7 @@ const createInviteCodeMutation = graphql`
   mutation useCreateInviteCodeMutation($teamId: Float!) {
     createInviteCode(teamId: $teamId) {
       code
+      expiredAt
     }
   }
 `;

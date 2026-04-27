@@ -13,7 +13,7 @@ jest.mock("@/lib/relay/observableToPromise", () => ({
   observableToPromise: (obs: unknown) => mockObservableToPromise(obs),
 }));
 
-import { fetchInviteCodeByTeam } from "../fetchInviteCodeByTeam";
+import { fetchInviteCodeByTeam } from "@/lib/inviteCode/fetchInviteCodeByTeam";
 
 describe("fetchInviteCodeByTeam", () => {
   const teamId = 1;
@@ -23,24 +23,40 @@ describe("fetchInviteCodeByTeam", () => {
   });
 
   describe("조회 성공 시", () => {
-    it("findInviteCodeByTeam.code가 있으면 해당 코드 문자열을 반환한다", async () => {
+    it("code·expiredAt가 있으면 스냅샷을 반환한다", async () => {
       mockObservableToPromise.mockResolvedValue({
-        findInviteCodeByTeam: { code: "TEAM-OVR-2026-ABCD" },
+        findInviteCodeByTeam: {
+          code: "TEAM-OVR-2026-ABCD",
+          expiredAt: "2026-12-31 23:59:59",
+        },
       });
 
       const result = await fetchInviteCodeByTeam(teamId);
 
-      expect(result).toBe("TEAM-OVR-2026-ABCD");
+      expect(result).toEqual({
+        code: "TEAM-OVR-2026-ABCD",
+        expiredAt: "2026-12-31 23:59:59",
+      });
     });
 
-    it("code가 빈 문자열이면 빈 문자열을 반환한다", async () => {
+    it("expiredAt가 없으면 null", async () => {
       mockObservableToPromise.mockResolvedValue({
-        findInviteCodeByTeam: { code: "" },
+        findInviteCodeByTeam: { code: "X" },
       });
 
       const result = await fetchInviteCodeByTeam(teamId);
 
-      expect(result).toBe("");
+      expect(result).toBeNull();
+    });
+
+    it("code가 빈 문자열이면 null", async () => {
+      mockObservableToPromise.mockResolvedValue({
+        findInviteCodeByTeam: { code: "", expiredAt: "2026-12-31 23:59:59" },
+      });
+
+      const result = await fetchInviteCodeByTeam(teamId);
+
+      expect(result).toBeNull();
     });
   });
 

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<234e43dfddb5d91af912c4e21ad09ce5>>
+ * @generated SignedSource<<9c47614abeb42e8f898405538e408b9b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type useCreateInviteCodeMutation$variables = {
 export type useCreateInviteCodeMutation$data = {
   readonly createInviteCode: {
     readonly code: string;
+    readonly expiredAt: any;
   };
 };
 export type useCreateInviteCodeMutation = {
@@ -51,6 +52,13 @@ v1 = [
         "kind": "ScalarField",
         "name": "code",
         "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "expiredAt",
+        "storageKey": null
       }
     ],
     "storageKey": null
@@ -74,16 +82,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "3874963131d064d95416916f8de04044",
+    "cacheID": "fde8226bcf7d4f8f090215736c4d6ee7",
     "id": null,
     "metadata": {},
     "name": "useCreateInviteCodeMutation",
     "operationKind": "mutation",
-    "text": "mutation useCreateInviteCodeMutation(\n  $teamId: Float!\n) {\n  createInviteCode(teamId: $teamId) {\n    code\n  }\n}\n"
+    "text": "mutation useCreateInviteCodeMutation(\n  $teamId: Float!\n) {\n  createInviteCode(teamId: $teamId) {\n    code\n    expiredAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "bb77bef5824419ee5e5f9e4107d27b5b";
+(node as any).hash = "7290fa95e85d9a6cbcd3c4fde9b3f2b6";
 
 export default node;

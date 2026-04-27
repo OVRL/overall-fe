@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<81af067e40be93dae2b421312ad52825>>
+ * @generated SignedSource<<0963d311adc9c1160a9a2e1f52940bba>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type findInviteCodeByTeamQuery$variables = {
 export type findInviteCodeByTeamQuery$data = {
   readonly findInviteCodeByTeam: {
     readonly code: string;
+    readonly expiredAt: any;
   } | null | undefined;
 };
 export type findInviteCodeByTeamQuery = {
@@ -51,6 +52,13 @@ v1 = [
         "kind": "ScalarField",
         "name": "code",
         "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "expiredAt",
+        "storageKey": null
       }
     ],
     "storageKey": null
@@ -74,16 +82,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "81326ce54e355b522d6c5850c7caf845",
+    "cacheID": "899d69ec632afb62e45a4771ddbd308f",
     "id": null,
     "metadata": {},
     "name": "findInviteCodeByTeamQuery",
     "operationKind": "query",
-    "text": "query findInviteCodeByTeamQuery(\n  $teamId: Int!\n) {\n  findInviteCodeByTeam(teamId: $teamId) {\n    code\n  }\n}\n"
+    "text": "query findInviteCodeByTeamQuery(\n  $teamId: Int!\n) {\n  findInviteCodeByTeam(teamId: $teamId) {\n    code\n    expiredAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e119490e4201dfcf4425221588ce3c3f";
+(node as any).hash = "44a70a3a105a66357f6ed53f9b7093cf";
 
 export default node;

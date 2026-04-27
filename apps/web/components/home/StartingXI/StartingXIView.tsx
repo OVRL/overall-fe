@@ -51,8 +51,11 @@ export default function StartingXIView({
           <SelectedTeamBadge />
         </motion.div>
 
-        <motion.div variants={startingXISectionVariants} className="flex flex-col flex-1">
-          <div className="relative h-9.5">
+        <motion.div
+          variants={startingXISectionVariants}
+          className="flex flex-col flex-1"
+        >
+          {/* <div className="relative h-9.5">
             <AdBoard
               imageUrl="/images/logo_OVR_head.png"
               linkUrl="#"
@@ -64,7 +67,7 @@ export default function StartingXIView({
               altText="OVR Ad Banner"
               className="w-31 absolute right-3 sm:right-2 md:right-1/6 lg:right-1/5"
             />
-          </div>
+          </div> */}
           <FormationField
             players={players}
             isSoloTeam={isSoloTeam}

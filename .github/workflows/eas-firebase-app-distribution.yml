@@ -78,13 +78,35 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: EAS Build iOS (firebase 프로필, 완료까지 대기)
-        run: eas build --platform ios --profile firebase --non-interactive --wait --json > eas-build-ios.json
+        id: eas_build
+        shell: bash
+        run: |
+          set +e
+          # stdout(JSON)은 파일로 저장, stderr(로그)는 별도 파일로 저장
+          eas build --platform ios --profile firebase --non-interactive --wait --json \
+            1> >(tee eas-build-ios.json) \
+            2> >(tee eas-build-ios.stderr >&2)
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: (실패 시) EAS 빌드 상세 출력
+        if: ${{ steps.eas_build.outputs.exit_code != '0' }}
+        shell: bash
+        run: |
+          echo "---- eas-build-ios.json (first 4000 chars) ----"
+          python -c 'from pathlib import Path; print(Path("eas-build-ios.json").read_text()[:4000])'
+          echo "---- eas-build-ios.stderr (first 4000 chars) ----"
+          python -c 'from pathlib import Path; p=Path("eas-build-ios.stderr"); print(p.read_text()[:4000] if p.exists() else "(no stderr file)")'
+          BUILD_ID=$(node scripts/extract-eas-build-id.mjs eas-build-ios.json)
+          echo "BUILD_ID=$BUILD_ID"
+          eas build:view "$BUILD_ID" --json || true
+          exit 1
 
       - name: 아카이브 URL 추출
         id: artifact
-        working-directory: ${{ github.workspace }}
         run: |
-          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-ios.json)
+          URL=$(node scripts/extract-eas-artifact-url.mjs eas-build-ios.json)
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: IPA 다운로드
@@ -106,10 +128,14 @@ jobs:
             export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
             export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
           else
-            export FIREBASE_DISTRIBUTION_GROUPS="testers"
-            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ secrets.FIREBASE_DISTRIBUTION_GROUPS }}"
+            # push 이벤트에서는 이번 푸시에 포함된 커밋 메시지를 릴리즈 노트로 사용합니다.
+            # (너무 길어지지 않게 최대 40줄로 제한)
+            export RELEASE_NOTES="$(git log --format='- %s' ${{ github.event.before }}..${GITHUB_SHA} | head -40)"
+            if [ -z "$RELEASE_NOTES" ]; then
+              export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+            fi
           fi
-          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
           node scripts/firebase-distribute.mjs ios
 
   android:
@@ -143,13 +169,34 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: EAS Build Android (firebase 프로필, 완료까지 대기)
-        run: eas build --platform android --profile firebase --non-interactive --wait --json > eas-build-android.json
+        id: eas_build
+        shell: bash
+        run: |
+          set +e
+          eas build --platform android --profile firebase --non-interactive --wait --json \
+            1> >(tee eas-build-android.json) \
+            2> >(tee eas-build-android.stderr >&2)
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: (실패 시) EAS 빌드 상세 출력
+        if: ${{ steps.eas_build.outputs.exit_code != '0' }}
+        shell: bash
+        run: |
+          echo "---- eas-build-android.json (first 4000 chars) ----"
+          python -c 'from pathlib import Path; print(Path("eas-build-android.json").read_text()[:4000])'
+          echo "---- eas-build-android.stderr (first 4000 chars) ----"
+          python -c 'from pathlib import Path; p=Path("eas-build-android.stderr"); print(p.read_text()[:4000] if p.exists() else "(no stderr file)")'
+          BUILD_ID=$(node scripts/extract-eas-build-id.mjs eas-build-android.json)
+          echo "BUILD_ID=$BUILD_ID"
+          eas build:view "$BUILD_ID" --json || true
+          exit 1
 
       - name: 아카이브 URL 추출
         id: artifact
-        working-directory: ${{ github.workspace }}
         run: |
-          URL=$(node apps/native/scripts/extract-eas-artifact-url.mjs apps/native/eas-build-android.json)
+          URL=$(node scripts/extract-eas-artifact-url.mjs eas-build-android.json)
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: APK 다운로드
@@ -171,8 +218,10 @@ jobs:
             export FIREBASE_DISTRIBUTION_GROUPS="${{ github.event.inputs.distribution_group }}"
             export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
           else
-            export FIREBASE_DISTRIBUTION_GROUPS="testers"
-            export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+            export FIREBASE_DISTRIBUTION_GROUPS="${{ secrets.FIREBASE_DISTRIBUTION_GROUPS }}"
+            export RELEASE_NOTES="$(git log --format='- %s' ${{ github.event.before }}..${GITHUB_SHA} | head -40)"
+            if [ -z "$RELEASE_NOTES" ]; then
+              export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
+            fi
           fi
-          [ -z "$FIREBASE_DISTRIBUTION_GROUPS" ] && export FIREBASE_DISTRIBUTION_GROUPS=testers
           node scripts/firebase-distribute.mjs android
