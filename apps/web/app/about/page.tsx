@@ -203,19 +203,22 @@ export default function AboutPage() {
         </div>
 
         {/* 메인 헤드라인 */}
-        <h1
-          className="mb-6 text-5xl sm:text-6xl md:text-7xl font-black leading-tight tracking-tight transition-all duration-700"
+        <div
+          className="mb-6 transition-all duration-700 flex justify-center"
           style={{
             opacity: heroVisible ? 1 : 0,
             transform: heroVisible ? "translateY(0)" : "translateY(20px)",
             transitionDelay: "350ms",
-            background: "linear-gradient(135deg, #ffffff 0%, #86efac 50%, #22c55e 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
           }}
         >
-          Overall
-        </h1>
+          <Image
+            src="/icons/logo_OVRx3.png"
+            alt="Overall Logo"
+            width={320}
+            height={80}
+            className="w-48 sm:w-64 md:w-80 h-auto"
+          />
+        </div>
 
         <p
           className="max-w-lg text-base sm:text-lg text-gray-400 leading-relaxed transition-all duration-700"
@@ -229,6 +232,7 @@ export default function AboutPage() {
           <br />
           당신의 축구팀을 위한 모든 것이 여기 있습니다.
         </p>
+
 
         <div
           className="mt-10 flex flex-col sm:flex-row gap-3 transition-all duration-700"
@@ -372,7 +376,7 @@ export default function AboutPage() {
             <p className="mb-3 text-sm font-semibold tracking-widest text-green-400 uppercase">
               Numbers
             </p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-green-500">
               숫자로 보는 Overall
             </h2>
           </Section>
