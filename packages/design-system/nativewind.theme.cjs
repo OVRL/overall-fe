@@ -4,6 +4,10 @@
  */
 module.exports = {
   extend: {
+    /** 네이티브는 expo-font 플러그인으로 번들된 Pretendard 정적 파일과 매칭 */
+    fontFamily: {
+      sans: ["Pretendard"],
+    },
     colors: {
       surface: {
         primary: "oklch(0.13 0 0)",
