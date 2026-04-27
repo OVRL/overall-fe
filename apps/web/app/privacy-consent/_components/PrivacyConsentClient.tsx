@@ -106,7 +106,7 @@ export default function PrivacyConsentClient() {
               badge="필수"
               badgeVariant="required"
               label="이용약관"
-              href="#"
+              href="/terms"
               checkboxClass={rowCheckboxClass}
             />
 
@@ -116,7 +116,7 @@ export default function PrivacyConsentClient() {
               badge="선택"
               badgeVariant="optional"
               label="마케팅 정보 수신"
-              href="#"
+              href="/marketing-notice"
               checkboxClass={rowCheckboxClass}
             />
           </ul>
