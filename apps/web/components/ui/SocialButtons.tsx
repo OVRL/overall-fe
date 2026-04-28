@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import kakaoLogo from "@/public/icons/kakao_logo.svg";
 import naverLogo from "@/public/icons/naver_logo.svg";
 import googleLogo from "@/public/icons/google_logo.svg";
+import { GoogleLoginButton } from "@/components/ui/social/GoogleLoginButton";
 import { KakaoLoginButton } from "@/components/ui/social/KakaoLoginButton";
 import { NaverLoginButton } from "@/components/ui/social/NaverLoginButton";
 
@@ -51,6 +52,12 @@ export default function SocialButtons() {
             />
           ) : provider.id === "naver" ? (
             <NaverLoginButton
+              className={provider.styleClass}
+              leftIcon={provider.icon}
+              label={provider.label}
+            />
+          ) : provider.id === "google" ? (
+            <GoogleLoginButton
               className={provider.styleClass}
               leftIcon={provider.icon}
               label={provider.label}

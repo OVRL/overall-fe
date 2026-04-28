@@ -676,7 +676,7 @@ type RegionSearchModel {
 
 input RegisterUserInput {
   """활동 지역 코드"""
-  activityArea: String!
+  activityArea: String
 
   """생년월일 (yyyy-MM-dd)"""
   birthDate: String!
@@ -685,16 +685,16 @@ input RegisterUserInput {
   email: String!
 
   """좋아하는 선수 (최대 15자)"""
-  favoritePlayer: String!
+  favoritePlayer: String
 
   """주발"""
-  foot: Foot!
+  foot: Foot
 
   """성별"""
-  gender: Gender!
+  gender: Gender
 
   """키 (cm)"""
-  height: Int!
+  height: Int
 
   """주 포지션"""
   mainPosition: Position!
@@ -706,16 +706,16 @@ input RegisterUserInput {
   phone: String!
 
   """선호 등번호 (최대 999)"""
-  preferredNumber: Int!
+  preferredNumber: Int
 
-  """소셜 로그인 제공자 (NAVER, KAKAO, GOOGLE)"""
-  provider: String!
+  """소셜 로그인 제공자"""
+  provider: Provider!
 
   """부 포지션 (최대 2개)"""
   subPositions: [Position!]!
 
   """몸무게 (kg)"""
-  weight: Int!
+  weight: Int
 }
 
 """팀 가입 신청 입력"""

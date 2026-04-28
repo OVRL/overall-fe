@@ -1,7 +1,7 @@
 import { env } from "@/lib/env";
 
 export type KakaoExchangeResult =
-  | { ok: true; userMe: unknown }
+  | { ok: true; accessToken: string; userMe: unknown }
   | { ok: false; error: unknown };
 
 async function requestKakaoToken(params: {
@@ -72,5 +72,5 @@ export async function exchangeKakaoCodeForUserMe(params: {
     return { ok: false, error: userMeRes.error };
   }
 
-  return { ok: true, userMe: userMeRes.data };
+  return { ok: true, accessToken, userMe: userMeRes.data };
 }

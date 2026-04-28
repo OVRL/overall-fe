@@ -17,6 +17,8 @@ export const env = createEnv({
     KAKAO_REST_API_KEY: z.string(),
     /** 카카오 앱 설정에서 Client Secret을 사용하는 경우에만 설정(서버 전용). */
     KAKAO_CLIENT_SECRET: z.string().optional(),
+    /** 구글 OAuth 웹 클라이언트 시크릿. PKCE만 쓸 때는 비워도 됩니다(설정 시 토큰 교환에 포함). */
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_API_URL: z.string(),
@@ -29,6 +31,8 @@ export const env = createEnv({
 
     /** 카카오 JavaScript 키(클라이언트 노출). */
     NEXT_PUBLIC_KAKAO_JS_KEY: z.string(),
+    /** 구글 OAuth 클라이언트 ID (공개 가능). authorize·토큰 교환에 동일 클라이언트 사용. */
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string(),
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
@@ -47,5 +51,8 @@ export const env = createEnv({
     KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
     KAKAO_CLIENT_SECRET: process.env.KAKAO_CLIENT_SECRET,
     NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY,
+
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
 });

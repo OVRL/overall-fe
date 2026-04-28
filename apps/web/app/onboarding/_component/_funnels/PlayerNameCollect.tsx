@@ -10,8 +10,10 @@ const PlayerNameCollect = ({
   onNext,
   data,
   onDataChange,
+  lockedFields,
 }: OnboardingStepProps) => {
   const [name, setName] = useState(data.name || "");
+  const locked = lockedFields?.name === true;
 
   const handleClick = () => {
     onDataChange((prev) => ({ ...prev, name }));
@@ -32,8 +34,13 @@ const PlayerNameCollect = ({
             placeholder="선수 이름을 입력해주세요."
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            onClear={() => setName("")}
+            onChange={(e) => {
+              if (locked) return;
+              setName(e.target.value);
+            }}
+            onClear={locked ? undefined : () => setName("")}
+            readOnly={locked}
+            aria-readonly={locked}
           />
         </div>
       </div>

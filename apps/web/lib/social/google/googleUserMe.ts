@@ -1,23 +1,25 @@
 import { env } from "@/lib/env";
 
-export type NaverExchangeResult =
+export type GoogleExchangeResult =
   | { ok: true; accessToken: string; userMe: unknown }
   | { ok: false; error: unknown };
 
-async function requestNaverToken(params: {
+async function exchangeAuthorizationCode(params: {
   code: string;
-  state: string;
   redirectUri: string;
+  codeVerifier: string;
 }) {
   const body = new URLSearchParams();
   body.set("grant_type", "authorization_code");
-  body.set("client_id", env.NAVER_CLIENT_ID);
-  body.set("client_secret", env.NAVER_CLIENT_SECRET);
   body.set("code", params.code);
-  body.set("state", params.state);
   body.set("redirect_uri", params.redirectUri);
+  body.set("client_id", env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  body.set("code_verifier", params.codeVerifier);
+  if (env.GOOGLE_CLIENT_SECRET) {
+    body.set("client_secret", env.GOOGLE_CLIENT_SECRET);
+  }
 
-  const res = await fetch("https://nid.naver.com/oauth2.0/token", {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
@@ -33,12 +35,12 @@ async function requestNaverToken(params: {
 
   return {
     ok: true as const,
-    data: json as { access_token?: string; token_type?: string },
+    data: json as { access_token?: string },
   };
 }
 
-async function requestNaverUserMe(accessToken: string) {
-  const res = await fetch("https://openapi.naver.com/v1/nid/me", {
+async function requestGoogleUserInfo(accessToken: string) {
+  const res = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -53,13 +55,13 @@ async function requestNaverUserMe(accessToken: string) {
   return { ok: true as const, data: json };
 }
 
-/** 인가 코드로 액세스 토큰 발급 후 `/v1/nid/me` 조회 */
-export async function exchangeNaverCodeForUserMe(params: {
+/** PKCE로 받은 code → 토큰 → OpenID userinfo */
+export async function exchangeGoogleCodeForUserMe(params: {
   code: string;
-  state: string;
   redirectUri: string;
-}): Promise<NaverExchangeResult> {
-  const tokenRes = await requestNaverToken(params);
+  codeVerifier: string;
+}): Promise<GoogleExchangeResult> {
+  const tokenRes = await exchangeAuthorizationCode(params);
 
   if (!tokenRes.ok) {
     return { ok: false, error: tokenRes.error };
@@ -67,13 +69,13 @@ export async function exchangeNaverCodeForUserMe(params: {
 
   const accessToken = tokenRes.data.access_token;
   if (!accessToken) {
-    return { ok: false, error: "naver access_token을 받지 못했습니다." };
+    return { ok: false, error: "google access_token을 받지 못했습니다." };
   }
 
-  const userMeRes = await requestNaverUserMe(accessToken);
-  if (!userMeRes.ok) {
-    return { ok: false, error: userMeRes.error };
+  const userInfoRes = await requestGoogleUserInfo(accessToken);
+  if (!userInfoRes.ok) {
+    return { ok: false, error: userInfoRes.error };
   }
 
-  return { ok: true, accessToken, userMe: userMeRes.data };
+  return { ok: true, accessToken, userMe: userInfoRes.data };
 }
