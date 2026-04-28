@@ -34,7 +34,7 @@ function useTeamSelectorData() {
       .map((m) => ({
         id: normalizeRelayTeamGlobalId(m.team.id) ?? String(m.team.id),
         name: m.team.name ?? "",
-        imageUrl: DEFAULT_TEAM_IMAGE,
+        imageUrl: m.team.emblem || DEFAULT_TEAM_IMAGE,
       }));
   }, [members]);
 
