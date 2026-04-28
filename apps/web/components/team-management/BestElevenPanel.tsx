@@ -321,40 +321,37 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     ? String(parseNumericIdFromRelayGlobalId(initialManagerMember.id) ?? initialManagerMember.id)
     : null;
 
-  // 팀 전체 매치 기록 기반 승/무/패 산출
-  const teamStats = useMemo(() => {
-    let wins = 0;
-    let draws = 0;
-    let losses = 0;
-    const matches = data.findMatch || [];
-
-    matches.forEach((m: any) => {
-      try {
-        if (!m.description) return;
-        const savedData = JSON.parse(m.description);
-        const homeScore = savedData.score?.home ?? 0;
-        const awayScore = savedData.score?.away ?? 0;
-
-        if (homeScore > awayScore) wins++;
-        else if (homeScore < awayScore) losses++;
-        else draws++;
-      } catch (e) {
-        // 기존 단순 텍스트 데이터(예: "하늘색 유니폼...")일 경우 JSON 파싱에 실패함
-        // 렌더링 도중 console.error 호출 시 Next.js Dev Error Overlay가 떠서 UI가 중단되므로 무시합니다.
-      }
-    });
-
-    const total = wins + draws + losses;
-    const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-
-    return { total, wins, draws, losses, winRate };
-  }, [data.findMatch]);
-
   const [manager, setManager] = useState({
     memberId: initialManagerId,
     name: initialManagerMember?.user?.name || "설정되지 않음",
     image: getValidImageSrc(initialManagerMember?.user?.profileImage)
   });
+
+  // 감독 개인 매치 기여도(overall) 기반 승/무/패 산출
+  const managerStats = useMemo(() => {
+    // manager.memberId에 해당하는 멤버의 overall 데이터를 찾습니다.
+    const members = data.findManyTeamMember?.members ?? [];
+    const currentMember = members.find((m: any) => {
+      const numId = parseNumericIdFromRelayGlobalId(m.id);
+      return String(numId) === manager.memberId;
+    });
+
+    const overall = currentMember?.overall;
+    if (!overall) {
+      return { total: 0, wins: 0, draws: 0, losses: 0, winRate: 0 };
+    }
+    const appearances = overall.appearances || 0;
+    const winRate = overall.winRate || 0;
+    const wins = Math.round(appearances * (winRate / 100));
+    
+    return {
+      total: appearances,
+      wins,
+      draws: 0,
+      losses: appearances - wins,
+      winRate,
+    };
+  }, [manager.memberId, data.findManyTeamMember?.members]);
 
   // 데이터 로딩 후 초기화 (릴레이 데이터 변경 시)
   useEffect(() => {
@@ -655,21 +652,21 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
                   <div className="flex flex-1 items-center justify-around">
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">경기수</span>
-                      <span className="text-sm font-black text-white">{teamStats.total}</span>
+                      <span className="text-sm font-black text-white">{managerStats.total}</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">승/무/패</span>
                       <span className="text-sm font-black italic">
-                        <span className="text-blue-400">{teamStats.wins}</span>
+                        <span className="text-blue-400">{managerStats.wins}</span>
                         <span className="text-white/20 mx-1">/</span>
-                        <span className="text-white/40">{teamStats.draws}</span>
+                        <span className="text-white/40">{managerStats.draws}</span>
                         <span className="text-white/20 mx-1">/</span>
-                        <span className="text-red-400">{teamStats.losses}</span>
+                        <span className="text-red-400">{managerStats.losses}</span>
                       </span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">팀 승률</span>
-                      <span className="text-base font-black text-primary italic">{teamStats.winRate}%</span>
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">승률</span>
+                      <span className="text-base font-black text-primary italic">{managerStats.winRate}%</span>
                     </div>
                   </div>
                 </div>
