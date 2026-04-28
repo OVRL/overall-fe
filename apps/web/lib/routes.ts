@@ -18,6 +18,7 @@ export const PUBLIC_ROUTES = [
   /^\/privacy-policy(\/.*)?$/,
   /^\/terms(\/.*)?$/,
   /^\/marketing-notice(\/.*)?$/,
+  /^\/onboarding(\/.*)?$/, // 소셜 미가입 사용자 회원가입 퍼널(소셜 스냅샷이 있으면 social-register 모드)
   /^\/social\/[^/]+\/callback(\/.*)?$/, // FE 소셜 콜백(코드 수신 등): 비로그인 접근 허용
 ];
 

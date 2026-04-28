@@ -14,8 +14,10 @@ const BirthDayCollect = ({
   onNext,
   data,
   onDataChange,
+  lockedFields,
 }: OnboardingStepProps) => {
   const [birthDay, setBirthDay] = useState(data.birthDate || "");
+  const locked = lockedFields?.birthDate === true;
 
   const handleClick = () => {
     onDataChange((prev) => ({ ...prev, birthDate: birthDay }));
@@ -32,8 +34,13 @@ const BirthDayCollect = ({
         <div className="mt-20">
           <BirthDayTextField
             value={birthDay}
-            onChange={(e) => setBirthDay(e.target.value)}
-            onClear={() => setBirthDay("")}
+            onChange={(e) => {
+              if (locked) return;
+              setBirthDay(e.target.value);
+            }}
+            onClear={locked ? undefined : () => setBirthDay("")}
+            readOnly={locked}
+            aria-readonly={locked}
           />
         </div>
       </div>

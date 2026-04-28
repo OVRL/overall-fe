@@ -17,8 +17,10 @@ const PhoneNumberCollect = ({
   onNext,
   data,
   onDataChange,
+  lockedFields,
 }: OnboardingStepProps) => {
   const [phoneNumber, setPhoneNumber] = useState(data.phone || "");
+  const locked = lockedFields?.phone === true;
 
   const handleClick = () => {
     const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
@@ -33,8 +35,13 @@ const PhoneNumberCollect = ({
         <div className="mt-20">
           <PhoneNumberTextField
             value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            onClear={() => setPhoneNumber("")}
+            onChange={(e) => {
+              if (locked) return;
+              setPhoneNumber(e.target.value);
+            }}
+            onClear={locked ? undefined : () => setPhoneNumber("")}
+            readOnly={locked}
+            aria-readonly={locked}
           />
         </div>
       </div>
