@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
                       <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#B8FF12]/10 text-[#B8FF12]">필수</span>
                     </td>
                     <td className="py-4 pr-4 align-top leading-relaxed">
-                      이름, 이메일, 카카오계정(전화번호)
+                      이름, 성별, 생일, 출생 연도, 카카오계정(전화번호)
                     </td>
                     <td className="py-4 align-top leading-relaxed" rowSpan={2}>
                       회원 탈퇴 시 즉시 파기
@@ -96,7 +96,7 @@ export default function PrivacyPolicyPage() {
                       <span className="inline-block rounded px-1.5 py-0.5 text-xs font-semibold bg-[#555]/30 text-[#A6A5A5]">선택</span>
                     </td>
                     <td className="py-4 pr-4 align-top leading-relaxed">
-                      성별, 생일, 출생 연도, 연령대
+                      연령대
                     </td>
                   </tr>
                   <tr className="border-b border-[#252525]">
