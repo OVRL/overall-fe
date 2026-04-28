@@ -466,10 +466,23 @@ type Mutation {
   deleteMatchMercenary(input: DeleteMatchMercenaryInput!): Boolean!
   deleteTeam(id: Int!): Boolean!
   deleteTeamMember(id: Int!): Boolean!
+
+  """유저를 삭제합니다. (JWT 인증 필요)"""
   deleteUser(id: Int!): Boolean!
+
+  """이메일과 비밀번호로 로그인합니다. Access Token과 Refresh Token을 반환합니다."""
   login(email: String!, password: String!): LoginResponseModel!
+
+  """로그아웃합니다. Refresh Token을 무효화합니다. (JWT 인증 필요)"""
   logout(refreshToken: String!): Boolean!
+
+  """Refresh Token으로 새로운 Access Token과 Refresh Token을 발급받습니다."""
   refresh(refreshToken: String!): LoginResponseModel!
+
+  """
+  회원가입을 진행합니다. 프론트엔드 SDK로 받은 소셜 로그인 정보를 전달받아 회원가입을 완료합니다. 토큰은 tokens 필드를 요청하여 조회할 수 있습니다.
+  """
+  registerUser(input: RegisterUserInput!, profileImage: Upload): UserModel!
 
   """팀 가입 신청을 거절합니다. PENDING 상태의 신청만 거절 가능하며, 신청 이력은 유지됩니다."""
   rejectJoinRequest(joinRequestId: Int!, rejectedReason: String): JoinRequestModel!
@@ -480,6 +493,12 @@ type Mutation {
 
   """매치 포메이션 임시저장 (새 draft 레코드 생성)"""
   saveMatchFormationDraft(input: SaveMatchFormationDraftInput!): MatchFormationModel!
+
+  """
+  소셜 로그인을 진행합니다. 프론트엔드 SDK로 받은 이메일과 액세스 토큰을 전달하면 회원 검증 후 UserModel을 반환합니다.
+  tokens 필드를 요청하여 JWT 토큰을 조회할 수 있습니다. 회원이 아닐 경우 예외가 발생하여 회원가입으로 유도합니다.
+  """
+  socialLogin(input: SocialLoginInput!): UserModel!
   updateMatch(input: UpdateMatchInput!): MatchModel!
   updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
 
@@ -492,6 +511,8 @@ type Mutation {
   updateMatchMom(input: UpdateMatchMomVoteInput!): [MatchMomVoteModel!]!
   updateTeam(emblem: Upload, input: UpdateTeamInput!): TeamModel!
   updateTeamMember(input: UpdateTeamMemberInput!, profileImage: Upload): TeamMemberModel!
+
+  """유저 정보를 수정합니다. 프로필 이미지 업로드를 지원합니다."""
   updateUser(input: UpdateUserInput!, profileImage: Upload): UserModel!
 }
 
@@ -579,6 +600,13 @@ enum Position {
   SW
 }
 
+"""소셜 로그인 제공자"""
+enum Provider {
+  GOOGLE
+  KAKAO
+  NAVER
+}
+
 type Query {
   findBestEleven(teamId: Int!): [BestElevenModel!]!
   findInviteCode(code: String!): InviteCodeModel
@@ -588,6 +616,8 @@ type Query {
   findManyRegion(keyword: String!): RegionSearchArrayModel!
   findManyTeam(limit: Int! = 10, offset: Int! = 0): TeamArrayModel!
   findManyTeamMember(limit: Int! = 10, offset: Int! = 0, teamId: Int!): TeamMemberArrayModel!
+
+  """유저 목록을 조회합니다. 페이지네이션을 지원합니다."""
   findManyUser(limit: Int! = 10, offset: Int! = 0): UserArrayModel!
   findMatch(createdTeamId: Int!): [MatchModel!]!
   findMatchAttendance(matchId: Int!, teamId: Int!): [MatchAttendanceModel!]!
@@ -614,7 +644,11 @@ type Query {
   """팀에 온 가입 신청 이력을 조회합니다. status를 지정하면 해당 상태만, 없으면 전체 상태를 조회합니다."""
   findTeamJoinRequest(status: JoinRequestStatus, teamId: Int!): [JoinRequestModel!]!
   findTeamMember: [TeamMemberModel!]!
+
+  """이메일로 유저를 조회합니다."""
   findUser(email: String!): UserModel!
+
+  """ID로 유저를 조회합니다."""
   findUserById(id: Int!): UserModel!
 
   """경기별 용병 목록 조회"""
@@ -638,6 +672,50 @@ type RegionSearchModel {
   riName: String
   sidoName: String!
   siggName: String
+}
+
+input RegisterUserInput {
+  """활동 지역 코드"""
+  activityArea: String!
+
+  """생년월일 (yyyy-MM-dd)"""
+  birthDate: String!
+
+  """이메일"""
+  email: String!
+
+  """좋아하는 선수 (최대 15자)"""
+  favoritePlayer: String!
+
+  """주발"""
+  foot: Foot!
+
+  """성별"""
+  gender: Gender!
+
+  """키 (cm)"""
+  height: Int!
+
+  """주 포지션"""
+  mainPosition: Position!
+
+  """이름"""
+  name: String!
+
+  """휴대폰 번호"""
+  phone: String!
+
+  """선호 등번호 (최대 999)"""
+  preferredNumber: Int!
+
+  """소셜 로그인 제공자 (NAVER, KAKAO, GOOGLE)"""
+  provider: String!
+
+  """부 포지션 (최대 2개)"""
+  subPositions: [Position!]!
+
+  """몸무게 (kg)"""
+  weight: Int!
 }
 
 """팀 가입 신청 입력"""
@@ -666,6 +744,18 @@ input SaveMatchFormationDraftInput {
 
   """팀 ID"""
   teamId: Int!
+}
+
+"""소셜 로그인을 위한 입력 데이터. 프론트엔드 SDK로 받은 이메일과 액세스 토큰을 전달합니다."""
+input SocialLoginInput {
+  """소셜 로그인 SDK에서 받은 액세스 토큰"""
+  accessToken: String!
+
+  """사용자 이메일"""
+  email: String!
+
+  """소셜 로그인 제공자"""
+  provider: Provider!
 }
 
 type TeamArrayModel {
@@ -849,6 +939,9 @@ input UpdateUserInput {
   favoritePlayer: String
   foot: Foot
   gender: Gender
+
+  """키 (cm)"""
+  height: Float
   id: Float!
   mainPosition: Position
   name: String
@@ -857,6 +950,9 @@ input UpdateUserInput {
   preferredNumber: Float
   provider: String
   subPositions: [Position!]
+
+  """몸무게 (kg)"""
+  weight: Float
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -875,6 +971,9 @@ type UserModel {
   favoritePlayer: String
   foot: Foot
   gender: Gender
+
+  """키 (cm)"""
+  height: Int
   id: Int!
   mainPosition: Position
   name: String
@@ -885,6 +984,9 @@ type UserModel {
   region: RegionSearchModel
   subPositions: [Position!]
   tokens: [UserTokenModel!]
+
+  """몸무게 (kg)"""
+  weight: Int
 }
 
 type UserTokenModel {

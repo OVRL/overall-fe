@@ -18,6 +18,7 @@ export const PUBLIC_ROUTES = [
   /^\/privacy-policy(\/.*)?$/,
   /^\/terms(\/.*)?$/,
   /^\/marketing-notice(\/.*)?$/,
+  /^\/social\/[^/]+\/callback(\/.*)?$/, // FE 소셜 콜백(코드 수신 등): 비로그인 접근 허용
 ];
 
 const TEAM_MANAGEMENT_PATH = /^\/team-management(\/.*)?$/;
