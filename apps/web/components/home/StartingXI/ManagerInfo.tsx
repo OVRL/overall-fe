@@ -9,28 +9,8 @@ import {
 } from "@/lib/playerPlaceholderImage";
 import OnboardingManager from "./OnboardingManager";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
-import { useTeamSettingsQuery } from "@/components/team-management/hooks/useTeamSettingsQuery";
-import { useMatchRecordsQuery } from "@/components/team-management/hooks/useMatchRecordsQuery";
 import { useBestElevenQuery } from "@/components/team-management/hooks/useBestElevenQuery";
-import { pickPrimaryBestElevenRow } from "@/lib/formation/pickPrimaryBestElevenRow";
-import { parseNumericIdFromRelayGlobalId } from "@/lib/relay/parseRelayGlobalId";
-
-interface MatchStats {
-  total: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  winRate: number;
-}
-
-function parseScore(description: string | null | undefined): { home: number; away: number } | null {
-  if (!description) return null;
-  try {
-    const parsed = JSON.parse(description);
-    if (parsed.score) return parsed.score;
-  } catch { /* skip */ }
-  return null;
-}
+import { extractPrimaryManagerMember, computeManagerStats } from "@/lib/formation/managerStats";
 
 const ManagerStatItem = ({ label, value }: { label: string; value: string }) => (
   <div>
@@ -46,39 +26,13 @@ function ManagerInfoInner({ teamId }: { teamId: number }) {
 
   const managerMemberInfo = useMemo(() => {
     const members = bestElevenData.findManyTeamMember?.members ?? [];
-    
-    // 1. tactics에 저장된 최우선 감독 확인
-    const primary = pickPrimaryBestElevenRow(bestElevenData.findBestEleven ?? []);
-    const savedManagerId = (primary?.tactics as any)?.managerTeamMemberId;
-    if (savedManagerId) {
-      const saved = members.find((m: any) => {
-        const numId = parseNumericIdFromRelayGlobalId(m.id);
-        return String(numId) === String(savedManagerId);
-      });
-      if (saved) return saved;
-    }
-
-    // 2. 기본 역할 기반 감독
-    return members.find((m: any) => m.role === "MANAGER") ?? null;
+    return extractPrimaryManagerMember(members, bestElevenData.findBestEleven ?? []);
   }, [bestElevenData.findManyTeamMember, bestElevenData.findBestEleven]);
 
   const managerUser = managerMemberInfo?.user;
 
   const stats = useMemo(() => {
-    const overall = managerMemberInfo?.overall;
-    if (!overall) {
-      return { total: 0, wins: 0, draws: 0, losses: 0, winRate: 0 };
-    }
-    const appearances = overall.appearances || 0;
-    const winRate = overall.winRate || 0;
-    const wins = Math.round(appearances * (winRate / 100));
-    return {
-      total: appearances,
-      wins,
-      draws: 0,
-      losses: appearances - wins,
-      winRate,
-    };
+    return computeManagerStats(managerMemberInfo?.overall);
   }, [managerMemberInfo]);
 
   const displayName = managerUser?.name?.trim() || user?.name?.trim() || "감독";
