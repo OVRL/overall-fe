@@ -74,8 +74,13 @@
 
 ### 6.1 카카오
 
-- **저장/사용**: `kakao_account.email` → `RegisterUserInput.email`  
-- **잠금(readOnly)**: `email`
+`userMe.kakao_account` 기준:
+
+- **email**: `email` → `RegisterUserInput.email` (잠금)
+- **name**: `name` → `RegisterUserInput.name` (잠금)
+- **phone**: `phone_number`에서 `+82` 국가코드 제거 후 숫자만 정규화, 국내 11자리(`010…`)로 맞춤 → `RegisterUserInput.phone` (잠금)
+- **birthDate**: `birthyear` + `birthday`(`"0718"` MMDD) → `YYYY-MM-DD` (잠금)
+- **gender**: `gender` (`male`/`female` → 스키마 `M`/`W`) (잠금)
 
 ### 6.2 네이버
 
@@ -92,8 +97,11 @@
 
 ### 6.3 구글
 
-- **email**: `userinfo.email` → `RegisterUserInput.email` (잠금)
-- **name**: `userinfo.name` → `RegisterUserInput.name` (잠금)
+OpenID `userinfo` 기준:
+
+- **email**: `email` → `RegisterUserInput.email` (잠금)
+- **name**: `name` 우선, 없으면 `family_name` + `given_name` → `RegisterUserInput.name` (잠금)
+- **picture**: 수집·프리필하지 않음
 
 ---
 
@@ -107,7 +115,7 @@
 | 이메일 추출 | `lib/social/extractSocialEmail.ts` |
 | 스냅샷 키·타입 | `lib/social/socialOauthStorage.ts` |
 | 소셜→회원가입 프리필 매핑 | `lib/social/mapSocialSnapshotToRegisterPrefill.ts` |
-| 소셜 회원가입 페이지 | `app/register/social/page.tsx` |
+| 소셜 회원가입 진입 | `app/onboarding/page.tsx` + `OnboardingEntryClient` |
 | 토큰 교환·프로필 | `lib/social/kakao/kakaoUserMe.ts`, `naver/naverUserMe.ts`, `google/googleUserMe.ts` |
 | 세션 쿠키 | `app/api/auth/set-session/route.ts` |
 | OAuth state/PKCE 쿠키 | `app/api/auth/oauth/state/route.ts` |
