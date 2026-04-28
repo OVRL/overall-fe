@@ -45,6 +45,7 @@ import { pickPrimaryBestElevenRow } from "@/lib/formation/pickPrimaryBestElevenR
 import { useUserId } from "@/hooks/useUserId";
 import { useRelayEnvironment, fetchQuery } from "react-relay";
 import { useBestElevenFetchQuery } from "./hooks/useBestElevenQuery";
+import { extractPrimaryManagerMember, computeManagerStats } from "@/lib/formation/managerStats";
 
 /**
  * 선수 스탯 목업 (이미지 기준)
@@ -300,22 +301,8 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   // 감독 정보 찾기 — 저장된 tactics의 managerTeamMemberId 우선, 없으면 역할 기반
   const initialManagerMember = useMemo(() => {
     const members = data.findManyTeamMember?.members ?? [];
-    // 1. 베스트11 tactics에 저장된 감독 ID 우선
-    const primary = pickPrimaryBestElevenRow(bestElevenRows);
-    const savedManagerId = (primary?.tactics as any)?.managerTeamMemberId;
-    if (savedManagerId) {
-      const saved = members.find((m: any) => {
-        const numId = parseNumericIdFromRelayGlobalId(m.id);
-        return String(numId) === String(savedManagerId);
-      });
-      if (saved) return saved;
-    }
-    // 2. 현재 접속 유저가 매니저인 경우
-    const meAsManager = members.find((m: any) => m.role === "MANAGER" && m.userId === editorUserId);
-    if (meAsManager) return meAsManager;
-    // 3. 아니면 첫 번째 매니저
-    return members.find((m: any) => m.role === "MANAGER");
-  }, [data.findManyTeamMember?.members, bestElevenRows, editorUserId]);
+    return extractPrimaryManagerMember(members, bestElevenRows);
+  }, [data.findManyTeamMember?.members, bestElevenRows]);
 
   const initialManagerId = initialManagerMember?.id
     ? String(parseNumericIdFromRelayGlobalId(initialManagerMember.id) ?? initialManagerMember.id)
@@ -329,28 +316,13 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
 
   // 감독 개인 매치 기여도(overall) 기반 승/무/패 산출
   const managerStats = useMemo(() => {
-    // manager.memberId에 해당하는 멤버의 overall 데이터를 찾습니다.
     const members = data.findManyTeamMember?.members ?? [];
     const currentMember = members.find((m: any) => {
       const numId = parseNumericIdFromRelayGlobalId(m.id);
       return String(numId) === manager.memberId;
     });
 
-    const overall = currentMember?.overall;
-    if (!overall) {
-      return { total: 0, wins: 0, draws: 0, losses: 0, winRate: 0 };
-    }
-    const appearances = overall.appearances || 0;
-    const winRate = overall.winRate || 0;
-    const wins = Math.round(appearances * (winRate / 100));
-    
-    return {
-      total: appearances,
-      wins,
-      draws: 0,
-      losses: appearances - wins,
-      winRate,
-    };
+    return computeManagerStats(currentMember?.overall);
   }, [manager.memberId, data.findManyTeamMember?.members]);
 
   // 데이터 로딩 후 초기화 (릴레이 데이터 변경 시)
