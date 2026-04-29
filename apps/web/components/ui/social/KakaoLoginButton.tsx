@@ -16,18 +16,6 @@ import {
   useSocialOAuthStart,
 } from "@/hooks/useSocialOAuthStart";
 
-declare global {
-  interface Window {
-    Kakao?: {
-      isInitialized: () => boolean;
-      init: (key: string) => void;
-      Auth: {
-        authorize: (options?: { redirectUri?: string; state?: string }) => void;
-      };
-    };
-  }
-}
-
 type Props = {
   className?: string;
   leftIcon?: React.ReactNode;

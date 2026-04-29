@@ -1,27 +1,3 @@
-declare global {
-  interface Window {
-    Kakao?: {
-      isInitialized: () => boolean;
-      init: (key: string) => void;
-      Share: {
-        sendDefault: (options: KakaoFeedOptions) => void;
-        uploadImage: (options: { file: File[] }) => Promise<{ infos: { original: { url: string } } }>;
-      };
-    };
-  }
-}
-
-interface KakaoFeedOptions {
-  objectType: "feed";
-  content: {
-    title: string;
-    description?: string;
-    imageUrl?: string;
-    link: { mobileWebUrl: string; webUrl: string };
-  };
-  buttons?: { title: string; link: { mobileWebUrl: string; webUrl: string } }[];
-}
-
 function isKakaoReady() {
   return typeof window !== "undefined" && !!window.Kakao?.Share;
 }
