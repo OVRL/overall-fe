@@ -16,8 +16,8 @@ const navItems: NavItem[] = [
     href: "http://www.ftc.go.kr/bizCommPop.do?wrkr_no=3020664464",
     external: true,
   },
-  { label: "회사소개", href: "/" },
-  { label: "고객센터", href: "/contact" },
+  { label: "회사소개", href: "/about" },
+  { label: "제휴문의", href: "/partnership" },
   { label: "문의하기", href: "/contact" },
 ];
 

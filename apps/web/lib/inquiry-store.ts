@@ -5,15 +5,17 @@ export type InquiryStatus = "pending" | "answered" | "closed";
 export type InquiryCategory =
   | "service"
   | "bug"
-  | "suggestion"
+  | "report"
+  | "user_tip"
   | "partnership"
   | "other";
 
 export const CATEGORY_LABELS: Record<InquiryCategory, string> = {
   service: "서비스 이용",
   bug: "버그 신고",
-  suggestion: "기능 제안",
-  partnership: "제휴/협업",
+  user_tip: "유저 제보",
+  report: "신고하기",
+  partnership: "제휴 신청",
   other: "기타",
 };
 
@@ -119,5 +121,7 @@ class InquiryStore {
   }
 }
 
-/** 싱글톤 (서버리스 cold start 시 초기화됨 — 프로토타입 전용) */
-export const inquiryStore = new InquiryStore();
+// globalThis로 유지해 hot reload / cold start 시 초기화 방지
+const g = globalThis as typeof globalThis & { __inquiryStore?: InquiryStore };
+if (!g.__inquiryStore) g.__inquiryStore = new InquiryStore();
+export const inquiryStore = g.__inquiryStore;
