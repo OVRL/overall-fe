@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFunnel } from "@/hooks/useFunnel";
 import Header from "@/components/Header";
 import backIcon from "@/public/icons/arrow_back.svg";
@@ -14,6 +14,10 @@ import AdditionalInfoCollect from "./_funnels/AdditionalInfoCollect";
 import OnboardingCompletion from "./_funnels/OnboardingCompletion";
 import { OnboardingState } from "@/types/onboarding";
 import ProfileImageCollect from "./_funnels/ProfileImageCollect";
+import type {
+  OnboardingFunnelMode,
+  OnboardingLockedFields,
+} from "@/types/onboarding";
 type Step =
   | "phone"
   | "name"
@@ -28,13 +32,40 @@ type Step =
 
 interface OnboardingFunnelWrapperProps {
   userId?: number;
+  /** 기본값: onboarding(기존 유저 updateUser). social-register는 registerUser 수행 */
+  mode?: OnboardingFunnelMode;
+  /** social-register일 때 주입할 초기값(예: email/provider/name/phone/birthDate/gender) */
+  initialSocialPrefill?: Record<string, unknown> | null;
+  lockedFields?: OnboardingLockedFields;
 }
 
-const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
+const OnboardingFunnelWrapper = ({
+  userId,
+  mode = "onboarding",
+  initialSocialPrefill = null,
+  lockedFields = {},
+}: OnboardingFunnelWrapperProps) => {
   const { Funnel, setStep, goBack, step } = useFunnel<Step>("phone");
-  const [formData, setFormData] = useState<Partial<OnboardingState>>({
-    id: userId,
-  });
+  const initial = useMemo((): Partial<OnboardingState> => {
+    const base: Partial<OnboardingState> = {};
+    if (userId != null) base.id = userId;
+    if (mode === "social-register" && initialSocialPrefill) {
+      return { ...base, ...(initialSocialPrefill as Partial<OnboardingState>) };
+    }
+    return base;
+  }, [userId, mode, initialSocialPrefill]);
+
+  const [formData, setFormData] = useState<Partial<OnboardingState>>(initial);
+
+  const appliedSocialPrefillRef = useRef(false);
+  useEffect(() => {
+    // social-register에서만 초기 프리필을 반영 (처음 1회)
+    if (mode !== "social-register") return;
+    if (!initialSocialPrefill) return;
+    if (appliedSocialPrefillRef.current) return;
+    setFormData((prev) => ({ ...prev, ...(initialSocialPrefill as Partial<OnboardingState>) }));
+    appliedSocialPrefillRef.current = true;
+  }, [mode, initialSocialPrefill]);
   const handleNext = (nextStep: Step) => () => setStep(nextStep);
 
   return (
@@ -58,6 +89,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("name")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="auth">
@@ -68,6 +101,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("birth")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="birth">
@@ -75,6 +110,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("formation")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="formation">
@@ -82,6 +119,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("subFormation")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="subFormation">
@@ -89,6 +128,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("profile")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="profile">
@@ -96,6 +137,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("additional")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="additional">
@@ -103,6 +146,8 @@ const OnboardingFunnelWrapper = ({ userId }: OnboardingFunnelWrapperProps) => {
               onNext={handleNext("complete")}
               data={formData}
               onDataChange={setFormData}
+              lockedFields={lockedFields}
+              mode={mode}
             />
           </Funnel.Step>
           <Funnel.Step name="complete">

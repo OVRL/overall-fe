@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -10,11 +10,20 @@ import { OnboardingStepProps } from "@/types/onboarding";
 import SelectGender from "../SelectGender";
 
 import { useModifyUserMutation } from "../../_hooks/useModifyUserMutation";
+import { useRegisterUserMutation } from "../../_hooks/useRegisterUserMutation";
 import {
   UpdateUserInput,
   Position,
 } from "@/__generated__/useModifyUserMutation.graphql";
 import useModal from "@/hooks/useModal";
+import { toast } from "@/lib/toast";
+import { applySessionFromTokens } from "@/lib/auth/applySessionFromTokens";
+import {
+  buildSocialRegisterInput,
+  graphQLProviderFromData,
+  pickLatestToken,
+} from "@/lib/onboarding/socialRegisterHelpers";
+import { SOCIAL_OAUTH_SNAPSHOT_STORAGE_KEY } from "@/lib/social/socialOauthStorage";
 
 /** 완료하기 클릭 후 최소 이 시간(ms) 동안 로딩 스피너를 보여줌. 스텝 전환이 너무 빨라 리프레시처럼 보이는 현상 방지 */
 const MIN_LOADING_DISPLAY_MS = 500;
@@ -23,6 +32,8 @@ const AdditionalInfoCollect = ({
   onNext,
   data,
   onDataChange,
+  lockedFields,
+  mode,
 }: OnboardingStepProps) => {
   const loadingStartedAtRef = useRef<number | null>(null);
 
@@ -36,11 +47,91 @@ const AdditionalInfoCollect = ({
   });
 
   const [commit, isMutationInFlight] = useModifyUserMutation();
+  const [registerCommit, isRegisterInFlight] = useRegisterUserMutation();
   const { openModal } = useModal("ADDRESS_SEARCH");
+
+  const persistRegisterSessionAndGoPrivacyConsent = async (user: {
+    id: number;
+    tokens?: ReadonlyArray<{
+      id: number;
+      accessToken?: string | null;
+      refreshToken?: string | null;
+    } | null> | null;
+  }) => {
+    const tokens = user.tokens ?? [];
+    const latest = pickLatestToken(tokens);
+    const at = latest?.accessToken ?? undefined;
+    const rt = latest?.refreshToken ?? undefined;
+
+    if (!at) {
+      toast.error("회원가입 토큰을 받지 못했습니다.", {
+        description: "백엔드 registerUser 응답의 tokens를 확인해 주세요.",
+      });
+      return;
+    }
+
+    try {
+      await applySessionFromTokens({
+        accessToken: at,
+        refreshToken: rt,
+        userId: user.id,
+      });
+      try {
+        sessionStorage.removeItem(SOCIAL_OAUTH_SNAPSHOT_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+      toast.success("회원가입이 완료되었습니다.");
+      window.location.href = "/privacy-consent";
+    } catch (e) {
+      toast.error("세션 저장에 실패했습니다.", {
+        description: e instanceof Error ? e.message : String(e ?? ""),
+      });
+    }
+  };
 
   const handleComplete = () => {
     if (!data.profileImageFile) {
       alert("프로필 이미지가 필요합니다.");
+      return;
+    }
+
+    if (mode === "social-register") {
+      const email = typeof data.email === "string" ? data.email : undefined;
+      const provider = graphQLProviderFromData(data.provider);
+      if (!email || !provider) {
+        toast.error("소셜 회원가입 정보가 부족합니다.", {
+          description: "소셜 로그인을 다시 진행해 주세요.",
+        });
+        window.location.href = "/login/social";
+        return;
+      }
+
+      const input = buildSocialRegisterInput(data, info, true);
+      if (!input) {
+        toast.error("회원가입에 필요한 정보가 부족합니다.");
+        return;
+      }
+
+      loadingStartedAtRef.current = Date.now();
+      registerCommit({
+        variables: {
+          input,
+          profileImage: null,
+        },
+        uploadables: {
+          profileImage: data.profileImageFile,
+        },
+        onCompleted: (resp) => {
+          void persistRegisterSessionAndGoPrivacyConsent(resp.registerUser);
+        },
+        onError: (error) => {
+          loadingStartedAtRef.current = null;
+          toast.error("회원가입에 실패했습니다.", {
+            description: error.message ?? "알 수 없는 오류",
+          });
+        },
+      });
       return;
     }
 
@@ -107,6 +198,45 @@ const AdditionalInfoCollect = ({
       return;
     }
 
+    if (mode === "social-register") {
+      const email = typeof data.email === "string" ? data.email : undefined;
+      const provider = graphQLProviderFromData(data.provider);
+      if (!email || !provider) {
+        toast.error("소셜 회원가입 정보가 부족합니다.", {
+          description: "소셜 로그인을 다시 진행해 주세요.",
+        });
+        window.location.href = "/login/social";
+        return;
+      }
+
+      const input = buildSocialRegisterInput(data, info, false);
+      if (!input) {
+        toast.error("회원가입에 필요한 정보가 부족합니다.");
+        return;
+      }
+
+      loadingStartedAtRef.current = Date.now();
+      registerCommit({
+        variables: {
+          input,
+          profileImage: null,
+        },
+        uploadables: {
+          profileImage: data.profileImageFile,
+        },
+        onCompleted: (resp) => {
+          void persistRegisterSessionAndGoPrivacyConsent(resp.registerUser);
+        },
+        onError: (error) => {
+          loadingStartedAtRef.current = null;
+          toast.error("회원가입에 실패했습니다.", {
+            description: error.message ?? "알 수 없는 오류",
+          });
+        },
+      });
+      return;
+    }
+
     const previousData = { ...data };
     const updateInput: UpdateUserInput = {
       id: data.id!,
@@ -138,6 +268,19 @@ const AdditionalInfoCollect = ({
   };
 
   const isFormFilled = Object.values(info).every((value) => !!value);
+  const genderLocked = lockedFields?.gender === true;
+  const inFlight = isMutationInFlight || isRegisterInFlight;
+
+  /** 소셜 회원가입: 이전 스텝 필수값 + 프로필 이미지가 있으면 registerUser 가능 (추가 정보 미입력 분기) */
+  const isSocialCoreReady =
+    mode === "social-register"
+      ? Boolean(data.profileImageFile) &&
+        buildSocialRegisterInput(data, info, false) !== null
+      : true;
+
+  const laterButtonDisabled =
+    inFlight ||
+    (mode === "social-register" ? !isSocialCoreReady : !data.profileImageFile);
 
   return (
     <section className="flex flex-col h-full pb-12">
@@ -156,6 +299,7 @@ const AdditionalInfoCollect = ({
                 gender: gender,
               }))
             }
+            disabled={genderLocked}
           />
           <div
             role="button"
@@ -230,13 +374,13 @@ const AdditionalInfoCollect = ({
           variant="primary"
           size="xl"
           onClick={handleComplete}
-          disabled={!isFormFilled || isMutationInFlight}
+          disabled={!isFormFilled || inFlight}
           className={cn(
             "w-full transition-colors",
             !isFormFilled && "bg-gray-900 text-Label-Tertiary",
           )}
         >
-          {isMutationInFlight ? (
+          {inFlight ? (
             <LoadingSpinner label="저장 중입니다." size="sm" />
           ) : (
             "완료하기"
@@ -246,7 +390,7 @@ const AdditionalInfoCollect = ({
           variant="line"
           size="xl"
           onClick={handleLater}
-          disabled={isMutationInFlight}
+          disabled={laterButtonDisabled}
         >
           다음에 작성하기
         </Button>

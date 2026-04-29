@@ -61,6 +61,7 @@ const ProfileImageCollect = (props: OnboardingStepProps) => {
           previewHeight="calc(100dvh - 26.5625rem)"
           currentImage={profileImage}
           onDefaultImageSelect={handleDefaultImageSelect}
+          priority
         />
       </div>
       <Button

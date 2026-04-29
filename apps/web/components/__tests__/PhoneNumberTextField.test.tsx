@@ -43,4 +43,17 @@ describe("PhoneNumberTextField 컴포넌트", () => {
     // 010a1234 -> 0101234 -> 010-1234
     expect(event.target.value).toBe("010-1234");
   });
+
+  it("부모 value가 숫자만일 때(onChange 없음·readOnly 등)에도 표시는 하이픈 포함 형태여야 한다", () => {
+    render(
+      <PhoneNumberTextField
+        value="01012345678"
+        onChange={jest.fn()}
+        readOnly
+      />,
+    );
+    expect(screen.getByPlaceholderText("전화번호를 입력해주세요.")).toHaveValue(
+      "010-1234-5678",
+    );
+  });
 });

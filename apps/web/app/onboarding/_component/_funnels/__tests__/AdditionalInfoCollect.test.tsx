@@ -2,10 +2,14 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import AdditionalInfoCollect from "../AdditionalInfoCollect";
 import "@testing-library/jest-dom";
 
-// Mock mutating hook
+// Mock mutating hooks (Relay 환경 없이 컴포넌트 렌더만 검증)
 const mockCommit = jest.fn();
 jest.mock("../../../_hooks/useModifyUserMutation", () => ({
   useModifyUserMutation: () => [mockCommit, false],
+}));
+
+jest.mock("../../../_hooks/useRegisterUserMutation", () => ({
+  useRegisterUserMutation: () => [jest.fn(), false],
 }));
 
 // Mock useModal

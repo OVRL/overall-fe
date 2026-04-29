@@ -3,23 +3,29 @@ import { buttonVariants } from "@/components/ui/Button";
 type Props = {
   gender: "M" | "W";
   setGender: (gender: "M" | "W") => void;
+  disabled?: boolean;
 };
 
-const SelectGender = ({ gender, setGender }: Props) => {
+const SelectGender = ({ gender, setGender, disabled = false }: Props) => {
   const toggleGender = (gender: "M" | "W") => {
+    if (disabled) return;
     setGender(gender);
   };
   return (
-    <div className="flex flex-col gap-y-4 px-3">
+    <div
+      className="flex flex-col gap-y-4 px-3"
+      aria-disabled={disabled}
+    >
       <span className="text-Label-Primary font-semibold text-sm leading-4">
         성별
       </span>
       <div className="flex gap-x-2">
-        <label className="flex-1 cursor-pointer">
+        <label className={disabled ? "flex-1 cursor-not-allowed" : "flex-1 cursor-pointer"}>
           <input
             type="checkbox"
             className="hidden"
             checked={gender === "M"}
+            disabled={disabled}
             onChange={() => toggleGender("M")}
           />
           <div
@@ -31,11 +37,12 @@ const SelectGender = ({ gender, setGender }: Props) => {
             남
           </div>
         </label>
-        <label className="flex-1 cursor-pointer">
+        <label className={disabled ? "flex-1 cursor-not-allowed" : "flex-1 cursor-pointer"}>
           <input
             type="checkbox"
             className="hidden"
             checked={gender === "W"}
+            disabled={disabled}
             onChange={() => toggleGender("W")}
           />
           <div

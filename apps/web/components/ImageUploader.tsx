@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { useProfileImageUploadFlow } from "@/hooks/useProfileImageUploadFlow";
 import Image from "next/image";
+import { isPlayerPlaceholderWebpSrc } from "@/lib/playerPlaceholderImage";
 import { getValidImageSrc, isNextImageUnoptimizedSrc } from "@/lib/utils";
 
 interface ImageUploaderProps {
@@ -11,6 +12,8 @@ interface ImageUploaderProps {
   previewHeight?: string;
   currentImage?: string;
   onDefaultImageSelect?: (image: string) => void;
+  /** LCP 등 핵심 히어로 이미지일 때 `true` — Next 권장: `priority` + 즉시 로드 */
+  priority?: boolean;
 }
 
 const ImageUploader = ({
@@ -19,6 +22,7 @@ const ImageUploader = ({
   previewHeight,
   currentImage,
   onDefaultImageSelect,
+  priority = false,
 }: ImageUploaderProps) => {
   const {
     displaySrc,
@@ -33,6 +37,9 @@ const ImageUploader = ({
   });
 
   const resolvedSrc = displaySrc ? getValidImageSrc(displaySrc) : null;
+  const unoptimized =
+    (resolvedSrc != null && isNextImageUnoptimizedSrc(resolvedSrc)) ||
+    (resolvedSrc != null && isPlayerPlaceholderWebpSrc(resolvedSrc));
 
   return (
     <div className={`flex flex-col gap-y-12 px-4 ${className || ""}`}>
@@ -61,9 +68,11 @@ const ImageUploader = ({
             src={resolvedSrc}
             alt="Preview"
             fill
-            sizes="(max-width: 48rem) min(100vw, 31.25rem), 31.25rem"
+            priority={priority}
+            sizes="(max-width: 48rem) min(calc(100vw - 2rem), 31.25rem), 31.25rem"
+            quality={100}
             className="object-cover"
-            unoptimized={isNextImageUnoptimizedSrc(resolvedSrc)}
+            unoptimized={unoptimized}
           />
         ) : null}
       </div>

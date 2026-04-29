@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/Button";
 import kakaoLogo from "@/public/icons/kakao_logo.svg";
 import naverLogo from "@/public/icons/naver_logo.svg";
 import googleLogo from "@/public/icons/google_logo.svg";
+import { GoogleLoginButton } from "@/components/ui/social/GoogleLoginButton";
+import { KakaoLoginButton } from "@/components/ui/social/KakaoLoginButton";
+import { NaverLoginButton } from "@/components/ui/social/NaverLoginButton";
 
 export type SocialProvider = "kakao" | "naver" | "google";
 
@@ -40,19 +43,37 @@ export default function SocialButtons() {
   return (
     <div className="flex flex-col gap-2 w-full">
       {SOCIAL_PROVIDERS.map((provider) => (
-        <a
-          key={provider.id}
-          href={`/api/auth/${provider.id}/callback`}
-          className="w-full"
-        >
-          <Button
-            size="xl"
-            className={provider.styleClass}
-            leftIcon={provider.icon}
-          >
-            {provider.label}
-          </Button>
-        </a>
+        <div key={provider.id} className="w-full">
+          {provider.id === "kakao" ? (
+            <KakaoLoginButton
+              className={provider.styleClass}
+              leftIcon={provider.icon}
+              label={provider.label}
+            />
+          ) : provider.id === "naver" ? (
+            <NaverLoginButton
+              className={provider.styleClass}
+              leftIcon={provider.icon}
+              label={provider.label}
+            />
+          ) : provider.id === "google" ? (
+            <GoogleLoginButton
+              className={provider.styleClass}
+              leftIcon={provider.icon}
+              label={provider.label}
+            />
+          ) : (
+            <a href={`/api/auth/${provider.id}/callback`} className="w-full block">
+              <Button
+                size="xl"
+                className={provider.styleClass}
+                leftIcon={provider.icon}
+              >
+                {provider.label}
+              </Button>
+            </a>
+          )}
+        </div>
       ))}
     </div>
   );
