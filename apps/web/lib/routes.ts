@@ -14,7 +14,6 @@ export const GUEST_ONLY_ROUTES = [
  */
 export const PUBLIC_ROUTES = [
   /^\/calculation(\/.*)?$/,
-  /^\/player(\/.*)?$/,
   /^\/privacy-policy(\/.*)?$/,
   /^\/terms(\/.*)?$/,
   /^\/marketing-notice(\/.*)?$/,
