@@ -1,5 +1,7 @@
 # 웹 소셜 로그인 플로우 (카카오 · 네이버 · 구글)
 
+> **전체 동선·OAuth2 개념·로그인/회원가입·세션**을 한곳에서 보려면: [`auth-signup-login-oauth-flow.md`](./auth-signup-login-oauth-flow.md)
+
 이 문서는 `apps/web`에서 **프론트가 OAuth 코드를 받은 뒤** 토큰 교환·프로필 조회·백엔드 `socialLogin` 뮤테이션까지 이어지는 경로를 제공자별로 정리합니다. 물리 서버(백엔드 Nest)와 Vercel(Next)이 분리되어 있다는 전제에서, 브라우저는 항상 **동일 출처**의 Next 앱(`/api/graphql`, `/api/auth/*`)과 통신합니다.
 
 ---
@@ -10,11 +12,11 @@
 |------|------|
 | ① 로그인 시작 | 각 버튼이 동의 화면(또는 SDK authorize)으로 보냄. `state`는 `POST /api/auth/oauth/state`로 **httpOnly 쿠키**에 저장( CSRF 완화). |
 | ② 리디렉트 콜백 | 사용자가 `/social/{kakao\|naver\|google}/callback?code=...&state=...` 로 돌아옴. |
-| ③ 코드 교환 | **서버(RSC)** 가 각 사 **토큰 엔드포인트**에 `authorization_code`를 보내 **provider access token**을 받음. |
+| ③ 코드 교환 | **서버(RSC)** 가 각 사 **토큰 엔드포인트**에 `authorization_code`를 보내 **provider access token**을 받음. (state·PKCE·교환 실패 등은 콜백 UI 대신 `redirect` → `/login/social?socialErr=...` 후 `SocialOAuthCallbackToast`가 토스트) |
 | ④ 프로필 조회 | 같은 서버 로직이 그 토큰으로 **이메일이 포함된 프로필 API**를 호출. |
-| ⑤ 스냅샷 저장 | 성공 시 클라이언트가 `sessionStorage` 키 `overall_social_oauth_snapshot`에 `{ provider, accessToken, email, userMe, savedAt }` 저장(회원가입 퍼널 등 후속 사용). |
-| ⑥ 백엔드 로그인 | 사용자가 **로그인하기** 클릭 시 Relay로 `socialLogin(input: { accessToken, email, provider })` 호출. `accessToken`은 **각 소셜이 준 액세스 토큰**, `email`은 프로필에서 추출한 문자열, `provider`는 GraphQL enum `KAKAO` \| `NAVER` \| `GOOGLE`. |
-| ⑦ 앱 세션 | 뮤테이션 응답의 `UserModel.tokens`에서 앱용 JWT를 고르고 `POST /api/auth/set-session`으로 **httpOnly 쿠키**(`accessToken`, `refreshToken`, `userId`) 설정 후 `/`로 이동. |
+| ⑤ 스냅샷 저장 | 콜백 **클라이언트**(`SocialCallbackAutoLogin`)가 `socialLogin` 직전에 `sessionStorage` 키 `overall_social_oauth_snapshot`에 `{ provider, accessToken, email, userMe, savedAt }` 저장(미가입 시 `/privacy-consent` 거친 뒤 `/onboarding`에서 프리필·잠금 동일). |
+| ⑥ 백엔드 로그인 | OAuth 교환에 성공하고 이메일이 있으면 **마운트 직후 자동**으로 Relay `socialLogin(input: { accessToken, email, provider })` 호출(별도 버튼 없음). |
+| ⑦ 앱 세션 | 성공 시 `UserModel.tokens`에서 앱용 JWT를 고르고 `POST /api/auth/set-session`으로 **httpOnly 쿠키** 설정 후 `/`로 이동. **미가입** 시 스냅샷 유지한 채 `/privacy-consent`로 이동 → 동의 후 `/onboarding`(회원가입 퍼널, lockedFields 동일). |
 
 추출 로직은 `lib/social/extractSocialEmail.ts`에 있습니다.
 
@@ -22,7 +24,7 @@
 - **네이버**: `nid/me` 응답의 `response.email`
 - **카카오**: `v2/user/me`의 `kakao_account.email`(동의·앱 설정 필요)
 
-이메일이 없으면 `socialLogin`을 보낼 수 없으므로, 콜백 UI에서 안내하고 **로그인하기**는 비활성입니다.
+이메일이 없으면 `socialLogin`을 보낼 수 없으므로, 콜백에서 안내 문구만 표시합니다.
 
 ---
 
@@ -62,8 +64,8 @@
 
 - 스키마: `SocialLoginInput { accessToken, email, provider }` → `UserModel!` (미가입 시 백엔드 예외 → 회원가입 유도).  
 - Relay 뮤테이션은 `app/social/[provider]/callback/useSocialLoginMutation.tsx`에 정의.  
-- 미가입(예: `status=404`, 메시지: “가입되지 않은 사용자…”)이면 콜백에서 `/onboarding`으로 이동해 `registerUser`로 회원가입을 진행합니다.
-- 콜백 페이지의 JSON 디버그 영역에는 **소셜 액세스 토큰 원문을 출력하지 않도록** 처리되어 있습니다. 스냅샷(`sessionStorage`)에는 테스트·후속 플로우용으로 포함되므로, 프로덕션에서는 퍼널 종료 시 삭제하는 것을 권장합니다.  
+- 미가입(예: `status=404`, 메시지: “가입되지 않은 사용자…”)이면 콜백 클라이언트가 **`/privacy-consent`** 로 이동한 뒤, 동의 후 **`/onboarding`** 에서 프리필·회원가입을 진행합니다. `registerUser` 성공 시에는 기존처럼 `POST /api/auth/set-session`으로 쿠키를 설정합니다.  
+- 레거시 백엔드 리다이렉트와 동일한 쿠키 정책은 `app/social/callback/route.ts`(쿼리로 토큰 전달 시) 및 `POST /api/auth/set-session`을 참고하면 됩니다. 스냅샷(`sessionStorage`)에는 후속 회원가입용으로 프로바이더 액세스 토큰이 포함되므로, 로그인 성공 시에는 제거합니다.  
 - `POST /api/auth/set-session`은 앱 배포 호스트와 동일 출처에서만 호출한다는 전제의 **세션 수용** 용도이며, 운영 단계에서는 CSRF·레이트 제한 등을 검토하는 것이 좋습니다.
 
 ---
@@ -105,17 +107,24 @@ OpenID `userinfo` 기준:
 
 ---
 
-## 6. 관련 파일 맵
+## 7. 관련 파일 맵
 
 | 영역 | 경로 |
 |------|------|
-| 콜백 페이지 (RSC) | `app/social/[provider]/callback/page.tsx` |
-| 로그인하기 UI + Relay + 스냅샷 | `app/social/[provider]/callback/SocialCallbackActions.tsx` |
+| 콜백 페이지 (RSC·코드 교환, 성공 시 거의 빈 화면) | `app/social/[provider]/callback/page.tsx` |
+| 자동 로그인 + Relay + 스냅샷(버튼·스피너 없음, 리다이렉트만) | `app/social/[provider]/callback/SocialCallbackAutoLogin.tsx` |
 | 뮤테이션 훅 | `app/social/[provider]/callback/useSocialLoginMutation.tsx` |
+| 세션 공통 적용 | `lib/auth/applySessionFromTokens.ts` |
+| 미가입 에러 판별 | `lib/social/isSocialLoginNotRegisteredError.ts` |
 | 이메일 추출 | `lib/social/extractSocialEmail.ts` |
 | 스냅샷 키·타입 | `lib/social/socialOauthStorage.ts` |
 | 소셜→회원가입 프리필 매핑 | `lib/social/mapSocialSnapshotToRegisterPrefill.ts` |
+| 소셜 registerUser 입력 조립 | `lib/onboarding/socialRegisterHelpers.ts` |
 | 소셜 회원가입 진입 | `app/onboarding/page.tsx` + `OnboardingEntryClient` |
+| 추가 정보·registerUser UI | `app/onboarding/_component/_funnels/AdditionalInfoCollect.tsx` |
 | 토큰 교환·프로필 | `lib/social/kakao/kakaoUserMe.ts`, `naver/naverUserMe.ts`, `google/googleUserMe.ts` |
-| 세션 쿠키 | `app/api/auth/set-session/route.ts` |
+| 세션 쿠키 (동일 출처 POST) | `app/api/auth/set-session/route.ts` |
+| 레거시 쿼리 리다이렉트 쿠키 | `app/social/callback/route.ts` |
 | OAuth state/PKCE 쿠키 | `app/api/auth/oauth/state/route.ts` |
+| 로그인 버튼 로딩·state POST 공통 | `hooks/useSocialOAuthStart.ts`, `lib/social/oauthStateClient.ts` |
+| 콜백 오류 시 로그인 화면 토스트 | `app/login/social/SocialOAuthCallbackToast.tsx` (`?socialErr=` 코드) |

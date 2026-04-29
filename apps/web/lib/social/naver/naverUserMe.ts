@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { safeFetchJson } from "@/lib/social/safeFetchJson";
 
 export type NaverExchangeResult =
   | { ok: true; accessToken: string; userMe: unknown }
@@ -17,40 +18,42 @@ async function requestNaverToken(params: {
   body.set("state", params.state);
   body.set("redirect_uri", params.redirectUri);
 
-  const res = await fetch("https://nid.naver.com/oauth2.0/token", {
+  const res = await safeFetchJson("https://nid.naver.com/oauth2.0/token", {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
     },
     body,
-    cache: "no-store",
   });
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[naver] token 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
 
   return {
     ok: true as const,
-    data: json as { access_token?: string; token_type?: string },
+    data: res.data as { access_token?: string; token_type?: string },
   };
 }
 
 async function requestNaverUserMe(accessToken: string) {
-  const res = await fetch("https://openapi.naver.com/v1/nid/me", {
+  const res = await safeFetchJson("https://openapi.naver.com/v1/nid/me", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    cache: "no-store",
   });
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[naver] nid/me 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
-  return { ok: true as const, data: json };
+  return { ok: true as const, data: res.data };
 }
 
 /** 인가 코드로 액세스 토큰 발급 후 `/v1/nid/me` 조회 */

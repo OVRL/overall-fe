@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { safeFetchJson } from "@/lib/social/safeFetchJson";
 
 export type KakaoExchangeResult =
   | { ok: true; accessToken: string; userMe: unknown }
@@ -17,38 +18,41 @@ async function requestKakaoToken(params: {
     body.set("client_secret", env.KAKAO_CLIENT_SECRET);
   }
 
-  const res = await fetch("https://kauth.kakao.com/oauth/token", {
+  const res = await safeFetchJson("https://kauth.kakao.com/oauth/token", {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
     },
     body,
-    cache: "no-store",
   });
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[kakao] token 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
 
-  return { ok: true as const, data: json as { access_token?: string } };
+  return { ok: true as const, data: res.data as { access_token?: string } };
 }
 
 async function requestKakaoUserMe(accessToken: string) {
-  const res = await fetch("https://kapi.kakao.com/v2/user/me", {
+  const res = await safeFetchJson("https://kapi.kakao.com/v2/user/me", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
     },
-    cache: "no-store",
   });
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[kakao] user/me 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
-  return { ok: true as const, data: json };
+
+  return { ok: true as const, data: res.data };
 }
 
 /** 인가 코드로 액세스 토큰 발급 후 `/v2/user/me` 조회 */

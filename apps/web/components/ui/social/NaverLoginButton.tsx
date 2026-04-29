@@ -1,9 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
 import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { env } from "@/lib/env";
+import {
+  createOAuthState,
+  postOAuthState,
+} from "@/lib/social/oauthStateClient";
+import { useOAuthRedirectUri } from "@/hooks/useOAuthRedirectUri";
+import {
+  SOCIAL_OAUTH_CONNECTING_LABEL,
+  useSocialOAuthStart,
+} from "@/hooks/useSocialOAuthStart";
 
 type Props = {
   className?: string;
@@ -11,53 +20,52 @@ type Props = {
   label: string;
 };
 
-/** OAuth state(CSRF 방지용). 네이버 로그인 개발가이드 요청 변수 state와 동일 목적입니다. */
-function createState(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return (crypto as Crypto).randomUUID();
-  }
-  return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-}
-
 /**
  * 네이버 로그인 연동 URL 생성 (개발가이드 3.4.2)
  * https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=...&redirect_uri=...&state=...
  */
 export function NaverLoginButton({ className, leftIcon, label }: Props) {
-  const redirectUri = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/social/naver/callback`;
-  }, []);
+  const { pending, run } = useSocialOAuthStart({
+    errorTitle: "네이버 로그인을 시작할 수 없습니다.",
+  });
+
+  const redirectUri = useOAuthRedirectUri("/social/naver/callback");
 
   return (
     <Button
       size="xl"
-      className={cn(className, "cursor-pointer")}
-      leftIcon={leftIcon}
+      className={cn(className, "cursor-pointer", pending && "cursor-wait")}
+      leftIcon={
+        pending ? (
+          <LoadingSpinner label="네이버 로그인 진행 중" size="sm" />
+        ) : (
+          leftIcon
+        )
+      }
       aria-label={label}
+      aria-busy={pending}
+      disabled={pending || !redirectUri}
       type="button"
-      onClick={async () => {
-        if (!redirectUri) return;
+      onClick={() => {
+        if (!redirectUri || pending) return;
+        void run(async () => {
+          const state = createOAuthState();
+          await postOAuthState({ provider: "naver", state });
 
-        const state = createState();
+          const url = new URL("https://nid.naver.com/oauth2.0/authorize");
+          url.searchParams.set("response_type", "code");
+          url.searchParams.set(
+            "client_id",
+            env.NEXT_PUBLIC_NAVER_LOGIN_CLIENT_ID,
+          );
+          url.searchParams.set("redirect_uri", redirectUri);
+          url.searchParams.set("state", state);
 
-        await fetch("/api/auth/oauth/state", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          credentials: "same-origin",
-          body: JSON.stringify({ provider: "naver", state }),
+          window.location.assign(url.toString());
         });
-
-        const url = new URL("https://nid.naver.com/oauth2.0/authorize");
-        url.searchParams.set("response_type", "code");
-        url.searchParams.set("client_id", env.NEXT_PUBLIC_NAVER_LOGIN_CLIENT_ID);
-        url.searchParams.set("redirect_uri", redirectUri);
-        url.searchParams.set("state", state);
-
-        window.location.assign(url.toString());
       }}
     >
-      {label}
+      {pending ? SOCIAL_OAUTH_CONNECTING_LABEL : label}
     </Button>
   );
 }

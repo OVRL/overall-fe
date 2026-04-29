@@ -1,10 +1,20 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import Script from "next/script";
 import { Button } from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { env } from "@/lib/env";
+import {
+  createOAuthState,
+  postOAuthState,
+} from "@/lib/social/oauthStateClient";
+import { useOAuthRedirectUri } from "@/hooks/useOAuthRedirectUri";
+import {
+  SOCIAL_OAUTH_CONNECTING_LABEL,
+  useSocialOAuthStart,
+} from "@/hooks/useSocialOAuthStart";
 
 declare global {
   interface Window {
@@ -24,34 +34,26 @@ type Props = {
   label: string;
 };
 
-function createState(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return (crypto as Crypto).randomUUID();
-  }
-  return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-}
-
 export function KakaoLoginButton({ className, leftIcon, label }: Props) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const disabled = !ready || Boolean(error);
+  const { pending, run } = useSocialOAuthStart({
+    errorTitle: "카카오 로그인을 시작할 수 없습니다.",
+  });
+  const disabled = !ready || Boolean(error) || pending;
 
-  const redirectUri = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/social/kakao/callback`;
-  }, []);
+  const redirectUri = useOAuthRedirectUri("/social/kakao/callback");
 
   const authorize = useCallback(async () => {
-    if (!window.Kakao) throw new Error("kakao sdk가 준비되지 않았습니다.");
-    const state = createState();
-    await fetch("/api/auth/oauth/state", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ provider: "kakao", state }),
+    await run(async () => {
+      if (!window.Kakao) {
+        throw new Error("kakao sdk가 준비되지 않았습니다.");
+      }
+      const state = createOAuthState();
+      await postOAuthState({ provider: "kakao", state });
+      window.Kakao.Auth.authorize({ redirectUri, state });
     });
-    window.Kakao.Auth.authorize({ redirectUri, state });
-  }, [redirectUri]);
+  }, [redirectUri, run]);
 
   return (
     <>
@@ -76,9 +78,20 @@ export function KakaoLoginButton({ className, leftIcon, label }: Props) {
 
       <Button
         size="xl"
-        className={cn(className, disabled && "cursor-not-allowed")}
-        leftIcon={leftIcon}
-        aria-disabled={disabled}
+        className={cn(
+          className,
+          disabled && "cursor-not-allowed",
+          pending && "cursor-wait",
+        )}
+        leftIcon={
+          pending ? (
+            <LoadingSpinner label="카카오 로그인 진행 중" size="sm" />
+          ) : (
+            leftIcon
+          )
+        }
+        disabled={disabled}
+        aria-busy={pending}
         onClick={(e) => {
           if (disabled) {
             e.preventDefault();
@@ -89,9 +102,8 @@ export function KakaoLoginButton({ className, leftIcon, label }: Props) {
         }}
         type="button"
       >
-        {error ? "카카오 로그인 준비 실패" : label}
+        {error ? "카카오 로그인 준비 실패" : pending ? SOCIAL_OAUTH_CONNECTING_LABEL : label}
       </Button>
     </>
   );
 }
-

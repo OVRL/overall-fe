@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
 
 /**
- * 소셜 가입 직후(pending) 약관·개인정보 동의 화면 (Figma OVR 약관 동의 스펙).
- * 필수 2항목 동의 후 온보딩으로 이동합니다.
+ * 약관·개인정보 동의 화면 (Figma OVR 약관 동의 스펙).
+ * 필수 동의 후 회원가입 온보딩으로 이동합니다.
+ * 소셜 미가입(콜백에서 `/privacy-consent`로 진입) 시에도 동일하며, 이때 sessionStorage 소셜 스냅샷은 온보딩에서 그대로 프리필·lockedFields에 사용됩니다.
  */
 export default function PrivacyConsentClient() {
   const router = useBridgeRouter();

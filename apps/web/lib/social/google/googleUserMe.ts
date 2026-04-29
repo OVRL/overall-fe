@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { safeFetchJson } from "@/lib/social/safeFetchJson";
 
 export type GoogleExchangeResult =
   | { ok: true; accessToken: string; userMe: unknown }
@@ -19,40 +20,45 @@ async function exchangeAuthorizationCode(params: {
     body.set("client_secret", env.GOOGLE_CLIENT_SECRET);
   }
 
-  const res = await fetch("https://oauth2.googleapis.com/token", {
+  const res = await safeFetchJson("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: {
       "content-type": "application/x-www-form-urlencoded;charset=utf-8",
     },
     body,
-    cache: "no-store",
   });
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[google] token 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
 
   return {
     ok: true as const,
-    data: json as { access_token?: string },
+    data: res.data as { access_token?: string },
   };
 }
 
 async function requestGoogleUserInfo(accessToken: string) {
-  const res = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+  const res = await safeFetchJson(
+    "https://openidconnect.googleapis.com/v1/userinfo",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     },
-    cache: "no-store",
-  });
+  );
 
-  const json = (await res.json()) as unknown;
   if (!res.ok) {
-    return { ok: false as const, error: json };
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[google] userinfo 요청 실패", res.error);
+    }
+    return { ok: false as const, error: res.error };
   }
-  return { ok: true as const, data: json };
+  return { ok: true as const, data: res.data };
 }
 
 /** PKCE로 받은 code → 토큰 → OpenID userinfo */
