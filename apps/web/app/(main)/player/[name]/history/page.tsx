@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Trophy, Users, BarChart2, History, Target, Star, Activity, Award, TrendingUp, Calendar, Zap, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Trophy, Users, BarChart2, History, Target, Star, Activity, Award, TrendingUp, Calendar, Zap, ShieldCheck, Share2, Link, Copy, Check } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -26,6 +26,51 @@ import { useBestElevenQuery } from "@/components/team-management/hooks/useBestEl
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { Suspense } from "react";
 import { getValidImageSrc } from "@/lib/utils";
+
+function PlayerCardImage({ imgUrlParam, profileImage, playerName }: { imgUrlParam: string | null; profileImage?: string | null; playerName: string }) {
+  const [src, setSrc] = useState<string>(() => {
+    if (imgUrlParam) {
+      try {
+        const decoded = decodeURIComponent(imgUrlParam);
+        // /images/ovr.png는 기본 fallback이므로 profileImage 우선 사용
+        if (decoded === "/images/ovr.png" && profileImage) {
+          return getValidImageSrc(profileImage);
+        }
+        return decoded;
+      } catch {
+        return getValidImageSrc(profileImage);
+      }
+    }
+    return getValidImageSrc(profileImage);
+  });
+  const [fallbackStep, setFallbackStep] = useState(0);
+
+  const handleError = () => {
+    if (fallbackStep === 0 && profileImage) {
+      setSrc(getValidImageSrc(profileImage));
+      setFallbackStep(1);
+    } else if (fallbackStep <= 1 && imgUrlParam) {
+      try {
+        const decoded = decodeURIComponent(imgUrlParam);
+        if (decoded !== src) { setSrc(decoded); setFallbackStep(2); return; }
+      } catch {}
+      setSrc("/icons/logo_OVR.svg");
+      setFallbackStep(3);
+    } else {
+      setSrc("/icons/logo_OVR.svg");
+      setFallbackStep(3);
+    }
+  };
+
+  return (
+    <img
+      src={src}
+      alt={playerName}
+      className="w-full h-full object-contain object-bottom drop-shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
+      onError={handleError}
+    />
+  );
+}
 
 export default function PlayerHistoryPage() {
   return (
@@ -102,8 +147,36 @@ function PlayerHistoryDataView() {
   const [activeTab, setActiveTab] = useState('contribution');
   const [currentAwardPage, setCurrentAwardPage] = useState(0);
   const [showGraphs, setShowGraphs] = useState(false);
-  
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copyDone, setCopyDone] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const toggleGraphs = () => setShowGraphs(!showGraphs);
+
+  const handleCopyUrl = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopyDone(true);
+    setTimeout(() => { setCopyDone(false); setShowShareMenu(false); }, 1500);
+  };
+
+  const handleKakaoShare = () => {
+    const url = window.location.href;
+    if (typeof window !== "undefined" && (window as any).Kakao?.Share) {
+      (window as any).Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: `${playerName}의 HISTORY`,
+          description: "오버롤 시즌 기록을 확인하세요",
+          imageUrl: imgUrlParam ? decodeURIComponent(imgUrlParam) : undefined,
+          link: { mobileWebUrl: url, webUrl: url },
+        },
+      });
+    } else {
+      window.open(`https://sharer.kakao.com/talk/friends/picker/link?app_key=&url=${encodeURIComponent(url)}`, "_blank");
+    }
+    setShowShareMenu(false);
+  };
+
   const getMaxValue = (statKey: string) => {
     const max = Math.max(...historyData.map(item => Number(item[statKey as keyof typeof item]) || 0));
     return max === 0 ? 10 : Math.ceil(max * 1.2);
@@ -304,11 +377,11 @@ function PlayerHistoryDataView() {
 
                   {/* 선수 사진 - URL param 우선, 없으면 Relay 데이터 */}
                   <div className="absolute inset-0 z-10 flex items-end justify-center">
-                    <div className="relative w-full h-[90%] overflow-hidden">
-                      <img
-                        src={imgUrlParam ? decodeURIComponent(imgUrlParam) : getValidImageSrc(playerMember?.user?.profileImage)}
-                        alt={playerName}
-                        className="w-full h-full object-contain object-bottom drop-shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
+                    <div className="relative w-full h-[95%] overflow-hidden">
+                      <PlayerCardImage
+                        imgUrlParam={imgUrlParam}
+                        profileImage={playerMember?.user?.profileImage}
+                        playerName={playerName}
                       />
                     </div>
                   </div>
@@ -374,14 +447,14 @@ function PlayerHistoryDataView() {
         )}
       </AnimatePresence>
 
-    <div className="relative z-10 w-full min-h-[calc(100vh-env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-bg-basic dark:bg-background pb-20">
+    <div ref={contentRef} className="relative z-10 w-full min-h-[calc(100vh-env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-bg-basic dark:bg-background pb-20">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-6 md:py-16 flex flex-col gap-8 md:gap-10">
-        
+
         {/* Header Section */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-8 border-b border-Label-Tertiary/10 pb-5 md:pb-6">
           <div className="flex flex-col gap-2.5 md:gap-3">
             <div className="flex items-center gap-3 md:gap-4">
-               <button 
+               <button
                 onClick={() => router.back()}
                 className="group flex flex-shrink-0 items-center justify-center w-9 md:w-10 h-9 md:h-10 bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-xl hover:bg-gray-50 dark:hover:bg-surface-elevated transition-all shadow-sm dark:shadow-none cursor-pointer"
                >
@@ -390,6 +463,42 @@ function PlayerHistoryDataView() {
                <h1 className="text-2xl md:text-3xl font-extrabold text-Label-Primary tracking-tight uppercase m-0 leading-none">{playerName}</h1>
             </div>
             <p className="text-[14px] md:text-[16px] font-semibold text-Label-Tertiary m-0">시즌별 성과 및 성장 추이를 한눈에 확인하세요</p>
+          </div>
+
+          {/* 공유 버튼 */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* 공유하기 */}
+            <div className="relative">
+              <button
+                onClick={() => setShowShareMenu((v) => !v)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#00e5a0] text-black text-[13px] font-bold hover:bg-[#00c98a] transition-all shadow-sm cursor-pointer"
+              >
+                <Share2 className="w-4 h-4" />
+                공유하기
+              </button>
+
+              {showShareMenu && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-surface-card border border-Label-Tertiary/15 rounded-2xl shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <button
+                    onClick={handleCopyUrl}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-Label-Primary hover:bg-surface-elevated transition-colors cursor-pointer"
+                  >
+                    {copyDone ? <Check className="w-4 h-4 text-[#00e5a0]" /> : <Copy className="w-4 h-4" />}
+                    {copyDone ? "복사 완료!" : "URL 복사"}
+                  </button>
+                  <div className="h-px bg-Label-Tertiary/10 mx-3" />
+                  <button
+                    onClick={handleKakaoShare}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-Label-Primary hover:bg-surface-elevated transition-colors cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#3A1D1D">
+                      <path d="M12 3C6.477 3 2 6.82 2 11.5c0 2.93 1.77 5.5 4.47 7.1L5.5 21.5l3.44-2.03C10.1 19.82 11.04 20 12 20c5.523 0 10-3.82 10-8.5S17.523 3 12 3z"/>
+                    </svg>
+                    카카오톡 공유
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
