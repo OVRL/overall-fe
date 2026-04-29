@@ -162,7 +162,9 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
           const imgParam = encodeURIComponent(
             player.image || "/images/ovr.png",
           );
-          router.push(`/player/${player.name}?imgUrl=${imgParam}`);
+          const params = new URLSearchParams({ imgUrl: imgParam });
+          if (player.backNumber != null) params.set("backNumber", String(player.backNumber));
+          router.push(`/player/${encodeURIComponent(player.name)}?${params.toString()}`);
         }}
         variant="line"
         size="m"
