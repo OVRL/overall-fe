@@ -39,18 +39,20 @@ export function TeamManagementAccessGuard({
 
 function TeamManagementAccessGuardInner({ children }: { children: ReactNode }) {
   const { selectedTeamId } = useSelectedTeamId();
-  const { canAccessTeamManagementRoute } =
+  const { canAccessTeamManagementRoute, selectedTeamMemberRole } =
     useTeamManagementCapabilitiesForUser();
   const router = useRouter();
 
   useEffect(() => {
-    // selectedTeamId가 아직 null이면 (로딩 중) 리다이렉트하지 않음
-    if (selectedTeamId && !canAccessTeamManagementRoute) {
+    // role이 null이면 데이터 로딩 중 — 리다이렉트하지 않음
+    // role이 명시적으로 PLAYER인 경우에만 리다이렉트
+    if (selectedTeamId && selectedTeamMemberRole !== null && !canAccessTeamManagementRoute) {
       router.replace("/");
     }
-  }, [canAccessTeamManagementRoute, selectedTeamId, router]);
+  }, [canAccessTeamManagementRoute, selectedTeamMemberRole, selectedTeamId, router]);
 
-  if (!canAccessTeamManagementRoute) {
+  // role이 PLAYER로 확정된 경우에만 null 반환 (null role = 로딩 중, children 유지)
+  if (selectedTeamMemberRole !== null && !canAccessTeamManagementRoute) {
     return null;
   }
 

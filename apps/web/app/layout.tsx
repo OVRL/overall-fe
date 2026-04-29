@@ -207,6 +207,21 @@ export default async function RootLayout({
           src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${env.NEXT_PUBLIC_NAVER_CLIENT_ID}&submodules=geocoder`}
           strategy="lazyOnload"
         />
+        {env.NEXT_PUBLIC_KAKAO_JS_KEY && (
+          <>
+            <Script
+              src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+              integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
+              crossOrigin="anonymous"
+              strategy="lazyOnload"
+              onLoad={() => {
+                if (typeof window !== "undefined" && (window as any).Kakao && !(window as any).Kakao.isInitialized()) {
+                  (window as any).Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+                }
+              }}
+            />
+          </>
+        )}
         <SpeedInsights />
       </body>
     </html>

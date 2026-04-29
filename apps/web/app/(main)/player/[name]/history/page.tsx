@@ -26,6 +26,7 @@ import { useBestElevenQuery } from "@/components/team-management/hooks/useBestEl
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { Suspense } from "react";
 import { getValidImageSrc } from "@/lib/utils";
+import { sharePlayerHistory } from "@/lib/kakao-share";
 
 function PlayerCardImage({ imgUrlParam, profileImage, playerName }: { imgUrlParam: string | null; profileImage?: string | null; playerName: string }) {
   const [src, setSrc] = useState<string>(() => {
@@ -160,20 +161,11 @@ function PlayerHistoryDataView() {
   };
 
   const handleKakaoShare = () => {
-    const url = window.location.href;
-    if (typeof window !== "undefined" && (window as any).Kakao?.Share) {
-      (window as any).Kakao.Share.sendDefault({
-        objectType: "feed",
-        content: {
-          title: `${playerName}의 HISTORY`,
-          description: "오버롤 시즌 기록을 확인하세요",
-          imageUrl: imgUrlParam ? decodeURIComponent(imgUrlParam) : undefined,
-          link: { mobileWebUrl: url, webUrl: url },
-        },
-      });
-    } else {
-      window.open(`https://sharer.kakao.com/talk/friends/picker/link?app_key=&url=${encodeURIComponent(url)}`, "_blank");
-    }
+    sharePlayerHistory({
+      playerName,
+      historyUrl: window.location.href,
+      imageUrl: imgUrlParam ? decodeURIComponent(imgUrlParam) : undefined,
+    });
     setShowShareMenu(false);
   };
 
@@ -293,14 +285,14 @@ function PlayerHistoryDataView() {
               transition={{ duration: 2, delay: 0.6 }}
               className="absolute inset-0 z-0 pointer-events-none"
             >
-              <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-[#00e5a0]/20 via-transparent to-transparent rotate-12 origin-top" />
-              <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-[#00e5a0]/15 via-transparent to-transparent -rotate-12 origin-top" />
-              <div className="absolute top-0 left-[38%] w-px h-full bg-gradient-to-b from-white/10 via-transparent to-transparent rotate-6 origin-top" />
-              <div className="absolute top-0 right-[38%] w-px h-full bg-gradient-to-b from-white/8 via-transparent to-transparent -rotate-6 origin-top" />
+              <div className="absolute top-0 left-1/4 w-px h-full bg-linear-to-b from-[#00e5a0]/20 via-transparent to-transparent rotate-12 origin-top" />
+              <div className="absolute top-0 right-1/4 w-px h-full bg-linear-to-b from-[#00e5a0]/15 via-transparent to-transparent -rotate-12 origin-top" />
+              <div className="absolute top-0 left-[38%] w-px h-full bg-linear-to-b from-white/10 via-transparent to-transparent rotate-6 origin-top" />
+              <div className="absolute top-0 right-[38%] w-px h-full bg-linear-to-b from-white/8 via-transparent to-transparent -rotate-6 origin-top" />
             </motion.div>
 
             {/* 하단 그라데이션 */}
-            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/80 to-transparent z-0 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-linear-to-t from-black/80 to-transparent z-0 pointer-events-none" />
 
             <div className="relative z-10 flex flex-col items-center gap-8 md:gap-10">
 
@@ -406,7 +398,7 @@ function PlayerHistoryDataView() {
                     initial={{ x: "-100%", skewX: "-20deg" }}
                     animate={{ x: "200%" }}
                     transition={{ duration: 0.8, delay: 1.8, ease: "easeInOut" }}
-                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent z-40 pointer-events-none"
+                    className="absolute inset-y-0 w-1/3 bg-linear-to-r from-transparent via-white/20 to-transparent z-40 pointer-events-none"
                   />
                 </motion.div>
               </motion.div>
@@ -456,7 +448,7 @@ function PlayerHistoryDataView() {
             <div className="flex items-center gap-3 md:gap-4">
                <button
                 onClick={() => router.back()}
-                className="group flex flex-shrink-0 items-center justify-center w-9 md:w-10 h-9 md:h-10 bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-xl hover:bg-gray-50 dark:hover:bg-surface-elevated transition-all shadow-sm dark:shadow-none cursor-pointer"
+                className="group flex shrink-0 items-center justify-center w-9 md:w-10 h-9 md:h-10 bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-xl hover:bg-gray-50 dark:hover:bg-surface-elevated transition-all shadow-sm dark:shadow-none cursor-pointer"
                >
                  <ArrowLeft className="w-4.5 md:w-5 h-4.5 md:h-5 text-Label-Primary group-hover:-translate-x-0.5 transition-transform" />
                </button>
@@ -466,7 +458,7 @@ function PlayerHistoryDataView() {
           </div>
 
           {/* 공유 버튼 */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {/* 공유하기 */}
             <div className="relative">
               <button
@@ -739,7 +731,7 @@ function PlayerHistoryDataView() {
                { id: 4, title: '함께 클린시트를 만든 선수', name: '기록 없음', value: '0회' }
              ].map(opt => (
                <div key={opt.id} className="bg-white dark:bg-surface-secondary rounded-[20px] p-4 md:p-5 flex flex-row items-center gap-4 shadow-[0_4px_16px_rgba(0,0,0,0.03)] dark:shadow-none border border-Label-Tertiary/10 transition-all hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_12px_rgba(255,255,255,0.02)] hover:-translate-y-0.5 group">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-Label-Tertiary/10 bg-gray-50 dark:bg-surface-elevated flex-shrink-0 overflow-hidden relative flex items-center justify-center">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-Label-Tertiary/10 bg-gray-50 dark:bg-surface-elevated shrink-0 overflow-hidden relative flex items-center justify-center">
                     <img src={getPartnerAvatarUrl(opt.name)} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110 opacity-50 dark:opacity-20" />
                   </div>
                   <div className="flex flex-col gap-0.5 w-full overflow-hidden">

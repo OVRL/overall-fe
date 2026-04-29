@@ -8,6 +8,7 @@ import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import arrowBack from "@/public/icons/arrow_back.svg";
+import { shareFormation } from "@/lib/kakao-share";
 
 type MobileHeaderProps = {
   variant: "mobile";
@@ -106,6 +107,16 @@ const Header = (props?: HeaderProps) => {
         <div className="z-10 flex shrink-0 items-center gap-1">
           <button
             type="button"
+            onClick={() => shareFormation({ matchTitle: "포메이션 공유", matchUrl: window.location.href })}
+            className="z-10 cursor-pointer p-2"
+            aria-label="카카오톡으로 공유"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#3A1D1D">
+              <path d="M12 3C6.477 3 2 6.82 2 11.5c0 2.93 1.77 5.5 4.47 7.1L5.5 21.5l3.44-2.03C10.1 19.82 11.04 20 12 20c5.523 0 10-3.82 10-8.5S17.523 3 12 3z"/>
+            </svg>
+          </button>
+          <button
+            type="button"
             onClick={handleMobileReset}
             className="z-10 cursor-pointer p-2 font-semibold text-red-400"
           >
@@ -169,6 +180,18 @@ const Header = (props?: HeaderProps) => {
         </p>
       </div>
       <div className="flex items-center gap-4">
+        <Button
+          type="button"
+          variant="line"
+          size="m"
+          className="w-fit p-3 font-semibold flex items-center gap-2"
+          onClick={() => shareFormation({ matchTitle: "포메이션 공유", matchUrl: window.location.href })}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#3A1D1D" className="dark:fill-[#FEE500]">
+            <path d="M12 3C6.477 3 2 6.82 2 11.5c0 2.93 1.77 5.5 4.47 7.1L5.5 21.5l3.44-2.03C10.1 19.82 11.04 20 12 20c5.523 0 10-3.82 10-8.5S17.523 3 12 3z"/>
+          </svg>
+          카카오로 공유
+        </Button>
         <Button
           variant="line"
           size="m"
