@@ -36,7 +36,7 @@ async function requestKakaoToken(params: {
   return { ok: true as const, data: res.data as { access_token?: string } };
 }
 
-async function requestKakaoUserMe(accessToken: string) {
+export async function requestKakaoUserMe(accessToken: string) {
   const res = await safeFetchJson("https://kapi.kakao.com/v2/user/me", {
     method: "GET",
     headers: {
@@ -76,5 +76,16 @@ export async function exchangeKakaoCodeForUserMe(params: {
     return { ok: false, error: userMeRes.error };
   }
 
+  return { ok: true, accessToken, userMe: userMeRes.data };
+}
+
+/** 네이티브 SDK 등에서 이미 받은 액세스 토큰으로 v2/user/me만 조회 */
+export async function fetchKakaoUserMeWithAccessToken(
+  accessToken: string,
+): Promise<KakaoExchangeResult> {
+  const userMeRes = await requestKakaoUserMe(accessToken);
+  if (!userMeRes.ok) {
+    return { ok: false, error: userMeRes.error };
+  }
   return { ok: true, accessToken, userMe: userMeRes.data };
 }

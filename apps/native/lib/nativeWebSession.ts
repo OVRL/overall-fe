@@ -67,6 +67,23 @@ export async function clearNativeAuthStorage(): Promise<void> {
  * WebView 마운트 전에 저장된 토큰을 도메인 쿠키로 주입 (스펙 Step 2).
  * WebView 캐시가 날아가도 앱 재실행 시 세션 복구에 사용.
  */
+/** 소셜 로그인 뮤테이션 성공 직후: 금고·WKWebView 쿠키를 한 번에 기록 */
+export async function persistNativeAuthSession(
+  webOrigin: string,
+  tokens: {
+    accessToken: string;
+    refreshToken?: string | null;
+    userId: string | number;
+  },
+): Promise<void> {
+  await SecureStore.setItemAsync(SECURE_KEYS.accessToken, tokens.accessToken);
+  if (tokens.refreshToken) {
+    await SecureStore.setItemAsync(SECURE_KEYS.refreshToken, tokens.refreshToken);
+  }
+  await SecureStore.setItemAsync(SECURE_KEYS.userId, String(tokens.userId));
+  await injectStoredAuthCookiesForWebView(webOrigin);
+}
+
 export async function injectStoredAuthCookiesForWebView(
   webOrigin: string
 ): Promise<void> {

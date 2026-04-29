@@ -41,10 +41,9 @@ import { handleMainAppWebViewNavigationStateChange } from "@/lib/mainWebViewNavi
 import {
   hasNativeAuthSession,
   injectStoredAuthCookiesForWebView,
-  persistAuthCookiesFromWebView,
   shouldClearNativeAuthFromNavigation,
 } from "@/lib/nativeWebSession";
-import { isPostAuthWebAppPath } from "@/lib/isPostAuthWebAppPath";
+import { useNativeSocialLogin } from "@/hooks/useNativeSocialLogin";
 import {
   isSameWebAppOrigin,
   INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
@@ -59,13 +58,13 @@ const BACKGROUND = {
   dark: "#131312",
 } as const;
 
-type AuthPhase = "checking" | "native_login" | "oauth" | "main";
+type AuthPhase = "checking" | "native_login" | "main";
 
 /**
- * true: 앱 실행 시 세션을 보지 않고 항상 네이티브 소셜 로그인 UI만 표시(UI 확인용).
- * 실제 로그인 플로우(세션 분기 + OAuth 완료 처리)를 켤 때 false 로 바꿉니다.
+ * true: 앱 실행 시 세션을 건너뛰고 로그인 UI만 표시(UI 확인용).
+ * 실제 배포·통합 테스트에서는 false 로 두고 SecureStore 세션 분기 + 네이티브 SDK 로그인을 사용합니다.
  */
-const FORCE_NATIVE_LOGIN_UI_PREVIEW = true;
+const FORCE_NATIVE_LOGIN_UI_PREVIEW = false;
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -85,17 +84,30 @@ export default function App() {
       ? "http://10.0.2.2:3000"
       : "http://localhost:3000"
     : getWebAppOrigin();
+
+  const onNativeSessionReady = useCallback(() => {
+    setAuthPhase("main");
+  }, []);
+
+  const onNativeNeedsPrivacyConsent = useCallback((injectScript: string) => {
+    pendingPrivacyHandoffRef.current = injectScript;
+    setAuthPhase("main");
+  }, []);
+
+  const { runProvider } = useNativeSocialLogin(webOrigin, {
+    onSessionReady: onNativeSessionReady,
+    onNeedsPrivacyConsent: onNativeNeedsPrivacyConsent,
+  });
+
   const isWebViewCookiePrepDone = useWebViewPreAuth(webOrigin);
   const webViewRef = useRef<WebView>(null);
-  const oauthWebViewRef = useRef<WebView>(null);
-  const oauthFinishLockRef = useRef(false);
+  const pendingPrivacyHandoffRef = useRef<string | null>(null);
   const syncViewportInjectTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
   const [authPhase, setAuthPhase] = useState<AuthPhase>(
     FORCE_NATIVE_LOGIN_UI_PREVIEW ? "native_login" : "checking",
   );
-  const [oauthStartUrl, setOauthStartUrl] = useState<string | null>(null);
   const [isRootLayoutDone, setIsRootLayoutDone] = useState(false);
   const [isWebViewFirstLoadDone, setIsWebViewFirstLoadDone] = useState(false);
   const [isSplashTimedOut, setIsSplashTimedOut] = useState(false);
@@ -145,12 +157,6 @@ export default function App() {
   }, [authPhase]);
 
   useEffect(() => {
-    if (authPhase === "oauth") {
-      oauthFinishLockRef.current = false;
-    }
-  }, [authPhase]);
-
-  useEffect(() => {
     if (Platform.OS !== "android") return;
     void Notifications.setNotificationChannelAsync("default", {
       name: "default",
@@ -176,7 +182,6 @@ export default function App() {
 
   const splashContentReady =
     authPhase === "native_login" ||
-    authPhase === "oauth" ||
     (authPhase === "main" && isWebViewFirstLoadDone);
 
   const isAppReadyForSplashHide =
@@ -234,10 +239,6 @@ export default function App() {
 
   useEffect(() => {
     const onBackPress = () => {
-      if (authPhase === "oauth" && oauthWebViewRef.current) {
-        oauthWebViewRef.current.goBack();
-        return true;
-      }
       if (authPhase === "main" && webViewRef.current) {
         webViewRef.current.goBack();
         return true;
@@ -256,36 +257,9 @@ export default function App() {
 
   const onSelectSocialProvider = useCallback(
     (provider: NativeSocialProvider) => {
-      const start = `${webOrigin}/api/auth/${provider}/callback`;
-      setOauthStartUrl(start);
-      setAuthPhase("oauth");
+      void runProvider(provider);
     },
-    [webOrigin],
-  );
-
-  const onOAuthNavigationStateChange = useCallback(
-    (navState: { url: string; loading?: boolean }) => {
-      if (navState.loading) return;
-      if (!isPostAuthWebAppPath(navState.url, webOrigin)) return;
-      if (oauthFinishLockRef.current) return;
-      oauthFinishLockRef.current = true;
-      void (async () => {
-        try {
-          await persistAuthCookiesFromWebView(webOrigin);
-          if (!(await hasNativeAuthSession())) {
-            oauthFinishLockRef.current = false;
-            return;
-          }
-          await injectStoredAuthCookiesForWebView(webOrigin);
-          setOauthStartUrl(null);
-          setAuthPhase("main");
-        } catch (e) {
-          console.warn("[Native] OAuth 완료 처리 실패:", e);
-          oauthFinishLockRef.current = false;
-        }
-      })();
-    },
-    [webOrigin],
+    [runProvider],
   );
 
   const onMessage = useCallback(
@@ -341,6 +315,11 @@ export default function App() {
       webViewRef.current?.injectJavaScript(
         INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
       );
+      const handoff = pendingPrivacyHandoffRef.current;
+      if (handoff) {
+        pendingPrivacyHandoffRef.current = null;
+        webViewRef.current?.injectJavaScript(handoff);
+      }
     },
     [webOrigin],
   );
@@ -406,20 +385,6 @@ export default function App() {
           <NativeSocialLoginScreen
             webOrigin={webOrigin}
             onSelectProvider={onSelectSocialProvider}
-          />
-        ) : null}
-
-        {authPhase === "oauth" && oauthStartUrl ? (
-          <WebView
-            ref={oauthWebViewRef}
-            source={{ uri: oauthStartUrl }}
-            style={styles.oauthWebview}
-            javaScriptEnabled
-            domStorageEnabled
-            startInLoadingState
-            onNavigationStateChange={onOAuthNavigationStateChange}
-            injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
-            applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
           />
         ) : null}
 
@@ -491,9 +456,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   webview: {
-    flex: 1,
-  },
-  oauthWebview: {
     flex: 1,
   },
   centered: {
