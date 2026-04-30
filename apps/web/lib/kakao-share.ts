@@ -66,8 +66,8 @@ export function sharePlayerHistory(options: {
   const shared = kakaoShareFeed({
     objectType: "feed",
     content: {
-      title: `${options.playerName}의 HISTORY`,
-      description: "오버롤 시즌 기록을 확인하세요",
+      title: `${options.playerName}의 통산기록`,
+      description: "오버롤 통산 기록을 확인하세요",
       imageUrl: options.imageUrl,
       link: { mobileWebUrl: url, webUrl: url },
     },
