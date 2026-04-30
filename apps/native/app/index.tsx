@@ -51,6 +51,8 @@ import {
 import { getWebAppOrigin } from "@/lib/webAuthConfig";
 import { APPLICATION_NAME_FOR_USER_AGENT } from "../utils/webViewUserAgent";
 import { useWebViewPhotoFlow } from "@/hooks/useWebViewPhotoFlow";
+import { NativeLiquidBottomNav } from "@/components/NativeLiquidBottomNav";
+import { isNativeBottomNavVisiblePath } from "@/lib/isNativeBottomNavVisiblePath";
 
 /** 앱 루트·웹뷰 뒤 캔버스 — 다크 bg-primary 와 동일 (스플래시 전환 시 색 튐 방지) */
 const BACKGROUND = {
@@ -136,6 +138,7 @@ export default function App() {
     "fullscreen",
   );
   const [nativeChrome, setNativeChrome] = useState<NativeWebChrome | null>(null);
+  const [webPathname, setWebPathname] = useState("");
 
   const {
     isCameraVisible,
@@ -174,8 +177,21 @@ export default function App() {
     if (authPhase !== "main") {
       setNativeChrome(null);
       setChromeMode("fullscreen");
+      setWebPathname("");
     }
   }, [authPhase]);
+
+  const navigateWebViewToPath = useCallback(
+    (path: string) => {
+      const base = webOrigin.replace(/\/$/, "");
+      const normalized = path.startsWith("/") ? path : `/${path}`;
+      const nextUrl = `${base}${normalized}`;
+      webViewRef.current?.injectJavaScript(
+        `window.location.assign(${JSON.stringify(nextUrl)}); true;`,
+      );
+    },
+    [webOrigin],
+  );
 
   useEffect(() => {
     if (!__DEV__) return;
@@ -342,6 +358,7 @@ export default function App() {
           webOrigin,
           setChromeMode,
           setNativeChrome,
+          setWebPathname,
           syncViewportInjectTimerRef,
           getWebView: () => webViewRef.current,
         },
@@ -366,6 +383,11 @@ export default function App() {
         );
       }
       if (!sameOrigin) return;
+      try {
+        setWebPathname(new URL(url).pathname);
+      } catch {
+        /* 무시 */
+      }
       setIsWebViewFirstLoadDone(true);
       webViewRef.current?.injectJavaScript(
         INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
@@ -444,6 +466,7 @@ export default function App() {
         ) : null}
 
         {authPhase === "main" && isWebViewCookiePrepDone ? (
+          <View style={styles.webviewColumn}>
           <WebView
             ref={webViewRef}
             source={
@@ -497,6 +520,13 @@ export default function App() {
             injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
             applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
           />
+          {isNativeBottomNavVisiblePath(webPathname) ? (
+            <NativeLiquidBottomNav
+              pathname={webPathname}
+              onNavigateToPath={navigateWebViewToPath}
+            />
+          ) : null}
+          </View>
         ) : showPrepFallback ? (
           <View style={styles.prepFallback}>
             <ActivityIndicator color="#ffffff" />
@@ -538,6 +568,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  webviewColumn: {
+    flex: 1,
+    flexDirection: "column",
   },
   webview: {
     flex: 1,
