@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, Suspense } from "react";
-import { X, Copy, Check, Settings } from "lucide-react";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { X, Copy, Check, Settings, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Dropdown from "@/components/ui/Dropdown";
@@ -11,6 +11,8 @@ import type { TeamMemberRole } from "@/lib/permissions/teamMemberRole";
 import { UNIFORM_DESIGNS, type UniformDesign } from "@/app/create-team/_lib/uniformDesign";
 import { useNaverAddressSearch } from "@/hooks/useNaverAddressSearch";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
+import { useInviteCodeForTeam, buildInviteLink } from "@/components/home/UpcomingMatch/useInviteCodeForTeam";
+import { parseGraphQLDateTime } from "@/lib/inviteCode/inviteCodeExpiry";
 import type { Role as GqlTeamMemberRole } from "@/__generated__/useUpdateTeamMemberMutation.graphql";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/shadcn/popover";
 import { useTeamSettingsQuery } from "./hooks/useTeamSettingsQuery";
@@ -377,12 +379,58 @@ function TeamInfoModal({
 }
 
 // ──────────────────────────────────────────────
+// 남은 유효 시간 계산 훅
+// ──────────────────────────────────────────────
+function useRemainingTime(expiredAt: string | null) {
+  const [remaining, setRemaining] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!expiredAt) { setRemaining(null); return; }
+
+    const calc = () => {
+      const expiry = parseGraphQLDateTime(expiredAt);
+      if (!expiry) { setRemaining(null); return; }
+      const diff = expiry.getTime() - Date.now();
+      if (diff <= 0) { setRemaining(null); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      if (h > 0) setRemaining(`${h}시간 ${m}분 ${s}초 후 만료`);
+      else if (m > 0) setRemaining(`${m}분 ${s}초 후 만료`);
+      else setRemaining(`${s}초 후 만료`);
+    };
+
+    calc();
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
+  }, [expiredAt]);
+
+  return remaining;
+}
+
+// ──────────────────────────────────────────────
 // 초대 링크 모달
 // ──────────────────────────────────────────────
-function InviteLinkModal({ inviteLink, onClose }: { inviteLink: string; onClose: () => void }) {
+function InviteLinkModal({
+  inviteLink,
+  isExpired,
+  expiredAt,
+  isRefreshing,
+  onRefresh,
+  onClose,
+}: {
+  inviteLink: string | null;
+  isExpired: boolean;
+  expiredAt: string | null;
+  isRefreshing: boolean;
+  onRefresh: () => void;
+  onClose: () => void;
+}) {
   const [copied, setCopied] = useState(false);
+  const remaining = useRemainingTime(isExpired ? null : expiredAt);
 
   const handleCopy = () => {
+    if (!inviteLink) return;
     navigator.clipboard.writeText(inviteLink).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -409,20 +457,54 @@ function InviteLinkModal({ inviteLink, onClose }: { inviteLink: string; onClose:
           <p className="text-sm text-gray-400 leading-relaxed">
             아래 링크를 공유하면 새로운 팀원을 초대할 수 있습니다.
           </p>
-          {/* 링크 박스 */}
-          <div className="bg-[#111] border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-2">
-            <span className="flex-1 text-sm text-gray-300 font-medium truncate select-all">
-              {inviteLink}
-            </span>
+
+          {/* 링크 박스 + 만료 표시 */}
+          <div className={cn(
+            "border rounded-xl px-4 py-3.5 flex items-center gap-2",
+            isExpired
+              ? "bg-red-500/5 border-red-500/30"
+              : "bg-[#111] border-white/10"
+          )}>
+            {isExpired ? (
+              <>
+                <span className="flex-1 text-sm text-red-400 font-medium truncate line-through opacity-60">
+                  {inviteLink ?? "링크 없음"}
+                </span>
+                <span className="shrink-0 text-xs font-bold text-red-400 bg-red-500/15 border border-red-500/30 rounded-md px-2 py-0.5">
+                  만료
+                </span>
+                <button
+                  onClick={onRefresh}
+                  disabled={isRefreshing}
+                  title="링크 새로고침"
+                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+                </button>
+              </>
+            ) : (
+              <span className="flex-1 text-sm text-gray-300 font-medium truncate select-all">
+                {inviteLink ?? "링크 로딩 중..."}
+              </span>
+            )}
           </div>
+
+          {/* 유효 시간 */}
+          {!isExpired && remaining && (
+            <p className="text-xs text-gray-500 text-center">{remaining}</p>
+          )}
+
           {/* 복사 버튼 */}
           <button
             onClick={handleCopy}
+            disabled={isExpired || !inviteLink}
             className={cn(
               "w-full h-[52px] flex items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all",
               copied
                 ? "bg-green-500/20 border border-green-500/40 text-green-400"
-                : "bg-[#b8ff12] text-black hover:bg-[#c8ff32] active:bg-[#a0e000]"
+                : isExpired || !inviteLink
+                  ? "bg-white/5 border border-white/10 text-gray-600 cursor-not-allowed"
+                  : "bg-[#b8ff12] text-black hover:bg-[#c8ff32] active:bg-[#a0e000]"
             )}
           >
             {copied ? (
@@ -681,8 +763,14 @@ function TeamSettingsPanelInner({
     };
   });
 
-  // 상태는 뮤테이션 처리를 위한 임시 상태로만 존재 (UI 표시는 Relay Store 데이터 기반)
-  const inviteLink = "https://ovr-log.com/invite/abc123xyz"; // 백업용 (차후 구현 여부에 따라 변경)
+  const {
+    inviteCode,
+    expiredAt: inviteExpiredAt,
+    isExpired: isInviteExpired,
+    isInFlight: isInviteRefreshing,
+    requestCreateInviteCode,
+  } = useInviteCodeForTeam(teamId);
+  const inviteLink = inviteCode ? buildInviteLink(inviteCode) : null;
   const [showInviteModal, setShowInviteModal] = useState(false);
   
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -697,10 +785,6 @@ function TeamSettingsPanelInner({
     memberName: string;
   } | null>(null);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(inviteLink).catch(() => { });
-    alert("링크가 복사되었습니다.");
-  };
 
   const handleRoleConfirm = async () => {
     if (!roleModal) return;
@@ -940,6 +1024,10 @@ function TeamSettingsPanelInner({
         {showInviteModal && (
           <InviteLinkModal
             inviteLink={inviteLink}
+            isExpired={isInviteExpired}
+            expiredAt={inviteExpiredAt}
+            isRefreshing={isInviteRefreshing}
+            onRefresh={requestCreateInviteCode}
             onClose={() => setShowInviteModal(false)}
           />
         )}

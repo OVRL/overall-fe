@@ -185,8 +185,16 @@ export function useInviteCodeForTeam(teamId: number | null) {
       });
   }, [teamId, snapshot, executeMutation]);
 
+  const expiredAt =
+    teamId != null && snapshot?.teamId === teamId ? snapshot.expiredAt : null;
+
+  const isExpired =
+    expiredAt != null ? isInviteExpired(expiredAt) : false;
+
   return {
     inviteCode,
+    expiredAt,
+    isExpired,
     isLoading,
     isInFlight,
     requestCreateInviteCode,

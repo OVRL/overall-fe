@@ -9,7 +9,9 @@
       "Bash(pnpm --filter web tsc --noEmit)",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(ls *.ts)",
-      "Bash(ls src/*.ts)"
+      "Bash(ls src/*.ts)",
+      "Bash(pnpm --filter web exec tsc --noEmit)",
+      "Bash(pnpm relay *)"
     ]
   }
 }

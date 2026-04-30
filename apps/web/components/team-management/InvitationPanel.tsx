@@ -8,9 +8,12 @@ import { useLazyLoadQuery, useMutation } from "react-relay";
 import { FindTeamJoinRequestQuery } from "@/lib/relay/queries/findTeamJoinRequestQuery";
 import { FindUserByIdQuery } from "@/lib/relay/queries/findUserByIdQuery";
 import { RejectJoinRequestMutation } from "@/lib/relay/mutations/rejectJoinRequestMutation";
+import { CreateTeamMemberMutation } from "@/lib/relay/mutations/createTeamMemberMutation";
 import type { findTeamJoinRequestQuery } from "@/__generated__/findTeamJoinRequestQuery.graphql";
 import type { findUserByIdQuery } from "@/__generated__/findUserByIdQuery.graphql";
 import type { rejectJoinRequestMutation } from "@/__generated__/rejectJoinRequestMutation.graphql";
+import type { createTeamMemberMutation } from "@/__generated__/createTeamMemberMutation.graphql";
+import { useInviteCodeForTeam } from "@/components/home/UpcomingMatch/useInviteCodeForTeam";
 import { useSelectedTeamId } from "@/components/providers/SelectedTeamProvider";
 import { toast } from "sonner";
 
@@ -33,6 +36,7 @@ type ModalState = {
   requestId: number;
   userId: number;
   userName: string;
+  userEmail?: string;
 } | null;
 
 // ──────────────────────────────────────────────
@@ -98,7 +102,7 @@ function JoinRequestCard({
   onReject,
 }: {
   req: RequestItem;
-  onApprove: (requestId: number, userId: number, userName: string) => void;
+  onApprove: (requestId: number, userId: number, userName: string, userEmail: string) => void;
   onReject: (requestId: number, userId: number, userName: string) => void;
 }) {
   const data = useLazyLoadQuery<findUserByIdQuery>(
@@ -188,7 +192,7 @@ function JoinRequestCard({
         {req.status === "PENDING" ? (
           <div className="flex gap-2">
             <button
-              onClick={() => onApprove(req.id, req.userId, userName)}
+              onClick={() => onApprove(req.id, req.userId, userName, user.email ?? "")}
               className="w-[77px] h-[41px] flex items-center justify-center bg-[#b8ff12] rounded-[10px] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity"
             >
               수락
@@ -249,6 +253,10 @@ function JoinRequestList({ teamId }: { teamId: number }) {
   const [commitReject, isRejectInFlight] = useMutation<rejectJoinRequestMutation>(
     RejectJoinRequestMutation,
   );
+  const [commitApprove, isApproveInFlight] = useMutation<createTeamMemberMutation>(
+    CreateTeamMemberMutation,
+  );
+  const { inviteCode: teamInviteCode } = useInviteCodeForTeam(teamId);
 
   const allRequests = data.findTeamJoinRequest ?? [];
 
@@ -280,8 +288,26 @@ function JoinRequestList({ teamId }: { teamId: number }) {
   };
 
   const handleApprove = () => {
-    toast.info("승인 기능은 현재 준비 중입니다.");
-    setModal(null);
+    if (!modal || modal.type !== "approve") return;
+    if (!teamInviteCode) {
+      toast.error("초대 코드를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    if (!modal.userEmail) {
+      toast.error("신청자 이메일 정보를 찾을 수 없습니다.");
+      return;
+    }
+    commitApprove({
+      variables: { email: modal.userEmail, inviteCode: teamInviteCode },
+      onCompleted: () => {
+        toast.success(`${modal.userName}님의 가입을 승인했습니다.`);
+        setModal(null);
+      },
+      onError: (err) => {
+        console.error("[InvitationPanel] approve error:", err);
+        toast.error("승인 처리 중 오류가 발생했습니다.");
+      },
+    });
   };
 
   return (
@@ -350,8 +376,8 @@ function JoinRequestList({ teamId }: { teamId: number }) {
               <Suspense key={req.id} fallback={<JoinRequestCardSkeleton />}>
                 <JoinRequestCard
                   req={req}
-                  onApprove={(rId, uId, name) =>
-                    setModal({ type: "approve", requestId: rId, userId: uId, userName: name })
+                  onApprove={(rId, uId, name, email) =>
+                    setModal({ type: "approve", requestId: rId, userId: uId, userName: name, userEmail: email })
                   }
                   onReject={(rId, uId, name) =>
                     setModal({ type: "reject", requestId: rId, userId: uId, userName: name })
@@ -408,9 +434,10 @@ function JoinRequestList({ teamId }: { teamId: number }) {
                 {modal.type === "approve" ? (
                   <button
                     onClick={handleApprove}
-                    className="flex-1 py-3 bg-primary rounded-xl text-black text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
+                    disabled={isApproveInFlight}
+                    className="flex-1 py-3 bg-primary rounded-xl text-black text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap disabled:opacity-50"
                   >
-                    수락하기
+                    {isApproveInFlight ? "처리 중..." : "수락하기"}
                   </button>
                 ) : (
                   <button
