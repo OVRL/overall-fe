@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { TeamInfoModalJoinFooter } from "@/components/modals/TeamInfoModal/TeamInfoModalJoinFooter";
 import {
   findPendingJoinRequestIdForTeam,
+  findRejectedReasonForTeam,
   formatFoundedLabel,
 } from "@/components/modals/TeamInfoModal/teamInfoModalUtils";
 
@@ -189,6 +190,10 @@ function TeamInfoModalLoaded({ inviteCode }: ModalPropsMap["TEAM_INFO"]) {
         <TeamInfoModalJoinFooter
           inviteCode={inviteCode}
           initialPendingJoinRequestId={findPendingJoinRequestIdForTeam(
+            data.findMyJoinRequest,
+            team.id,
+          )}
+          rejectedReason={findRejectedReasonForTeam(
             data.findMyJoinRequest,
             team.id,
           )}

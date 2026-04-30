@@ -26,6 +26,24 @@ export function findPendingJoinRequestIdForTeam(
   return row?.id ?? null;
 }
 
+export type JoinRequestListWithReason = ReadonlyArray<{
+  readonly id: number;
+  readonly status: string;
+  readonly teamId: number;
+  readonly rejectedReason?: string | null | undefined;
+}>;
+
+/** 현재 조회 중인 팀에 대해 내가 REJECTED된 가입 신청의 거절 사유 (없으면 null) */
+export function findRejectedReasonForTeam(
+  joinRequests: JoinRequestListWithReason,
+  teamId: number,
+): string | null {
+  const row = joinRequests.find(
+    (r) => r.teamId === teamId && r.status === "REJECTED",
+  );
+  return row?.rejectedReason ?? null;
+}
+
 /** 서버/GraphQL에서 온 창단일을 모달 표기용 문자열로 변환 */
 export function formatFoundedLabel(raw: unknown): string {
   if (raw == null) return "—";

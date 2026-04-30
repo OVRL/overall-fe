@@ -427,6 +427,7 @@ function InviteLinkModal({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [showRefreshConfirm, setShowRefreshConfirm] = useState(false);
   const remaining = useRemainingTime(isExpired ? null : expiredAt);
 
   const handleCopy = () => {
@@ -434,6 +435,11 @@ function InviteLinkModal({
     navigator.clipboard.writeText(inviteLink).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRefreshConfirm = () => {
+    setShowRefreshConfirm(false);
+    onRefresh();
   };
 
   return (
@@ -458,7 +464,7 @@ function InviteLinkModal({
             아래 링크를 공유하면 새로운 팀원을 초대할 수 있습니다.
           </p>
 
-          {/* 링크 박스 + 만료 표시 */}
+          {/* 링크 박스 */}
           <div className={cn(
             "border rounded-xl px-4 py-3.5 flex items-center gap-2",
             isExpired
@@ -466,27 +472,27 @@ function InviteLinkModal({
               : "bg-[#111] border-white/10"
           )}>
             {isExpired ? (
-              <>
-                <span className="flex-1 text-sm text-red-400 font-medium truncate line-through opacity-60">
-                  {inviteLink ?? "링크 없음"}
-                </span>
-                <span className="shrink-0 text-xs font-bold text-red-400 bg-red-500/15 border border-red-500/30 rounded-md px-2 py-0.5">
-                  만료
-                </span>
-                <button
-                  onClick={onRefresh}
-                  disabled={isRefreshing}
-                  title="링크 새로고침"
-                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                >
-                  <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-                </button>
-              </>
+              <span className="flex-1 text-sm text-red-400 font-medium truncate line-through opacity-60">
+                {inviteLink ?? "링크 없음"}
+              </span>
             ) : (
               <span className="flex-1 text-sm text-gray-300 font-medium truncate select-all">
                 {inviteLink ?? "링크 로딩 중..."}
               </span>
             )}
+            {isExpired && (
+              <span className="shrink-0 text-xs font-bold text-red-400 bg-red-500/15 border border-red-500/30 rounded-md px-2 py-0.5">
+                만료
+              </span>
+            )}
+            <button
+              onClick={() => setShowRefreshConfirm(true)}
+              disabled={isRefreshing}
+              title="링크 새로 만들기"
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+            </button>
           </div>
 
           {/* 유효 시간 */}
@@ -515,6 +521,36 @@ function InviteLinkModal({
           </button>
         </div>
       </div>
+
+      {/* 새로고침 확인 모달 */}
+      {showRefreshConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-xs bg-[#2a2a2a] rounded-2xl p-7 shadow-2xl border border-white/10 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
+              <RefreshCw size={20} className="text-yellow-400" />
+            </div>
+            <h3 className="text-base font-bold text-white mb-3">링크를 새로 만들까요?</h3>
+            <p className="text-sm text-gray-400 leading-relaxed mb-7">
+              새 링크를 만들면{" "}
+              <span className="text-white font-semibold">기존 링크를 받은 사람은<br />더 이상 접근할 수 없습니다.</span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRefreshConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-white/15 text-gray-400 text-sm hover:bg-white/5 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleRefreshConfirm}
+                className="flex-1 py-2.5 rounded-xl bg-primary text-black text-sm font-bold hover:bg-primary/90 transition-colors"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

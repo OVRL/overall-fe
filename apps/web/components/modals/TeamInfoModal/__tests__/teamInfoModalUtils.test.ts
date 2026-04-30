@@ -13,30 +13,30 @@ describe("findPendingJoinRequestIdForTeam", () => {
 
   it("해당 teamId에 PENDING이 있으면 그 id", () => {
     const rows = [
-      { id: 10, status: "APPROVED" as const, teamId: 2 },
-      { id: 20, status: "PENDING" as const, teamId: 1 },
+      { id: 10, status: "APPROVED" as const, teamId: 2, rejectedReason: null },
+      { id: 20, status: "PENDING" as const, teamId: 1, rejectedReason: null },
     ] as JoinRequestList;
     expect(findPendingJoinRequestIdForTeam(rows, 1)).toBe(20);
   });
 
   it("같은 팀이어도 PENDING이 아니면 null", () => {
     const rows = [
-      { id: 5, status: "REJECTED" as const, teamId: 1 },
+      { id: 5, status: "REJECTED" as const, teamId: 1, rejectedReason: "미달" },
     ] as JoinRequestList;
     expect(findPendingJoinRequestIdForTeam(rows, 1)).toBeNull();
   });
 
   it("teamId가 다르면 null", () => {
     const rows = [
-      { id: 7, status: "PENDING" as const, teamId: 99 },
+      { id: 7, status: "PENDING" as const, teamId: 99, rejectedReason: null },
     ] as JoinRequestList;
     expect(findPendingJoinRequestIdForTeam(rows, 1)).toBeNull();
   });
 
   it("여러 건 중 첫 번째 매칭 PENDING id를 반환", () => {
     const rows = [
-      { id: 1, status: "PENDING" as const, teamId: 1 },
-      { id: 2, status: "PENDING" as const, teamId: 1 },
+      { id: 1, status: "PENDING" as const, teamId: 1, rejectedReason: null },
+      { id: 2, status: "PENDING" as const, teamId: 1, rejectedReason: null },
     ] as JoinRequestList;
     expect(findPendingJoinRequestIdForTeam(rows, 1)).toBe(1);
   });

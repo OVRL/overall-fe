@@ -414,13 +414,16 @@ function JoinRequestList({ teamId }: { teamId: number }) {
 
               {modal.type === "reject" && (
                 <div className="mb-6">
-                  <input
-                    type="text"
+                  <textarea
                     placeholder="거절 사유 (선택)"
                     value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border-primary/40 transition-all"
+                    onChange={(e) => setRejectReason(e.target.value.slice(0, 200))}
+                    rows={4}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border-primary/40 transition-all resize-none"
                   />
+                  <p className="text-right text-xs text-gray-600 mt-1">
+                    {rejectReason.length} / 200
+                  </p>
                 </div>
               )}
 

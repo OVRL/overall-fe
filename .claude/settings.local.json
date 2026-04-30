@@ -11,7 +11,8 @@
       "Bash(ls *.ts)",
       "Bash(ls src/*.ts)",
       "Bash(pnpm --filter web exec tsc --noEmit)",
-      "Bash(pnpm relay *)"
+      "Bash(pnpm relay *)",
+      "Bash(pnpm tsc *)"
     ]
   }
 }

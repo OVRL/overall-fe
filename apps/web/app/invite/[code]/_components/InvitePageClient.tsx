@@ -7,7 +7,10 @@ import Image from "next/image";
 import { EmblemImage } from "@/components/ui/EmblemImage";
 import { FindTeamByInviteCodeQuery } from "@/lib/relay/queries/findTeamByInviteCodeQuery";
 import type { findTeamByInviteCodeQuery } from "@/__generated__/findTeamByInviteCodeQuery.graphql";
-import { findPendingJoinRequestIdForTeam } from "@/components/modals/TeamInfoModal/teamInfoModalUtils";
+import {
+  findPendingJoinRequestIdForTeam,
+  findRejectedReasonForTeam,
+} from "@/components/modals/TeamInfoModal/teamInfoModalUtils";
 import { TeamInfoModalJoinFooter } from "@/components/modals/TeamInfoModal/TeamInfoModalJoinFooter";
 import ovrLogo from "@/public/images/ovr.png";
 
@@ -60,6 +63,7 @@ function InviteContent({ code }: { code: string }) {
 
   const teamName = team.name?.trim() || "팀";
   const pendingId = findPendingJoinRequestIdForTeam(data.findMyJoinRequest, team.id);
+  const rejectedReason = findRejectedReasonForTeam(data.findMyJoinRequest, team.id);
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-xs">
@@ -106,6 +110,7 @@ function InviteContent({ code }: { code: string }) {
         <TeamInfoModalJoinFooter
           inviteCode={code}
           initialPendingJoinRequestId={pendingId}
+          rejectedReason={rejectedReason}
           className="flex-col gap-3"
         />
       </div>

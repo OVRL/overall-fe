@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<abcc8c3dee571320af8eab88891ab332>>
+ * @generated SignedSource<<2128c9c67d05641e17a8cee40ae03056>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,6 +17,7 @@ export type findTeamByInviteCodeQuery$variables = {
 export type findTeamByInviteCodeQuery$data = {
   readonly findMyJoinRequest: ReadonlyArray<{
     readonly id: number;
+    readonly rejectedReason: string | null | undefined;
     readonly status: JoinRequestStatus;
     readonly teamId: number;
   }>;
@@ -197,6 +198,13 @@ v3 = [
         "kind": "ScalarField",
         "name": "teamId",
         "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "rejectedReason",
+        "storageKey": null
       }
     ],
     "storageKey": null
@@ -220,16 +228,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "76d18e2c48a3cc913d7059b166093871",
+    "cacheID": "4440a41786ccd00a4c0c9874252e7745",
     "id": null,
     "metadata": {},
     "name": "findTeamByInviteCodeQuery",
     "operationKind": "query",
-    "text": "query findTeamByInviteCodeQuery(\n  $inviteCode: String!\n) {\n  findTeamByInviteCode(inviteCode: $inviteCode) {\n    id\n    name\n    description\n    activityArea\n    emblem\n    historyStartDate\n    homeUniform\n    awayUniform\n    region {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n  findMyJoinRequest {\n    id\n    status\n    teamId\n  }\n}\n"
+    "text": "query findTeamByInviteCodeQuery(\n  $inviteCode: String!\n) {\n  findTeamByInviteCode(inviteCode: $inviteCode) {\n    id\n    name\n    description\n    activityArea\n    emblem\n    historyStartDate\n    homeUniform\n    awayUniform\n    region {\n      code\n      sidoName\n      siggName\n      dongName\n      riName\n      name\n    }\n  }\n  findMyJoinRequest {\n    id\n    status\n    teamId\n    rejectedReason\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "84f06227c433cc49ac28e3a61b5305ce";
+(node as any).hash = "7af478753f549d9bc4e2f5ecad2e6db9";
 
 export default node;

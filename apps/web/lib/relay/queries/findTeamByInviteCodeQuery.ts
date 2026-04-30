@@ -27,6 +27,7 @@ export const FindTeamByInviteCodeQuery = graphql`
       id
       status
       teamId
+      rejectedReason
     }
   }
 `;
