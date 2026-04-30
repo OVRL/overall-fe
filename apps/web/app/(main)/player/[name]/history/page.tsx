@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Trophy, Users, BarChart2, History, Target, Star, Activity, Award, TrendingUp, Calendar, Zap, ShieldCheck, Share2, Link, Copy, Check } from "lucide-react";
+import { ArrowLeft, Trophy, Users, BarChart2, History, Target, Star, Activity, Award, TrendingUp, Calendar, Zap, ShieldCheck, Share2, Copy, Check } from "lucide-react";
+import { useUserId } from "@/hooks/useUserId";
 import {
   LineChart,
   Line,
@@ -28,22 +29,20 @@ import { Suspense } from "react";
 import { getValidImageSrc } from "@/lib/utils";
 import { sharePlayerHistory } from "@/lib/kakao-share";
 
+function resolveImgUrl(imgUrlParam: string | null, profileImage?: string | null): string {
+  if (imgUrlParam) {
+    try {
+      let decoded = decodeURIComponent(imgUrlParam);
+      // 이중 인코딩 대응 (%25EA... → %EA... → 한글)
+      if (decoded.includes("%")) decoded = decodeURIComponent(decoded);
+      if (decoded !== "/images/ovr.png") return getValidImageSrc(decoded);
+    } catch {}
+  }
+  return getValidImageSrc(profileImage);
+}
+
 function PlayerCardImage({ imgUrlParam, profileImage, playerName }: { imgUrlParam: string | null; profileImage?: string | null; playerName: string }) {
-  const [src, setSrc] = useState<string>(() => {
-    if (imgUrlParam) {
-      try {
-        const decoded = decodeURIComponent(imgUrlParam);
-        // /images/ovr.png는 기본 fallback이므로 profileImage 우선 사용
-        if (decoded === "/images/ovr.png" && profileImage) {
-          return getValidImageSrc(profileImage);
-        }
-        return decoded;
-      } catch {
-        return getValidImageSrc(profileImage);
-      }
-    }
-    return getValidImageSrc(profileImage);
-  });
+  const [src, setSrc] = useState<string>(() => resolveImgUrl(imgUrlParam, profileImage));
   const [fallbackStep, setFallbackStep] = useState(0);
 
   const handleError = () => {
@@ -51,10 +50,8 @@ function PlayerCardImage({ imgUrlParam, profileImage, playerName }: { imgUrlPara
       setSrc(getValidImageSrc(profileImage));
       setFallbackStep(1);
     } else if (fallbackStep <= 1 && imgUrlParam) {
-      try {
-        const decoded = decodeURIComponent(imgUrlParam);
-        if (decoded !== src) { setSrc(decoded); setFallbackStep(2); return; }
-      } catch {}
+      const alt = resolveImgUrl(imgUrlParam, null);
+      if (alt !== src) { setSrc(alt); setFallbackStep(2); return; }
       setSrc("/icons/logo_OVR.svg");
       setFallbackStep(3);
     } else {
@@ -123,6 +120,8 @@ function PlayerHistoryDataView() {
   const imgUrlParam = searchParams.get("imgUrl");
   const backNumberParam = searchParams.get("backNumber");
 
+  const userId = useUserId();
+
   const { selectedTeamIdNum } = useSelectedTeamId();
   const queryData = useBestElevenQuery(selectedTeamIdNum ?? 1);
   const playerMember = queryData.findManyTeamMember?.members?.find(
@@ -151,6 +150,14 @@ function PlayerHistoryDataView() {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copyDone, setCopyDone] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleBack = () => {
+    if (userId !== null) {
+      router.back();
+    } else {
+      router.replace("/login/social");
+    }
+  };
 
   const toggleGraphs = () => setShowGraphs(!showGraphs);
 
@@ -257,13 +264,13 @@ function PlayerHistoryDataView() {
             transition={{ duration: 1.2, ease: "easeInOut" }}
             className="fixed inset-0 z-100 flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* landing_bg.webp 배경 */}
+            {/* BG 배경 */}
             <div className="absolute inset-0 z-0">
               <img
-                src="/images/landing_bg.webp"
+                src="/images/BG.png"
                 alt=""
-                className="w-full h-full object-cover object-center scale-105"
-                style={{ filter: "brightness(0.35) saturate(1.2)" }}
+                className="w-full h-full object-cover object-center"
+                style={{ filter: "brightness(0.5) saturate(1.3)" }}
               />
             </div>
 
@@ -328,14 +335,14 @@ function PlayerHistoryDataView() {
 
               {/* Player Card */}
               <motion.div
-                initial={{ scale: 0.6, opacity: 0, y: 80, rotateY: -25 }}
+                initial={{ rotateY: -180, scale: 0.85, opacity: 0 }}
                 animate={isExiting
-                  ? { scale: 0.05, opacity: 0, rotateY: 720, rotateZ: 360, y: 200, filter: "blur(20px)" }
-                  : { scale: 1, opacity: 1, y: 0, rotateY: 0, filter: "blur(0px)" }
+                  ? { rotateY: 90, scale: 1.6, opacity: 0, filter: "blur(12px)" }
+                  : { rotateY: 0, scale: 1, opacity: 1, filter: "blur(0px)" }
                 }
                 transition={isExiting
-                  ? { duration: 0.9, ease: [0.55, 0, 1, 0.45] }
-                  : { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.5 }
+                  ? { duration: 0.7, ease: [0.4, 0, 1, 0.6] }
+                  : { duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.5 }
                 }
                 className="relative"
                 style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
@@ -393,12 +400,13 @@ function PlayerHistoryDataView() {
                     </motion.div>
                   </div>
 
-                  {/* 카드 반짝임 sweep */}
+                  {/* 카드 반짝임 sweep - 스무스 무한 반복 */}
                   <motion.div
-                    initial={{ x: "-100%", skewX: "-20deg" }}
-                    animate={{ x: "200%" }}
-                    transition={{ duration: 0.8, delay: 1.8, ease: "easeInOut" }}
-                    className="absolute inset-y-0 w-1/3 bg-linear-to-r from-transparent via-white/20 to-transparent z-40 pointer-events-none"
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "250%" }}
+                    transition={{ duration: 1.2, delay: 1.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 2.8 }}
+                    className="absolute inset-y-0 w-1/4 z-40 pointer-events-none"
+                    style={{ skewX: "-15deg", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.15), rgba(255,255,255,0.3), rgba(255,255,255,0.15), transparent)" }}
                   />
                 </motion.div>
               </motion.div>
@@ -447,7 +455,7 @@ function PlayerHistoryDataView() {
           <div className="flex flex-col gap-2.5 md:gap-3">
             <div className="flex items-center gap-3 md:gap-4">
                <button
-                onClick={() => router.back()}
+                onClick={handleBack}
                 className="group flex shrink-0 items-center justify-center w-9 md:w-10 h-9 md:h-10 bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-xl hover:bg-gray-50 dark:hover:bg-surface-elevated transition-all shadow-sm dark:shadow-none cursor-pointer"
                >
                  <ArrowLeft className="w-4.5 md:w-5 h-4.5 md:h-5 text-Label-Primary group-hover:-translate-x-0.5 transition-transform" />
