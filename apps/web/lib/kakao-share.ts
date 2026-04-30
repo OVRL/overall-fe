@@ -40,7 +40,7 @@ export async function shareFormation(options: {
     content: {
       title: options.matchTitle,
       description: "오버롤에서 포메이션을 확인하세요",
-      imageUrl,
+      ...(imageUrl ? { imageUrl } : {}),
       link: { mobileWebUrl: url, webUrl: url },
     },
     buttons: [{ title: "포메이션 보기", link: { mobileWebUrl: url, webUrl: url } }],

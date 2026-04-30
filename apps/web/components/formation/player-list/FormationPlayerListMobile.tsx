@@ -232,14 +232,14 @@ const FormationPlayerListMobile = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-4 pb-3">
+      <div className="flex items-center gap-3 px-4 pb-3 overflow-x-auto scrollbar-hide">
         {FORMATION_PLAYER_LIST_POSITION_TABS.map((tab) => (
           <AssistiveChip
             key={tab}
             label={tab}
             variant={activePosTab === tab ? "select2" : "default"}
             onClick={() => setActivePosTab(tab)}
-            className="flex-1 min-w-0"
+            className="shrink-0 whitespace-nowrap"
           />
         ))}
       </div>
