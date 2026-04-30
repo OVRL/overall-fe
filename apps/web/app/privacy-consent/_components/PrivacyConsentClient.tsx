@@ -41,8 +41,8 @@ export default function PrivacyConsentClient() {
   );
 
   return (
-    <div className="flex flex-col min-h-dvh bg-black text-Label-Primary">
-      <main className="flex-1 flex flex-col justify-center px-4 py-8 md:py-12 w-full">
+    <div className="flex h-full min-h-0 flex-col overflow-x-hidden bg-black text-Label-Primary">
+      <main className="flex min-h-0 flex-1 flex-col justify-center px-4 py-8 md:py-12 w-full">
         <div
           className={cn(
             "w-full max-w-md mx-auto rounded-[1.25rem] border border-gray-1000",

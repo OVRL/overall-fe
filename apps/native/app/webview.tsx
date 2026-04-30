@@ -1,6 +1,8 @@
 import { useLocalSearchParams, Stack, useNavigation } from "expo-router";
 import { WebView } from "react-native-webview";
 import { useRef, useEffect, useState, useCallback } from "react";
+import { NativeLiquidBottomNav } from "@/components/NativeLiquidBottomNav";
+import { isNativeBottomNavVisiblePath } from "@/lib/isNativeBottomNavVisiblePath";
 import { StyleSheet, View, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeWebTopBar } from "@/components/NativeWebTopBar";
@@ -37,6 +39,17 @@ export default function WebViewScreen() {
   const [nativeChrome, setNativeChrome] = useState<NativeWebChrome | null>(
     null
   );
+  const [webPathname, setWebPathname] = useState(() => {
+    if (!url) return "";
+    try {
+      if (isSameWebAppOrigin(url, webOrigin)) {
+        return new URL(url).pathname;
+      }
+    } catch {
+      /* 초기 URL 파싱 실패 시 빈 문자열 */
+    }
+    return "";
+  });
 
   const injectWebChromeMessage = useCallback((message: object) => {
     const payload = JSON.stringify(message);
@@ -44,11 +57,37 @@ export default function WebViewScreen() {
     webViewRef.current?.injectJavaScript(js);
   }, []);
 
+  const navigateWebViewToPath = useCallback(
+    (path: string) => {
+      const base = webOrigin.replace(/\/$/, "");
+      const normalized = path.startsWith("/") ? path : `/${path}`;
+      const nextUrl = `${base}${normalized}`;
+      webViewRef.current?.injectJavaScript(
+        `window.location.assign(${JSON.stringify(nextUrl)}); true;`,
+      );
+    },
+    [webOrigin],
+  );
+
   useEffect(() => {
     return () => {
       decrementStackDepth();
     };
   }, []);
+
+  useEffect(() => {
+    if (!url) {
+      setWebPathname("");
+      return;
+    }
+    try {
+      if (isSameWebAppOrigin(url, webOrigin)) {
+        setWebPathname(new URL(url).pathname);
+      }
+    } catch {
+      /* 무시 */
+    }
+  }, [url, webOrigin]);
 
   return (
     <View style={[styles.screenRoot, { backgroundColor }]}>
@@ -94,6 +133,7 @@ export default function WebViewScreen() {
             }
           />
         ) : null}
+        <View style={styles.webviewColumn}>
         <WebView
           ref={webViewRef as any}
           source={{ uri: url }}
@@ -136,6 +176,7 @@ export default function WebViewScreen() {
             if (isSameWebAppOrigin(navUrl, webOrigin)) {
               try {
                 const path = new URL(navUrl).pathname;
+                setWebPathname(path);
                 setNativeChrome((prev) =>
                   reduceNativeChromeForPathname(prev, path),
                 );
@@ -145,6 +186,13 @@ export default function WebViewScreen() {
             }
           }}
         />
+        {isNativeBottomNavVisiblePath(webPathname) ? (
+          <NativeLiquidBottomNav
+            pathname={webPathname}
+            onNavigateToPath={navigateWebViewToPath}
+          />
+        ) : null}
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -156,6 +204,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  webviewColumn: {
+    flex: 1,
+    flexDirection: "column",
   },
   webview: {
     flex: 1,

@@ -18,6 +18,8 @@ export type MainAppWebViewNavigationContext = {
   webOrigin: string;
   setChromeMode: Dispatch<SetStateAction<"safe" | "fullscreen">>;
   setNativeChrome: Dispatch<SetStateAction<NativeWebChrome | null>>;
+  /** 메인 WebView 현재 pathname — 하단 네이티브 탭바 노출 여부 등 */
+  setWebPathname?: Dispatch<SetStateAction<string>>;
   syncViewportInjectTimerRef: MutableRefObject<ReturnType<
     typeof setTimeout
   > | null>;
@@ -35,6 +37,7 @@ export function handleMainAppWebViewNavigationStateChange(
   if (isSameWebAppOrigin(url, ctx.webOrigin)) {
     try {
       const path = new URL(url).pathname;
+      ctx.setWebPathname?.(path);
       ctx.setNativeChrome((prev) => reduceNativeChromeForPathname(prev, path));
     } catch {
       /* 잘못된 URL 무시 */

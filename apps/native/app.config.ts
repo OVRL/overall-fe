@@ -20,6 +20,10 @@ function getKakaoKeyFromPlugins(
   return "";
 }
 
+/**
+ * 카카오 로그인 플러그인 옵션에 주입된 `kakaoAppKey`만 갱신하고,
+ * `kotlinVersion` 등 나머지 필드는 유지한다(덮어쓰면 EAS Android Gradle이 실패할 수 있음).
+ */
 function withKakaoNativeAppKey(
   plugins: ExpoConfig["plugins"] | undefined,
   kakaoAppKey: string,
@@ -27,7 +31,9 @@ function withKakaoNativeAppKey(
   if (!plugins) return plugins;
   return plugins.map((entry) => {
     if (Array.isArray(entry) && entry[0] === KAKAO_LOGIN_PLUGIN) {
-      return [KAKAO_LOGIN_PLUGIN, { kakaoAppKey }] as const;
+      const prev =
+        (entry[1] as Record<string, unknown> | undefined) ?? {};
+      return [KAKAO_LOGIN_PLUGIN, { ...prev, kakaoAppKey }] as const;
     }
     return entry;
   });
