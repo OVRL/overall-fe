@@ -17,6 +17,19 @@ export async function fetchUserMeViaWebRoutes(
     body: JSON.stringify({ accessToken }),
   });
   const json = (await res.json()) as { ok?: boolean; data?: unknown; error?: unknown };
+  if (__DEV__ && (!res.ok || !json.ok || json.data == null)) {
+    console.warn(
+      "[fetchUserMeViaWebRoutes]",
+      provider,
+      `${webOrigin}${path}`,
+      "status=",
+      res.status,
+      "json.ok=",
+      json.ok,
+      "error=",
+      json.error,
+    );
+  }
   if (!res.ok || !json.ok || json.data == null) {
     throw new Error(
       typeof json.error === "string" ? json.error : "프로필 조회에 실패했습니다.",

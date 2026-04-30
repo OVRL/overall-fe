@@ -21,6 +21,54 @@
 
 ---
 
+## 1-보. `webOrigin` (개발 서버 vs 배포)
+
+메인 셸 WebView의 기준 origin은 `app/index.tsx` 에서 정한다.
+
+| 빌드 | `webOrigin` (요약) | 비고 |
+|------|-------------------|------|
+| `__DEV__` (개발) | iOS: `http://localhost:3000` / Android: `http://10.0.2.2:3000` | `apps/web` dev 서버가 켜져 있어야 함. 실기기는 맥 IP로 바꾸는 편이 안전. |
+| 릴리스·프로덕션 | `getWebAppOrigin()` | `expo-constants` 의 `expoConfig.extra.webOrigin` (없으면 `https://ovr-log.com`). `app.json` 의 `extra.webOrigin` 과 일치시킬 것. |
+
+소셜 `fetch`·GraphQL·쿠키 주입·클리어 판별은 **모두 이 `webOrigin`과 동일한 origin** 을 전제로 동작한다.
+
+---
+
+## 1-보-2. 인증·쿠키 엔드투엔드 흐름 (요약도)
+
+```mermaid
+flowchart TB
+  subgraph entry["앱 진입"]
+    A[hasNativeAuthSession SecureStore]
+    A -->|refresh 없음| B[authPhase native_login]
+    A -->|refresh 있음| C[authPhase main]
+  end
+  subgraph preWv["WebView 로드 전"]
+    D[useWebViewPreAuth]
+    D --> E[injectStoredAuthCookiesForWebView]
+    E --> F[CookieManager.set accessToken refreshToken userId for webOrigin iOS useWebKit]
+  end
+  C --> D
+  F --> G[메인 WebView uri = webOrigin]
+  subgraph nSocial["네이티브 소셜 성공"]
+    H[SDK 토큰 userme GraphQL socialLogin]
+    H --> I[persistNativeAuthSession]
+    I --> J[SecureStore + injectStoredAuthCookiesForWebView]
+  end
+  subgraph notReg["소셜 미가입"]
+    K[pending ref + inject privacy handoff]
+    K --> L[onLoadEnd same origin 시 sessionStorage + /privacy-consent]
+  end
+  subgraph home["로그인 후 랜딩"]
+    M[shouldSyncCookies / 또는 persistAuthCookiesFromWebView]
+  end
+```
+
+- **HttpOnly** 는 웹·WK가 설정한 쿠키를 `CookieManager.get` 으로 읽을 수 있을 때 `persistAuthCookiesFromWebView` 가 금고에 복제한다(경로: 홈 등).
+- **앱이 직접 세션을 쓰는** 경로는 `persistNativeAuthSession` 이 `SecureStore` 쓰고 `injectStoredAuthCookiesForWebView` 로 **이름·도메인을 웹 쿠키와 맞춘** 대체 주입을 한다.
+
+---
+
 ## 2. 필수 패키지 (앱)
 
 ```bash
@@ -62,14 +110,45 @@ pnpm add @react-native-seoul/kakao-login @react-native-seoul/naver-login expo-au
 
 - **의도**: 앱 재실행·쿠키 유실 시에도 동일 출처 요청에 세션이 붙도록 한다.
 - **구현**: `injectStoredAuthCookiesForWebView(webOrigin)`, 훅 `useWebViewPreAuth(webOrigin)` (`hooks/useWebViewPreAuth.ts`)
-- **연결**: `app/index.tsx` 에서 메인 WebView는 `isWebViewCookiePrepDone` 이 true일 때만 로드한다.
+- **CookieManager**: iOS는 `useWebKit: true` 로 **WKWebView** 쿠키 저장소와 맞춘다. `buildSetCookieFields` 로 `path: /`, `httpOnly: true`, HTTPS 이면 `secure: true`, `expires` 는 먼 미래.
+- **연결**: `app/index.tsx` 에서 메인 WebView는 `isWebViewCookiePrepDone` 이 true일 때만 로드한다. Android 는 주입 후 `CookieManager.flush()`.
 
-### 4.3 로그아웃·비회원 랜딩 동기화 (구 Step 3)
+### 4.2-보. `persistNativeAuthSession` (소셜 뮤테이션 직후 한 번에)
 
-- **의도**: 웹에서 세션이 제거되면 네이티브 금고도 비운다.
-- **구현**: `shouldClearNativeAuthFromNavigation(url)` + `clearNativeAuthStorage()` (`lib/nativeWebSession.ts`), `app/index.tsx` 의 `onNavigationStateChange` 에서 `native_login` 등으로 되돌림.
+`socialLogin` 성공 직후 `persistNativeAuthSession(webOrigin, { accessToken, refreshToken, userId })` 를 호출한다. 순서는 (1) `SecureStore` 에 토큰·userId 기록 (2) `injectStoredAuthCookiesForWebView` 동일. 웹 `set-session` 이 내려주는 쿠키와 **이름·의미**를 맞춘다.
 
-### 4.4 토큰 갱신 / 401 Self-Healing (구 Step 4)
+### 4.3 로그아웃·비로그인 랜딩 동기화 (구 Step 3)
+
+- **의도**: **우리 웹 앱**에서 세션이 제거되었거나, 비로그인 랜딩으로 빠진 것으로 볼 수 있을 때 네이티브 금고를 비우고, 필요하면 로그인 셸(`native_login`)로 되돌린다.
+- **클리어 저장소**: `clearNativeAuthStorage()` — `SECURE_KEYS` 전부 삭제.
+- **셸으로 되돌리기**: `app/index.tsx` 의 `onNavigationStateChange` 에서 `setAuthPhase("native_login")`.
+- **판별 함수**: `shouldClearNativeAuthFromNavigation(url, webAppOrigin)` — **필수 두 번째 인자**는 `webOrigin` 과 동일한 문자열.
+
+**동일 origin(`url`의 origin === `new URL(webAppOrigin).origin`)일 때만** 경로를 본다. `nid.naver.com`, `kauth.kakao.com` 등 **외부 OAuth** URL 은 `false` 이다(아래 10절 “알려진 이슈” 참고). 조건(모두 **우리 origin** 기준 `pathname`):
+
+| 조건(참이면 “클리어 후 셸 전환”) | 제외(항상 `false`로 한 번 더 막음) |
+|--------------------------------|----------------------------------|
+| `p.startsWith("/login")` | ` /login/social` |
+| `p`에 `auth/logout` | ` /privacy-consent` |
+| `p`에 `/api/auth/logout` | ` /social/…` (OAuth 콜백·후처리) |
+
+`mainWebViewNavigationEffects` 에서는 같은 판별로 `clearNativeAuthStorage()` 만 호출하고(셸 phase 는 index 쪽), URL 동기화와 함께 쓰인다.
+
+### 4.4 `shouldSyncCookiesFromWebView` (홈 랜딩 시 금고 미러)
+
+- **구현**: `p === "/"` 또는 `p.startsWith("/home")` **이고** origin이 `webOrigin` 과 같을 때 `persistAuthCookiesFromWebView` (WebView 쿠키 → SecureStore) 시도.
+- `handleMainAppWebViewNavigationStateChange` 에서 호출.
+
+### 4.5 `onLoadEnd` 와 미가입 핸드오프 (메인 WebView)
+
+- `isSameWebAppOrigin(url, webOrigin)` 이 **true**일 때만 (1) 첫 로드 완료 플래그 (2) 뷰포트 주입 (3) `pendingPrivacyHandoffRef` 가 있으면 `injectJavaScript` 로 `sessionStorage` + `/privacy-consent` 전환.
+- `nid.naver.com` 처럼 **다른 origin** 은 `sameOrigin === false` 가 정상이며, 이 단계에서는 **아무것도 주입하지 않는다**. 콜백이 `https://{webApp}/social/.../callback` 으로 돌아온 뒤에 `true` 가 된다.
+
+### 4.6 딥링크 → WebView (카카오 등 앱 복귀)
+
+`Linking` URL 수신 시 `injectJavaScript` 로 `postMessage` 를 쓰되, `window.ReactNativeWebView` **가드** 후 호출(브리지 주입 전 타이밍 이슈 방지). IIFE 끝에 `true` (WK 권장).
+
+### 4.7 토큰 갱신 / 401 Self-Healing (구 Step 4, 선택)
 
 - **의도**: 웹이 리프레시로 쿠키만 갱신하고 네이티브 금고가 낡은 경우를 줄인다.
 - **상태**: **선택 과제**. 네이티브 단독 API 호출이 늘어날 때 CookieManager 재조회·금고 갱신 패턴을 검토한다. 현재 메인 경로는 WebView 내 웹 요청이 대부분이다.
@@ -119,9 +198,13 @@ pnpm add @react-native-seoul/kakao-login @react-native-seoul/naver-login expo-au
 
 | `authPhase` | 의미 |
 |-------------|------|
-| `checking` | `hasNativeAuthSession()` 등으로 초기 분기 |
-| `native_login` | RN 소셜 로그인 UI (`NativeSocialLoginScreen`) |
-| `main` | 메인 WebView (`webOrigin`), 사전 쿠키 주입 완료 후 로드 |
+| `checking` | 앱 기동 직후: `hasNativeAuthSession()` 으로 refreshToken 유무 판단 |
+| `native_login` | `NativeSocialLoginScreen` (카카오·네이버·구글 네이티브/Expo) |
+| `main` | 메인 WebView: **`authPhase === "main"` 이고 `isWebViewCookiePrepDone`** 일 때만 마운트(`useWebViewPreAuth` 가 `injectStoredAuthCookiesForWebView` 끝낸 뒤) |
+
+- **소셜 성공(`ok`)**: `onSessionReady` → `main` — 이미 `persistNativeAuthSession` 으로 금고·쿠키 반영.
+- **소셜 미가입(`not_registered`)**: `onNeedsPrivacyConsent` 가 `buildPrivacyConsentHandoffScript` 를 ref에 넣고 `main` — WebView 첫 **같은 origin** `onLoadEnd`에서 주입(위 4.5절).
+- **스플래시**: `authPhase` 가 `main` 이어도 WebView **첫 로드 전**에는 `splashContentReady` 조건에 걸려 커스텀 스플래시가 잠시 유지될 수 있다.
 
 `FORCE_NATIVE_LOGIN_UI_PREVIEW` 가 true이면 UI 테스트용으로 로그인 전용 화면만 고정할 수 있다.
 
@@ -140,6 +223,29 @@ pnpm add @react-native-seoul/kakao-login @react-native-seoul/naver-login expo-au
 - [ ] 소셜 콘솔(카카오·네이버·구글)에 네이티브 리디렉션·패키지명·키가 등록되었는가
 - [ ] 미가입 플로우에서 **스냅샷 키·필드가 웹 `SocialOauthSnapshot` 과 동일**한가 (`lib/social/nativeSocialTypes.ts` 주석 참고)
 - [ ] 로그아웃 시 네이티브 금고·WebView 쿠키가 함께 정리되는가
+- [ ] `shouldClearNativeAuthFromNavigation(url, webOrigin)` **두 인자** 호출 여부(외부 OAuth 오탐 방지)
+- [ ] iOS: `@react-native-seoul/kakao-login` prebuild 시 `Info.plist` 의 `KAKAO_APP_KEY`·URL scheme (`kakao{네이티브앱키}`)
+
+---
+
+## 10. 알려진 이슈·해결 (유지보수 이력)
+
+1. **`/login/social` 에서 `native_login`으로 튕김 (미가입 핸드오프 끊김)**  
+   - 원인: `shouldClearNativeAuth` 가 `p.startsWith("/login")` 만 볼 때, **`/login/social`** 이 걸렸다.  
+   - 대응: ` /login/social` 제외 + (아래) origin 제한.
+
+2. **`nid.naver.com` OAuth 중 `native_login`으로 튕김**  
+   - 원인: 경로 ` /login/noauth/…` 가 **`/login` prefix**로 오탐. Naver 쪽은 **다른 host**이지만 예전엔 host 없이 `pathname` 만 보는 버그가 있을 수 있음.  
+   - 대응: `shouldClearNativeAuthFromNavigation` 은 **반드시** `u.origin === new URL(webAppOrigin).origin` 인 경우에만 위 표를 적용. 외부 OAuth 페이지는 **항상 false**.
+
+3. **`/social/…/callback` 등**  
+   - ` /social/` prefix 는 클리어 대상에서 제외(콜백·리다이렉트 사이 `native_login` 방지).
+
+4. **WebView `onLoadEnd` + `sameOrigin=false`** (네이버·카카오 호스트)  
+   - 정상. 핸드오프는 **콜백이 `webOrigin`으로 돌아온 뒤** `true` 가 될 때 처리.
+
+5. **Metro 로그: `[NativeSocial]` 등**  
+   - `__DEV__` 전용. 릴리스에서 제거·슬림화할지 정책에 따른다.
 
 ---
 

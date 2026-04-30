@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useBridge } from "@/hooks/bridge/useBridge";
 import { cn } from "@/lib/utils";
 import { env } from "@/lib/env";
 import { createPkcePair } from "@/lib/social/google/googlePkce";
@@ -27,6 +28,7 @@ type Props = {
  * 콜백 RSC에서 토큰 교환·userinfo까지 처리합니다.
  */
 export function GoogleLoginButton({ className, leftIcon, label }: Props) {
+  const { isNativeApp, sendToNative } = useBridge();
   const { pending, run } = useSocialOAuthStart({
     errorTitle: "구글 로그인을 시작할 수 없습니다.",
   });
@@ -49,7 +51,16 @@ export function GoogleLoginButton({ className, leftIcon, label }: Props) {
       disabled={pending || !redirectUri}
       type="button"
       onClick={() => {
-        if (!redirectUri || pending) return;
+        if (pending) return;
+        // Google은 임베디드 WebView에서 OAuth를 막음 → 네이티브(expo-auth-session)로 위임
+        if (isNativeApp) {
+          sendToNative({
+            type: "START_NATIVE_SOCIAL_LOGIN",
+            payload: { provider: "google" },
+          });
+          return;
+        }
+        if (!redirectUri) return;
         void run(async () => {
           const state = createOAuthState();
           const { codeVerifier, codeChallenge } = await createPkcePair();

@@ -55,7 +55,7 @@ export function handleMainAppWebViewNavigationStateChange(
     }, 80);
   }
 
-  if (shouldClearNativeAuthFromNavigation(url)) {
+  if (shouldClearNativeAuthFromNavigation(url, ctx.webOrigin)) {
     void (async () => {
       try {
         await clearNativeAuthStorage();

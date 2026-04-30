@@ -85,13 +85,36 @@ export default function App() {
       : "http://localhost:3000"
     : getWebAppOrigin();
 
+  const webViewRef = useRef<WebView>(null);
+  const pendingPrivacyHandoffRef = useRef<string | null>(null);
+
   const onNativeSessionReady = useCallback(() => {
+    if (__DEV__) {
+      console.log("[App] social ok → main (session ready)");
+    }
     setAuthPhase("main");
   }, []);
 
   const onNativeNeedsPrivacyConsent = useCallback((injectScript: string) => {
+    if (__DEV__) {
+      console.log(
+        "[App] not_registered → main, handoff script len=",
+        injectScript.length,
+      );
+    }
     pendingPrivacyHandoffRef.current = injectScript;
     setAuthPhase("main");
+    // 이미 동일 URL에 머물면 onLoadEnd가 다시 오지 않아 핸드오프가 막힘 → 즉시 주입
+    const flush = () => {
+      const wv = webViewRef.current;
+      const pending = pendingPrivacyHandoffRef.current;
+      if (!wv || !pending || pending !== injectScript) return;
+      pendingPrivacyHandoffRef.current = null;
+      wv.injectJavaScript(injectScript);
+    };
+    queueMicrotask(flush);
+    setTimeout(flush, 0);
+    setTimeout(flush, 120);
   }, []);
 
   const { runProvider } = useNativeSocialLogin(webOrigin, {
@@ -100,8 +123,6 @@ export default function App() {
   });
 
   const isWebViewCookiePrepDone = useWebViewPreAuth(webOrigin);
-  const webViewRef = useRef<WebView>(null);
-  const pendingPrivacyHandoffRef = useRef<string | null>(null);
   const syncViewportInjectTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -155,6 +176,19 @@ export default function App() {
       setChromeMode("fullscreen");
     }
   }, [authPhase]);
+
+  useEffect(() => {
+    if (!__DEV__) return;
+    const mountWebView = authPhase === "main" && isWebViewCookiePrepDone;
+    console.log(
+      "[App WebView gate] authPhase=",
+      authPhase,
+      "cookiePrepDone=",
+      isWebViewCookiePrepDone,
+      "=> mountWebView=",
+      mountWebView,
+    );
+  }, [authPhase, isWebViewCookiePrepDone]);
 
   useEffect(() => {
     if (Platform.OS !== "android") return;
@@ -221,10 +255,20 @@ export default function App() {
     const handleDeepLink = (event: { url: string }) => {
       const url = event.url;
       if (authPhase !== "main" || !webViewRef.current) return;
-      const script = `
-           window.dispatchEvent(new CustomEvent('message', { detail: { type: 'DEEP_LINK_RECEIVED', payload: { url: "${url}" } } }));
-           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'DEEP_LINK_RECEIVED', payload: { url: "${url}" } }));
-        `;
+      // 카카오/네이버 OAuth 복귀 직후에는 WK가 아직 window.ReactNativeWebView를 주입하지 않은 경우가 있어
+      // postMessage 없이 호출하면 TypeError → WKErrorDomain Code=4. 가드 + IIFE 끝에 true 로 WK 요구사항 충족.
+      const safeUrl = JSON.stringify(url);
+      const script = `(function(){
+        try {
+          var d = { type: 'DEEP_LINK_RECEIVED', payload: { url: ${safeUrl} } };
+          window.dispatchEvent(new CustomEvent('message', { detail: d }));
+          var rw = window.ReactNativeWebView;
+          if (rw != null && typeof rw.postMessage === 'function') {
+            rw.postMessage(JSON.stringify(d));
+          }
+        } catch (e) {}
+        true;
+      })();`;
       webViewRef.current.injectJavaScript(script);
     };
 
@@ -279,13 +323,16 @@ export default function App() {
             onClearNativeWebChromeIfMode: (mode: "global" | "topbar") => {
               setNativeChrome((prev) => (prev?.mode === mode ? null : prev));
             },
+            onStartNativeSocialLogin: (provider) => {
+              void runProvider(provider);
+            },
           },
         );
       } catch (e) {
         console.error("Failed to parse bridge message", e);
       }
     },
-    [navigation, tryConsumePhotoBridgeMessage],
+    [navigation, tryConsumePhotoBridgeMessage, runProvider],
   );
 
   const onNavigationStateChange = useCallback(
@@ -300,7 +347,7 @@ export default function App() {
         },
         navState,
       );
-      if (shouldClearNativeAuthFromNavigation(navState.url)) {
+      if (shouldClearNativeAuthFromNavigation(navState.url, webOrigin)) {
         setAuthPhase("native_login");
       }
     },
@@ -310,7 +357,15 @@ export default function App() {
   const onLoadEnd = useCallback(
     (e: { nativeEvent: { url: string } }) => {
       const url = e.nativeEvent.url;
-      if (!isSameWebAppOrigin(url, webOrigin)) return;
+      const sameOrigin = isSameWebAppOrigin(url, webOrigin);
+      if (__DEV__) {
+        // nid.naver.com·kauth.kakao.com 등 OAuth 호스트는 당연히 sameOrigin=false (외부 도메인).
+        // console.warn 만 쓰면 LogBox가 스택처럼 붙어 혼동되므로 log 한 줄만 사용.
+        console.log(
+          `[WebView onLoadEnd] url=${url} | webOrigin=${webOrigin} | sameOrigin=${sameOrigin} | pendingHandoff=${String(pendingPrivacyHandoffRef.current != null)}`,
+        );
+      }
+      if (!sameOrigin) return;
       setIsWebViewFirstLoadDone(true);
       webViewRef.current?.injectJavaScript(
         INJECT_SYNC_WEBVIEW_VIEWPORT_HEIGHT,
@@ -409,6 +464,35 @@ export default function App() {
             startInLoadingState={true}
             allowsBackForwardNavigationGestures={true}
             contentInsetAdjustmentBehavior="never"
+            onLoadStart={(e) => {
+              if (__DEV__) {
+                console.log("[WebView onLoadStart]", e.nativeEvent.url);
+              }
+            }}
+            onError={(e) => {
+              if (__DEV__) {
+                const d = e.nativeEvent as {
+                  description?: string;
+                  domain?: string;
+                  code?: number;
+                };
+                console.warn(
+                  "[WebView onError]",
+                  d.description ?? d,
+                  d.domain,
+                  d.code,
+                );
+              }
+            }}
+            onHttpError={(e) => {
+              if (__DEV__) {
+                console.warn(
+                  "[WebView onHttpError]",
+                  e.nativeEvent.statusCode,
+                  e.nativeEvent.url,
+                );
+              }
+            }}
             onLoadEnd={onLoadEnd}
             injectedJavaScriptBeforeContentLoaded={`window.isNativeApp = true;`}
             applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}

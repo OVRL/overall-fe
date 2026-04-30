@@ -72,6 +72,10 @@ export function useNativeSocialLogin(webOrigin: string, options: Options) {
   const finishSocialPipeline = useCallback(
     async (provider: NativeSocialProvider, accessToken: string, userMe: unknown) => {
       const email = extractEmailFromUserMe(provider, userMe);
+      if (__DEV__) {
+        // Metro 터미널 / Xcode 콘솔에서 확인 (크롬 DevTools에는 안 붙음)
+        console.warn("[NativeSocial]", provider, "email?", Boolean(email), "userMe keys?", userMe && typeof userMe === "object" ? Object.keys(userMe as object).slice(0, 8) : userMe);
+      }
       const result = await completeNativeSocialLogin({
         webOrigin,
         provider,
@@ -79,6 +83,9 @@ export function useNativeSocialLogin(webOrigin: string, options: Options) {
         email,
         userMe,
       });
+      if (__DEV__) {
+        console.warn("[NativeSocial] completeNativeSocialLogin →", result.kind);
+      }
       if (result.kind === "ok") {
         onSessionReady();
         return;
@@ -147,7 +154,13 @@ export function useNativeSocialLogin(webOrigin: string, options: Options) {
       busyRef.current = true;
       try {
         if (provider === "kakao") {
+          if (__DEV__) {
+            console.warn("[NativeSocial] Kakao SDK login… webOrigin=", webOrigin);
+          }
           const token = await kakaoSdkLogin();
+          if (__DEV__) {
+            console.warn("[NativeSocial] Kakao token received, POST userme…");
+          }
           const userMe = await fetchUserMeViaWebRoutes(
             webOrigin,
             "kakao",

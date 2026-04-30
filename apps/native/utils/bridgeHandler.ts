@@ -6,6 +6,7 @@ import { Linking } from "react-native";
 import { BridgeMessage, BridgeResponse } from "../types/bridge";
 import type { NativeTopBarState } from "../types/nativeTopBar";
 import type { NativeWebChrome } from "../types/nativeChrome";
+import type { NativeSocialProvider } from "@/components/login/NativeSocialLoginScreen";
 import { handleGetLocation } from "./locationHandler";
 import { router } from "expo-router";
 import { CommonActions } from "@react-navigation/native";
@@ -24,6 +25,8 @@ export const handleBridgeMessage = async (
      * 미지정 시 기존처럼 `onSetNativeWebChrome(null)` 로 전체를 비운다.
      */
     onClearNativeWebChromeIfMode?: (mode: "global" | "topbar") => void;
+    /** WebView 내 소셜 버튼 → 네이티브 SDK/시스템 브라우저로 OAuth (구글 WebView 차단 대응) */
+    onStartNativeSocialLogin?: (provider: NativeSocialProvider) => void;
   }
 ) => {
   const { type, payload, reqId } = message;
@@ -166,6 +169,19 @@ export const handleBridgeMessage = async (
             showHamburger: payload.showHamburger !== false,
           },
         });
+        break;
+      }
+
+      case "START_NATIVE_SOCIAL_LOGIN": {
+        const p = payload?.provider;
+        if (p === "kakao" || p === "naver" || p === "google") {
+          options?.onStartNativeSocialLogin?.(p);
+        } else {
+          console.warn(
+            "[Bridge] START_NATIVE_SOCIAL_LOGIN: provider 필요 (kakao|naver|google)",
+            p,
+          );
+        }
         break;
       }
 

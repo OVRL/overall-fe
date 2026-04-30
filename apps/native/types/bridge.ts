@@ -9,7 +9,8 @@ export type BridgeActionType =
   | "ROUTE_CHANGE"
   | "SET_WEBVIEW_CHROME"
   | "SET_NATIVE_TOPBAR"
-  | "SET_NATIVE_GLOBAL_HEADER";
+  | "SET_NATIVE_GLOBAL_HEADER"
+  | "START_NATIVE_SOCIAL_LOGIN";
 
 export interface BridgePayload {
   url?: string;
@@ -31,6 +32,8 @@ export interface BridgePayload {
   rightDisabled?: boolean;
   /** 글로벌 헤더 전용 */
   showHamburger?: boolean;
+  /** START_NATIVE_SOCIAL_LOGIN */
+  provider?: "kakao" | "naver" | "google";
   [key: string]: any;
 }
 

@@ -136,11 +136,25 @@ export function shouldSyncCookiesFromWebView(
   }
 }
 
-/** 웹에서 로그아웃·세션 제거로 보이는 경로인지 */
-export function shouldClearNativeAuthFromNavigation(url: string): boolean {
+/**
+ * 웹에서 로그아웃·비로그인 랜딩으로 보일 때 네이티브 저장소·로그인 셸 동기화 여부.
+ * 반드시 **우리 웹 앱 origin** 일 때만 판별한다.
+ * (nid.naver.com 의 `/login/noauth/...` 처럼 외부 OAuth 페이지도 경로가 `/login` 으로 시작해 오탐하면 안 됨.)
+ */
+export function shouldClearNativeAuthFromNavigation(
+  url: string,
+  webAppOrigin: string,
+): boolean {
   try {
     const u = new URL(url);
+    const appOrigin = new URL(webAppOrigin).origin;
+    if (u.origin !== appOrigin) return false;
+
     const p = u.pathname;
+    // 네이티브 소셜 미가입 핸드오프: `/login/social` 등 제외
+    if (p.startsWith("/login/social")) return false;
+    if (p.startsWith("/privacy-consent")) return false;
+    if (p.startsWith("/social/")) return false;
     return (
       p.startsWith("/login") ||
       p.includes("auth/logout") ||
