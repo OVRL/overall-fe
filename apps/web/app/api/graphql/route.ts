@@ -11,6 +11,7 @@ const BACKEND_URL = env.BACKEND_URL;
 /**
  * 클라이언트 GraphQL 요청을 백엔드로 프록시하며,
  * 쿠키의 accessToken(또는 refreshToken 갱신 결과)을 Authorization 헤더로 붙입니다.
+ * 브라우저가 보낸 User-Agent를 그대로 넘겨 백엔드 디바이스 식별(UAParser 등)이 가능하게 합니다.
  * Relay fetchGraphQL이 이 경로로 요청하면 인증이 적용됩니다.
  */
 export async function POST(request: NextRequest) {
@@ -35,11 +36,15 @@ export async function POST(request: NextRequest) {
   const isMultipart = contentType.includes("multipart/form-data");
 
   const body = isMultipart ? await request.blob() : await request.text();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     ...(isMultipart ? { "Content-Type": contentType } : { "Content-Type": "application/json" }),
   };
+  const userAgent = request.headers.get("user-agent");
+  if (userAgent) {
+    headers["User-Agent"] = userAgent;
+  }
   if (token) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const backendResponse = await fetch(`${BACKEND_URL}/graphql`, {
