@@ -7,11 +7,8 @@ export function useSocialLoginMutation() {
       socialLogin(input: $input) {
         id
         email
-        tokens {
-          id
-          accessToken
-          refreshToken
-        }
+        accessToken
+        refreshToken
       }
     }
   `);

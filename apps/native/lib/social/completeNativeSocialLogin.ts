@@ -5,16 +5,14 @@ import { isSocialLoginNotRegisteredMessage } from "./isSocialLoginNotRegisteredM
 import type { SocialOauthSnapshotPayload } from "./nativeSocialTypes";
 import { SOCIAL_OAUTH_SNAPSHOT_STORAGE_KEY } from "./nativeSocialTypes";
 
+/** 웹 `useSocialLoginMutation`과 동일 필드 — 응답은 `LoginResponseModel`. */
 const SOCIAL_LOGIN_MUTATION = `
   mutation NativeSocialLogin($input: SocialLoginInput!) {
     socialLogin(input: $input) {
       id
       email
-      tokens {
-        id
-        accessToken
-        refreshToken
-      }
+      accessToken
+      refreshToken
     }
   }
 `;
@@ -31,24 +29,6 @@ type SocialLoginResult =
   | { kind: "ok" }
   | { kind: "not_registered"; snapshot: SocialOauthSnapshotPayload }
   | { kind: "error"; message: string };
-
-function pickLatestAppToken(
-  tokens: Array<{
-    id?: number | null;
-    accessToken?: string | null;
-    refreshToken?: string | null;
-  } | null | undefined>,
-): { accessToken: string; refreshToken?: string | null } | null {
-  const withAt = (tokens ?? []).filter(
-    (t) => t?.accessToken && String(t.accessToken).length > 0,
-  ) as Array<{
-    id: number;
-    accessToken: string;
-    refreshToken?: string | null;
-  }>;
-  if (withAt.length === 0) return null;
-  return withAt.reduce((a, b) => (b.id > a.id ? b : a));
-}
 
 /** Relay 웹과 동일 입력으로 소셜 로그인 후 세션 저장 (미가입 시 스냅샷만 반환) */
 export async function completeNativeSocialLogin(params: {
@@ -86,11 +66,8 @@ export async function completeNativeSocialLogin(params: {
     data?: {
       socialLogin?: {
         id: string | number;
-        tokens?: Array<{
-          id: number;
-          accessToken?: string | null;
-          refreshToken?: string | null;
-        } | null>;
+        accessToken?: string | null;
+        refreshToken?: string | null;
       };
     };
     errors?: Array<{ message?: string }>;
@@ -114,18 +91,18 @@ export async function completeNativeSocialLogin(params: {
     return { kind: "error", message: firstErr };
   }
 
-  const user = raw.data?.socialLogin;
-  const appTok = user?.tokens
-    ? pickLatestAppToken(user.tokens)
-    : null;
-  if (!user || !appTok?.accessToken) {
+  const login = raw.data?.socialLogin;
+  const accessToken = login?.accessToken?.trim()
+    ? login.accessToken
+    : undefined;
+  if (!login?.id || !accessToken) {
     return { kind: "error", message: "로그인 토큰을 받지 못했습니다." };
   }
 
   await persistNativeAuthSession(webOrigin, {
-    accessToken: appTok.accessToken,
-    refreshToken: appTok.refreshToken,
-    userId: user.id,
+    accessToken,
+    refreshToken: login.refreshToken,
+    userId: login.id,
   });
 
   return { kind: "ok" };

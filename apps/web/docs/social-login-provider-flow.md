@@ -16,7 +16,7 @@
 | ④ 프로필 조회 | 같은 서버 로직이 그 토큰으로 **이메일이 포함된 프로필 API**를 호출. |
 | ⑤ 스냅샷 저장 | 콜백 **클라이언트**(`SocialCallbackAutoLogin`)가 `socialLogin` 직전에 `sessionStorage` 키 `overall_social_oauth_snapshot`에 `{ provider, accessToken, email, userMe, savedAt }` 저장(미가입 시 `/privacy-consent` 거친 뒤 `/onboarding`에서 프리필·잠금 동일). |
 | ⑥ 백엔드 로그인 | OAuth 교환에 성공하고 이메일이 있으면 **마운트 직후 자동**으로 Relay `socialLogin(input: { accessToken, email, provider })` 호출(별도 버튼 없음). |
-| ⑦ 앱 세션 | 성공 시 `UserModel.tokens`에서 앱용 JWT를 고르고 `POST /api/auth/set-session`으로 **httpOnly 쿠키** 설정 후 `/`로 이동. **미가입** 시 스냅샷 유지한 채 `/privacy-consent`로 이동 → 동의 후 `/onboarding`(회원가입 퍼널, lockedFields 동일). |
+| ⑦ 앱 세션 | 성공 시 `socialLogin` 응답(`LoginResponseModel`)의 `accessToken`·`refreshToken`으로 `POST /api/auth/set-session` 호출해 **httpOnly 쿠키** 설정 후 `/`로 이동. **미가입** 시 스냅샷 유지한 채 `/privacy-consent`로 이동 → 동의 후 `/onboarding`(회원가입 퍼널, lockedFields 동일). |
 
 추출 로직은 `lib/social/extractSocialEmail.ts`에 있습니다.
 
@@ -62,7 +62,7 @@
 
 ## 5. GraphQL `socialLogin` 및 보안 메모
 
-- 스키마: `SocialLoginInput { accessToken, email, provider }` → `UserModel!` (미가입 시 백엔드 예외 → 회원가입 유도).  
+- 스키마: `SocialLoginInput { accessToken, email, provider }` → `LoginResponseModel!` (미가입 시 백엔드 예외 → 회원가입 유도). 성공 시 앱 JWT는 응답 필드 `accessToken`·`refreshToken`에 직접 포함된다.  
 - Relay 뮤테이션은 `app/social/[provider]/callback/useSocialLoginMutation.tsx`에 정의.  
 - 미가입(예: `status=404`, 메시지: “가입되지 않은 사용자…”)이면 콜백 클라이언트가 **`/privacy-consent`** 로 이동한 뒤, 동의 후 **`/onboarding`** 에서 프리필·회원가입을 진행합니다. `registerUser` 성공 시에는 기존처럼 `POST /api/auth/set-session`으로 쿠키를 설정합니다.  
 - 레거시 백엔드 리다이렉트와 동일한 쿠키 정책은 `app/social/callback/route.ts`(쿼리로 토큰 전달 시) 및 `POST /api/auth/set-session`을 참고하면 됩니다. 스냅샷(`sessionStorage`)에는 후속 회원가입용으로 프로바이더 액세스 토큰이 포함되므로, 로그인 성공 시에는 제거합니다.  

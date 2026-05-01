@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d5900a94ce34447914ab82ed414e766a>>
+ * @generated SignedSource<<dfad9dd2741d531cd592779d1e3cb821>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,13 +20,10 @@ export type useSocialLoginMutation$variables = {
 };
 export type useSocialLoginMutation$data = {
   readonly socialLogin: {
+    readonly accessToken: string | null | undefined;
     readonly email: string;
     readonly id: number;
-    readonly tokens: ReadonlyArray<{
-      readonly accessToken: string | null | undefined;
-      readonly id: number;
-      readonly refreshToken: string | null | undefined;
-    }> | null | undefined;
+    readonly refreshToken: string | null | undefined;
   };
 };
 export type useSocialLoginMutation = {
@@ -42,14 +39,7 @@ var v0 = [
     "name": "input"
   }
 ],
-v1 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "id",
-  "storageKey": null
-},
-v2 = [
+v1 = [
   {
     "alias": null,
     "args": [
@@ -59,12 +49,18 @@ v2 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "UserModel",
+    "concreteType": "LoginResponseModel",
     "kind": "LinkedField",
     "name": "socialLogin",
     "plural": false,
     "selections": [
-      (v1/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "id",
+        "storageKey": null
+      },
       {
         "alias": null,
         "args": null,
@@ -75,27 +71,15 @@ v2 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "UserTokenModel",
-        "kind": "LinkedField",
-        "name": "tokens",
-        "plural": true,
-        "selections": [
-          (v1/*: any*/),
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "accessToken",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "refreshToken",
-            "storageKey": null
-          }
-        ],
+        "kind": "ScalarField",
+        "name": "accessToken",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "refreshToken",
         "storageKey": null
       }
     ],
@@ -108,7 +92,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "useSocialLoginMutation",
-    "selections": (v2/*: any*/),
+    "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -117,19 +101,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "useSocialLoginMutation",
-    "selections": (v2/*: any*/)
+    "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "07f88cc79a7626c24afdcc4df7abcc06",
+    "cacheID": "415e93b8df8aca0b759bd52eafa2967c",
     "id": null,
     "metadata": {},
     "name": "useSocialLoginMutation",
     "operationKind": "mutation",
-    "text": "mutation useSocialLoginMutation(\n  $input: SocialLoginInput!\n) {\n  socialLogin(input: $input) {\n    id\n    email\n    tokens {\n      id\n      accessToken\n      refreshToken\n    }\n  }\n}\n"
+    "text": "mutation useSocialLoginMutation(\n  $input: SocialLoginInput!\n) {\n  socialLogin(input: $input) {\n    id\n    email\n    accessToken\n    refreshToken\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4036c0abc0a7cd578e5ef7e0acfdd283";
+(node as any).hash = "ad78f986bdd06d54f882d364f6a021cd";
 
 export default node;

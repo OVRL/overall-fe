@@ -81,7 +81,7 @@ sequenceDiagram
   N->>B: HTML + SocialCallbackAutoLogin (클라이언트)
   B->>N: Relay socialLogin(accessToken, email, provider)
   N->>API: GraphQL socialLogin
-  API-->>B: User + 앱용 JWT(tokens)
+  API-->>B: LoginResponseModel(accessToken, refreshToken, id …)
   B->>N: POST /api/auth/set-session
   N-->>B: Set-Cookie accessToken, refreshToken, userId
   B->>B: location / (홈)

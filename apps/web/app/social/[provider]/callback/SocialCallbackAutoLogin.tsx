@@ -10,6 +10,13 @@ import {
 import { isSocialLoginNotRegisteredError } from "@/lib/social/isSocialLoginNotRegisteredError";
 import { useSocialLoginMutation } from "./useSocialLoginMutation";
 
+/** Relay `socialLogin` 선택 필드와 동일한 형태(LoginResponseModel 일부). */
+type SocialLoginRelayPayload = {
+  readonly id: number;
+  readonly accessToken: string | null | undefined;
+  readonly refreshToken: string | null | undefined;
+};
+
 type GraphQLProvider = "KAKAO" | "NAVER" | "GOOGLE";
 
 function toGraphQLProvider(provider: CallbackProvider): GraphQLProvider {
@@ -81,18 +88,9 @@ export function SocialCallbackAutoLogin({
       },
       onCompleted: (response) => {
         void (async () => {
-          const user = response.socialLogin;
-          const tokens = user.tokens ?? [];
-          const latest = tokens
-            .filter((t) => t?.accessToken)
-            .reduce<(typeof tokens)[number] | null>((acc, cur) => {
-              if (!cur) return acc;
-              if (!acc) return cur;
-              return cur.id > acc.id ? cur : acc;
-            }, null);
-
-          const at = latest?.accessToken ?? undefined;
-          const rt = latest?.refreshToken ?? undefined;
+          const login = response.socialLogin as unknown as SocialLoginRelayPayload;
+          const at = login.accessToken ?? undefined;
+          const rt = login.refreshToken ?? undefined;
 
           if (!at) {
             socialLoginStartedForAccessToken.delete(accessToken);
@@ -104,7 +102,7 @@ export function SocialCallbackAutoLogin({
             await applySessionFromTokens({
               accessToken: at,
               refreshToken: rt,
-              userId: user.id,
+              userId: login.id,
             });
             try {
               sessionStorage.removeItem(SOCIAL_OAUTH_SNAPSHOT_STORAGE_KEY);

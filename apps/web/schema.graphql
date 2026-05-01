@@ -495,10 +495,10 @@ type Mutation {
   saveMatchFormationDraft(input: SaveMatchFormationDraftInput!): MatchFormationModel!
 
   """
-  소셜 로그인을 진행합니다. 프론트엔드 SDK로 받은 이메일과 액세스 토큰을 전달하면 회원 검증 후 UserModel을 반환합니다.
-  tokens 필드를 요청하여 JWT 토큰을 조회할 수 있습니다. 회원이 아닐 경우 예외가 발생하여 회원가입으로 유도합니다.
+  소셜 로그인을 진행합니다. 프론트엔드 SDK로 받은 이메일과 액세스 토큰을 전달하면 회원 검증 후 JWT 토큰(Access Token,
+  Refresh Token)과 사용자 정보를 반환합니다. 회원이 아닐 경우 예외가 발생하여 회원가입으로 유도합니다.
   """
-  socialLogin(input: SocialLoginInput!): UserModel!
+  socialLogin(input: SocialLoginInput!): LoginResponseModel!
   updateMatch(input: UpdateMatchInput!): MatchModel!
   updateMatchAttendance(input: UpdateMatchAttendanceInput!): MatchAttendanceModel!
 
