@@ -21,7 +21,9 @@ export type BridgeActionType =
   | "OPEN_PHOTO_PICKER"
   | "SET_WEBVIEW_CHROME"
   | "SET_NATIVE_TOPBAR"
-  | "SET_NATIVE_GLOBAL_HEADER";
+  | "SET_NATIVE_GLOBAL_HEADER"
+  /** WebView 인앱에서 구글 OAuth 등 — 임베디드 WebView는 Google 정책상 차단되므로 네이티브 SDK/ASWebAuthenticationSession으로 위임 */
+  | "START_NATIVE_SOCIAL_LOGIN";
 
 export type WebViewChromeMode = "safe" | "fullscreen";
 

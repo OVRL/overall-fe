@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f04e9e952074d87ef642b909d6cd5e4d>>
+ * @generated SignedSource<<73e0003fe0cda9a31b61177b4c770a06>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,6 +18,7 @@ export type UpdateUserInput = {
   favoritePlayer?: string | null | undefined;
   foot?: Foot | null | undefined;
   gender?: Gender | null | undefined;
+  height?: number | null | undefined;
   id: number;
   mainPosition?: Position | null | undefined;
   name?: string | null | undefined;
@@ -26,6 +27,7 @@ export type UpdateUserInput = {
   preferredNumber?: number | null | undefined;
   provider?: string | null | undefined;
   subPositions?: ReadonlyArray<Position> | null | undefined;
+  weight?: number | null | undefined;
 };
 export type useModifyUserMutation$variables = {
   input: UpdateUserInput;

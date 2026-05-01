@@ -13,6 +13,28 @@ export const PLAYER_PLACEHOLDER_IMAGES = [
   "/images/player/img_player_9.webp",
 ] as const;
 
+const PLACEHOLDER_PATH_SET = new Set<string>(PLAYER_PLACEHOLDER_IMAGES);
+
+/**
+ * `next/image`가 동일 WebP를 다시 q=75로 인코딩하지 않도록 구분할 때 사용합니다.
+ * (공식 문서: 이미 최종 포맷·손실 압축된 에셋은 `unoptimized`가 적합한 경우가 있음)
+ */
+export function isPlayerPlaceholderWebpSrc(src: string): boolean {
+  const raw = src.trim();
+  if (!raw) return false;
+  let path = raw;
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    try {
+      path = new URL(raw).pathname;
+    } catch {
+      return false;
+    }
+  } else {
+    path = raw.split("?")[0] ?? raw;
+  }
+  return PLACEHOLDER_PATH_SET.has(path);
+}
+
 function djb2Hash(str: string): number {
   let hash = 5381;
   for (let i = 0; i < str.length; i += 1) {

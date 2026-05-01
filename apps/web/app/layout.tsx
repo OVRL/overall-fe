@@ -25,6 +25,7 @@ import { errorMessageRequiresSessionClear } from "@/lib/auth/graphqlSessionClear
 import { redirect } from "next/navigation";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { isNativeWebViewUserAgent } from "@/lib/native/webViewUserAgent";
+import { KakaoSdkScript } from "@/components/KakaoSdkScript";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -207,6 +208,7 @@ export default async function RootLayout({
           src={`https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${env.NEXT_PUBLIC_NAVER_CLIENT_ID}&submodules=geocoder`}
           strategy="lazyOnload"
         />
+        <KakaoSdkScript />
         <SpeedInsights />
       </body>
     </html>

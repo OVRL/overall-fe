@@ -28,8 +28,24 @@ export const onboardingSchema = z.object({
 
 export type OnboardingState = z.infer<typeof onboardingSchema>;
 
+export type OnboardingLockedFields = Partial<
+  Record<
+    | "email"
+    | "name"
+    | "phone"
+    | "birthDate"
+    | "gender"
+    | "provider",
+    boolean
+  >
+>;
+
+export type OnboardingFunnelMode = "onboarding" | "social-register";
+
 export interface OnboardingStepProps {
   onNext: () => void;
   data: Partial<OnboardingState>;
   onDataChange: Dispatch<SetStateAction<Partial<OnboardingState>>>;
+  lockedFields?: OnboardingLockedFields;
+  mode?: OnboardingFunnelMode;
 }

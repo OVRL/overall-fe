@@ -159,10 +159,11 @@ const PlayerDetailModal = ({ player }: PlayerDetailModalProps) => {
       <Button
         onClick={() => {
           closeAllModals(); // hideModal() 대신 모든 모달 닫기 (팀 데이터 구조상 다른 팝업이 겹쳐있을 수 있으므로 확실히 닫기 위함)
-          const imgParam = encodeURIComponent(
-            player.image || "/images/ovr.png",
-          );
-          router.push(`/player/${player.name}?imgUrl=${imgParam}`);
+          const resolvedImg = player.image || player.imageFallbackUrl || "";
+          const params = new URLSearchParams();
+          if (resolvedImg) params.set("imgUrl", encodeURIComponent(resolvedImg));
+          if (player.backNumber != null) params.set("backNumber", String(player.backNumber));
+          router.push(`/player/${encodeURIComponent(player.name)}?${params.toString()}`);
         }}
         variant="line"
         size="m"

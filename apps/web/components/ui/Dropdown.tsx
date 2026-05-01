@@ -206,20 +206,23 @@ const Dropdown = ({
     }
   };
 
+  // 1. 열렸을 때 현재 선택된 항목으로 스크롤 (또는 키보드 조작 시)
   useEffect(() => {
-    if (
-      isOpen &&
-      focusedIndex >= 0 &&
-      listRef.current &&
-      isKeyboardActionRef.current
-    ) {
-      const list = listRef.current;
-      const element = list.children[focusedIndex] as HTMLElement;
-      if (element) {
-        element.scrollIntoView({ block: "nearest" });
+    if (isOpen && focusedIndex >= 0 && listRef.current) {
+      const isInitialOpen = !isKeyboardActionRef.current && focusedIndex === options.findIndex((opt) => opt.value === value);
+
+      if (isKeyboardActionRef.current || isInitialOpen) {
+        const list = listRef.current;
+        const element = list.children[focusedIndex] as HTMLElement;
+        if (element) {
+          // 애니메이션 도중이나 렌더링 직후에는 정확한 위치가 아닐 수 있으므로 rAF나 setTimeout 활용
+          requestAnimationFrame(() => {
+            element.scrollIntoView({ block: "nearest" });
+          });
+        }
       }
     }
-  }, [focusedIndex, isOpen]);
+  }, [focusedIndex, isOpen, value, options]);
 
   const listBoxClass =
     "flex flex-col gap-1 p-2 overflow-y-auto custom-scrollbar overscroll-contain";

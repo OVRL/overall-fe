@@ -12,13 +12,27 @@ export const env = createEnv({
     DEV_ACCESS_TOKEN: z.string().optional(),
     /** 개발 시 refreshToken fallback (선택). DEV_ACCESS_TOKEN 만으로도 대부분 동작. */
     DEV_REFRESH_TOKEN: z.string().optional(),
+
+    /** 카카오 로그인 REST API 키(서버 전용). */
+    KAKAO_REST_API_KEY: z.string(),
+    /** 카카오 앱 설정에서 Client Secret을 사용하는 경우에만 설정(서버 전용). */
+    KAKAO_CLIENT_SECRET: z.string().optional(),
+    /** 구글 OAuth 웹 클라이언트 시크릿. PKCE만 쓸 때는 비워도 됩니다(설정 시 토큰 교환에 포함). */
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_API_URL: z.string(),
     NEXT_PUBLIC_BACKEND_URL: z.string().url(),
     NEXT_PUBLIC_NAVER_CLIENT_ID: z.string(),
+    /** 네이버 로그인 authorize URL용 Client ID (공개 가능). 검색/NCP 지도용 NEXT_PUBLIC_NAVER_CLIENT_ID와 구분 */
+    NEXT_PUBLIC_NAVER_LOGIN_CLIENT_ID: z.string(),
     /** S3/CloudFront 등 정적 이미지 베이스 (슬래시 없이, 예: https://xxxx.cloudfront.net) */
     NEXT_PUBLIC_ASSET_CDN_ORIGIN: z.string().url(),
+
+    /** 카카오 JavaScript 키(클라이언트 노출). */
+    NEXT_PUBLIC_KAKAO_JS_KEY: z.string(),
+    /** 구글 OAuth 클라이언트 ID (공개 가능). authorize·토큰 교환에 동일 클라이언트 사용. */
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string(),
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
@@ -26,10 +40,19 @@ export const env = createEnv({
     BACKEND_URL: process.env.BACKEND_URL,
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
     NEXT_PUBLIC_NAVER_CLIENT_ID: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
+    NEXT_PUBLIC_NAVER_LOGIN_CLIENT_ID:
+      process.env.NEXT_PUBLIC_NAVER_LOGIN_CLIENT_ID,
     NEXT_PUBLIC_ASSET_CDN_ORIGIN: process.env.NEXT_PUBLIC_ASSET_CDN_ORIGIN,
     NAVER_CLIENT_ID: process.env.NAVER_CLIENT_ID,
     NAVER_CLIENT_SECRET: process.env.NAVER_CLIENT_SECRET,
     DEV_ACCESS_TOKEN: process.env.DEV_ACCESS_TOKEN,
     DEV_REFRESH_TOKEN: process.env.DEV_REFRESH_TOKEN,
+
+    KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
+    KAKAO_CLIENT_SECRET: process.env.KAKAO_CLIENT_SECRET,
+    NEXT_PUBLIC_KAKAO_JS_KEY: process.env.NEXT_PUBLIC_KAKAO_JS_KEY,
+
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   },
 });

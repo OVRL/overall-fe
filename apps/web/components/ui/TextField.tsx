@@ -30,6 +30,12 @@ export interface TextFieldProps
 const boxedControlClass =
   "w-full rounded-xl border border-gray-1000 bg-gray-1100 px-4 py-3 text-base text-gray-300 placeholder:text-gray-500 outline-none focus-visible:ring-2 focus-visible:ring-Fill_AccentPrimary/40";
 
+const readOnlyInputClass =
+  "cursor-default text-Label-Secondary selection:bg-Fill_Secondary/40";
+
+const readOnlyBoxedExtraClass =
+  "border-Fill_Secondary bg-gray-1200 focus-visible:ring-Fill_Tertiary/30";
+
 const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(
   function TextField(props, ref) {
     const {
@@ -47,6 +53,7 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
       required = false,
       multiline = false,
       rows = 4,
+      readOnly,
       ...rest
     } = props;
 
@@ -58,7 +65,13 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
     const controlPaddingForClear = onClear && value ? "pr-10" : "";
 
     const labelEl = (
-      <label htmlFor={id} className="text-sm font-semibold text-Label-Primary">
+      <label
+        htmlFor={id}
+        className={cn(
+          "text-sm font-semibold",
+          readOnly ? "text-Label-Secondary" : "text-Label-Primary",
+        )}
+      >
         {label}
         {required ? (
           <span className="ml-0.5 text-Fill_Error" aria-hidden>
@@ -98,15 +111,18 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
                 onBlur={() => setIsFocused(false)}
                 aria-invalid={!!errorMessage}
                 aria-describedby={errorMessage ? errorId : undefined}
+                readOnly={readOnly}
                 className={cn(
                   boxedControlClass,
                   "min-h-31 resize-y",
                   leftIcon && "pl-12",
                   controlPaddingForClear,
+                  readOnly && readOnlyInputClass,
+                  readOnly && readOnlyBoxedExtraClass,
                 )}
                 {...(rest as Omit<
                   ComponentProps<"textarea">,
-                  "id" | "value" | "onChange" | "rows" | "className"
+                  "id" | "value" | "onChange" | "rows" | "className" | "readOnly"
                 >)}
               />
             ) : (
@@ -118,6 +134,7 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
                 onChange={onChange}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
+                readOnly={readOnly}
                 aria-invalid={!!errorMessage}
                 aria-describedby={errorMessage ? errorId : undefined}
                 className={cn(
@@ -125,6 +142,8 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
                   "h-12",
                   leftIcon && "pl-12",
                   controlPaddingForClear,
+                  readOnly && readOnlyInputClass,
+                  readOnly && readOnlyBoxedExtraClass,
                   type === "number" &&
                     "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                 )}
@@ -167,7 +186,7 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
             showBorderBottom && "border-b",
             showBorderBottom && errorMessage
               ? "border-Fill_Error"
-              : showBorderBottom && isFocused
+              : showBorderBottom && isFocused && !readOnly
                 ? "border-white"
                 : showBorderBottom
                   ? "border-Fill_Tertiary"
@@ -191,10 +210,14 @@ const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldPr
             onChange={onChange}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            readOnly={readOnly}
             aria-invalid={!!errorMessage}
             aria-describedby={errorMessage ? errorId : undefined}
             className={cn(
-              "flex-1 w-full bg-transparent text-base text-Label-Primary outline-none placeholder:text-Label-Tertiary",
+              "flex-1 w-full bg-transparent text-base outline-none placeholder:text-Label-Tertiary",
+              readOnly
+                ? readOnlyInputClass
+                : "text-Label-Primary",
               onClear && value ? "pr-8" : "",
               type === "number" &&
                 "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",

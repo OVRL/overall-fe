@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent, useEffect } from "react";
 import Footer from "@/components/ui/Footer";
 import { CATEGORY_LABELS, type InquiryCategory } from "@/lib/inquiry-store";
 import { toast } from "sonner";
@@ -9,6 +9,29 @@ const categories = Object.entries(CATEGORY_LABELS) as [
   InquiryCategory,
   string,
 ][];
+
+// 연락처 자동 포맷: 숫자만 추출 → 010-XXXX-XXXX
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function isPhoneComplete(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length === 10 || digits.length === 11;
+}
+
+function CheckIcon() {
+  return (
+    <svg className="h-3 w-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+const EMAIL_DOMAINS = ["naver.com", "gmail.com", "daum.net", "kakao.com", "hanmail.net", "nate.com", "outlook.com"];
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -21,8 +44,50 @@ export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // 이메일 자동완성 상태
+  const [showEmailSuggest, setShowEmailSuggest] = useState(false);
+  const [suggestIndex, setSuggestIndex] = useState(0);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const suggestRef = useRef<HTMLDivElement>(null);
+
   const canSubmit =
     name.trim() && email.trim() && title.trim() && content.trim() && agreed;
+
+  const filteredDomains = email.includes("@") 
+    ? EMAIL_DOMAINS.filter(d => d.startsWith(email.split("@")[1]))
+    : [];
+
+  useEffect(() => {
+    if (email.includes("@") && filteredDomains.length > 0) {
+      setShowEmailSuggest(true);
+    } else {
+      setShowEmailSuggest(false);
+    }
+  }, [email, filteredDomains.length]);
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent) => {
+    if (!showEmailSuggest) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSuggestIndex(prev => (prev + 1) % filteredDomains.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSuggestIndex(prev => (prev - 1 + filteredDomains.length) % filteredDomains.length);
+    } else if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      selectDomain(filteredDomains[suggestIndex]);
+    } else if (e.key === "Escape") {
+      setShowEmailSuggest(false);
+    }
+  };
+
+  const selectDomain = (domain: string) => {
+    const [prefix] = email.split("@");
+    setEmail(`${prefix}@${domain}`);
+    setShowEmailSuggest(false);
+    setSuggestIndex(0);
+  };
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -152,14 +217,34 @@ export default function ContactPage() {
               >
                 연락처
               </label>
-              <input
-                id="contact-phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="010-0000-0000"
-                className="rounded-xl border border-gray-900 bg-surface-secondary px-4 py-3 text-sm text-Label-Primary placeholder:text-gray-700 transition-colors focus:border-green-600 focus:outline-none"
-              />
+              <div className="relative">
+                <input
+                  id="contact-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  placeholder="010-0000-0000"
+                  maxLength={13}
+                  className={`w-full rounded-xl border bg-surface-secondary px-4 py-3 text-sm text-Label-Primary placeholder:text-gray-700 transition-colors focus:outline-none ${
+                    phone && !isPhoneComplete(phone)
+                      ? "border-red-800 focus:border-red-600"
+                      : "border-gray-900 focus:border-green-600"
+                  }`}
+                />
+                {phone && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isPhoneComplete(phone) ? (
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600">
+                        <CheckIcon />
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-red-500 font-bold">
+                        {11 - phone.replace(/\D/g, "").length}자리 남음
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </fieldset>
 
             {/* 이메일 */}
@@ -170,14 +255,43 @@ export default function ContactPage() {
               >
                 이메일 <span className="text-red-400">*</span>
               </label>
-              <input
-                id="contact-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@email.com"
-                className="rounded-xl border border-gray-900 bg-surface-secondary px-4 py-3 text-sm text-Label-Primary placeholder:text-gray-700 transition-colors focus:border-green-600 focus:outline-none"
-              />
+              <div className="relative">
+                <input
+                  ref={emailInputRef}
+                  id="contact-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleEmailKeyDown}
+                  onBlur={() => setTimeout(() => setShowEmailSuggest(false), 200)}
+                  placeholder="example@email.com"
+                  autoComplete="off"
+                  className="w-full rounded-xl border border-gray-900 bg-surface-secondary px-4 py-3 text-sm text-Label-Primary placeholder:text-gray-700 transition-colors focus:border-green-600 focus:outline-none"
+                />
+                {showEmailSuggest && (
+                  <div 
+                    ref={suggestRef}
+                    className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border border-gray-800 bg-surface-secondary shadow-2xl"
+                  >
+                    {filteredDomains.map((domain, idx) => (
+                      <button
+                        key={domain}
+                        type="button"
+                        onClick={() => selectDomain(domain)}
+                        onMouseEnter={() => setSuggestIndex(idx)}
+                        className={`flex w-full items-center px-4 py-3 text-left text-sm transition-colors ${
+                          idx === suggestIndex ? "bg-green-600/10 text-green-500" : "text-Label-Secondary hover:bg-gray-900"
+                        }`}
+                      >
+                        <span className="truncate">
+                          <span className="text-Label-Primary">{email.split("@")[0]}</span>
+                          <span className="opacity-60">@{domain}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </fieldset>
 
             {/* 문의 유형 */}
@@ -188,20 +302,27 @@ export default function ContactPage() {
               >
                 문의 유형
               </label>
-              <select
-                id="contact-category"
-                value={category}
-                onChange={(e) =>
-                  setCategory(e.target.value as InquiryCategory)
-                }
-                className="rounded-xl border border-gray-900 bg-surface-secondary px-4 py-3 text-sm text-Label-Primary transition-colors focus:border-green-600 focus:outline-none appearance-none"
-              >
-                {categories.map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  id="contact-category"
+                  value={category}
+                  onChange={(e) =>
+                    setCategory(e.target.value as InquiryCategory)
+                  }
+                  className="w-full rounded-xl border border-gray-900 bg-surface-secondary px-4 py-3 text-sm text-Label-Primary transition-colors focus:border-green-600 focus:outline-none appearance-none cursor-pointer"
+                >
+                  {categories.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </fieldset>
 
             {/* 제목 */}

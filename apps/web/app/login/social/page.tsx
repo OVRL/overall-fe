@@ -1,9 +1,14 @@
+import { Suspense } from "react";
 import SocialButtons from "@/components/ui/SocialButtons";
 import LoginLogo from "@/components/login/LoginLogo";
+import { SocialOAuthCallbackToast } from "./SocialOAuthCallbackToast";
 
 export default function LoginSocialPage() {
   return (
     <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
+      <Suspense fallback={null}>
+        <SocialOAuthCallbackToast />
+      </Suspense>
       <div className="absolute inset-0 z-0 flex items-end justify-center">
         <div className="absolute inset-0 bg-linear-to-br from-dark-olive/40 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-linear-to-b from-black/70 via-black/50 to-black/30" />

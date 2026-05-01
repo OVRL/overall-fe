@@ -13,6 +13,12 @@ interface RefreshResponse {
 
 const BACKEND_URL = env.BACKEND_URL;
 
+function maskToken(token: string): string {
+  if (!token) return "";
+  if (token.length <= 16) return token;
+  return `${token.slice(0, 8)}…${token.slice(-6)}`;
+}
+
 /**
  * refreshToken으로 새 accessToken(및 refreshToken) 발급.
  * proxy 및 API 라우트에서 공통 사용.
@@ -48,7 +54,7 @@ export async function refreshAccessToken(
       data.errors.length > 0
     ) {
       console.error("Token refresh GraphQL errors:", data.errors);
-      console.log("이 때의 RefreshToken:", refreshToken);
+      console.log("이 때의 RefreshToken(마스킹):", maskToken(refreshToken));
 
       return null;
     }

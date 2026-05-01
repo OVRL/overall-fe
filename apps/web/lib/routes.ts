@@ -1,6 +1,6 @@
 /**
  * 비로그인 사용자 전용. 로그인 상태로 접근하면 /(앱 루트)로 보냄.
- * (privacy-policy / privacy-consent 는 로그인 여부와 관계없이 또는 로그인 필수이므로 여기 넣지 않음)
+ * (privacy-policy·privacy-consent·onboarding 등은 `PUBLIC_ROUTES` — 비로그인 동선 포함)
  */
 export const GUEST_ONLY_ROUTES = [
   /^\/login$/,
@@ -10,14 +10,16 @@ export const GUEST_ONLY_ROUTES = [
 
 /**
  * 비로그인도 접근 가능. 로그인해도 접근 가능(isPrivate 아님).
- * privacy-consent 는 여기 없음 → Private → 토큰 필요(소셜 pending 동의 플로우).
+ * privacy-consent: 소셜 미가입 시 콜백에서 토큰 없이 동의만 받은 뒤 온보딩으로 보내기 위해 공개.
  */
 export const PUBLIC_ROUTES = [
   /^\/calculation(\/.*)?$/,
-  /^\/player(\/.*)?$/,
   /^\/privacy-policy(\/.*)?$/,
   /^\/terms(\/.*)?$/,
   /^\/marketing-notice(\/.*)?$/,
+  /^\/privacy-consent(\/.*)?$/,
+  /^\/onboarding(\/.*)?$/, // 소셜 미가입 사용자 회원가입 퍼널(소셜 스냅샷이 있으면 social-register 모드)
+  /^\/social\/[^/]+\/callback(\/.*)?$/, // FE 소셜 콜백(코드 수신 등): 비로그인 접근 허용
 ];
 
 const TEAM_MANAGEMENT_PATH = /^\/team-management(\/.*)?$/;
@@ -61,14 +63,14 @@ export function isLoginOnlyWithoutTeamPath(pathname: string): boolean {
 /**
  * 팀 멤버십을 layout에서 요구하지 않는 private 페이지 패턴(문서·검색용).
  * TEAM_REQUIRED가 아니므로 팀 미소속이라도 이 경로에 머물 수 있음(공개는 아님).
- * pending·약관 동의 등은 각 페이지/가드에서 별도 처리.
+ *
+ * `privacy-consent`는 비로그인 소셜 가입 동선용으로 `PUBLIC_ROUTES`에 있음(이 목록에는 미포함).
  *
  * `/onboarding`은 팀 조건과 별개로 pending 등 **플로우 전용**이라 이 목록에 넣지 않음.
  */
 export const LOGIN_ONLY_WITHOUT_TEAM_ROUTES: RegExp[] = [
   /^\/create-team(\/.*)?$/,
   /^\/join-team(\/.*)?$/,
-  /^\/privacy-consent(\/.*)?$/,
   /^\/mom(\/.*)?$/,
   /^\/profile(\/.*)?$/,
 ];

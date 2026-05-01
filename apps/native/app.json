@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "ovr-log",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -41,6 +41,44 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-font",
+        {
+          "ios": {
+            "fonts": [
+              "./assets/fonts/Pretendard-Regular.otf",
+              "./assets/fonts/Pretendard-Medium.otf",
+              "./assets/fonts/Pretendard-SemiBold.otf",
+              "./assets/fonts/Pretendard-Bold.otf"
+            ]
+          },
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Pretendard",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Pretendard-Regular.otf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./assets/fonts/Pretendard-Medium.otf",
+                    "weight": 500
+                  },
+                  {
+                    "path": "./assets/fonts/Pretendard-SemiBold.otf",
+                    "weight": 600
+                  },
+                  {
+                    "path": "./assets/fonts/Pretendard-Bold.otf",
+                    "weight": 700
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       "expo-notifications",
       [
         "expo-location",
@@ -54,9 +92,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#131312",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#131312"
           }
         }
       ],
@@ -73,6 +111,18 @@
         {
           "photosPermission": "사진을 선택하려면 사진 라이브러리 접근이 필요합니다."
         }
+      ],
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          "kakaoAppKey": "42531423b6e6bd15d5806708e81c28c6"
+        }
+      ],
+      [
+        "@react-native-seoul/naver-login",
+        {
+          "urlScheme": "ovr-log"
+        }
       ]
     ],
     "experiments": {
@@ -85,7 +135,15 @@
       "eas": {
         "projectId": "78f68efa-aa19-4a71-8850-141659221689"
       },
-      "webOrigin": "https://ovr-log.com"
+      "webOrigin": "https://ovr-log.com",
+      "nativeSocialLogin": {
+        "kakaoNativeAppKey": "42531423b6e6bd15d5806708e81c28c6",
+        "naverConsumerKey": "HbhJjofPRxpTpWwynMuK",
+        "naverConsumerSecret": "bGpccE3y84",
+        "naverServiceUrlSchemeIOS": "ovr-log",
+        "googleIosClientId": "451258070537-bdebj5st7hiv7u78ku5gqk2s00pu0krj.apps.googleusercontent.com",
+        "googleAndroidClientId": "451258070537-757me8au90u9i557qg06h1ss85bphhul.apps.googleusercontent.com"
+      }
     }
   }
 }
