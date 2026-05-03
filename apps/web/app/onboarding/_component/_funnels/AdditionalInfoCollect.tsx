@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import { Button } from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import { cn } from "@/lib/utils";
 import TextField from "@/components/ui/TextField";
 import SelectMainFoot from "../SelectMainFoot";
@@ -370,22 +370,20 @@ const AdditionalInfoCollect = ({
         </div>
       </div>
       <div className="flex flex-col gap-y-4">
-        <Button
+        <PendingActionButton
           variant="primary"
           size="xl"
           onClick={handleComplete}
-          disabled={!isFormFilled || inFlight}
+          disabled={!isFormFilled}
+          pending={inFlight}
+          pendingLabel="저장 중입니다."
           className={cn(
             "w-full transition-colors",
             !isFormFilled && "bg-gray-900 text-Label-Tertiary",
           )}
         >
-          {inFlight ? (
-            <LoadingSpinner label="저장 중입니다." size="sm" />
-          ) : (
-            "완료하기"
-          )}
-        </Button>
+          완료하기
+        </PendingActionButton>
         <Button
           variant="line"
           size="xl"

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import useModal from "@/hooks/useModal";
 import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
 import { toast } from "@/lib/toast";
@@ -165,21 +165,18 @@ export function TeamInfoModalJoinFooter({
     <div className={cn("flex w-full gap-3 pt-1", className)}>
       {!isPending ? (
         <>
-          <Button
+          <PendingActionButton
             type="button"
             variant="primary"
             size="xl"
             className="flex-1 text-Label-Fixed_black"
             disabled={busy}
-            aria-busy={isRequestInFlight}
+            pending={isRequestInFlight}
+            pendingLabel="가입 신청 처리 중"
             onClick={handleRequestJoin}
           >
-            {isRequestInFlight ? (
-              <LoadingSpinner label="가입 신청 처리 중" size="sm" />
-            ) : (
-              "가입 신청"
-            )}
-          </Button>
+            가입 신청
+          </PendingActionButton>
           <Button
             type="button"
             variant="ghost"
@@ -203,21 +200,18 @@ export function TeamInfoModalJoinFooter({
           >
             승인 대기중
           </Button>
-          <Button
+          <PendingActionButton
             type="button"
             variant="ghost"
             size="xl"
             className="flex-1"
             disabled={busy}
-            aria-busy={isCancelInFlight}
+            pending={isCancelInFlight}
+            pendingLabel="가입 취소 처리 중"
             onClick={handleCancelJoin}
           >
-            {isCancelInFlight ? (
-              <LoadingSpinner label="가입 취소 처리 중" size="sm" />
-            ) : (
-              "가입 취소"
-            )}
-          </Button>
+            가입 취소
+          </PendingActionButton>
         </>
       )}
     </div>

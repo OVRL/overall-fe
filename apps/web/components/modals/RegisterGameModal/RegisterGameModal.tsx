@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { useWatch, type FieldErrors } from "react-hook-form";
 import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import ModalLayout from "../ModalLayout";
 import ModalLoadingFallback from "../ModalLoadingFallback";
 import useModal from "@/hooks/useModal";
@@ -135,19 +135,16 @@ function RegisterGameFormContent() {
               >
                 취소
               </Button>
-              <Button
+              <PendingActionButton
                 type="submit"
                 variant="primary"
                 size="xl"
                 className="flex-1 font-bold rounded-[4px]"
-                disabled={isInFlight}
+                pending={isInFlight}
+                pendingLabel="등록 중"
               >
-                {isInFlight ? (
-                  <LoadingSpinner label="등록 중" size="sm" />
-                ) : (
-                  "등록"
-                )}
-              </Button>
+                등록
+              </PendingActionButton>
             </div>
           </form>
         </div>

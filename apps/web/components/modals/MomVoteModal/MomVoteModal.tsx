@@ -4,8 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import type { momVoteModalQuery } from "@/__generated__/momVoteModalQuery.graphql";
 import ModalLayout from "@/components/modals/ModalLayout";
-import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import useModal from "@/hooks/useModal";
 import { useUserId } from "@/hooks/useUserId";
 import { getGraphQLErrorMessage } from "@/lib/relay/getGraphQLErrorMessage";
@@ -242,7 +241,7 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
           )}
         </section>
 
-        <Button
+        <PendingActionButton
           variant="primary"
           size="xl"
           className={cn(
@@ -251,16 +250,11 @@ function MomVoteModalLoaded({ matchId, teamId }: MomVoteModalProps) {
           )}
           disabled={primaryDisabled}
           onClick={onPrimaryClick}
-          aria-busy={isMutating}
+          pending={isMutating}
+          pendingLabel="MOM 투표 처리 중"
         >
-          {isMutating ? (
-            <LoadingSpinner label="MOM 투표 처리 중" size="sm" />
-          ) : isRevoteLockedView ? (
-            "재투표하기"
-          ) : (
-            "투표하기"
-          )}
-        </Button>
+          {isRevoteLockedView ? "재투표하기" : "투표하기"}
+        </PendingActionButton>
       </div>
     </ModalLayout>
   );

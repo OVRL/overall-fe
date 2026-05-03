@@ -7,8 +7,7 @@ import Header from "@/components/Header";
 import OnboardingTitle from "@/components/onboarding/OnboardingTitle";
 import backIcon from "@/public/icons/arrow_back.svg";
 import TextField from "@/components/ui/TextField";
-import { Button } from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import useModal from "@/hooks/useModal";
 import { cn } from "@/lib/utils";
 import { Controller } from "react-hook-form";
@@ -256,22 +255,20 @@ const CreateTeamWrapper = () => {
         </div>
 
         <div className="flex flex-col mt-auto pt-6">
-          <Button
+          <PendingActionButton
             type="submit"
             variant="primary"
             size="xl"
             disabled={!canSubmit}
+            pending={isInFlight}
+            pendingLabel="만들기 중입니다."
             className={cn(
               "w-full transition-colors",
               !canSubmit && "bg-gray-900 text-Label-Tertiary",
             )}
           >
-            {isInFlight ? (
-              <LoadingSpinner label="만들기 중입니다." size="sm" />
-            ) : (
-              "클럽 생성하기"
-            )}
-          </Button>
+            클럽 생성하기
+          </PendingActionButton>
         </div>
       </section>
     </form>

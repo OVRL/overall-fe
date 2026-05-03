@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 
 type PendingChoice = "ATTEND" | "ABSENT" | null;
 
@@ -50,36 +50,30 @@ export function AttendanceVoteChoiceButtons({
         </Button>
       ) : (
         <div className="flex gap-3 h-14">
-          <Button
+          <PendingActionButton
             variant="ghost"
             size="xl"
             className="flex-1"
             type="button"
             onClick={onAbsent}
             disabled={voteButtonsDisabled}
-            aria-busy={isInFlight && pendingVoteChoice === "ABSENT"}
+            pending={isInFlight && pendingVoteChoice === "ABSENT"}
+            pendingLabel="불참 투표 처리 중"
           >
-            {isInFlight && pendingVoteChoice === "ABSENT" ? (
-              <LoadingSpinner label="불참 투표 처리 중" size="sm" />
-            ) : (
-              "불참"
-            )}
-          </Button>
-          <Button
+            불참
+          </PendingActionButton>
+          <PendingActionButton
             variant="primary"
             size="xl"
             className="flex-1 bg-red-500 text-Label-Primary"
             type="button"
             onClick={onAttend}
             disabled={voteButtonsDisabled}
-            aria-busy={isInFlight && pendingVoteChoice === "ATTEND"}
+            pending={isInFlight && pendingVoteChoice === "ATTEND"}
+            pendingLabel="참석 투표 처리 중"
           >
-            {isInFlight && pendingVoteChoice === "ATTEND" ? (
-              <LoadingSpinner label="참석 투표 처리 중" size="sm" />
-            ) : (
-              "참석"
-            )}
-          </Button>
+            참석
+          </PendingActionButton>
         </div>
       )}
     </div>

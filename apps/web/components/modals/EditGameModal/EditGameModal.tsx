@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, Suspense } from "react";
 import { useWatch, type FieldErrors } from "react-hook-form";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import ModalLayout from "../ModalLayout";
 import ModalLoadingFallback from "../ModalLoadingFallback";
 import useModal from "@/hooks/useModal";
@@ -204,19 +204,16 @@ function EditGameFormContent({
             <MemoSection control={control} />
 
             <div className="flex gap-3 pt-2 pl-3">
-              <Button
+              <PendingActionButton
                 type="submit"
                 variant="primary"
                 size="xl"
                 className="flex-1"
-                disabled={isInFlight}
+                pending={isInFlight}
+                pendingLabel="수정 중"
               >
-                {isInFlight ? (
-                  <LoadingSpinner label="수정 중" size="sm" />
-                ) : (
-                  "수정"
-                )}
-              </Button>
+                수정
+              </PendingActionButton>
               <Button
                 type="button"
                 variant="ghost"

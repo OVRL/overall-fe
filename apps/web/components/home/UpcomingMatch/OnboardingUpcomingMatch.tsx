@@ -3,7 +3,7 @@
 import Image from "next/image";
 import directorImage from "@/public/images/director.webp";
 import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import { useInviteCodeForTeam } from "./useInviteCodeForTeam";
 
 type OnboardingUpcomingMatchProps = {
@@ -65,29 +65,31 @@ function OnboardingInviteCodeActionSlot({
       );
     case "loading":
       return (
-        <Button
+        <PendingActionButton
           variant="primary"
           size="m"
           type="button"
-          disabled
+          pending
+          pendingLabel="초대 코드를 불러오는 중"
           className={INVITE_ACTION_BUTTON_CLASS}
-          aria-busy="true"
         >
-          <LoadingSpinner label="초대 코드를 불러오는 중" size="sm" />
-        </Button>
+          {null}
+        </PendingActionButton>
       );
     case "create":
       return (
-        <Button
+        <PendingActionButton
           variant="primary"
           size="m"
           type="button"
           className={INVITE_ACTION_BUTTON_CLASS}
           onClick={action.onClick}
           disabled={action.disabled}
+          pending={action.disabled}
+          pendingLabel="초대 코드 만드는 중"
         >
           초대 코드 만들기
-        </Button>
+        </PendingActionButton>
       );
     case "copy":
       return (
