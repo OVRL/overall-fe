@@ -2,20 +2,20 @@
 
 import { buttonVariants } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import type { ProfileEditFoot } from "./types";
+import type { UserProfileEditFoot } from "./types";
 
 type Props = {
-  value: ProfileEditFoot;
-  onChange: (next: ProfileEditFoot) => void;
+  value: UserProfileEditFoot;
+  onChange: (next: UserProfileEditFoot) => void;
 };
 
-const OPTIONS: { key: ProfileEditFoot; label: string }[] = [
+const OPTIONS: { key: UserProfileEditFoot; label: string }[] = [
   { key: "B", label: "양발" },
   { key: "L", label: "왼발" },
   { key: "R", label: "오른발" },
 ];
 
-export default function ProfileEditFootToggle({ value, onChange }: Props) {
+export default function UserProfileEditFootToggle({ value, onChange }: Props) {
   return (
     <div className="flex w-full flex-col gap-y-2">
       <span className="text-sm font-semibold text-Label-Primary">주발</span>
@@ -24,7 +24,7 @@ export default function ProfileEditFootToggle({ value, onChange }: Props) {
           <label key={key} className="min-w-0 flex-1 cursor-pointer">
             <input
               type="radio"
-              name="profile-edit-foot"
+              name="user-profile-edit-foot"
               className="sr-only"
               checked={value === key}
               onChange={() => onChange(key)}

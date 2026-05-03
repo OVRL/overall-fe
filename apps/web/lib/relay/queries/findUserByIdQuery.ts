@@ -22,6 +22,16 @@ export const FindUserByIdQuery = graphql`
       preferredNumber
       provider
       subPositions
+      height
+      weight
+      region {
+        code
+        sidoName
+        siggName
+        name
+        dongName
+        riName
+      }
     }
   }
 `;

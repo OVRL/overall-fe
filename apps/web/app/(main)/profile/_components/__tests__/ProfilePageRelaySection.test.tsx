@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { SelectedTeamProvider } from "@/components/providers/SelectedTeamProvider";
-import type { ProfileTeamMemberRow } from "../../types/profileTeamMemberTypes";
 import ProfilePageRelaySection from "../ProfilePageRelaySection";
+import { useUserId } from "@/hooks/useUserId";
+import { useLazyLoadQuery } from "react-relay";
 
 jest.mock("@/hooks/useUserId", () => ({
   useUserId: jest.fn(),
@@ -25,39 +26,40 @@ jest.mock("react-relay", () => {
   };
 });
 
-jest.mock("@/components/charts/AttackContributionLineChart", () => ({
+// 하위 컴포넌트들을 모킹하여 Relay 데이터 복잡성을 피함
+jest.mock("../ProfileStats", () => ({
   __esModule: true,
-  default: () => <div data-testid="attack-line-chart" />,
+  default: () => <div data-testid="profile-stats">ProfileStats</div>,
 }));
 
-import { useLazyLoadQuery } from "react-relay";
-import { useUserId } from "@/hooks/useUserId";
+jest.mock("../TeamSelectButtonContainer", () => ({
+  __esModule: true,
+  default: ({ members }: any) => (
+    <div data-testid="team-select">
+      {members.map((m: any) => (
+        <span key={m.team.id}>{m.team.name}</span>
+      ))}
+    </div>
+  ),
+}));
+
+jest.mock("../SeasonIntegratedRecords", () => ({
+  __esModule: true,
+  default: () => <div data-testid="season-records">SeasonIntegratedRecords</div>,
+}));
+
+jest.mock("../AttackContributionSection", () => ({
+  __esModule: true,
+  default: () => <div data-testid="attack-section">AttackContributionSection</div>,
+}));
+
+jest.mock("../ProfileRevealSection", () => ({
+  __esModule: true,
+  default: ({ children }: any) => <div>{children}</div>,
+}));
 
 const mockUseUserId = useUserId as jest.MockedFunction<typeof useUserId>;
-const mockUseLazyLoadQuery = useLazyLoadQuery as jest.MockedFunction<
-  typeof useLazyLoadQuery
->;
-
-function makeMembers(): ProfileTeamMemberRow[] {
-  return [
-    {
-      team: { id: "TeamModel:1", name: "팀 하나", emblem: null },
-      user: { name: "김철수", region: { name: "서울" } },
-      profileImg: null,
-      joinedAt: "2023-06-01T00:00:00.000Z",
-      overall: {
-        ovr: 77,
-        appearances: 5,
-        goals: 2,
-        assists: 1,
-        keyPasses: 3,
-        cleanSheets: 0,
-        mom3: 1,
-        mom8: 0,
-      },
-    },
-  ] as unknown as ProfileTeamMemberRow[];
-}
+const mockUseLazyLoadQuery = useLazyLoadQuery as jest.MockedFunction<typeof useLazyLoadQuery>;
 
 describe("ProfilePageRelaySection", () => {
   beforeEach(() => {
@@ -66,16 +68,18 @@ describe("ProfilePageRelaySection", () => {
 
   it("userId가 null이면 아무것도 렌더링하지 않는다", () => {
     mockUseUserId.mockReturnValue(null);
-
     const { container } = render(<ProfilePageRelaySection />);
-
     expect(container.firstChild).toBeNull();
   });
 
-  it("Relay 데이터와 선택 팀에 맞춰 프로필 구역을 렌더링한다", () => {
+  it("Relay 데이터가 있을 때 하위 섹션들을 렌더링한다", () => {
     mockUseUserId.mockReturnValue(1);
     mockUseLazyLoadQuery.mockReturnValue({
-      findTeamMember: makeMembers(),
+      findTeamMember: [
+        {
+          team: { id: "TeamModel:1", name: "팀 하나", emblem: null },
+        },
+      ],
     });
 
     render(
@@ -84,14 +88,10 @@ describe("ProfilePageRelaySection", () => {
       </SelectedTeamProvider>,
     );
 
-    expect(screen.getByRole("radio", { name: /팀 하나/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "김철수" })).toBeInTheDocument();
-    expect(screen.getByText("77")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "시즌별 통합 기록" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "공격 기여도" }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("team-select")).toBeInTheDocument();
+    expect(screen.getByText("팀 하나")).toBeInTheDocument();
+    expect(screen.getByTestId("profile-stats")).toBeInTheDocument();
+    expect(screen.getByTestId("season-records")).toBeInTheDocument();
+    expect(screen.getByTestId("attack-section")).toBeInTheDocument();
   });
 });

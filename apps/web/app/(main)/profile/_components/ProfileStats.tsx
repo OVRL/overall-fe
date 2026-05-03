@@ -2,6 +2,8 @@ import React from "react";
 import StatCard from "./StatCard";
 import OvrCard from "./OvrCard";
 import PositionCard from "./PositionCard";
+import ImgPlayer from "@/components/ui/ImgPlayer";
+import { PendingActionButton } from "@/components/ui/PendingActionButton";
 import type { ProfileTeamMemberRow } from "../types/profileTeamMemberTypes";
 
 import whistleIcon from "@/public/icons/player-infos/whistle.svg";
@@ -11,14 +13,16 @@ import signpostIcon from "@/public/icons/player-infos/signpost.svg";
 import shieldIcon from "@/public/icons/player-infos/shield.svg";
 import goldTrophyIcon from "@/public/icons/player-infos/gold_trophy.svg";
 import silverTrophyIcon from "@/public/icons/player-infos/silver_trophy.svg";
+import { useUpdateTeamMemberProfileImage } from "@/hooks/useUpdateTeamMemberProfileImage";
 
 const statsHeadingId = "profile-stats-heading";
 
 type ProfileStatsProps = {
+  member: ProfileTeamMemberRow | null;
   overall: ProfileTeamMemberRow["overall"];
 };
 
-export default function ProfileStats({ overall }: ProfileStatsProps) {
+export default function ProfileStats({ member, overall }: ProfileStatsProps) {
   const ovrScore = overall?.ovr ?? 0;
   const appearances = overall?.appearances ?? 0;
   const goals = overall?.goals ?? 0;
@@ -27,6 +31,12 @@ export default function ProfileStats({ overall }: ProfileStatsProps) {
   const cleanSheets = overall?.cleanSheets ?? 0;
   const mom3 = overall?.mom3 ?? 0;
   const mom8 = overall?.mom8 ?? 0;
+
+  const { pickFromAlbum, fileInputRef, onHiddenFileChange, previewImage, isUpdating } =
+    useUpdateTeamMemberProfileImage({
+      memberId: member?.id ?? 0,
+      currentImage: member?.profileImg,
+    });
 
   return (
     <section
@@ -37,11 +47,61 @@ export default function ProfileStats({ overall }: ProfileStatsProps) {
         활동 통계
       </h2>
 
-      {/* Row 1: OVR & 주 포지션 */}
+      {/* 모바일 전용 프로필 영역: 가로 스크롤 리스트 밖 상단에 위치 */}
+      <div className="flex md:hidden flex-col items-center justify-center gap-4 w-full mb-2">
+        <div className="relative size-[150px] overflow-hidden rounded-full bg-gray-1200 border border-gray-1100">
+          <ImgPlayer
+            src={previewImage}
+            alt="프로필 이미지"
+            sizes="150px"
+            className="size-full object-cover object-bottom"
+          />
+        </div>
+        <PendingActionButton
+          type="button"
+          variant="ghost"
+          pending={isUpdating}
+          pendingLabel="프로필 이미지 업로드 중"
+          className="flex h-8 w-auto items-center justify-center px-3 text-xs font-semibold text-Label-Tertiary bg-gray-1000 hover:bg-gray-900 rounded-lg border-none"
+          onClick={pickFromAlbum}
+        >
+          수정하기
+        </PendingActionButton>
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept="image/*"
+        onChange={onHiddenFileChange}
+      />
+
+      {/* Row 1: 프로필(데스크탑) & OVR & 주 포지션 */}
       <ul
-        aria-label="OVR 및 포지션. 가로로 스크롤하여 전체를 볼 수 있습니다."
+        aria-label="프로필, OVR 및 포지션. 가로로 스크롤하여 전체를 볼 수 있습니다."
         className="flex min-w-0 justify-start gap-4 w-full flex-nowrap max-md:overflow-x-auto max-md:snap-x scrollbar-hide shrink-0 list-none m-0 p-0"
       >
+        <li className="hidden md:flex flex-col items-center justify-center gap-4 shrink-0 h-[275px] w-[200px]">
+          <div className="relative size-[200px] overflow-hidden rounded-full bg-gray-1200 border border-gray-1100">
+            <ImgPlayer
+              src={previewImage}
+              alt="프로필 이미지"
+              sizes="200px"
+              className="size-full object-cover object-bottom"
+            />
+          </div>
+          <PendingActionButton
+            type="button"
+            variant="ghost"
+            pending={isUpdating}
+            pendingLabel="프로필 이미지 업로드 중"
+            className="flex h-9.5 w-auto items-center justify-center px-3 text-sm font-semibold text-Label-Tertiary bg-gray-1000 hover:bg-gray-900 rounded-lg border-none"
+            onClick={pickFromAlbum}
+          >
+            수정하기
+          </PendingActionButton>
+        </li>
         <li className="contents">
           <OvrCard ovrScore={ovrScore} />
         </li>

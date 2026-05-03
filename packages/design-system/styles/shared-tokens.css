@@ -30,7 +30,7 @@
   --color-bg-Primary: var(--color-gray-1200);
   --color-bg-Secondary: var(--color-gray-1000);
   --color-bg-Tertiary: var(--color-gray-900);
-  --color-bg-basic: var(--color-gray-1300);
+  --color-bg-basic: var(--color-gray-1400);
 }
 
 @theme inline {
@@ -95,7 +95,7 @@
   --color-gray-1000: oklch(36.39% 0 89.9);
   --color-gray-1100: oklch(24.59% 0.004 128.6);
   --color-gray-1200: oklch(18.63% 0.002 106.6);
-  --color-gray-1300: oklch(6.72% 0 89.9);
+  --color-gray-1300: oklch(14.86% 0.001 252.1);
   --color-gray-1400: oklch(16.38% 0 89.9); /* #0E0E0E */
 
   --color-green-100: oklch(97.92% 0.0588 120.9);

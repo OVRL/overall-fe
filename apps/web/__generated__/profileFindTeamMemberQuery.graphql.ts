@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9c35dc5649f3fdce5f19ef7b131960c1>>
+ * @generated SignedSource<<0c711c62d41c061377e37aae7b34d47a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -53,6 +53,7 @@ export type profileFindTeamMemberQuery$data = {
       readonly birthDate: any | null | undefined;
       readonly favoritePlayer: string | null | undefined;
       readonly foot: Foot | null | undefined;
+      readonly height: number | null | undefined;
       readonly id: number;
       readonly mainPosition: Position | null | undefined;
       readonly name: string | null | undefined;
@@ -67,6 +68,7 @@ export type profileFindTeamMemberQuery$data = {
         readonly siggName: string | null | undefined;
       } | null | undefined;
       readonly subPositions: ReadonlyArray<Position> | null | undefined;
+      readonly weight: number | null | undefined;
     } | null | undefined;
     readonly userId: number;
   }>;
@@ -254,6 +256,20 @@ v7 = [
           {
             "alias": null,
             "args": null,
+            "kind": "ScalarField",
+            "name": "height",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "weight",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "RegionSearchModel",
             "kind": "LinkedField",
             "name": "region",
@@ -421,16 +437,16 @@ return {
     "selections": (v7/*: any*/)
   },
   "params": {
-    "cacheID": "4329dc3d650f79e601b78ff7c57f215f",
+    "cacheID": "93247a9289ffc9a7c6fd3eb55237a628",
     "id": null,
     "metadata": {},
     "name": "profileFindTeamMemberQuery",
     "operationKind": "query",
-    "text": "query profileFindTeamMemberQuery {\n  findTeamMember {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    foot\n    introduction\n    preferredNumber\n    preferredPosition\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      id\n      name\n      birthDate\n      profileImage\n      activityArea\n      favoritePlayer\n      foot\n      preferredNumber\n      mainPosition\n      subPositions\n      region {\n        code\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
+    "text": "query profileFindTeamMemberQuery {\n  findTeamMember {\n    __typename\n    id\n    teamId\n    joinedAt\n    profileImg\n    userId\n    role\n    foot\n    introduction\n    preferredNumber\n    preferredPosition\n    team {\n      __typename\n      id\n      name\n      emblem\n    }\n    user {\n      id\n      name\n      birthDate\n      profileImage\n      activityArea\n      favoritePlayer\n      foot\n      preferredNumber\n      mainPosition\n      subPositions\n      height\n      weight\n      region {\n        code\n        sidoName\n        siggName\n        name\n        dongName\n        riName\n      }\n    }\n    overall {\n      appearances\n      assists\n      attackPoints\n      cleanSheets\n      createdAt\n      goals\n      id\n      keyPasses\n      mom3\n      mom8\n      ovr\n      teamId\n      updatedAt\n      userId\n      winRate\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5704229a95efbae8b54b00e48af569dd";
+(node as any).hash = "e3f91d62fcca3169cdb3e12289abf95b";
 
 export default node;

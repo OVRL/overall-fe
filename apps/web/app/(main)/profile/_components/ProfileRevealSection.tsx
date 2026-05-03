@@ -30,16 +30,18 @@ export default function ProfileRevealSection({
   className,
 }: ProfileRevealSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+    return false;
+  });
 
   useLayoutEffect(() => {
+    if (visible) return;
+
     const el = ref.current;
     if (!el) return;
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setVisible(true);
-      return;
-    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -60,7 +62,9 @@ export default function ProfileRevealSection({
     const pending = observer.takeRecords() ?? [];
     for (const entry of pending) {
       if (shouldReveal(entry)) {
-        setVisible(true);
+        requestAnimationFrame(() => {
+          setVisible(true);
+        });
         observer.disconnect();
         return;
       }

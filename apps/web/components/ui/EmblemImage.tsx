@@ -67,7 +67,7 @@ export function EmblemImage({
   alt,
   className,
   fill = true,
-  sizes,
+  sizes = "100vw",
   quality = 100,
   unoptimized: unoptimizedProp,
   onError,

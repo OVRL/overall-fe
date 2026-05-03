@@ -32,7 +32,7 @@ export default function PositionCard({ positions }: PositionCardProps) {
   return (
     <section
       aria-labelledby={POSITION_CARD_HEADING_ID}
-      className="flex-1 min-w-70 snap-start bg-gray-1200 border border-gray-1100 rounded-[0.875rem] p-4 flex flex-col h-55.75 justify-between shrink-0"
+      className="flex-1 min-w-70 snap-start bg-gray-1200 border border-gray-1100 rounded-[0.875rem] p-4 flex flex-col justify-between shrink-0"
     >
       <div className="flex items-center gap-2">
         <div
@@ -56,10 +56,7 @@ export default function PositionCard({ positions }: PositionCardProps) {
                 POSITION_COLORS[mainPosition.name] || "bg-gray-300"
               } flex items-center justify-center`}
             >
-              <span
-                className="text-[2rem] font-bold text-black"
-                translate="no"
-              >
+              <span className="text-[2rem] font-bold text-black" translate="no">
                 {mainPosition.name}
               </span>
             </div>

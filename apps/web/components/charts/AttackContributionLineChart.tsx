@@ -1,4 +1,5 @@
 "use client";
+import * as React from "react";
 
 import {
   CartesianGrid,
@@ -87,10 +88,17 @@ export default function AttackContributionLineChart({
   data,
   className,
 }: AttackContributionLineChartProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div className={className}>
       <div className="attack-contribution-line-chart h-62.5 w-full md:h-100 flex flex-col items-center">
-        <ResponsiveContainer width="100%" height="100%">
+        {isMounted && (
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart
             className="flex flex-col items-center"
             data={data}
@@ -168,6 +176,7 @@ export default function AttackContributionLineChart({
             />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

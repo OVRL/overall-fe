@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3796643fae86008225f3a803e33a9d33>>
+ * @generated SignedSource<<a5ee94ec58a286f6aad0b21e65998308>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -22,6 +22,7 @@ export type UpdateTeamMemberInput = {
 };
 export type useUpdateTeamMemberMutation$variables = {
   input: UpdateTeamMemberInput;
+  profileImage?: any | null | undefined;
 };
 export type useUpdateTeamMemberMutation$data = {
   readonly updateTeamMember: {
@@ -29,6 +30,7 @@ export type useUpdateTeamMemberMutation$data = {
     readonly id: number;
     readonly preferredNumber: number | null | undefined;
     readonly preferredPosition: Position | null | undefined;
+    readonly profileImg: string | null | undefined;
     readonly role: Role;
   };
 };
@@ -43,6 +45,11 @@ var v0 = [
     "defaultValue": null,
     "kind": "LocalArgument",
     "name": "input"
+  },
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "profileImage"
   }
 ],
 v1 = [
@@ -53,6 +60,11 @@ v1 = [
         "kind": "Variable",
         "name": "input",
         "variableName": "input"
+      },
+      {
+        "kind": "Variable",
+        "name": "profileImage",
+        "variableName": "profileImage"
       }
     ],
     "concreteType": "TeamMemberModel",
@@ -94,6 +106,13 @@ v1 = [
         "kind": "ScalarField",
         "name": "preferredPosition",
         "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "profileImg",
+        "storageKey": null
       }
     ],
     "storageKey": null
@@ -117,16 +136,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "74f1560014ac3e96c7b4972fee0df5ab",
+    "cacheID": "5e67c77f1a9f6226c1b6d4c9047af299",
     "id": null,
     "metadata": {},
     "name": "useUpdateTeamMemberMutation",
     "operationKind": "mutation",
-    "text": "mutation useUpdateTeamMemberMutation(\n  $input: UpdateTeamMemberInput!\n) {\n  updateTeamMember(input: $input) {\n    id\n    role\n    foot\n    preferredNumber\n    preferredPosition\n  }\n}\n"
+    "text": "mutation useUpdateTeamMemberMutation(\n  $input: UpdateTeamMemberInput!\n  $profileImage: Upload\n) {\n  updateTeamMember(input: $input, profileImage: $profileImage) {\n    id\n    role\n    foot\n    preferredNumber\n    preferredPosition\n    profileImg\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3d138348d39df8c6e90ce6d2906b367a";
+(node as any).hash = "44005e57d1f5a56b55ba9ecd44e4463c";
 
 export default node;

@@ -13,7 +13,11 @@ export const MOCK_IMAGE_SRC = "/images/player/img_player_2.webp";
 export const MOCK_EMBLEM_SRC = "/images/teamemblum_default.webp";
 
 /** 백엔드가 객체 키만 줄 때 로컬 `public/` 과 혼동되지 않게 CDN 절대 URL로 만듦 */
-const CDN_OBJECT_KEY_PREFIXES = [/^users\//, /^teams\//] as const;
+const CDN_OBJECT_KEY_PREFIXES = [
+  /^users\//,
+  /^teams\//,
+  /^team-members\//,
+] as const;
 
 function isCdnObjectKey(trimmed: string): boolean {
   return CDN_OBJECT_KEY_PREFIXES.some((re) => re.test(trimmed));

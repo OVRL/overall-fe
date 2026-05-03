@@ -36,6 +36,8 @@ export const ProfileFindTeamMemberQuery = graphql`
         preferredNumber
         mainPosition
         subPositions
+        height
+        weight
         region {
           code
           sidoName

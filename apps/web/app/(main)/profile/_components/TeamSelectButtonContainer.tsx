@@ -21,7 +21,7 @@ const TeamSelectButtonContainer = ({
   members,
 }: TeamSelectButtonContainerProps) => {
   return (
-    <div className="flex justify-center gap-2 overflow-x-auto p-1 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">
       <TeamListSection members={members} />
     </div>
   );

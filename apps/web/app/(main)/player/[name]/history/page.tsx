@@ -99,6 +99,12 @@ function PlayerHistoryContent() {
 }
 
 function PlayerHistoryDataView() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const params = useParams();
   const router = useRouter();
 
@@ -626,83 +632,87 @@ function PlayerHistoryDataView() {
                     </div>
                   </div>
                   <div className="w-full h-[250px] md:h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={historyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          vertical={false}
-                          stroke="var(--color-chart-grid-soft)"
-                        />
-                        <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} domain={[0, getMaxValue(selectedStat)]} />
-                        <Tooltip content={<LineChartTooltipContent />} />
-                        <Line
-                          type="monotone"
-                          dataKey={selectedStat}
-                          stroke="var(--color-chart-series-goals)"
-                          strokeWidth={3}
-                          dot={{
-                            r: 5,
-                            fill: "var(--color-white)",
-                            strokeWidth: 2,
-                            stroke: "var(--color-chart-series-goals)",
-                          }}
-                          activeDot={{ r: 8, strokeWidth: 0 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    {isMounted && (
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                        <LineChart data={historyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            vertical={false}
+                            stroke="var(--color-chart-grid-soft)"
+                          />
+                          <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} domain={[0, getMaxValue(selectedStat)]} />
+                          <Tooltip content={<LineChartTooltipContent />} />
+                          <Line
+                            type="monotone"
+                            dataKey={selectedStat}
+                            stroke="var(--color-chart-series-goals)"
+                            strokeWidth={3}
+                            dot={{
+                              r: 5,
+                              fill: "var(--color-white)",
+                              strokeWidth: 2,
+                              stroke: "var(--color-chart-series-goals)",
+                            }}
+                            activeDot={{ r: 8, strokeWidth: 0 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
 
                 <div className="bg-white dark:bg-surface-secondary border border-Label-Tertiary/10 rounded-3xl p-5 md:p-8 flex flex-col gap-5 shadow-[0_8px_24px_rgba(0,0,0,0.04)] dark:shadow-none">
                   <h3 className="text-[17px] md:text-[20px] font-bold tracking-tight text-Label-Primary m-0">승/무/패 밸런스</h3>
                   <div className="w-full h-[250px] md:h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={historyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                        <CartesianGrid
-                          strokeDasharray="3 3"
-                          vertical={false}
-                          stroke="var(--color-chart-grid-soft)"
-                        />
-                        <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} />
-                        <Tooltip content={<LineChartTooltipContent />} />
-                        <Legend
-                          verticalAlign="top"
-                          align="right"
-                          height={36}
-                          wrapperStyle={{
-                            fontSize: "0.8125rem",
-                            fontWeight: 600,
-                            color: "var(--color-Label-Primary)",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="win"
-                          name="승"
-                          stroke="var(--color-chart-series-goals)"
-                          strokeWidth={2.5}
-                          dot={{ r: 4 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="draw"
-                          name="무"
-                          stroke="var(--color-gray-500)"
-                          strokeWidth={2.5}
-                          dot={{ r: 4 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="lose"
-                          name="패"
-                          stroke="var(--color-chart-series-attack)"
-                          strokeWidth={2.5}
-                          dot={{ r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    {isMounted && (
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                        <LineChart data={historyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            vertical={false}
+                            stroke="var(--color-chart-grid-soft)"
+                          />
+                          <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} dy={10} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--color-Label-Tertiary)', fontSize: 12, fontWeight: 600 }} />
+                          <Tooltip content={<LineChartTooltipContent />} />
+                          <Legend
+                            verticalAlign="top"
+                            align="right"
+                            height={36}
+                            wrapperStyle={{
+                              fontSize: "0.8125rem",
+                              fontWeight: 600,
+                              color: "var(--color-Label-Primary)",
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="win"
+                            name="승"
+                            stroke="var(--color-chart-series-goals)"
+                            strokeWidth={2.5}
+                            dot={{ r: 4 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="draw"
+                            name="무"
+                            stroke="var(--color-gray-500)"
+                            strokeWidth={2.5}
+                            dot={{ r: 4 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="lose"
+                            name="패"
+                            stroke="var(--color-chart-series-attack)"
+                            strokeWidth={2.5}
+                            dot={{ r: 4 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
              </div>

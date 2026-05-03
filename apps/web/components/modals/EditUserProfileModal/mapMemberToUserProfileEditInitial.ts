@@ -1,7 +1,7 @@
 import type { ProfileTeamMemberRow } from "@/app/(main)/profile/types/profileTeamMemberTypes";
 import { formatRegionSearchDisplay } from "@/lib/region/formatRegionSearchDisplay";
 import type { Position } from "@/types/position";
-import type { ProfileEditFoot, ProfileEditFormInitial } from "./types";
+import type { UserProfileEditFoot, UserProfileEditFormInitial } from "./types";
 
 function formatBirthDateInput(value: unknown): string {
   if (value == null || value === "") return "";
@@ -27,9 +27,19 @@ function toPositionList(
   return positions.filter((p): p is Position => p !== "용병") as Position[];
 }
 
-export function mapMemberToProfileEditInitial(
+function parseRelayId(id: string | number | null | undefined): number {
+  if (typeof id === "number") return id;
+  if (typeof id === "string") {
+    const parts = id.split(":");
+    const num = parseInt(parts[parts.length - 1], 10);
+    return isNaN(num) ? 0 : num;
+  }
+  return 0;
+}
+
+export function mapMemberToUserProfileEditInitial(
   member: ProfileTeamMemberRow | null,
-): ProfileEditFormInitial {
+): UserProfileEditFormInitial {
   const user = member?.user;
   const rawActivity =
     typeof user?.activityArea === "string" ? user.activityArea.trim() : "";
@@ -54,14 +64,11 @@ export function mapMemberToProfileEditInitial(
   const subPositions = toPositionList(user?.subPositions);
 
   const footRaw = member?.foot ?? user?.foot;
-  const foot: ProfileEditFoot =
+  const foot: UserProfileEditFoot =
     footRaw === "L" || footRaw === "R" || footRaw === "B" ? footRaw : "B";
 
-  const prefNum = user?.preferredNumber ?? member?.preferredNumber ?? null;
-  const preferredNumber =
-    prefNum != null && !Number.isNaN(Number(prefNum)) ? String(prefNum) : "";
-
   return {
+    id: parseRelayId(user?.id),
     name: user?.name?.trim() ?? "",
     birthDate: formatBirthDateInput(user?.birthDate),
     activityArea,
@@ -69,10 +76,8 @@ export function mapMemberToProfileEditInitial(
     mainPosition,
     subPositions,
     foot,
-    preferredNumber,
+    height: user?.height ? String(user.height) : "",
+    weight: user?.weight ? String(user.weight) : "",
     favoritePlayer: user?.favoritePlayer?.trim() ?? "",
-    introduction: member?.introduction?.trim() ?? "",
-    profilePreviewUrl:
-      member?.profileImg?.trim() || user?.profileImage?.trim() || null,
   };
 }

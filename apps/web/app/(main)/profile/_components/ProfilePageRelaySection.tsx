@@ -8,7 +8,6 @@ import { ProfileFindTeamMemberQuery } from "@/lib/relay/queries/profileFindTeamM
 import { selectProfileTeamMemberRow } from "@/lib/relay/selectProfileTeamMemberRow";
 import type { profileFindTeamMemberQuery } from "@/__generated__/profileFindTeamMemberQuery.graphql";
 import TeamSelectButtonContainer from "./TeamSelectButtonContainer";
-import UserIntroSection from "./UserIntroSection";
 import ProfileStats from "./ProfileStats";
 import SeasonIntegratedRecords from "./SeasonIntegratedRecords";
 import AttackContributionSection from "./AttackContributionSection";
@@ -26,10 +25,10 @@ export default function ProfilePageRelaySection() {
     return null;
   }
 
-  return <ProfilePageRelayBody userId={userId} />;
+  return <ProfilePageRelayBody />;
 }
 
-function ProfilePageRelayBody({ userId }: { userId: number }) {
+function ProfilePageRelayBody() {
   const data = useLazyLoadQuery<profileFindTeamMemberQuery>(
     ProfileFindTeamMemberQuery,
     {},
@@ -51,11 +50,8 @@ function ProfilePageRelayBody({ userId }: { userId: number }) {
       <ProfileRevealSection>
         <TeamSelectButtonContainer members={members} />
       </ProfileRevealSection>
-      <ProfileRevealSection>
-        <UserIntroSection member={selectedMember} />
-      </ProfileRevealSection>
-      <ProfileRevealSection>
-        <ProfileStats overall={selectedMember?.overall} />
+      <ProfileRevealSection className="flex w-full justify-center">
+        <ProfileStats member={selectedMember} overall={selectedMember?.overall} />
       </ProfileRevealSection>
       <ProfileRevealSection>
         <SeasonIntegratedRecords />

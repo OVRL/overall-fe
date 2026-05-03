@@ -112,15 +112,15 @@ const FormationCheckLineupModal = dynamic(
     loading: () => <ModalLoadingFallback />,
   },
 );
-const EditProfileModal = dynamic(
-  () => import("./EditProfileModal/EditProfileModal"),
+const EditUserProfileModal = dynamic(
+  () => import("./EditUserProfileModal/EditUserProfileModal"),
   {
     ssr: false,
     loading: () => <ModalLoadingFallback />,
   },
 );
-const ProfileSubPositionPickerModal = dynamic(
-  () => import("./EditProfileModal/ProfileSubPositionPickerModal"),
+const UserProfilePositionPickerModal = dynamic(
+  () => import("./EditUserProfileModal/UserProfilePositionPickerModal"),
   {
     ssr: false,
     loading: () => <ModalLoadingFallback />,
@@ -157,7 +157,7 @@ export const MODAL_REGISTRY: ModalComponentMap = {
   FORMATION_CHANGE_LINEUP: FormationChangeLineupModal,
   FORMATION_MOBILE_TEAM_DRAFT: FormationMobileTeamDraftModal,
   FORMATION_CHECK_LINEUP: FormationCheckLineupModal,
-  EDIT_PROFILE: EditProfileModal,
-  PROFILE_EDIT_SUB_POSITIONS: ProfileSubPositionPickerModal,
+  EDIT_USER_PROFILE: EditUserProfileModal,
+  USER_POSITION_PICKER: UserProfilePositionPickerModal,
   TEAM_INFO: TeamInfoModal,
 } as ModalComponentMap;

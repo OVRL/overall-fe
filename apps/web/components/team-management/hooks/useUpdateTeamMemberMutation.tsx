@@ -5,13 +5,17 @@ import type {
 } from "../../../__generated__/useUpdateTeamMemberMutation.graphql";
 
 const updateTeamMemberMutation = graphql`
-  mutation useUpdateTeamMemberMutation($input: UpdateTeamMemberInput!) {
-    updateTeamMember(input: $input) {
+  mutation useUpdateTeamMemberMutation(
+    $input: UpdateTeamMemberInput!
+    $profileImage: Upload
+  ) {
+    updateTeamMember(input: $input, profileImage: $profileImage) {
       id
       role
       foot
       preferredNumber
       preferredPosition
+      profileImg
     }
   }
 `;
@@ -19,10 +23,17 @@ const updateTeamMemberMutation = graphql`
 export const useUpdateTeamMemberMutation = () => {
   const [commit, isInFlight] = useMutation<MutationType>(updateTeamMemberMutation);
 
-  const executeMutation = (input: UpdateTeamMemberInput) => {
+  const executeMutation = (
+    input: UpdateTeamMemberInput,
+    profileImage?: File | null,
+  ) => {
     return new Promise((resolve, reject) => {
       commit({
-        variables: { input },
+        variables: {
+          input,
+          profileImage: null,
+        },
+        uploadables: profileImage ? { profileImage } : undefined,
         onCompleted: (response, errors) => {
           if (errors) reject(errors);
           else resolve(response);

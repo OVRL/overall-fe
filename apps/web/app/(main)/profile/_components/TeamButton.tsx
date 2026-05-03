@@ -28,7 +28,7 @@ const TeamButton = ({
       )}
     >
       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-        <EmblemImage src={imageUrl} alt={`${name} 로고`} />
+        <EmblemImage src={imageUrl} alt={`${name} 로고`} sizes="40px" />
       </div>
       <p
         className={cn(

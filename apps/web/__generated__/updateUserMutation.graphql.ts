@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e510f6e9e2c8728d48cb9fc12e019a8c>>
+ * @generated SignedSource<<3e1db1a2724d96bf0917978aa728fd4a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,26 +12,36 @@ import { ConcreteRequest } from 'relay-runtime';
 export type Foot = "B" | "L" | "R" | "%future added value";
 export type Gender = "M" | "W" | "%future added value";
 export type Position = "CAM" | "CB" | "CDM" | "CF" | "CM" | "DF" | "FW" | "GK" | "LAM" | "LB" | "LCAM" | "LCB" | "LCM" | "LDM" | "LF" | "LM" | "LS" | "LW" | "LWB" | "MF" | "RAM" | "RB" | "RCAM" | "RCB" | "RCM" | "RDM" | "RF" | "RM" | "RS" | "RW" | "RWB" | "ST" | "SW" | "%future added value";
-export type findUserByIdQuery$variables = {
+export type UpdateUserInput = {
+  activityArea?: string | null | undefined;
+  birthDate?: string | null | undefined;
+  favoritePlayer?: string | null | undefined;
+  foot?: Foot | null | undefined;
+  gender?: Gender | null | undefined;
+  height?: number | null | undefined;
   id: number;
+  mainPosition?: Position | null | undefined;
+  name?: string | null | undefined;
+  password?: string | null | undefined;
+  phone?: string | null | undefined;
+  preferredNumber?: number | null | undefined;
+  provider?: string | null | undefined;
+  subPositions?: ReadonlyArray<Position> | null | undefined;
+  weight?: number | null | undefined;
 };
-export type findUserByIdQuery$data = {
-  readonly findUserById: {
-    readonly __typename: "UserModel";
+export type updateUserMutation$variables = {
+  input: UpdateUserInput;
+};
+export type updateUserMutation$data = {
+  readonly updateUser: {
     readonly activityArea: string | null | undefined;
     readonly birthDate: any | null | undefined;
-    readonly email: string;
     readonly favoritePlayer: string | null | undefined;
     readonly foot: Foot | null | undefined;
-    readonly gender: Gender | null | undefined;
     readonly height: number | null | undefined;
     readonly id: number;
     readonly mainPosition: Position | null | undefined;
     readonly name: string | null | undefined;
-    readonly phone: string | null | undefined;
-    readonly preferredNumber: number | null | undefined;
-    readonly profileImage: string | null | undefined;
-    readonly provider: string | null | undefined;
     readonly region: {
       readonly code: string;
       readonly dongName: string | null | undefined;
@@ -44,9 +54,9 @@ export type findUserByIdQuery$data = {
     readonly weight: number | null | undefined;
   };
 };
-export type findUserByIdQuery = {
-  response: findUserByIdQuery$data;
-  variables: findUserByIdQuery$variables;
+export type updateUserMutation = {
+  response: updateUserMutation$data;
+  variables: updateUserMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -54,7 +64,7 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "id"
+    "name": "input"
   }
 ],
 v1 = {
@@ -70,34 +80,20 @@ v2 = [
     "args": [
       {
         "kind": "Variable",
-        "name": "id",
-        "variableName": "id"
+        "name": "input",
+        "variableName": "input"
       }
     ],
     "concreteType": "UserModel",
     "kind": "LinkedField",
-    "name": "findUserById",
+    "name": "updateUser",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "__typename",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "id",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "email",
         "storageKey": null
       },
       (v1/*: any*/),
@@ -105,7 +101,7 @@ v2 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "profileImage",
+        "name": "birthDate",
         "storageKey": null
       },
       {
@@ -119,34 +115,6 @@ v2 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "birthDate",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "favoritePlayer",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "foot",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "gender",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "mainPosition",
         "storageKey": null
       },
@@ -154,28 +122,14 @@ v2 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "phone",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "preferredNumber",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "provider",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
         "name": "subPositions",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "foot",
         "storageKey": null
       },
       {
@@ -190,6 +144,13 @@ v2 = [
         "args": null,
         "kind": "ScalarField",
         "name": "weight",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "favoritePlayer",
         "storageKey": null
       },
       {
@@ -248,29 +209,29 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "findUserByIdQuery",
+    "name": "updateUserMutation",
     "selections": (v2/*: any*/),
-    "type": "Query",
+    "type": "Mutation",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "findUserByIdQuery",
+    "name": "updateUserMutation",
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "de95e4216c173d6385e4e2218098c3a4",
+    "cacheID": "d10426aaeda0b520c42565bfa9babc17",
     "id": null,
     "metadata": {},
-    "name": "findUserByIdQuery",
-    "operationKind": "query",
-    "text": "query findUserByIdQuery(\n  $id: Int!\n) {\n  findUserById(id: $id) {\n    __typename\n    id\n    email\n    name\n    profileImage\n    activityArea\n    birthDate\n    favoritePlayer\n    foot\n    gender\n    mainPosition\n    phone\n    preferredNumber\n    provider\n    subPositions\n    height\n    weight\n    region {\n      code\n      sidoName\n      siggName\n      name\n      dongName\n      riName\n    }\n  }\n}\n"
+    "name": "updateUserMutation",
+    "operationKind": "mutation",
+    "text": "mutation updateUserMutation(\n  $input: UpdateUserInput!\n) {\n  updateUser(input: $input) {\n    id\n    name\n    birthDate\n    activityArea\n    mainPosition\n    subPositions\n    foot\n    height\n    weight\n    favoritePlayer\n    region {\n      code\n      sidoName\n      siggName\n      name\n      dongName\n      riName\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8aedf4050ac80a23c24c67fff28e9290";
+(node as any).hash = "4953d8cad615bddf18958740b3aaafb6";
 
 export default node;

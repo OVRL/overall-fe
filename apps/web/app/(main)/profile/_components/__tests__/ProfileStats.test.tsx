@@ -2,6 +2,23 @@ import { render, screen } from "@testing-library/react";
 import ProfileStats from "../ProfileStats";
 import type { ProfileTeamMemberRow } from "../../types/profileTeamMemberTypes";
 
+jest.mock("@/hooks/useUpdateTeamMemberProfileImage", () => ({
+  useUpdateTeamMemberProfileImage: () => ({
+    pickFromAlbum: jest.fn(),
+    fileInputRef: { current: null },
+    onHiddenFileChange: jest.fn(),
+    previewImage: null,
+    isUpdating: false,
+  }),
+}));
+
+jest.mock("@/components/ui/ImgPlayer", () => ({
+  __esModule: true,
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="img-player" />
+  ),
+}));
+
 const mockOverall: NonNullable<ProfileTeamMemberRow["overall"]> = {
   ovr: 80,
   appearances: 10,

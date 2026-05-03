@@ -31,7 +31,13 @@ export default function Icon({
         width={iconWidth}
         height={iconHeight}
         alt={iconAlt}
-        style={{ objectFit: "contain", ...sizeStyle, ...style }}
+        style={{
+          objectFit: "contain",
+          ...sizeStyle,
+          ...(width != null && height == null ? { height: "auto" } : {}),
+          ...(width == null && height != null ? { width: "auto" } : {}),
+          ...style,
+        }}
         {...props}
       />
     );

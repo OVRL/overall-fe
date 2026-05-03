@@ -1,7 +1,7 @@
 import { ComponentType } from "react";
 
-import type { ProfileEditFormInitial } from "./EditProfileModal/types";
-import type { ProfileSubPositionPickerModalProps } from "./EditProfileModal/ProfileSubPositionPickerModal";
+import type { UserProfileEditFormInitial } from "./EditUserProfileModal/types";
+import type { UserProfilePositionPickerModalProps } from "./EditUserProfileModal/UserProfilePositionPickerModal";
 import type { Player as TeamDataPlayer } from "@/app/(main)/team-data/_types/player";
 import type { TeamSearchResult } from "@/hooks/useTeamSearch";
 import type { Player } from "@/types/formation";
@@ -109,12 +109,12 @@ export interface ModalPropsMap {
     matchId: number;
     teamId: number;
   };
-  /** 마이페이지 — 프로필 편집 (UI만, 저장 뮤테이션은 추후) */
-  EDIT_PROFILE: {
-    initial: ProfileEditFormInitial;
+  /** 마이페이지 — 유저 프로필 편집 */
+  EDIT_USER_PROFILE: {
+    initial: UserProfileEditFormInitial;
   };
-  /** 프로필 편집 — 서브 포지션 선택 (온보딩 `SubFormationCollect`와 동일 셀렉터) */
-  PROFILE_EDIT_SUB_POSITIONS: ProfileSubPositionPickerModalProps;
+  /** 유저 프로필 편집 — 포지션 선택 */
+  USER_POSITION_PICKER: UserProfilePositionPickerModalProps;
 }
 
 export type ModalKey = keyof ModalPropsMap;

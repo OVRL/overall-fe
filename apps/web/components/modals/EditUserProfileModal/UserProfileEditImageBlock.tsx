@@ -14,7 +14,7 @@ type Props = {
 /**
  * `ImageUploader`와 동일한 모달·파일 플로우, 프로필 편집 UI(원형 프리뷰·카피)만 분리.
  */
-export default function ProfileEditImageBlock({
+export default function UserProfileEditImageBlock({
   currentImage,
   onFileSelect,
   onDefaultImageSelect,
