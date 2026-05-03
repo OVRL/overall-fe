@@ -1,6 +1,24 @@
-import CookieManager from "@react-native-cookies/cookies";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
+
+type CookieManagerModule = typeof import("@react-native-cookies/cookies").default;
+
+/**
+ * Expo Go에는 `@react-native-cookies/cookies` 네이티브 코드가 없어 **모듈을 로드하는 순간** invariant가 난다.
+ * development build / 스토어 빌드에서만 실제 CookieManager를 요청한다.
+ */
+function getCookieManager(): CookieManagerModule | null {
+  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
+    return null;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("@react-native-cookies/cookies").default as CookieManagerModule;
+  } catch {
+    return null;
+  }
+}
 
 /** RNWebView_Auth_Implementation_Spec: SecureStore 키와 동일한 이름 사용 */
 export const SECURE_KEYS = {
@@ -42,6 +60,9 @@ function buildSetCookieFields(webOrigin: string) {
 export async function persistAuthCookiesFromWebView(
   webOrigin: string
 ): Promise<void> {
+  const CookieManager = getCookieManager();
+  if (!CookieManager) return;
+
   const useWebKit = useWebKitCookieStore();
   const jar = await CookieManager.get(webOrigin, useWebKit);
   const access = jar.accessToken?.value;
@@ -87,6 +108,9 @@ export async function persistNativeAuthSession(
 export async function injectStoredAuthCookiesForWebView(
   webOrigin: string
 ): Promise<void> {
+  const CookieManager = getCookieManager();
+  if (!CookieManager) return;
+
   const useWebKit = useWebKitCookieStore();
   const fields = buildSetCookieFields(webOrigin);
   const refresh = await SecureStore.getItemAsync(SECURE_KEYS.refreshToken);

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "expo start --no-dev-client",
     "start": "expo start",
+    "start:offline": "expo start --offline",
     "typecheck": "tsc --noEmit",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",

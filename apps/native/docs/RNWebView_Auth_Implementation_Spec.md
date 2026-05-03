@@ -117,6 +117,8 @@ pnpm add @react-native-seoul/kakao-login @react-native-seoul/naver-login expo-au
 
 `socialLogin` 성공 직후 `persistNativeAuthSession(webOrigin, { accessToken, refreshToken, userId })` 를 호출한다. 순서는 (1) `SecureStore` 에 토큰·userId 기록 (2) `injectStoredAuthCookiesForWebView` 동일. 웹 `set-session` 이 내려주는 쿠키와 **이름·의미**를 맞춘다.
 
+GraphQL 응답 타입은 **`LoginResponseModel`** 이다. 앱용 JWT는 예전처럼 중첩 `tokens[]`에서 고르는 방식이 아니라, **응답 루트의 `accessToken`·`refreshToken`·`id`** 를 쓴다 (`apps/web` Relay `useSocialLoginMutation` 과 동일한 필드 선택·의미).
+
 ### 4.3 로그아웃·비로그인 랜딩 동기화 (구 Step 3)
 
 - **의도**: **우리 웹 앱**에서 세션이 제거되었거나, 비로그인 랜딩으로 빠진 것으로 볼 수 있을 때 네이티브 금고를 비우고, 필요하면 로그인 셸(`native_login`)로 되돌린다.
@@ -165,6 +167,8 @@ pnpm add @react-native-seoul/kakao-login @react-native-seoul/naver-login expo-au
 | 프로필 JSON | 서버·라우트에서 조회 | `POST /api/auth/kakao|naver/userme` (`accessToken`), 구글은 OIDC UserInfo |
 | 앱 로그인 | Relay `socialLogin` + `set-session` | `POST {webOrigin}/api/graphql` 동일 뮤테이션 → `persistNativeAuthSession` |
 | 세션 | HttpOnly 쿠키 | SecureStore + `injectStoredAuthCookiesForWebView` 와 동일 쿠키 이름 |
+
+뮤테이션 성공 페이로드는 **`LoginResponseModel`** (`accessToken`·`refreshToken`·`id` 등 루트 스칼라). 웹·앱 모두 이 필드로 세션을 잡는다.
 
 **코드 위치**
 
