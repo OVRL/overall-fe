@@ -281,7 +281,7 @@ const Dropdown = ({
                   ? { top: overlayGeometry.top }
                   : { bottom: overlayGeometry.bottom }),
               }}
-              className="bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2 flex flex-col min-h-0"
+              className="bg-gray-900 border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2 flex flex-col min-h-0"
             >
               <div
                 ref={listRef}
@@ -328,7 +328,7 @@ const Dropdown = ({
           aria-labelledby={ariaLabelledBy}
           className={cn(
             "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
-            "bg-Fill_Quatiary border-transparent",
+            "bg-gray-900 border-transparent",
             isOpen ? "border-Fill_AccentPrimary" : "",
             disabled && "opacity-60 cursor-not-allowed",
             triggerClassName,
@@ -359,7 +359,7 @@ const Dropdown = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute z-50 mt-1 w-full bg-[#1a1a1b] border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2"
+                className="absolute z-50 mt-1 w-full bg-gray-900 border border-white/5 rounded-[0.625rem] shadow-2xl overflow-hidden py-2"
               >
                 <div
                   className={cn(listBoxClass, "max-h-60")}

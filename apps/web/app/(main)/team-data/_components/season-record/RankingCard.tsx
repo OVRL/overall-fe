@@ -24,7 +24,7 @@ const RankingCard = ({
 
   return (
     <article
-      className="flex flex-col w-76 h-100 shrink-0 relative select-none"
+      className="flex flex-col w-72 h-100 shrink-0 relative select-none"
       aria-labelledby={`ranking-card-${title.replace(/\s/g, "-")}`}
     >
       <h3
@@ -65,7 +65,7 @@ const RankingCard = ({
             width={40}
             height={40}
             nofill
-            className="absolute top-1/2 -translate-y-1/2 right-0 translate-x-1/2"
+            className="absolute top-1/2 -translate-y-1/2 left-0 -translate-x-1/2"
           />
           <div className="flex flex-col w-full mt-3">
             <span className="text-sm font-semibold text-center text-[#f7f8f8]">
@@ -81,7 +81,7 @@ const RankingCard = ({
       </div>
 
       {/* 2~5위 리스트 */}
-      <div className="w-full px-3 pt-30 pb-4 rounded-3xl bg-gray-1200 flex flex-col gap-4">
+      <div className="w-full px-3 pt-30 pb-4 rounded-3xl bg-gray-1300 flex flex-col gap-4">
         <ul className="flex flex-col gap-2" aria-label={`${title} 상위 순위`}>
           {rank2To5.map((player, index) => (
             <RankCardRow

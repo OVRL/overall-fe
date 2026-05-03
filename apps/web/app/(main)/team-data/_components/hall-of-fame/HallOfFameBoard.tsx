@@ -86,7 +86,7 @@ function toMinimalPlayer(info: HallOfFamePlayerInfo): Player {
 const HallOfFameBoard = () => {
   return (
     <section
-      className="flex flex-col gap-4 pt-12.5 lg:flex-row lg:gap-x-4"
+      className="flex flex-col gap-4 pt-2 lg:pt-12.5 lg:flex-row lg:gap-x-4"
       aria-label="명예의 전당"
     >
       <div>

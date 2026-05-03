@@ -28,13 +28,21 @@ const HallOfFameFeatureCard = ({
       )}
       aria-label={categoryLabel}
     >
-      <div className="flex items-center gap-2 p-4">
-        <div className="relative size-12 shrink-0 flex items-center justify-center text-Label-Secondary">
-          <Icon src={ballIcon} alt="" width={48} height={48} nofill />
+      <div className="flex items-center justify-between p-4 w-full relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="relative size-12 shrink-0 flex items-center justify-center text-Label-Secondary">
+            <Icon src={ballIcon} alt="" width={48} height={48} nofill />
+          </div>
+          <h3 className="text-lg font-bold text-white whitespace-nowrap">
+            {categoryLabel}
+          </h3>
         </div>
-        <h3 className="text-lg font-bold text-white whitespace-nowrap">
-          {categoryLabel}
-        </h3>
+        <button
+          type="button"
+          className="mr-3 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
+        >
+          전체 순위
+        </button>
       </div>
 
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center size-fit">
@@ -52,13 +60,13 @@ const HallOfFameFeatureCard = ({
             />
           </div>
 
-          <div className="absolute top-43.75 left-1/2 flex w-[103px] -translate-x-1/2 flex-col items-center gap-2">
-            <p className="text-2xl font-bold text-white">{player.name}</p>
-            <div className="flex items-center gap-2.5">
+          <div className="absolute top-43.75 left-1/2 flex w-[103px] -translate-x-1/2 flex-col items-center gap-4">
+            <p className="mt-2 text-2xl font-semibold text-white">{player.name}</p>
+            <div className="flex items-baseline gap-2.5">
               <span className="text-[3.5rem] font-black leading-none text-Fill_AccentPrimary tabular-nums">
                 {player.value}
               </span>
-              <span className="text-xl font-bold text-gray-800">
+              <span className="relative bottom-1 text-xl font-semibold text-gray-800">
                 {player.unit}
               </span>
             </div>
@@ -80,13 +88,6 @@ const HallOfFameFeatureCard = ({
           </div>
         </div>
       </div>
-
-      <button
-        type="button"
-        className="absolute bottom-6 right-6 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
-      >
-        전체 순위 보기
-      </button>
     </article>
   );
 };

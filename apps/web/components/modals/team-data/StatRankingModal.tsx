@@ -25,7 +25,7 @@ const StatRankingModal = ({
   return (
     <ModalLayout
       title={category}
-      wrapperClassName="gap-y-6"
+      wrapperClassName="gap-y-6 w-[360px] md:w-[360px]"
       closeButtonClassName="text-gray-600"
     >
       {/* 선수 목록 */}

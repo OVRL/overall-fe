@@ -104,7 +104,7 @@ export const COLUMN_WIDTH_MAP: Record<string, string> = {
   등수: "w-13 shrink-0",
   포지션: "w-10.5 shrink-0",
   등번호: "w-13.25 shrink-0",
-  이름: "justify-start w-31.25 shrink-0",
+  이름: "w-31.25 shrink-0",
   default: "w-12.25 shrink-0",
 };
 

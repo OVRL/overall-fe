@@ -29,7 +29,7 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
     <>
       <header className="mb-8">
         <div className="flex items-center gap-4">
-          <h1 className="text-[1.75rem] md:text-3xl font-extrabold text-Label-Primary">
+          <h1 className="text-2xl md:text-[1.75rem] font-extrabold text-Label-Primary">
             선수 기록
           </h1>
         </div>
@@ -44,7 +44,7 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
               value={hallPeriod}
               onChange={setHallPeriod}
               options={[...HALL_PERIOD_OPTIONS]}
-              className="w-24 min-w-24"
+              className="w-32 min-w-32"
             />
           ) : undefined
         }
@@ -56,7 +56,7 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
             value={hallPeriod}
             onChange={setHallPeriod}
             options={[...HALL_PERIOD_OPTIONS]}
-            triggerClassName="py-1.5 h-10"
+            triggerClassName="py-1.5 h-12"
           />
         </div>
       ) : null}

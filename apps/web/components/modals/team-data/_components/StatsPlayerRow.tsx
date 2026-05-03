@@ -21,31 +21,33 @@ const StatsPlayerRow = ({
 }: StatsPlayerRowProps) => {
   return (
     <li
-      className="flex items-center hover:bg-gray-800/50 transition-colors cursor-pointer justify-between"
+      className="flex items-center cursor-pointer justify-between"
       onClick={() => onPlayerClick?.(player)}
     >
-      {/* 순위 - 1등은 primary, 나머지는 흰색 */}
-      <span
-        className={`${racingSansOne.className} text-sm w-7.5 text-center ${
-          index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
-        }`}
-      >
-        {index + 1}
-      </span>
+      <div className="flex items-center gap-3 pl-1">
+        {/* 순위 - 1등은 primary, 나머지는 흰색 */}
+        <span
+          className={`${racingSansOne.className} text-sm w-7.5 text-center ${
+            index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
+          }`}
+        >
+          {index + 1}
+        </span>
 
-      <div className="flex gap-2">
-        {/* 선수 이미지 */}
-        <ProfileAvatar src={player.image || ""} alt={player.name} size={36} />
+        <div className="flex gap-4">
+          {/* 선수 이미지 */}
+          <ProfileAvatar src={player.image || ""} alt={player.name} size={36} />
 
-        {/* 포지션 칩 + 이름 */}
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          <span
-            className={`w-18.75 text-sm truncate ${
-              index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
-            }`}
-          >
-            {player.name}
-          </span>
+          {/* 포지션 칩 + 이름 */}
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            <span
+              className={`w-18.75 text-sm truncate ${
+                index === 0 ? "text-Label-AccentPrimary" : "text-Label-Primary"
+              }`}
+            >
+              {player.name}
+            </span>
+          </div>
         </div>
       </div>
       {/* 능력치 값 (숫자만 추출) */}
