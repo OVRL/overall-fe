@@ -672,7 +672,7 @@ export default function MOMVotePanel() {
     <div className="px-4 md:px-6 pt-6 pb-4">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-[24px] font-bold text-white">MOM 투표 설정</h1>
+          <h1 className="text-xl font-bold text-white">MOM 투표 설정</h1>
           <button onClick={() => setIsInfoOpen(true)} className="ml-1 text-gray-400 hover:text-white transition-colors">
             <Info size={24} />
           </button>

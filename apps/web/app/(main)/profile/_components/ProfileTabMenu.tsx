@@ -23,12 +23,12 @@ export default function ProfileTabMenu({
   const isMobile = useIsMobile(768);
 
   return (
-    <div className={cn("flex items-center gap-4", isMobile && "w-full")}>
+    <div className={cn("flex items-center mb-6 gap-4", isMobile && "w-full")}>
       <div
         role="tablist"
         id="profile-tabs"
         aria-label="프로필 탭"
-        className={cn("flex items-center h-12 gap-x-6", isMobile && "w-full")}
+        className={cn("flex items-center h-12", isMobile && "w-full")}
       >
         {TABS.map(({ type, label }) => {
           const isActive = activeTab === type;
@@ -37,7 +37,7 @@ export default function ProfileTabMenu({
             <div
               className={cn(
                 "relative h-full flex items-center",
-                isMobile && "w-1/2",
+                isMobile ? "w-1/2 px-1" : "px-1",
               )}
               key={type}
             >
@@ -50,8 +50,8 @@ export default function ProfileTabMenu({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => onChange(type)}
                 className={cn(
-                  "transition-colors cursor-pointer h-4.75 text-xl font-medium",
-                  isMobile ? "w-full" : "w-25",
+                  "transition-colors cursor-pointer h-auto text-base font-semibold",
+                  isMobile ? "w-full" : "w-28",
                   isActive
                     ? "text-Label-AccentPrimary"
                     : "text-white hover:text-gray-300",

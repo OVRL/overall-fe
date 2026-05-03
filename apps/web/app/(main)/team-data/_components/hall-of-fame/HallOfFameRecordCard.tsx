@@ -45,20 +45,28 @@ const HallOfFameRecordCard = ({
       )}
       aria-label={categoryLabel}
     >
-      <div className="flex items-center gap-2">
-        {categoryType !== "goal" && (
-          <Icon
-            src={RECORD_TYPE_ICON[categoryType]}
-            alt=""
-            width={48}
-            height={48}
-            nofill
-            className="shrink-0 size-12 text-Label-Secondary"
-          />
-        )}
-        <h3 className="text-lg font-bold text-white whitespace-nowrap">
-          {categoryLabel}
-        </h3>
+      <div className="flex items-center justify-between w-full relative z-10">
+        <div className="flex items-center gap-2">
+          {categoryType !== "goal" && (
+            <Icon
+              src={RECORD_TYPE_ICON[categoryType]}
+              alt=""
+              width={48}
+              height={48}
+              nofill
+              className="shrink-0 size-12 text-Label-Secondary"
+            />
+          )}
+          <h3 className="text-lg font-bold text-white whitespace-nowrap">
+            {categoryLabel}
+          </h3>
+        </div>
+        <button
+          type="button"
+          className="mr-3 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
+        >
+          전체 순위
+        </button>
       </div>
 
       <div className="absolute bottom-7.5 left-7.5 flex items-end gap-5">
@@ -71,24 +79,17 @@ const HallOfFameRecordCard = ({
           />
         </div>
         <div className="flex flex-col">
-          <p className="font-bold text-white">{player.name}</p>
-          <div className="flex items-center gap-2.5">
+          <p className="mt-2 mb-3 font-semibold text-white">{player.name}</p>
+          <div className="flex items-baseline gap-2.5">
             <span className="text-[2.6875rem] font-bold leading-none text-Fill_AccentPrimary tabular-nums">
               {player.value}
             </span>
-            <span className="text-xl font-bold text-gray-800">
+            <span className="relative bottom-1 text-xl font-semibold text-gray-800">
               {player.unit}
             </span>
           </div>
         </div>
       </div>
-
-      <button
-        type="button"
-        className="absolute bottom-9 right-7.5 text-xs font-normal text-gray-800 hover:text-Label-Secondary focus:outline-none focus-visible:underline cursor-pointer"
-      >
-        전체 순위 보기
-      </button>
     </article>
   );
 };

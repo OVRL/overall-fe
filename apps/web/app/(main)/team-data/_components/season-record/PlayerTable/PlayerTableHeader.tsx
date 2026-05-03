@@ -25,7 +25,7 @@ const PlayerTableHeader = ({ sortConfig, onSort }: PlayerTableHeaderProps) => (
   <thead className="block w-full">
     <tr
       className={cn(
-        "bg-gray-1100 rounded-t-xl px-2.5 py-3 flex items-center w-full min-w-max md:min-w-full justify-between",
+        "bg-gray-1200 rounded-t-xl px-2.5 py-3 flex items-center w-full min-w-max md:min-w-full justify-between",
       )}
     >
       {PLAYER_TABLE_COLUMNS.map((col) => {

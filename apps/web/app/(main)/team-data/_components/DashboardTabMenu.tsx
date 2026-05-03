@@ -51,8 +51,8 @@ const DashboardTabMenu = ({
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => onChange(type)}
                 className={cn(
-                  "transition-colors cursor-pointer h-4.75",
-                  isMobile ? "w-full" : "w-25",
+                  "transition-colors cursor-pointer h-auto text-base font-semibold",
+                  isMobile ? "w-full" : "w-28",
                   isActive
                     ? "text-Label-AccentPrimary"
                     : "text-white hover:text-gray-300",

@@ -33,7 +33,7 @@ export function MatchRecordPageHeader({
       )}
     >
       {/* md 이상에서 w-full이면 flex 한 줄에서 제목이 100%를 먹어 폼이 뷰포트 밖으로 밀림 → md:w-auto */}
-      <h1 className="w-full shrink-0 text-[1.75rem] font-extrabold text-Label-Primary md:w-auto md:shrink-0">
+      <h1 className="w-full shrink-0 text-2xl md:text-[1.75rem] font-extrabold text-Label-Primary md:w-auto md:shrink-0">
         경기 기록
       </h1>
 

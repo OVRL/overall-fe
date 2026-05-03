@@ -31,7 +31,7 @@ const PlayerTableRow = memo(function PlayerTableRow({
     <tr
       className={cn(
         ROW_BASE_CLASS,
-        "flex items-center w-full min-w-max md:min-w-full justify-between pl-2 pr-1.5 relative",
+        "bg-gray-1300 h-[42px] flex items-center w-full min-w-max md:min-w-full justify-between pl-2 pr-1.5 relative",
         "after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-Fill_Quatiary after:z-50",
       )}
       onClick={() => onPlayerClick?.(player)}
