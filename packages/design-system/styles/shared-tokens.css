@@ -108,6 +108,17 @@
   --color-green-800: oklch(83.01% 0.2176 128.2);
   --color-green-900: oklch(68.3% 0.1807 128.8);
 
+  /* Primary Alpha Tokens (#B8FF12 at various opacities) */
+  --color-PrimaryAlpha10: oklch(91.85% 0.2357 127.4 / 0.10); /* #B8FF12 10% */
+  --color-PrimaryAlpha20: oklch(91.85% 0.2357 127.4 / 0.20); /* #B8FF12 20% */
+  --color-PrimaryAlpha30: oklch(91.85% 0.2357 127.4 / 0.30); /* #B8FF12 30% */
+  --color-PrimaryAlpha40: oklch(91.85% 0.2357 127.4 / 0.40); /* #B8FF12 40% */
+  --color-PrimaryAlpha50: oklch(91.85% 0.2357 127.4 / 0.50); /* #B8FF12 50% */
+  --color-PrimaryAlpha60: oklch(91.85% 0.2357 127.4 / 0.60); /* #B8FF12 60% */
+  --color-PrimaryAlpha70: oklch(91.85% 0.2357 127.4 / 0.70); /* #B8FF12 70% */
+  --color-PrimaryAlpha80: oklch(91.85% 0.2357 127.4 / 0.80); /* #B8FF12 80% */
+  --color-PrimaryAlpha90: oklch(91.85% 0.2357 127.4 / 0.90); /* #B8FF12 90% */
+
   --color-blue-300: oklch(92.06% 0.0384 277.6);
   --color-blue-400: oklch(75.73% 0.1248 275.5);
   --color-blue-500: oklch(60.41% 0.2144 271.1);

@@ -17,7 +17,7 @@ const buttonVariants = cva(
         s: "h-9.5 w-full text-xs rounded-xl",
         m: "h-10 w-full text-sm rounded-xl",
         l: "h-12 w-full text-sm rounded-[0.625rem]",
-        xl: "h-14 w-full text-lg rounded-sm",
+        xl: "h-14 w-full text-lg font-semibold rounded-sm",
       },
       logo: {
         true: "gap-2.5",

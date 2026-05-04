@@ -48,11 +48,11 @@ const DefaultImageModal = ({
   }, []);
 
   return (
-    <ModalLayout title="선수 추가">
+    <ModalLayout title="기본 이미지 변경" wrapperClassName="overflow-x-hidden">
       <div className="flex-1 flex flex-col gap-y-12">
         <div
           ref={scrollContainerRef}
-          className="flex gap-x-3 overflow-x-auto pb-2 min-w-0"
+          className="flex gap-x-3 overflow-x-auto -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-0"
         >
           {defaultImages.map((image) => (
             <div
@@ -66,7 +66,13 @@ const DefaultImageModal = ({
               )}
               onClick={() => setSelectedImage(image)}
             >
-              <Image src={image} alt="player" width={80} height={80} />
+              <Image
+                src={image}
+                alt="player"
+                width={132}
+                height={132}
+                className="w-[120px] h-[120px] md:w-[132px] md:h-[132px]"
+              />
             </div>
           ))}
         </div>

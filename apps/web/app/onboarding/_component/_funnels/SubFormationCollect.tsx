@@ -27,7 +27,7 @@ const SubFormationCollect = ({
   const isComplete = subPositions.length === 2;
 
   return (
-    <section className="flex flex-col h-full overflow-hidden pb-12">
+    <section className="flex flex-col h-full overflow-visible pb-12">
       <div className="flex-1 flex flex-col min-h-0">
         <OnboardingTitle>
           {data.name} 선수! <br />
@@ -42,7 +42,7 @@ const SubFormationCollect = ({
                 setSubPositions(newPositions);
               }
             }}
-            className="h-auto w-full md:max-w-layout"
+            className="w-full h-auto md:h-[50vh] md:w-auto md:max-w-none"
             multiSelect={true}
             disabledPositions={mainPosition ? [mainPosition] : []}
           />

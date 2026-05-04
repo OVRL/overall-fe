@@ -42,7 +42,7 @@ const ImageUploader = ({
     (resolvedSrc != null && isPlayerPlaceholderWebpSrc(resolvedSrc));
 
   return (
-    <div className={`flex flex-col gap-y-12 px-4 ${className || ""}`}>
+    <div className={`flex flex-col px-4 items-center ${className || ""}`}>
       <input
         ref={fileInputRef}
         type="file"
@@ -50,57 +50,58 @@ const ImageUploader = ({
         accept="image/*"
         onChange={onHiddenFileChange}
       />
-      {/* previewHeight: 뷰포트에 맞춘 최대 한 변 — height만 주면 가로(size-50)와 불일치해 세로로 찌그러진 프레임이 됨 → 정사각형 유지 */}
+      {/* 이미지 + 버튼을 같은 너비 컨테이너로 묶음
+          모바일: previewHeight 기반 너비 상한 유지
+          PC(md+): 화면 높이의 30% = 30dvh 로 고정 */}
       <div
-        className={
-          previewHeight
-            ? "aspect-square w-full max-w-125 shrink-0 bg-bg-modal rounded-lg overflow-hidden relative mx-auto"
-            : "size-125 max-w-full shrink-0 bg-bg-modal rounded-lg overflow-hidden relative mx-auto"
-        }
+        className="w-full md:w-[30dvh] flex flex-col gap-y-6 mx-auto"
         style={
           previewHeight
-            ? { width: `min(100%, min(31.25rem, ${previewHeight}))` }
+            ? { maxWidth: `min(100%, min(31.25rem, ${previewHeight}))` }
             : undefined
         }
       >
-        {resolvedSrc ? (
-          <Image
-            src={resolvedSrc}
-            alt="Preview"
-            fill
-            priority={priority}
-            sizes="(max-width: 48rem) min(calc(100vw - 2rem), 31.25rem), 31.25rem"
-            quality={100}
-            className="object-cover"
-            unoptimized={unoptimized}
-          />
-        ) : null}
-      </div>
-      <div className="flex flex-col gap-2 h-23.5">
-        <Button
-          variant="line"
-          size="m"
-          className="flex-1"
-          type="button"
-          onClick={pickFromAlbum}
-        >
-          사진 불러오기
-        </Button>
-        <Button
-          variant="line"
-          size="m"
-          className="flex-1"
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            pickDefaultImage();
-          }}
-        >
-          기본 이미지 변경
-        </Button>
+        <div className="aspect-square w-full shrink-0 bg-bg-modal rounded-3xl overflow-hidden relative">
+          {resolvedSrc ? (
+            <Image
+              src={resolvedSrc}
+              alt="Preview"
+              fill
+              priority={priority}
+              sizes="(max-width: 48rem) min(calc(100vw - 2rem), 31.25rem), 30dvh"
+              quality={100}
+              className="object-cover"
+              unoptimized={unoptimized}
+            />
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-2 h-23.5">
+          <Button
+            variant="line"
+            size="m"
+            className="flex-1"
+            type="button"
+            onClick={pickFromAlbum}
+          >
+            사진 불러오기
+          </Button>
+          <Button
+            variant="line"
+            size="m"
+            className="flex-1"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              pickDefaultImage();
+            }}
+          >
+            기본 이미지 변경
+          </Button>
+        </div>
       </div>
     </div>
   );
+
 };
 
 export default ImageUploader;

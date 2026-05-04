@@ -13,6 +13,50 @@ import { useBridgeRouter } from "@/hooks/bridge/useBridgeRouter";
  * 필수 동의 후 회원가입 온보딩으로 이동합니다.
  * 소셜 미가입(콜백에서 `/privacy-consent`로 진입) 시에도 동일하며, 이때 sessionStorage 소셜 스냅샷은 온보딩에서 그대로 프리필·lockedFields에 사용됩니다.
  */
+
+/** 피그마 디자인 기반 커스텀 체크박스 */
+function CustomCheckbox({
+  checked,
+  onChange,
+  ariaLabel,
+  className,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={onChange}
+      className={cn(
+        "size-[18px] shrink-0 rounded-[3px] border-2 flex items-center justify-center transition-all duration-150",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B8FF12]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-1400 cursor-pointer",
+        checked
+          ? "bg-[#B8FF12] border-[#B8FF12]"
+          : "bg-transparent border-gray-600",
+        className,
+      )}
+    >
+      {checked && (
+        <svg viewBox="0 0 11 9" className="w-2.5 h-2" fill="none" aria-hidden>
+          <path
+            d="M1 4L4 7.5L10 1"
+            stroke="black"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 export default function PrivacyConsentClient() {
   const router = useBridgeRouter();
   const [terms, setTerms] = useState(false);
@@ -32,13 +76,6 @@ export default function PrivacyConsentClient() {
   const toggleMaster = () => {
     setAll(!allChecked);
   };
-
-  const rowCheckboxClass = cn(
-    "size-6 shrink-0 rounded border-2 border-Fill_Quatiary",
-    "accent-(--color-green-600) focus-visible:outline-none focus-visible:ring-2",
-    "focus-visible:ring-Label-AccentPrimary/40 focus-visible:ring-offset-2",
-    "focus-visible:ring-offset-[var(--color-surface-card)]",
-  );
 
   return (
     <div className="flex flex-col min-h-dvh bg-black text-Label-Primary">
@@ -71,23 +108,24 @@ export default function PrivacyConsentClient() {
           </header>
 
           {/* 전체 동의 */}
-          <section className="">
-            <label className="flex gap-3 items-start cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={allChecked}
-                className={cn(rowCheckboxClass, "mt-0.5")}
-                onChange={toggleMaster}
-                aria-label="전체 동의"
-              />
-              <div className="flex flex-col gap-2 min-w-0">
+          <section>
+            <div
+              className="flex flex-col gap-2 cursor-pointer select-none"
+              onClick={toggleMaster}
+            >
+              <div className="flex gap-3 items-center">
+                <CustomCheckbox
+                  checked={allChecked}
+                  onChange={toggleMaster}
+                  ariaLabel="전체 동의"
+                />
                 <span className="text-lg font-bold text-white">전체 동의</span>
-                <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                  전체동의는 선택목적에 대한 동의를 포함하고 있으며, 선택목적에
-                  대한 동의를 거부해도 서비스 이용이 가능합니다.
-                </p>
               </div>
-            </label>
+              <p className="text-sm font-medium text-gray-700 leading-relaxed ml-[30px]">
+                전체동의는 선택목적에 대한 동의를 포함하고 있으며, 선택목적에
+                대한 동의를 거부해도 서비스 이용이 가능합니다.
+              </p>
+            </div>
           </section>
 
           {/* 개별 항목 */}
@@ -99,7 +137,6 @@ export default function PrivacyConsentClient() {
               badgeVariant="required"
               label="개인정보 수집 및 이용"
               href="/privacy-policy"
-              checkboxClass={rowCheckboxClass}
             />
             <ConsentRow
               checked={terms}
@@ -108,9 +145,7 @@ export default function PrivacyConsentClient() {
               badgeVariant="required"
               label="이용약관"
               href="/terms"
-              checkboxClass={rowCheckboxClass}
             />
-
             <ConsentRow
               checked={marketing}
               onCheckedChange={setMarketing}
@@ -118,7 +153,6 @@ export default function PrivacyConsentClient() {
               badgeVariant="optional"
               label="마케팅 정보 수신"
               href="/marketing-notice"
-              checkboxClass={rowCheckboxClass}
             />
           </ul>
 
@@ -150,7 +184,6 @@ function ConsentRow({
   badgeVariant,
   label,
   href,
-  checkboxClass,
 }: {
   checked: boolean;
   onCheckedChange: (v: boolean) => void;
@@ -158,32 +191,33 @@ function ConsentRow({
   badgeVariant: "required" | "optional";
   label: string;
   href: string;
-  checkboxClass: string;
 }) {
   return (
     <li className="list-none">
       <div className="flex items-center gap-3">
-        <label className="flex flex-1 items-center gap-3 cursor-pointer min-w-0 select-none">
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={(e) => onCheckedChange(e.target.checked)}
-            className={checkboxClass}
-          />
+        <CustomCheckbox
+          checked={checked}
+          onChange={() => onCheckedChange(!checked)}
+        />
+        <button
+          type="button"
+          className="flex flex-1 items-center cursor-pointer min-w-0 select-none text-left"
+          onClick={() => onCheckedChange(!checked)}
+        >
           <span className="text-sm text-white leading-snug min-w-0">
             <span
               className={cn(
-                "font-medium",
+                "font-semibold",
                 badgeVariant === "required"
                   ? "text-[#B8FF12]"
-                  : "text-gray-100",
+                  : "text-gray-400",
               )}
             >
               [{badge}]
             </span>{" "}
             {label}
           </span>
-        </label>
+        </button>
         <Link
           href={href}
           className="shrink-0 hover:bg-Fill_Quatiary/20 transition-colors text-gray-800 flex items-center"

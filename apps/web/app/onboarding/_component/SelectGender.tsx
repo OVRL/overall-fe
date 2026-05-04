@@ -1,10 +1,14 @@
 import { buttonVariants } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   gender: "M" | "W";
   setGender: (gender: "M" | "W") => void;
   disabled?: boolean;
 };
+
+const selectedClass =
+  "bg-[var(--color-PrimaryAlpha20)] text-Label-AccentPrimary border-transparent";
 
 const SelectGender = ({ gender, setGender, disabled = false }: Props) => {
   const toggleGender = (gender: "M" | "W") => {
@@ -29,10 +33,10 @@ const SelectGender = ({ gender, setGender, disabled = false }: Props) => {
             onChange={() => toggleGender("M")}
           />
           <div
-            className={buttonVariants({
-              variant: gender === "M" ? "primary" : "line",
-              size: "m",
-            })}
+            className={cn(
+              buttonVariants({ variant: "line", size: "m" }),
+              gender === "M" && selectedClass,
+            )}
           >
             남
           </div>
@@ -46,10 +50,10 @@ const SelectGender = ({ gender, setGender, disabled = false }: Props) => {
             onChange={() => toggleGender("W")}
           />
           <div
-            className={buttonVariants({
-              variant: gender === "W" ? "primary" : "line",
-              size: "m",
-            })}
+            className={cn(
+              buttonVariants({ variant: "line", size: "m" }),
+              gender === "W" && selectedClass,
+            )}
           >
             여
           </div>

@@ -1,9 +1,13 @@
 import { buttonVariants } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   mainFoot: "L" | "R" | "B";
   setMainFoot: (mainFoot: "L" | "R" | "B") => void;
 };
+
+const selectedClass =
+  "bg-[var(--color-PrimaryAlpha20)] text-Label-AccentPrimary border-transparent";
 
 const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
   const toggleFoot = (foot: "L" | "R" | "B") => {
@@ -23,10 +27,10 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
             onChange={() => toggleFoot("L")}
           />
           <div
-            className={buttonVariants({
-              variant: mainFoot === "L" ? "primary" : "line",
-              size: "m",
-            })}
+            className={cn(
+              buttonVariants({ variant: "line", size: "m" }),
+              mainFoot === "L" && selectedClass,
+            )}
           >
             왼발
           </div>
@@ -39,10 +43,10 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
             onChange={() => toggleFoot("B")}
           />
           <div
-            className={buttonVariants({
-              variant: mainFoot === "B" ? "primary" : "line",
-              size: "m",
-            })}
+            className={cn(
+              buttonVariants({ variant: "line", size: "m" }),
+              mainFoot === "B" && selectedClass,
+            )}
           >
             양발
           </div>
@@ -55,10 +59,10 @@ const SelectMainFoot = ({ mainFoot, setMainFoot }: Props) => {
             onChange={() => toggleFoot("R")}
           />
           <div
-            className={buttonVariants({
-              variant: mainFoot === "R" ? "primary" : "line",
-              size: "m",
-            })}
+            className={cn(
+              buttonVariants({ variant: "line", size: "m" }),
+              mainFoot === "R" && selectedClass,
+            )}
           >
             오른발
           </div>

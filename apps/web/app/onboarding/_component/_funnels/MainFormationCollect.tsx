@@ -22,7 +22,7 @@ const MainFormationCollect = ({
     onNext();
   };
   return (
-    <section className="flex flex-col h-full overflow-hidden pb-12">
+    <section className="flex flex-col h-full overflow-visible pb-12">
       <div className="flex-1 flex flex-col min-h-0">
         <OnboardingTitle>
           {data.name} 선수! <br />
@@ -33,7 +33,7 @@ const MainFormationCollect = ({
           <OnboardingFormationSelector
             value={mainPosition ? [mainPosition] : []}
             onChange={(positions) => setMainPosition(positions[0])}
-            className="h-auto w-full md:max-w-layout"
+            className="w-full h-auto md:h-[50vh] md:w-auto md:max-w-none"
           />
         </div>
       </div>
