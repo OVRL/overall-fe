@@ -27,6 +27,8 @@ export const handleBridgeMessage = async (
     onClearNativeWebChromeIfMode?: (mode: "global" | "topbar") => void;
     /** WebView 내 소셜 버튼 → 네이티브 SDK/시스템 브라우저로 OAuth (구글 WebView 차단 대응) */
     onStartNativeSocialLogin?: (provider: NativeSocialProvider) => void;
+    /** 웹 모달 오버레이 시 리퀴드 하단 네브바 숨김(true) / 복귀(false) */
+    onSetLiquidNavModalOverlay?: (hidden: boolean) => void;
   }
 ) => {
   const { type, payload, reqId } = message;
@@ -166,7 +168,7 @@ export const handleBridgeMessage = async (
         options?.onSetNativeWebChrome?.({
           mode: "global",
           global: {
-            showHamburger: payload.showHamburger !== false,
+            showTeamManagement: payload.showTeamManagement !== false,
           },
         });
         break;
@@ -182,6 +184,12 @@ export const handleBridgeMessage = async (
             p,
           );
         }
+        break;
+      }
+
+      case "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY": {
+        const hidden = payload?.hidden === true;
+        options?.onSetLiquidNavModalOverlay?.(hidden);
         break;
       }
 

@@ -1,10 +1,10 @@
 /**
- * 네이티브 글로벌 헤더(로고·햄버거) 탭 → 웹 콜백
+ * 네이티브 글로벌 헤더(로고·팀 관리) 탭 → 웹 콜백
  */
 
 type Handlers = {
   onLogo?: () => void;
-  onHamburger?: () => void;
+  onTeamManagement?: () => void;
 };
 
 let handlers: Handlers = {};
@@ -32,8 +32,8 @@ export function tryHandleNativeGlobalHeaderPressFromMessageData(
       handlers.onLogo?.();
       return true;
     }
-    if (action === "hamburger") {
-      handlers.onHamburger?.();
+    if (action === "team_management") {
+      handlers.onTeamManagement?.();
       return true;
     }
     return false;

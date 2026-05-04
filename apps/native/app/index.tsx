@@ -52,6 +52,7 @@ import { getWebAppOrigin } from "@/lib/webAuthConfig";
 import { APPLICATION_NAME_FOR_USER_AGENT } from "../utils/webViewUserAgent";
 import { useWebViewPhotoFlow } from "@/hooks/useWebViewPhotoFlow";
 import { NativeLiquidBottomNav } from "@/components/NativeLiquidBottomNav";
+import { AnimatedLiquidBottomNavShell } from "@/components/native-liquid-bottom-nav/AnimatedLiquidBottomNavShell";
 import { isNativeBottomNavVisiblePath } from "@/lib/isNativeBottomNavVisiblePath";
 
 /** 앱 루트·웹뷰 뒤 캔버스 — 다크 bg-primary 와 동일 (스플래시 전환 시 색 튐 방지) */
@@ -139,6 +140,8 @@ export default function App() {
   );
   const [nativeChrome, setNativeChrome] = useState<NativeWebChrome | null>(null);
   const [webPathname, setWebPathname] = useState("");
+  const [liquidNavModalOverlayHidden, setLiquidNavModalOverlayHidden] =
+    useState(false);
 
   const {
     isCameraVisible,
@@ -156,6 +159,12 @@ export default function App() {
     const js = `window.postMessage(${JSON.stringify(payload)}, '*'); true;`;
     webViewRef.current?.injectJavaScript(js);
   }, []);
+
+  useEffect(() => {
+    if (!isNativeBottomNavVisiblePath(webPathname)) {
+      setLiquidNavModalOverlayHidden(false);
+    }
+  }, [webPathname]);
 
   useEffect(() => {
     if (FORCE_NATIVE_LOGIN_UI_PREVIEW) return;
@@ -342,6 +351,7 @@ export default function App() {
             onStartNativeSocialLogin: (provider) => {
               void runProvider(provider);
             },
+            onSetLiquidNavModalOverlay: setLiquidNavModalOverlayHidden,
           },
         );
       } catch (e) {
@@ -441,10 +451,10 @@ export default function App() {
                     payload: { action: "logo" },
                   })
                 }
-                onHamburgerPress={() =>
+                onTeamManagementPress={() =>
                   injectWebChromeMessage({
                     type: "NATIVE_GLOBAL_HEADER_PRESS",
-                    payload: { action: "hamburger" },
+                    payload: { action: "team_management" },
                   })
                 }
               />
@@ -521,15 +531,17 @@ export default function App() {
             applicationNameForUserAgent={APPLICATION_NAME_FOR_USER_AGENT}
           />
           {isNativeBottomNavVisiblePath(webPathname) ? (
-            <NativeLiquidBottomNav
-              pathname={webPathname}
-              onNavigateToPath={navigateWebViewToPath}
-              onLiquidNavFabPress={() =>
-                injectWebChromeMessage({
-                  type: "NATIVE_LIQUID_NAV_FAB_PRESS",
-                })
-              }
-            />
+            <AnimatedLiquidBottomNavShell hidden={liquidNavModalOverlayHidden}>
+              <NativeLiquidBottomNav
+                pathname={webPathname}
+                onNavigateToPath={navigateWebViewToPath}
+                onLiquidNavFabPress={() =>
+                  injectWebChromeMessage({
+                    type: "NATIVE_LIQUID_NAV_FAB_PRESS",
+                  })
+                }
+              />
+            </AnimatedLiquidBottomNavShell>
           ) : null}
           </View>
         ) : showPrepFallback ? (

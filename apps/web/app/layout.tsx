@@ -9,6 +9,7 @@ import MomResultOverlayHost from "@/components/ui/mom/MomResultOverlayHost";
 import { Toaster } from "@/components/ui/shadcn/sonner";
 import { TransitionProvider } from "@/components/providers/TransitionProvider";
 import { NativeLiquidNavFabRegisterGameBridge } from "@/components/providers/NativeLiquidNavFabRegisterGameBridge";
+import { NativeLiquidNavModalOverlayBridge } from "@/components/providers/NativeLiquidNavModalOverlayBridge";
 import { PageTransition } from "@/components/providers/PageTransition";
 import Script from "next/script";
 import { env } from "@/lib/env";
@@ -154,6 +155,7 @@ export default async function RootLayout({
         {/* End Google Tag Manager (noscript) */}
         <TransitionProvider>
           <NativeLiquidNavFabRegisterGameBridge />
+          <NativeLiquidNavModalOverlayBridge />
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
