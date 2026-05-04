@@ -72,7 +72,7 @@ function ProfilePersonalRelayBody({ userId }: { userId: number }) {
     <div className="bg-gray-1300 flex flex-col items-start p-8 rounded-2xl shrink-0 w-full relative">
       <div className="flex flex-col gap-6 items-start w-full">
         <div className="relative shrink-0 w-full flex justify-between items-center">
-          <p className="leading-[normal] not-italic relative shrink-0 text-[1.75rem] font-bold text-white whitespace-nowrap">
+          <p className="leading-[normal] not-italic relative shrink-0 text-2xl font-bold text-white whitespace-nowrap">
             {user.name || "—"}
           </p>
           <Button

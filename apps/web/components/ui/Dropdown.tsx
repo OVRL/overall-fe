@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 
 interface DropdownProps {
-  options: { label: string; value: string }[];
+  options: { label: string; value: string; icon?: string }[];
   value?: string;
   onChange: (value: string) => void;
   /** true면 목록 열기·선택 불가 */
@@ -105,7 +105,9 @@ const Dropdown = ({
   const listRef = useRef<HTMLDivElement>(null);
   const isKeyboardActionRef = useRef<boolean>(false);
 
-  const selectedLabel = options?.find((opt) => opt.value === value)?.label;
+  const selectedOption = options?.find((opt) => opt.value === value);
+  const selectedLabel = selectedOption?.label;
+  const selectedIcon = selectedOption?.icon;
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
@@ -237,7 +239,7 @@ const Dropdown = ({
         aria-selected={value === option.value}
         tabIndex={-1}
         className={cn(
-          "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none",
+          "w-full text-left px-3 py-2.5 text-[14px] rounded-[0.625rem] transition-all outline-none flex items-center gap-2.5",
           value === option.value ? "text-Fill_AccentPrimary" : "text-white/60",
           focusedIndex === index && "bg-white/10",
         )}
@@ -246,7 +248,12 @@ const Dropdown = ({
           setFocusedIndex(index);
         }}
       >
-        {option.label}
+        {option.icon && (
+          <div className="relative size-6 shrink-0 overflow-hidden rounded-full">
+            <img src={option.icon} alt="" className="size-full object-cover" />
+          </div>
+        )}
+        <span className="truncate">{option.label}</span>
       </button>
     ));
 
@@ -327,21 +334,28 @@ const Dropdown = ({
           aria-label={ariaLabelledBy ? undefined : placeholder}
           aria-labelledby={ariaLabelledBy}
           className={cn(
-            "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.625rem] transition-colors duration-200",
+            "flex items-center justify-between w-full min-w-0 h-12 pl-4 pr-2 py-3 border rounded-[0.875rem] transition-colors duration-200",
             "bg-gray-900 border-transparent",
             isOpen ? "border-Fill_AccentPrimary" : "",
             disabled && "opacity-60 cursor-not-allowed",
             triggerClassName,
           )}
         >
-          <span
-            className={cn(
-              "text-sm font-normal truncate w-25.25 text-left",
-              selectedLabel ? "text-Label-Secondary" : "text-Label-Primary",
+          <div className="flex items-center gap-3 overflow-hidden">
+            {selectedIcon && (
+              <div className="relative size-7 shrink-0 overflow-hidden rounded-full">
+                <img src={selectedIcon} alt="" className="size-full object-cover" />
+              </div>
             )}
-          >
-            {selectedLabel || placeholder}
-          </span>
+            <span
+              className={cn(
+                "text-base font-bold truncate text-left",
+                selectedLabel ? "text-white" : "text-Label-Primary",
+              )}
+            >
+              {selectedLabel || placeholder}
+            </span>
+          </div>
           <motion.div
             animate={{ rotate: 0 }}
             transition={{ duration: 0.2 }}

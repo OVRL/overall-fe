@@ -7,7 +7,6 @@ const COLUMN_LABELS = [
   "출석",
   "득점",
   "도움",
-  "기점",
   "클린시트",
   "승/무/패",
   "승률",
@@ -23,7 +22,6 @@ const DUMMY_ROWS = [
     attendance: "12",
     goals: "5",
     assists: "3",
-    keyPoints: "8",
     cleanSheets: "1",
     wdl: "6/3/2",
     winRate: "55%",
@@ -37,7 +35,6 @@ const DUMMY_ROWS = [
     attendance: "7",
     goals: "3",
     assists: "4",
-    keyPoints: "10",
     cleanSheets: "2",
     wdl: "5/4/1",
     winRate: "70%",
@@ -51,7 +48,6 @@ const DUMMY_ROWS = [
     attendance: "9",
     goals: "2",
     assists: "6",
-    keyPoints: "7",
     cleanSheets: "0",
     wdl: "4/2/3",
     winRate: "44%",
@@ -65,7 +61,6 @@ const DUMMY_ROWS = [
     attendance: "5",
     goals: "1",
     assists: "1",
-    keyPoints: "4",
     cleanSheets: "0",
     wdl: "2/1/2",
     winRate: "40%",
@@ -104,8 +99,8 @@ export default function SeasonIntegratedRecords() {
         </h2>
       </div>
 
-      <div className="rounded-3xl border border-gray-1100 bg-gray-1200 px-4 pt-3 pb-4">
-        <div className="-mx-4 overflow-x-auto px-4 scrollbar-thin md:mx-0 md:px-0">
+      <div className="rounded-3xl border border-gray-1100 bg-gray-1300 p-0">
+        <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full min-w-max border-collapse text-center">
             <thead>
               <tr className="border-b border-gray-1000">
@@ -113,7 +108,7 @@ export default function SeasonIntegratedRecords() {
                   <th
                     key={label}
                     scope="col"
-                    className="min-w-12 px-1 py-6 text-[0.8125rem] font-normal whitespace-nowrap text-gray-800 first:pl-6 last:pr-6"
+                    className="min-w-12 px-1 py-6 text-[0.8125rem] font-normal whitespace-nowrap text-gray-800 first:pl-4 last:pr-4"
                   >
                     {label}
                   </th>
@@ -122,8 +117,8 @@ export default function SeasonIntegratedRecords() {
             </thead>
             <tbody>
               {DUMMY_ROWS.map((row) => (
-                <tr key={row.year} className="border-b border-gray-1000">
-                  <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-normal whitespace-nowrap text-Label-Tertiary first:pl-6">
+                <tr key={row.year} className="border-b border-gray-1000 last:border-b-0">
+                  <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-normal whitespace-nowrap text-Label-Tertiary first:pl-4">
                     {row.year}
                   </td>
                   <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
@@ -137,9 +132,6 @@ export default function SeasonIntegratedRecords() {
                   </td>
                   <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
                     {row.assists}
-                  </td>
-                  <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
-                    {row.keyPoints}
                   </td>
                   <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
                     {row.cleanSheets}
@@ -156,7 +148,7 @@ export default function SeasonIntegratedRecords() {
                   <td className="min-w-12 px-1 py-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
                     {row.mom3}
                   </td>
-                  <td className="min-w-12 px-1 py-6 pr-6 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
+                  <td className="min-w-12 px-1 py-6 pr-4 text-[0.9375rem] font-medium whitespace-nowrap text-Label-Tertiary">
                     {row.mom8}
                   </td>
                 </tr>
