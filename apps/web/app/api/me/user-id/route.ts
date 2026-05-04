@@ -8,6 +8,15 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const userIdStr = cookieStore.get("userId")?.value;
+    if (process.env.NODE_ENV === "development") {
+      const hasAccess = cookieStore.get("accessToken")?.value != null;
+      const hasRefresh = cookieStore.get("refreshToken")?.value != null;
+      console.log("[OVRL login/social][api/me/user-id]", {
+        hasUserIdCookie: userIdStr != null && userIdStr.length > 0,
+        hasAccessCookie: hasAccess,
+        hasRefreshCookie: hasRefresh,
+      });
+    }
     if (!userIdStr) {
       return NextResponse.json({ userId: null, error: "쿠키에 userId 없음" }, { status: 200 });
     }

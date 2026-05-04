@@ -1,11 +1,23 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import SocialButtons from "@/components/ui/SocialButtons";
 import LoginLogo from "@/components/login/LoginLogo";
+import { isAccessTokenExpired } from "@/lib/auth/jwtAccess";
 import { SocialOAuthCallbackToast } from "./SocialOAuthCallbackToast";
+import { LoginSocialSessionRedirectGuard } from "./LoginSocialSessionRedirectGuard";
 
-export default function LoginSocialPage() {
+/** 유효한 access 쿠키가 있으면 홈으로. 캐시 복원만 있는 뒤로가기는 `LoginSocialSessionRedirectGuard`가 `/api/me/user-id`로 보정. */
+export default async function LoginSocialPage() {
+  const cookieStore = await cookies();
+  const access = cookieStore.get("accessToken")?.value;
+  if (access != null && !isAccessTokenExpired(access)) {
+    redirect("/");
+  }
+
   return (
     <main className="flex flex-col h-full w-full justify-between items-center bg-linear-to-br from-primary-light via-dark-olive to-black relative overflow-hidden pt-safe">
+      <LoginSocialSessionRedirectGuard />
       <Suspense fallback={null}>
         <SocialOAuthCallbackToast />
       </Suspense>

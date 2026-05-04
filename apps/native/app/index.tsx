@@ -35,12 +35,10 @@ import type { NativeWebChrome } from "@/types/nativeChrome";
 import { BridgeMessage } from "../types/bridge";
 import { handleBridgeMessage } from "../utils/bridgeHandler";
 import { useWebViewPreAuth } from "@/hooks/useWebViewPreAuth";
-import { buildDevCookieHeader } from "@/lib/devWebViewCookies";
 import InteractiveSplashScreen from "../components/InteractiveSplashScreen";
 import { handleMainAppWebViewNavigationStateChange } from "@/lib/mainWebViewNavigationEffects";
 import {
   hasNativeAuthSession,
-  injectStoredAuthCookiesForWebView,
   shouldClearNativeAuthFromNavigation,
 } from "@/lib/nativeWebSession";
 import { useNativeSocialLogin } from "@/hooks/useNativeSocialLogin";
@@ -480,16 +478,9 @@ export default function App() {
           <View style={styles.webviewColumn}>
           <WebView
             ref={webViewRef}
-            source={
-              __DEV__
-                ? {
-                    uri: webOrigin,
-                    headers: {
-                      Cookie: buildDevCookieHeader(),
-                    },
-                  }
-                : { uri: webOrigin }
-            }
+            /* 첫 요청에 `buildDevCookieHeader()` 를 붙이면 만료·도메인 불일치 토큰이 proxy를 깨고
+             * `/api/auth/clear-session?redirect=/login/social` 로 떨어짐. 세션은 `useWebViewPreAuth` 주입만 사용. */
+            source={{ uri: webOrigin }}
             style={styles.webview}
             javaScriptEnabled={true}
             onMessage={onMessage}

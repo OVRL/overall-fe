@@ -109,7 +109,7 @@ export function SocialCallbackAutoLogin({
             } catch {
               // ignore
             }
-            window.location.href = "/";
+            window.location.replace("/");
           } catch {
             socialLoginStartedForAccessToken.delete(accessToken);
             window.location.replace("/login/social");

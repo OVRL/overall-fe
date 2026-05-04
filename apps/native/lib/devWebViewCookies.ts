@@ -1,6 +1,7 @@
 /**
- * 로컬(`__DEV__` + localhost/10.0.2.2)에서 WebView **첫 요청**에 붙일 Cookie.
- * `buildDevCookieHeader()`는 `name=value`만 사용합니다. 토큰·팀 ID는 여기서 갱신하세요.
+ * 로컬에서 **수동**으로 Cookie 헤더 문자열이 필요할 때만 사용 (예: curl·별도 스크립트).
+ * 메인 앱 WebView는 `useWebViewPreAuth` → `injectStoredAuthCookiesForWebView` 만 쓰고,
+ * 여기 값을 첫 요청 헤더로 붙이면 만료 토큰으로 Next `proxy` 가 세션을 버리고 `/login/social` 로 보낼 수 있음.
  */
 export const DEV_COOKIE_JSON = [
   {
