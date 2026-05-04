@@ -40,11 +40,13 @@ export function GlobalHeader(props: GlobalHeaderProps) {
   useNativeGlobalHeaderSync(
     isNativeApp
       ? {
-          showHamburger,
+          showTeamManagement: showHamburger,
           onLogoPress: () => {
             void bridgeRouter.push("/");
           },
-          onHamburgerPress: toggleMenu,
+          onTeamManagementPress: () => {
+            void bridgeRouter.push("/team-management");
+          },
         }
       : null,
     bridge,

@@ -10,7 +10,8 @@ export type BridgeActionType =
   | "SET_WEBVIEW_CHROME"
   | "SET_NATIVE_TOPBAR"
   | "SET_NATIVE_GLOBAL_HEADER"
-  | "START_NATIVE_SOCIAL_LOGIN";
+  | "START_NATIVE_SOCIAL_LOGIN"
+  | "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY";
 
 export interface BridgePayload {
   url?: string;
@@ -30,10 +31,12 @@ export interface BridgePayload {
   rightMode?: "none" | "label";
   rightLabel?: string | null;
   rightDisabled?: boolean;
-  /** 글로벌 헤더 전용 */
-  showHamburger?: boolean;
+  /** 글로벌 헤더 전용 — 우측 팀 관리 아이콘 표시 여부 */
+  showTeamManagement?: boolean;
   /** START_NATIVE_SOCIAL_LOGIN */
   provider?: "kakao" | "naver" | "google";
+  /** SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY — true면 하단 네브바를 모달 뒤로 슬라이드 아웃 */
+  hidden?: boolean;
   [key: string]: any;
 }
 

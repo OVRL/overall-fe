@@ -2,6 +2,7 @@ import { useLocalSearchParams, Stack, useNavigation } from "expo-router";
 import { WebView } from "react-native-webview";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { NativeLiquidBottomNav } from "@/components/NativeLiquidBottomNav";
+import { AnimatedLiquidBottomNavShell } from "@/components/native-liquid-bottom-nav/AnimatedLiquidBottomNavShell";
 import { isNativeBottomNavVisiblePath } from "@/lib/isNativeBottomNavVisiblePath";
 import { StyleSheet, View, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -51,6 +52,9 @@ export default function WebViewScreen() {
     return "";
   });
 
+  const [liquidNavModalOverlayHidden, setLiquidNavModalOverlayHidden] =
+    useState(false);
+
   const injectWebChromeMessage = useCallback((message: object) => {
     const payload = JSON.stringify(message);
     const js = `window.postMessage(${JSON.stringify(payload)}, '*'); true;`;
@@ -89,6 +93,12 @@ export default function WebViewScreen() {
     }
   }, [url, webOrigin]);
 
+  useEffect(() => {
+    if (!isNativeBottomNavVisiblePath(webPathname)) {
+      setLiquidNavModalOverlayHidden(false);
+    }
+  }, [webPathname]);
+
   return (
     <View style={[styles.screenRoot, { backgroundColor }]}>
       <StatusBar barStyle="light-content" backgroundColor={backgroundColor} />
@@ -125,10 +135,10 @@ export default function WebViewScreen() {
                 payload: { action: "logo" },
               })
             }
-            onHamburgerPress={() =>
+            onTeamManagementPress={() =>
               injectWebChromeMessage({
                 type: "NATIVE_GLOBAL_HEADER_PRESS",
-                payload: { action: "hamburger" },
+                payload: { action: "team_management" },
               })
             }
           />
@@ -148,6 +158,7 @@ export default function WebViewScreen() {
                 onClearNativeWebChromeIfMode: (mode) => {
                   setNativeChrome((prev) => (prev?.mode === mode ? null : prev));
                 },
+                onSetLiquidNavModalOverlay: setLiquidNavModalOverlayHidden,
               });
             } catch (e) {
               console.error("Failed to parse bridge message", e);
@@ -187,15 +198,17 @@ export default function WebViewScreen() {
           }}
         />
         {isNativeBottomNavVisiblePath(webPathname) ? (
-          <NativeLiquidBottomNav
-            pathname={webPathname}
-            onNavigateToPath={navigateWebViewToPath}
-            onLiquidNavFabPress={() =>
-              injectWebChromeMessage({
-                type: "NATIVE_LIQUID_NAV_FAB_PRESS",
-              })
-            }
-          />
+          <AnimatedLiquidBottomNavShell hidden={liquidNavModalOverlayHidden}>
+            <NativeLiquidBottomNav
+              pathname={webPathname}
+              onNavigateToPath={navigateWebViewToPath}
+              onLiquidNavFabPress={() =>
+                injectWebChromeMessage({
+                  type: "NATIVE_LIQUID_NAV_FAB_PRESS",
+                })
+              }
+            />
+          </AnimatedLiquidBottomNavShell>
         ) : null}
         </View>
       </SafeAreaView>

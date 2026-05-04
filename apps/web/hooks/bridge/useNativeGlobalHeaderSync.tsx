@@ -8,9 +8,9 @@ import {
 } from "@/lib/native/nativeGlobalHeaderPressBridge";
 
 export type NativeGlobalHeaderSyncConfig = {
-  showHamburger: boolean;
+  showTeamManagement: boolean;
   onLogoPress?: () => void;
-  onHamburgerPress?: () => void;
+  onTeamManagementPress?: () => void;
 };
 
 export type NativeGlobalHeaderBridgePick = Pick<
@@ -27,17 +27,17 @@ export function useNativeGlobalHeaderSync(
 ) {
   const { isNativeApp, sendToNative } = bridge;
   const logoRef = useRef<(() => void) | undefined>(undefined);
-  const hamburgerRef = useRef<(() => void) | undefined>(undefined);
+  const teamManagementRef = useRef<(() => void) | undefined>(undefined);
 
   /** 렌더 중 ref 갱신 금지 — 페인트 직전에 최신 콜백 동기화 */
   useLayoutEffect(() => {
     if (!isNativeApp || config == null) {
       logoRef.current = undefined;
-      hamburgerRef.current = undefined;
+      teamManagementRef.current = undefined;
       return;
     }
     logoRef.current = config.onLogoPress;
-    hamburgerRef.current = config.onHamburgerPress;
+    teamManagementRef.current = config.onTeamManagementPress;
   }, [isNativeApp, config]);
 
   useEffect(() => {
@@ -47,14 +47,14 @@ export function useNativeGlobalHeaderSync(
 
     setNativeGlobalHeaderPressHandlers({
       onLogo: () => logoRef.current?.(),
-      onHamburger: () => hamburgerRef.current?.(),
+      onTeamManagement: () => teamManagementRef.current?.(),
     });
 
     sendToNative({
       type: "SET_NATIVE_GLOBAL_HEADER",
       payload: {
         visible: true,
-        showHamburger: config.showHamburger,
+        showTeamManagement: config.showTeamManagement,
       },
     });
 
@@ -65,5 +65,5 @@ export function useNativeGlobalHeaderSync(
         payload: { visible: false },
       });
     };
-  }, [isNativeApp, sendToNative, config, config?.showHamburger]);
+  }, [isNativeApp, sendToNative, config, config?.showTeamManagement]);
 }
