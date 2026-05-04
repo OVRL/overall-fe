@@ -146,6 +146,47 @@ WebView는 상단 네이티브 헤더 아래 **가능한 한 큰 세로 공간**
 - `NativeWebTopBar` — 뒤로(Ionicons), 중앙 타이틀/매치라인업 등.
 - `NativeLiquidBottomNav` — 홈·선수/경기 기록·내 정보 탭 + FAB. 웹은 동일 경로에서 `pb-app-native-liquid-nav`로 하단을 예약한다. 웹 모달이 열리면 `AnimatedLiquidBottomNavShell`로 슬라이드 아웃한다.
 
+## 네이티브 리퀴드 하단 네비: 탭 프레스·네비게이션 쿨다운 (2026-05-04)
+
+**키워드(grep)**: `NativeLiquidBottomNav`, `LiquidNavTab`, `useLiquidNavTabNavigation`, `NAV_TAB_NAV_COOLDOWN_MS`, `TAB_PRESS_SCALE`, `onNavigateRef`, 트레일링 큐, WebView pathname 싱크, `expo-haptics`
+
+기획·구현 히스토리는 planning-implementation-chronicler 규격으로 남긴다. 이후 탭·쿨다운·FAB 경계를 바꿀 때 아래 **불변조건**을 우선 확인한다.
+
+### 1) 기획·정책 스냅샷
+
+| 구분 | 내용 |
+|------|------|
+| **목표** | 인앱 하단 리퀴드 네비에서 탭을 눌렀을 때 **반응감은 유지**하면서, **활성 하이라이트·아이콘 상태는 pathname과 동기화**(낙관적 “가짜 활성”으로 필·콘텐츠 어긋남을 피함). |
+| **범위** | `apps/native/components/native-liquid-bottom-nav/`(탭 셀 + FAB). 웹 라우팅 계약·GraphQL·Relay 비대상. |
+| **선택안** | 낙관적 아이콘/필 분리(B안) 대신 **C안 계열**: **프레스 피드백 강화** + **연속 탭 시 네비 쿨다운 + 마지막 `href`만 트레일링 실행**. |
+| **비기능** | 짧은 연속 탭으로 `injectJavaScript` 기반 네비 호출이 겹치지 않게 완충; 언마운트 시 타이머 정리; 햅틱은 탭마다 제공. |
+
+### 2) 구현 매핑
+
+| 영역 | 위치·역할 |
+|------|-----------|
+| **상수** | `constants.ts` — `NAV_TAB_NAV_COOLDOWN_MS`(320ms), `TAB_PRESS_SCALE`(0.94). |
+| **탭 UI** | `LiquidNavTab.tsx` — `Pressable`의 `pressed` 시 `TAB_PRESS_SCALE` 스케일; 활성/비활성에 따라 눌림 시 opacity 차등. |
+| **탭 네비** | `useLiquidNavTabNavigation.ts` — 쿨다운 밖이면 즉시 `onNavigateToPath`; 쿨다운 안이면 `queuedHrefRef`만 갱신하고 쿨다운 종료 시 `setTimeout`으로 **한 번** 플러시. `onNavigateRef`로 콜백 최신화. 클린업에서 타임아웃·큐 초기화. 각 탭 프레스마다 Light 햅틱. |
+| **조립** | `NativeLiquidBottomNav.tsx` — `isTabActive(pathname, item)` 등으로 활성 상태 전달. 탭에는 `useLiquidNavTabNavigation` 반환 핸들러만 연결. |
+| **FAB(+)** | `onPlus`만 별도 — Medium 햅틱 후 `onLiquidNavFabPress` 또는 `onNavigateToPath(plusHref)`. **쿨다운·큐 미적용**. |
+
+**활성 표시 소스**: `pathname` + `navPathUtils`(기존). 낙관적 활성 색 없음.
+
+### 3) 검증·잔여 리스크
+
+- **수동 확인 권장**: 동일 탭·다른 탭을 빠르게 연타했을 때 **마지막 목적지만** 따라가는지; 느린 기기·WebView 지연 시 체감 지연 가능성.
+- **트레이드오프**: 쿨다운 구간 내 **첫 탭은 즉시**, 이후 탭은 **최대 약 `NAV_TAB_NAV_COOLDOWN_MS` 뒤**로 미뤄질 수 있음. 플러시 후 다시 쿨다운이 적용되어 연속 라우팅이 **일정 간격으로 제한**됨.
+- **튜닝**: 동작 규칙을 바꾸지 않고 수치만 조정할 때는 `NAV_TAB_NAV_COOLDOWN_MS`·`TAB_PRESS_SCALE` 중심으로 조정하고, 본 섹션·주석을 함께 갱신할지 검토.
+
+### 4) 후속 수정 시 불변조건·주의점
+
+- **활성 UI는 pathname과만 일치**시키고, 빠른 연속 입력은 **쿨다운 + 단일 트레일링 `href`**로 WebView 네비 중첩을 막을 것.
+- **FAB는 `useLiquidNavTabNavigation`에 넣지 말 것** — 쿨다운 적용 범위를 탭으로 한정한 계약.
+- **`onNavigateToPath` 변경**: ref(`onNavigateRef`) 패턴을 깨면 큐 플러시 시 stale closure 가능.
+- **언마운트**: 타이머·큐 정리 로직을 제거하면 백그라운드 플러시·누적 위험.
+- **플랫폼**: 본 패치는 **`apps/native` 전용**. 브리지·UA·`SYNC_WEBVIEW_CLIENT_PATHNAME` 등과 혼동하지 말 것. 상위 맥락은 `.agents/skills/native-web-bridge/SKILL.md` 및 본 문서 브리지 절.
+
 ## 타입·핸들러 위치 (빠른 참조)
 
 | 영역 | 경로 |
@@ -166,6 +207,9 @@ WebView는 상단 네이티브 헤더 아래 **가능한 한 큰 세로 공간**
 | 클라이언트 pathname 동기화(웹) | `apps/web/hooks/bridge/useNativeWebViewClientPathnameSync.tsx` |
 | 리퀴드 탭 제외 경로(웹) | `apps/web/lib/native/nativeLiquidNavTabExcludedPaths.ts` |
 | 리퀴드 탭 제외 경로(네이티브) | `apps/native/lib/nativeLiquidNavTabExcludedPaths.ts` |
+| 리퀴드 탭 네비 쿨다운 훅 | `apps/native/components/native-liquid-bottom-nav/useLiquidNavTabNavigation.ts` |
+| 리퀴드 탭 셀(`Pressable`) | `apps/native/components/native-liquid-bottom-nav/LiquidNavTab.tsx` |
+| 리퀴드 네비 상수(쿨다운·스케일) | `apps/native/components/native-liquid-bottom-nav/constants.ts` |
 
 ## 향후: 포메이션 모바일
 

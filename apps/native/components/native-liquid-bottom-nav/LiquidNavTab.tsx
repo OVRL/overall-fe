@@ -5,6 +5,7 @@ import {
   ACCENT_HEX,
   INACTIVE_ICON_TINT,
   TAB_ICON_SIZE,
+  TAB_PRESS_SCALE,
   TAB_SLOT_HEIGHT,
 } from "./constants";
 import type { NavItemConfig } from "./navConfig";
@@ -36,8 +37,11 @@ export const LiquidNavTab = memo(function LiquidNavTab({
         {
           height: TAB_SLOT_HEIGHT,
           position: "relative",
+          transform: [{ scale: pressed ? TAB_PRESS_SCALE : 1 }],
         },
-        pressed ? { opacity: isActive ? 0.92 : 0.88 } : null,
+        pressed
+          ? { opacity: isActive ? 0.9 : 0.84 }
+          : null,
       ]}
     >
       <View

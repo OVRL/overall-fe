@@ -10,6 +10,7 @@ import { NAV_ITEMS } from "./navConfig";
 import { nativeLiquidBottomNavStyles } from "./nativeLiquidBottomNav.styles";
 import { getActiveTabIndex, isTabActive } from "./navPathUtils";
 import { TabActiveSlidingHighlight } from "./TabActiveSlidingHighlight";
+import { useLiquidNavTabNavigation } from "./useLiquidNavTabNavigation";
 
 type Props = {
   pathname: string;
@@ -31,13 +32,7 @@ function NativeLiquidBottomNavInner({
   const slotWidth =
     tabRowWidth > 0 ? tabRowWidth / NAV_ITEMS.length : 0;
 
-  const onTabPress = useCallback(
-    async (href: string) => {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      onNavigateToPath(href);
-    },
-    [onNavigateToPath]
-  );
+  const onTabPress = useLiquidNavTabNavigation(onNavigateToPath);
 
   const onPlus = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

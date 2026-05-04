@@ -19,6 +19,12 @@ export const TAB_ACTIVE_RADIUS = TAB_SLOT_HEIGHT / 2;
 export const BLUR_INTENSITY_PILL = 38;
 export const BLUR_INTENSITY_FAB = 44;
 
+/** 짧은 연속 탭 시 마지막 목적지만 반영하기 위한 네비 쿨다운(ms) */
+export const NAV_TAB_NAV_COOLDOWN_MS = 320;
+
+/** 탭 눌림 시 스케일(1 미만 — 살짝 눌리는 느낌) */
+export const TAB_PRESS_SCALE = 0.94;
+
 /**
  * 왼쪽 pill 배경 — Figma `background: linear-gradient(0deg, rgba(51,51,51,.3), rgba(51,51,51,.3)), #E6E6E6`
  * (동일 농도 그라데이션 = 단색 오버레이 + 베이스).
