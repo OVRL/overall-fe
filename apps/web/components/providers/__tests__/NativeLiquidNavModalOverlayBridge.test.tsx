@@ -77,6 +77,19 @@ describe("NativeLiquidNavModalOverlayBridge", () => {
     });
   });
 
+  it("로그인(/login/social) 경로에서는 모달이 있어도 hidden true를 보내지 않는다", () => {
+    bridgeState.isNativeApp = true;
+    pathnameMock = "/login/social";
+    modalInstances = [{ id: "a" }];
+
+    render(<NativeLiquidNavModalOverlayBridge />);
+
+    expect(sendToNative).toHaveBeenCalledWith({
+      type: "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY",
+      payload: { hidden: false },
+    });
+  });
+
   it("모달을 닫으면 hidden false를 보낸다", () => {
     bridgeState.isNativeApp = true;
     pathnameMock = "/";

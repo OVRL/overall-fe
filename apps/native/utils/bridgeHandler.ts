@@ -29,6 +29,8 @@ export const handleBridgeMessage = async (
     onStartNativeSocialLogin?: (provider: NativeSocialProvider) => void;
     /** 웹 모달 오버레이 시 리퀴드 하단 네브바 숨김(true) / 복귀(false) */
     onSetLiquidNavModalOverlay?: (hidden: boolean) => void;
+    /** Next.js 클라이언트 라우트 pathname 동기화(SPA) */
+    onSyncWebClientPathname?: (pathname: string) => void;
   }
 ) => {
   const { type, payload, reqId } = message;
@@ -190,6 +192,13 @@ export const handleBridgeMessage = async (
       case "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY": {
         const hidden = payload?.hidden === true;
         options?.onSetLiquidNavModalOverlay?.(hidden);
+        break;
+      }
+
+      case "SYNC_WEBVIEW_CLIENT_PATHNAME": {
+        const path =
+          typeof payload?.pathname === "string" ? payload.pathname : "";
+        options?.onSyncWebClientPathname?.(path);
         break;
       }
 

@@ -6,7 +6,10 @@
  * 네브바가 사라지지 않도록 한다.
  *
  * 웹 하단 예약 패딩: `apps/web/lib/native/nativeLiquidBottomNavShellPaths.ts` 와 동기화.
+ * 로그인 등 제외: `nativeLiquidNavTabExcludedPaths.ts`. SPA pathname은 `SYNC_WEBVIEW_CLIENT_PATHNAME` 브리지로 맞춘다.
  */
+
+import { isNativeLiquidNavTabExcludedPath } from "./nativeLiquidNavTabExcludedPaths";
 
 /** 탭 "홈" — `(main)/page.tsx` */
 function isHomeShellPath(p: string): boolean {
@@ -31,6 +34,8 @@ function isProfileShellPath(p: string): boolean {
 export function isNativeBottomNavVisiblePath(pathname: string): boolean {
   if (pathname === "") return false;
   const normalized = pathname.replace(/\/+$/, "") || "/";
+
+  if (isNativeLiquidNavTabExcludedPath(normalized)) return false;
 
   return (
     isHomeShellPath(normalized) ||

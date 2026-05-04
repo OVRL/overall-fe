@@ -5,6 +5,8 @@
  * @see apps/native/lib/isNativeBottomNavVisiblePath.ts — 로직 변경 시 **반드시** 양쪽 동기화
  */
 
+import { isNativeLiquidNavTabExcludedPath } from "./nativeLiquidNavTabExcludedPaths";
+
 function isHomeShellPath(p: string): boolean {
   return p === "/";
 }
@@ -27,6 +29,8 @@ function isProfileShellPath(p: string): boolean {
 export function isNativeLiquidBottomNavShellPath(pathname: string): boolean {
   if (pathname === "") return false;
   const normalized = pathname.replace(/\/+$/, "") || "/";
+
+  if (isNativeLiquidNavTabExcludedPath(normalized)) return false;
 
   return (
     isHomeShellPath(normalized) ||

@@ -352,6 +352,7 @@ export default function App() {
               void runProvider(provider);
             },
             onSetLiquidNavModalOverlay: setLiquidNavModalOverlayHidden,
+            onSyncWebClientPathname: setWebPathname,
           },
         );
       } catch (e) {

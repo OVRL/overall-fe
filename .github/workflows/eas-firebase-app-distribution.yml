@@ -57,7 +57,11 @@ jobs:
       run:
         working-directory: apps/native
     steps:
+      # fetch-depth 기본값(1)이면 github.event.before 커밋이 없어 git log 범위가 비고,
+      # 릴리즈 노트가 "ci main <해시>" 폴백만 남습니다. 푸시 구간 커밋 제목을 쓰려면 전체 히스토리가 필요합니다.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
       - uses: pnpm/action-setup@v4
@@ -129,9 +133,13 @@ jobs:
             export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
           else
             export FIREBASE_DISTRIBUTION_GROUPS="${{ secrets.FIREBASE_DISTRIBUTION_GROUPS }}"
-            # push 이벤트에서는 이번 푸시에 포함된 커밋 메시지를 릴리즈 노트로 사용합니다.
-            # (너무 길어지지 않게 최대 40줄로 제한)
-            export RELEASE_NOTES="$(git log --format='- %s' ${{ github.event.before }}..${GITHUB_SHA} | head -40)"
+            # push: 이번 푸시 구간의 커밋 제목(%s). checkout fetch-depth:0 필수.
+            BEFORE="${{ github.event.before }}"
+            if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              export RELEASE_NOTES="$(git log -1 --format='- %s' HEAD)"
+            else
+              export RELEASE_NOTES="$(git log --format='- %s' "$BEFORE"..${GITHUB_SHA} | head -40)"
+            fi
             if [ -z "$RELEASE_NOTES" ]; then
               export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
             fi
@@ -149,6 +157,8 @@ jobs:
         working-directory: apps/native
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # package.json 의 packageManager(pnpm@…)만 버전 소스로 둠 — with.version 과 동시 지정 시 액션 충돌 방지
       - uses: pnpm/action-setup@v4
@@ -219,7 +229,12 @@ jobs:
             export RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
           else
             export FIREBASE_DISTRIBUTION_GROUPS="${{ secrets.FIREBASE_DISTRIBUTION_GROUPS }}"
-            export RELEASE_NOTES="$(git log --format='- %s' ${{ github.event.before }}..${GITHUB_SHA} | head -40)"
+            BEFORE="${{ github.event.before }}"
+            if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              export RELEASE_NOTES="$(git log -1 --format='- %s' HEAD)"
+            else
+              export RELEASE_NOTES="$(git log --format='- %s' "$BEFORE"..${GITHUB_SHA} | head -40)"
+            fi
             if [ -z "$RELEASE_NOTES" ]; then
               export RELEASE_NOTES="ci ${{ github.ref_name }} ${GITHUB_SHA:0:7}"
             fi
