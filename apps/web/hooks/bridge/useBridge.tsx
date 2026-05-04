@@ -15,6 +15,9 @@ export type {
   WebViewChromeMode,
 } from "./bridgeTypes";
 
+/** 네이티브 리퀴드 FAB(+) → 웹 경기 등록 모달 (RN은 `injectJavaScript`로 동일 type 문자열 전달) */
+export { NATIVE_LIQUID_NAV_FAB_PRESS_TYPE } from "@/lib/native/nativeLiquidNavFabPressBridge";
+
 export const useBridge = () => {
   const pendingToNativeRef = useRef<BridgeMessage[]>([]);
 

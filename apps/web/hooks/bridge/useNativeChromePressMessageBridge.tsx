@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useBridge } from "@/hooks/bridge/useBridge";
 import { tryHandleNativeTopBarPressFromMessageData } from "@/lib/native/nativeTopBarPressBridge";
 import { tryHandleNativeGlobalHeaderPressFromMessageData } from "@/lib/native/nativeGlobalHeaderPressBridge";
+import { tryHandleNativeLiquidNavFabPressFromMessageData } from "@/lib/native/nativeLiquidNavFabPressBridge";
 
 /**
  * RN WebView 가 `injectJavaScript` 로 보낸 postMessage 를 받아
@@ -18,6 +19,7 @@ export function useNativeChromePressMessageBridge() {
     const onMessage = (event: MessageEvent) => {
       tryHandleNativeTopBarPressFromMessageData(event.data);
       tryHandleNativeGlobalHeaderPressFromMessageData(event.data);
+      tryHandleNativeLiquidNavFabPressFromMessageData(event.data);
     };
     window.addEventListener("message", onMessage);
     document.addEventListener("message", onMessage);

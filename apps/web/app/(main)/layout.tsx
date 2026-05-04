@@ -1,5 +1,7 @@
 import Header from "@/components/Header";
+import { MainNativeBottomNavReserve } from "@/components/providers/MainNativeBottomNavReserve";
 import { headers } from "next/headers";
+import { isNativeLiquidBottomNavShellPath } from "@/lib/native/nativeLiquidBottomNavShellPaths";
 import { isNativeWebViewUserAgent } from "@/lib/native/webViewUserAgent";
 
 export default async function MainLayout({
@@ -7,13 +9,19 @@ export default async function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const ua = (await headers()).get("user-agent") ?? "";
+  const h = await headers();
+  const ua = h.get("user-agent") ?? "";
+  const pathname = h.get("x-pathname") ?? "";
   const hideWebGlobalChrome = isNativeWebViewUserAgent(ua);
+  const ssrNativeBottomNavPad =
+    hideWebGlobalChrome && isNativeLiquidBottomNavShellPath(pathname);
 
   return (
-    <div className="min-h-dvh bg-bg-basic flex flex-col pt-safe">
+    <div className="flex min-h-dvh flex-col bg-bg-basic pt-safe">
       <Header variant="global" hideWebGlobalChrome={hideWebGlobalChrome} />
-      {children}
+      <MainNativeBottomNavReserve ssrShouldPad={ssrNativeBottomNavPad}>
+        {children}
+      </MainNativeBottomNavReserve>
     </div>
   );
 }
