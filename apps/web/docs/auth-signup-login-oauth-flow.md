@@ -224,4 +224,32 @@ flowchart TD
 - 미가입 시 **`/privacy-consent` 선행** 후 `/onboarding`  
 - 콜백 단계 오류는 **로그인 화면 토스트** (`socialErr`)로 통일  
 
+### 2026-05-04 — 소셜 OAuth 콜백 히스토리·뒤로가기 정리
+
+**기획·정책**
+
+- **목표**: 소셜 OAuth 웹 콜백 성공 직후 `window.location.href = "/"` 사용으로 히스토리에 `/social/.../callback` 이 남아, 홈에서 뒤로가기 시 빈 콜백 페이지·레이아웃 이슈·일회용 `code` 재노출 위험이 생기는 문제를 제거함.
+- **제약**: Relay·GraphQL 스키마·필드 선택 변경 없음(프론트 내비게이션·문서만).
+
+**구현 매핑**
+
+| 구분 | 내용 |
+|------|------|
+| 웹 콜백 | `SocialCallbackAutoLogin.tsx` — 로그인 성공 후 홈 이동을 **`window.location.replace("/")`** 로 통일(기존 `href` 대체). 동일 파일 내 오류·분기에서 이미 쓰던 `replace` 패턴과 정렬. |
+| 웹 플로우 문서 | `social-login-provider-flow.md` — ⑦단계에 **`replace` 정책** 명시, 웹 OAuth(브라우저·WebView)와 네이티브 SDK 경로를 표로 구분. |
+| 네이티브 스펙 | `RNWebView_Auth_Implementation_Spec.md` §10 — **항목 6**: 원인·대응·디버깅 힌트(콜백 URL 스택 vs SDK 등). |
+
+**의사결정·트레이드오프**
+
+- Next `useRouter().replace` 대신 **`window.location.replace` 유지** — httpOnly 쿠키 반영 후 **풀 페이지 리로드** 전제와 맞고, 같은 파일의 다른 분기(`replace("/login/social")`, `replace("/privacy-consent")` 등)와 **일관된 API**를 유지함.
+
+**검증**
+
+- **수동**: 웹·WebView에서 로그인 후 홈에서 뒤로가기 시 콜백 URL로 **복귀하지 않음**, iOS **가장자리 백 제스처** 포함.
+- **데이터 계약**: Relay·GraphQL 필드 변경 없음.
+
+**잔여 리스크·메모**
+
+- 네이티브 **SDK 전용** 소셜 로그인은 해당 웹 콜백 페이지를 로드하지 않을 수 있어, 동일 증상이면 **WebView 내 웹 소셜 버튼 플로우**인지 등 경로를 구분해 확인하는 것이 문서·디버깅 가이드와 합치함.
+
 이 문서는 위 동선을 기준으로 작성되었습니다.

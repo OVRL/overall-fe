@@ -187,8 +187,30 @@ export async function proxy(request: NextRequest) {
 
   // 3. 비로그인 사용자만 접근 가능한 페이지 (Guest Only) -> /login
   if (isGuestOnly) {
+    if (process.env.NODE_ENV === "development") {
+      const ua = request.headers.get("user-agent") ?? "";
+      console.log("[OVRL login/social][proxy] guest-only request", {
+        pathname,
+        search,
+        uaOverallRn: ua.includes("Overall_RN"),
+        hasAccessCookie: accessToken != null,
+        hasRefreshCookie: refreshToken != null,
+        accessExpired:
+          accessToken != null ? isAccessTokenExpired(accessToken) : null,
+      });
+    }
     const { isAuthenticated, newTokens } = await checkAuth();
+    if (process.env.NODE_ENV === "development") {
+      console.log("[OVRL login/social][proxy] guest-only auth", {
+        pathname,
+        isAuthenticated,
+        silentRefreshApplied: newTokens?.accessToken != null,
+      });
+    }
     if (isAuthenticated) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[OVRL login/social][proxy] → redirect / (logged-in on guest route)");
+      }
       // 로그인 된 사용자가 접근 시 -> 앱 루트
       const response = NextResponse.redirect(new URL("/", request.url));
       if (newTokens?.accessToken) {

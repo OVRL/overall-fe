@@ -16,7 +16,17 @@
 | ④ 프로필 조회 | 같은 서버 로직이 그 토큰으로 **이메일이 포함된 프로필 API**를 호출. |
 | ⑤ 스냅샷 저장 | 콜백 **클라이언트**(`SocialCallbackAutoLogin`)가 `socialLogin` 직전에 `sessionStorage` 키 `overall_social_oauth_snapshot`에 `{ provider, accessToken, email, userMe, savedAt }` 저장(미가입 시 `/privacy-consent` 거친 뒤 `/onboarding`에서 프리필·잠금 동일). |
 | ⑥ 백엔드 로그인 | OAuth 교환에 성공하고 이메일이 있으면 **마운트 직후 자동**으로 Relay `socialLogin(input: { accessToken, email, provider })` 호출(별도 버튼 없음). |
-| ⑦ 앱 세션 | 성공 시 `socialLogin` 응답(`LoginResponseModel`)의 `accessToken`·`refreshToken`으로 `POST /api/auth/set-session` 호출해 **httpOnly 쿠키** 설정 후 `/`로 이동. **미가입** 시 스냅샷 유지한 채 `/privacy-consent`로 이동 → 동의 후 `/onboarding`(회원가입 퍼널, lockedFields 동일). |
+| ⑦ 앱 세션 | 성공 시 `socialLogin` 응답(`LoginResponseModel`)의 `accessToken`·`refreshToken`으로 `POST /api/auth/set-session` 호출해 **httpOnly 쿠키** 설정 후 **`window.location.replace("/")`** 로 홈 이동(콜백 URL을 히스토리에서 제거해 뒤로가기 시 빈 콜백·일회용 `code` 재노출 방지). **미가입** 시 스냅샷 유지한 채 `replace("/privacy-consent")` 등으로 이동 → 동의 후 `/onboarding`(회원가입 퍼널, lockedFields 동일). |
+
+### 1-보. 웹 OAuth 콜백 vs 네이티브 SDK (재현·디버깅)
+
+| 경로 | `/social/{provider}/callback` 로드 |
+|------|-------------------------------------|
+| 브라우저 또는 **WebView 안** `/login/social` → 프로바이더 리다이렉트 OAuth | 예. ⑦의 `replace` 정책이 **뒤로가기·iOS 가장자리 제스처** 이슈와 직접 연관됨. |
+| **Expo 네이티브** `useNativeSocialLogin` → `completeNativeSocialLogin`(GraphQL만) | 아니오. 메인 WebView는 `webOrigin`으로 새로 열리며 이 콜백 라우트를 거치지 않음. 콜백으로 돌아가는 현상은 주로 **웹 OAuth 동선** 또는 이전 WebView 히스토리 잔존을 의심. |
+
+**뒤로가기로 `/login/social` 복귀:** `replace("/")` 는 콜백 항목만 치환하므로 OAuth 직전의 `/login/social` 히스토리는 남을 수 있음. 로그인된 사용자는 (1) Next 16 루트 [`proxy.ts`](../proxy.ts) 의 `GUEST_ONLY` 분기에서 `/` 로 리다이렉트, (2) [`app/login/social/page.tsx`](../app/login/social/page.tsx) RSC에서 유효 `accessToken` 이면 `redirect("/")` 로 이중 방어.  
+**WebView·모바일:** 뒤로가기가 **BFCache / WebKit Page Cache** 로만 복원되면 서버·proxy가 다시 안 돌 수 있음 → [`LoginSocialSessionRedirectGuard.tsx`](../app/login/social/LoginSocialSessionRedirectGuard.tsx) 가 `fetch("/api/me/user-id", { cache: "no-store" })` 및 `pageshow`(persisted) 로 세션 있으면 `location.replace("/")`.
 
 추출 로직은 `lib/social/extractSocialEmail.ts`에 있습니다.
 
