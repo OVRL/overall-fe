@@ -93,61 +93,59 @@ function RegisterGameFormContent() {
       onClose={resetToDefaults}
       wrapperClassName="w-full md:w-full max-w-[90vw] md:max-w-112 lg:max-w-125"
     >
-      <div className="max-h-[70vh] pr-3">
-        <div className="max-h-[70vh] overflow-y-auto scrollbar-thin w-[calc(100%+1rem)] pr-2">
-          <form
-            onSubmit={handleSubmit(onSubmit, onSubmitInvalid)}
-            className="flex flex-col gap-y-8"
-            noValidate
-          >
-            <MatchTypeSection control={control} />
+      <div className="max-h-[70vh] min-h-0 overflow-y-auto overscroll-y-contain scrollbar-hide pr-1">
+        <form
+          onSubmit={handleSubmit(onSubmit, onSubmitInvalid)}
+          className="flex flex-col gap-y-8"
+          noValidate
+        >
+          <MatchTypeSection control={control} />
 
-            <MatchOnlySection
-              control={control}
-              isMatch={currentMatchType === "MATCH"}
-            />
+          <MatchOnlySection
+            control={control}
+            isMatch={currentMatchType === "MATCH"}
+          />
 
-            <ScheduleSection
-              control={control}
-              setValue={setValue}
-              form={{ getValues }}
-            />
+          <ScheduleSection
+            control={control}
+            setValue={setValue}
+            form={{ getValues }}
+          />
 
-            <VenueSection
-              control={control}
-              currentVenue={currentVenue}
-              onAddressClick={handleAddressClick}
-            />
+          <VenueSection
+            control={control}
+            currentVenue={currentVenue}
+            onAddressClick={handleAddressClick}
+          />
 
-            <QuarterSection control={control} />
+          <QuarterSection control={control} />
 
-            <VoteDeadlineSection control={control} />
+          <VoteDeadlineSection control={control} />
 
-            <MemoSection control={control} />
+          <MemoSection control={control} />
 
-            <div className="flex gap-3 pt-4 w-full">
-              <Button
-                type="button"
-                variant="ghost"
-                size="xl"
-                className="flex-1 font-bold rounded-[4px]"
-                onClick={onClose}
-              >
-                취소
-              </Button>
-              <PendingActionButton
-                type="submit"
-                variant="primary"
-                size="xl"
-                className="flex-1 font-bold rounded-[4px]"
-                pending={isInFlight}
-                pendingLabel="등록 중"
-              >
-                등록
-              </PendingActionButton>
-            </div>
-          </form>
-        </div>
+          <div className="flex gap-3 pt-4 w-full">
+            <Button
+              type="button"
+              variant="ghost"
+              size="xl"
+              className="flex-1 font-bold rounded-[4px]"
+              onClick={onClose}
+            >
+              취소
+            </Button>
+            <PendingActionButton
+              type="submit"
+              variant="primary"
+              size="xl"
+              className="flex-1 font-bold rounded-[4px]"
+              pending={isInFlight}
+              pendingLabel="등록 중"
+            >
+              등록
+            </PendingActionButton>
+          </div>
+        </form>
       </div>
     </ModalLayout>
   );
