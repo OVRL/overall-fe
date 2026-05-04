@@ -1,4 +1,5 @@
 ---
+description: 
 alwaysApply: true
 ---
 
@@ -8,3 +9,4 @@ alwaysApply: true
 - exception-edge-case-advisor-ko 서브에이전트로 이 뮤테이션 흐름의 예외·엣지 케이스 검토해줘
 - 포메이션 **명단 뷰 모드 / 팀 드래프트** 관련 코드를 수정·추가·삭제할 때(예: `buildSubTeamDraftLineup.ts`, `FormationDraftLineupOverview`, `FormationRosterViewModeTabs`, `useInHouseDraftTeamAssignments`, `FormationBuilder*`, 용병·`getFormationRosterPlayerKey` 연동)에는 항상 `docs/formation-roster-view-mode-team-draft.md`의 해당 섹션(§3 타입·데이터, §4 파일 맵, §5 플로우)을 **같은 PR/작업**에서 최신화한다.
 - 파일 코드 라인이 200줄이 넘어가면 별도 컴포넌트로의 분리나 hook으로 분리를 고려한다.
+- apps/native 패키지를 수정할 때는 `.cursor/skills/expo-official-skills/SKILL.md` 를 확인하고, 공식 Expo 팀 지침은 Project Rules의 `https://github.com/expo/skills.git` Remote Rule을 기준으로 코드·설정을 맞춘다.

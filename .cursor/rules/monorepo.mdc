@@ -20,6 +20,7 @@ alwaysApply: true
 
 - 앱 내부는 풀 웹뷰 구성이다. 웹뷰 쪽 수정은 네이티브 코드에 직접 손대기보다, 웹(`apps/web`) 변경 가이드를 프롬프트에 명확히 적는 편을 권장한다.
 - 네이티브↔웹 브리지·WebView 계약은 `.agents/skills/native-web-bridge/SKILL.md` 를 따른다.
+- Expo·EAS(Build/Submit/Workflow·SDK 업그레이드·네이티브 빌드 등) 작업 전에는 `.cursor/skills/expo-official-skills/SKILL.md` 를 읽고, 공식 세부 지침은 Cursor Project Rules에 연결한 `https://github.com/expo/skills.git` Remote Rule을 우선한다(웹뷰·브리지 계약은 `native-web-bridge` 가 우선).
 
 ## 스타일·토큰 (웹 Tailwind v4)
 
