@@ -11,7 +11,8 @@ export type BridgeActionType =
   | "SET_NATIVE_TOPBAR"
   | "SET_NATIVE_GLOBAL_HEADER"
   | "START_NATIVE_SOCIAL_LOGIN"
-  | "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY";
+  | "SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY"
+  | "SYNC_WEBVIEW_CLIENT_PATHNAME";
 
 export interface BridgePayload {
   url?: string;
@@ -37,6 +38,8 @@ export interface BridgePayload {
   provider?: "kakao" | "naver" | "google";
   /** SET_NATIVE_LIQUID_NAV_MODAL_OVERLAY — true면 하단 네브바를 모달 뒤로 슬라이드 아웃 */
   hidden?: boolean;
+  /** SYNC_WEBVIEW_CLIENT_PATHNAME — Next `usePathname()` 값(선행 `/`) */
+  pathname?: string;
   [key: string]: any;
 }
 

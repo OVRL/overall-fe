@@ -159,6 +159,7 @@ export default function WebViewScreen() {
                   setNativeChrome((prev) => (prev?.mode === mode ? null : prev));
                 },
                 onSetLiquidNavModalOverlay: setLiquidNavModalOverlayHidden,
+                onSyncWebClientPathname: setWebPathname,
               });
             } catch (e) {
               console.error("Failed to parse bridge message", e);
