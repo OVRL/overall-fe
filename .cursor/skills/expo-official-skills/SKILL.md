@@ -1,6 +1,6 @@
 ---
 name: expo-official-skills
-description: Aligns Expo and EAS work with the Expo team's official agent skills repository (expo/skills). Covers Expo Router UI, NativeWind/Tailwind v4, native data fetching, API routes and EAS Hosting, dev client, expo-module, DOM components, deployment (App Store, Play, TestFlight, workflows), CI/CD YAML, and SDK upgrades. Use when building or debugging Expo apps, configuring EAS Build/Submit/Workflows, upgrading Expo SDK, or when the user mentions expo/skills, Expo official AI skills, or wants Cursor to follow Expo-recommended patterns.
+description: Aligns Expo and EAS work with the Expo team's official agent skills repository (expo/skills). Covers Expo Router UI, NativeWind/Tailwind v4, native data fetching, API routes and EAS Hosting, dev client, expo-module, DOM components, deployment (App Store, Play, TestFlight, workflows), CI/CD YAML, EAS Update rollout health and insights, and SDK upgrades. Use when building or debugging Expo apps, configuring EAS Build/Submit/Workflows, monitoring EAS Updates, upgrading Expo SDK, or when the user mentions expo/skills, Expo official AI skills, or wants Cursor to follow Expo-recommended patterns.
 ---
 
 # Expo 공식 에이전트 스킬 (expo/skills)
@@ -18,6 +18,8 @@ description: Aligns Expo and EAS work with the Expo team's official agent skills
 3. 주소 입력: `https://github.com/expo/skills.git`
 
 스킬은 문맥에 따라 자동으로 사용된다. **`/` 명령 메뉴에는 나타나지 않는다** — 슬래시 명령은 `.cursor/commands/` 전용이다.
+
+공식 README의 예시 표현(예: `building-ui`)과 실제 플러그인 폴더명(예: `building-native-ui`)이 다를 수 있으므로, **아래 표의 폴더명과 raw URL 경로를 기준**으로 한다.
 
 ## 이 모노레포에서의 우선순위
 
@@ -41,12 +43,13 @@ description: Aligns Expo and EAS work with the Expo team's official agent skills
 | `native-data-fetching` | 네트워크·캐시·오프라인·Expo Router 로더 패턴 |
 | `use-dom` | DOM 컴포넌트로 웹 코드를 네이티브에서 실행 |
 
-### 배포·자동화
+### 배포·자동화·업데이트 관측
 
 | 폴더명 | 역할 요약 |
 |--------|-----------|
 | `expo-deployment` | iOS/Android 스토어, 웹 호스팅, 메타데이터 등 |
 | `expo-cicd-workflows` | EAS Workflow YAML(CI/CD) |
+| `eas-update-insights` | 배포된 EAS Update 건강도(크래시율·설치·OTA 대비 임베디드 비율 등) CLI 조회 |
 
 ### 네이티브 확장·업그레이드
 

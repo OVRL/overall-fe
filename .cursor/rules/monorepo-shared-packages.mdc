@@ -1,5 +1,5 @@
 ---
-description: 모노레포 공유 패키지(@overall/*)·웹/네이티브 경계·토큰·타입 공유 베스트 프랙티스
+description: 
 alwaysApply: true
 ---
 
@@ -11,13 +11,13 @@ alwaysApply: true
 ## 2. 무엇을 `packages/`에 둘지
 
 | 두는 것 | 예시 | 이유 |
-|--------|------|------|
+|-----|---|---|
 | 크로스 앱 **의미·계약** | 브리지 메시지 타입, 공통 상수, Zod 스키마 | 웹·네이티브가 같은 말을 하게 함 |
 | **디자인 토큰** | `@overall/design-system`의 `shared-tokens.css`, `nativewind.theme.cjs` | 시각적 일관, 단 플랫폼별 표현 방식은 다름 |
 | 순수 TS **유틸** | 날짜 포맷, 무게 없는 헬퍼 | 앱에 묶이지 않은 로직 재사용 |
 
 | 두지 말 것(앱에 유지) | 이유 |
-|----------------------|------|
+|----|---|
 | Relay fragment·앱 라우팅 전용 코드 | 웹 도메인에 종속 |
 | Expo 플러그인·네이티브 전용 모듈 | RN 번들만 필요 |
 | `@import "tailwindcss"` 가 들어간 패키지 CSS 단독 엔트리 | PostCSS가 패키지 경로 기준으로 `tailwindcss` 해석 실패 → **Tailwind 엔트리는 `apps/web/styles/globals.css` 등 앱 한 곳** |

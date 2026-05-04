@@ -32,9 +32,34 @@
 
 ## 코드 위치 (파일 맵)
 
+### 공개 엔트리 (import 경로 유지)
+
 | 역할 | 경로 |
 |------|------|
-| UI 컴포넌트 | `apps/native/components/NativeLiquidBottomNav.tsx` |
+| **배럴 re-export** | `apps/native/components/NativeLiquidBottomNav.tsx` — `native-liquid-bottom-nav/` 에서 `NativeLiquidBottomNav`, `NativeBottomNavTabId` 만 다시 내보냄. 기존 `@/components/NativeLiquidBottomNav` import 는 그대로 사용한다. |
+
+### `native-liquid-bottom-nav/` 모듈 분리
+
+구현은 **`apps/native/components/native-liquid-bottom-nav/`** 아래에 나뉜다.
+
+| 파일 | 역할 |
+|------|------|
+| `index.ts` | `NativeLiquidBottomNav`, 타입 `NativeBottomNavTabId` export |
+| `NativeLiquidBottomNav.tsx` | 하단 오버레이 조립: 글래스 pill + `NAV_ITEMS` 매핑 + `LiquidNavFab` |
+| `LiquidNavTab.tsx` | 탭 한 칸(Pressable, 아이콘·라벨, 활성 시 `TabActivePillLayers`) |
+| `LiquidNavFab.tsx` | 우측 원형 `+` FAB(블러·그라데이션·틴트) |
+| `TabActivePillLayers.tsx` | 활성 탭 밝은 흰 필 배경 |
+| `GlassBackdrop.tsx` | pill/FAB 공용 `BlurView` 또는 폴백 `View` |
+| `navConfig.ts` | SVG `require`, `NAV_ITEMS`, `NavItemConfig`, `ICON_PLUS`, `NativeBottomNavTabId` |
+| `navPathUtils.ts` | `normalizePath`, `isTabActive` |
+| `constants.ts` | `ACCENT_HEX`, 치수(`NAV_BAR_HEIGHT`, `TAB_SLOT_HEIGHT`, FAB 크기 등), 블러 강도 상수 |
+| `nativeLiquidBottomNav.styles.ts` | `StyleSheet` 모음(pill·FAB·활성 칩) |
+| `expoBlurAvailable.ts` | `ExpoBlurView` 네이티브 등록 여부(`CAN_USE_NATIVE_BLUR`) |
+
+### 그 외 (앱·라이브러리)
+
+| 역할 | 경로 |
+|------|------|
 | 경로 노출 판별 | `apps/native/lib/isNativeBottomNavVisiblePath.ts` |
 | 메인 WebView + 네브바 마운트 | `apps/native/app/index.tsx` |
 | 브리지로 열리는 `/webview` 화면 | `apps/native/app/webview.tsx` |
@@ -50,19 +75,21 @@
 ## 스타일·에셋
 
 - 레이아웃: pill + `gap` (FAB와 간격), 하단은 `absolute` + `useSafeAreaInsets` 로 오버레이.
-- 탭 아이콘: `TAB_ICON_SIZE` (24) — `expo-image` + SVG `require`, 틴트로 활성/비활성 색.
-- FAB: 그림자 래퍼 / `Pressable` / `fabGlassClip` 안에 `BlurView` + 그라데이션·테두리 레이어.
+- 탭 아이콘: `constants.ts`의 `TAB_ICON_SIZE` (24) — `expo-image` + `navConfig`의 SVG `require`, 틴트로 활성/비활성 색.
+- 스타일 상수: 치수·색·`StyleSheet` 는 `constants.ts` / `nativeLiquidBottomNav.styles.ts` 를 본다.
+- FAB: `LiquidNavFab.tsx` — 그림자 래퍼 / `Pressable` / `fabGlassClip` 안에 `BlurView` + 그라데이션·테두리 레이어.
 
 ## 블러 (`expo-blur`)
 
 - 패키지: `expo-blur` (앱 `package.json` 의존성).
+- 가용 여부: `expoBlurAvailable.ts` 의 `CAN_USE_NATIVE_BLUR` — 미등록 시 `GlassBackdrop` 이 반투명 `View` 폴백.
 - iOS: 기본 `BlurView`.
 - Android: `experimentalBlurMethod="dimezisBlurView"` (실험·성능 이슈 가능).
 - 네이티브 바이너리에 모듈이 없으면 빨간 화면 `Unimplemented: ExpoBlurView` — **`expo prebuild` 후 `expo run:ios` / `run:android`** 로 재빌드.
 
 ## 변경 시 체크리스트
 
-- [ ] 새 “탭급” 섹션을 네브에 추가하면 `NAV_ITEMS`·`isTabActive`·`isNativeBottomNavVisiblePath`·문서 표를 같이 갱신.
+- [ ] 새 “탭급” 섹션을 네브에 추가하면 **`navConfig.ts`의 `NAV_ITEMS`**·**`navPathUtils.ts`의 `isTabActive`**·`isNativeBottomNavVisiblePath`·문서 표를 같이 갱신.
 - [ ] 웹만 바꾸고 네이티브 네브가 빠지면 pathname prefix 누락 여부 확인.
 - [ ] iOS·Android WebView에서 탭 이동·뒤로가기 후 pathname 동기화.
 
