@@ -32,7 +32,7 @@ export default function PositionCard({ positions }: PositionCardProps) {
   return (
     <section
       aria-labelledby={POSITION_CARD_HEADING_ID}
-      className="flex-1 min-w-70 snap-start bg-gray-1200 border border-gray-1100 rounded-[0.875rem] p-4 flex flex-col justify-between shrink-0"
+      className="flex-1 min-w-70 snap-start bg-gray-1300 border border-gray-1100 rounded-[0.875rem] p-4 flex flex-col justify-between shrink-0"
     >
       <div className="flex items-center gap-2">
         <div
@@ -43,12 +43,12 @@ export default function PositionCard({ positions }: PositionCardProps) {
         </div>
         <span
           id={POSITION_CARD_HEADING_ID}
-          className="text-base font-semibold text-gray-500"
+          className="text-xl font-semibold text-gray-500"
         >
           주 포지션
         </span>
       </div>
-      <ul className="flex items-center justify-center w-full gap-6 pb-2 m-0 list-none p-0">
+      <ul className="flex-1 flex items-center justify-center w-full gap-6 pt-4 m-0 list-none p-0">
         {mainPosition && (
           <li className="flex flex-col items-center gap-2">
             <div

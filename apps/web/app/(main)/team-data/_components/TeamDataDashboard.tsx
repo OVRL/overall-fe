@@ -27,28 +27,25 @@ const TeamDataDashboard = ({ initialPlayers }: TeamDataDashboardProps) => {
 
   return (
     <>
-      <header className="mb-8">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl md:text-[1.75rem] font-extrabold text-Label-Primary">
-            선수 기록
-          </h1>
-        </div>
-      </header>
-
-      <DashboardTabMenu
-        activeTab={dataTab}
-        onChange={setDataTab}
-        trailingContent={
-          !isMobile && dataTab === "명예의 전당" ? (
-            <Dropdown
-              value={hallPeriod}
-              onChange={setHallPeriod}
-              options={[...HALL_PERIOD_OPTIONS]}
-              className="w-32 min-w-32"
-            />
-          ) : undefined
-        }
-      />
+      <div className="flex flex-row items-baseline justify-start gap-6 mb-2 md:mb-6">
+        <h1 className="hidden md:block text-2xl md:text-[1.75rem] font-extrabold text-Label-Primary shrink-0">
+          선수 기록
+        </h1>
+        <DashboardTabMenu
+          activeTab={dataTab}
+          onChange={setDataTab}
+          trailingContent={
+            !isMobile && dataTab === "명예의 전당" ? (
+              <Dropdown
+                value={hallPeriod}
+                onChange={setHallPeriod}
+                options={[...HALL_PERIOD_OPTIONS]}
+                className="w-32 min-w-32"
+              />
+            ) : undefined
+          }
+        />
+      </div>
 
       {isMobile && dataTab === "명예의 전당" ? (
         <div className="mb-4 w-full">

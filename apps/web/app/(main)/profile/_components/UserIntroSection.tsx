@@ -10,6 +10,9 @@ type UserIntroSectionProps = {
   member: ProfileTeamMemberRow | null;
 };
 
+import Icon from "@/components/ui/Icon";
+import edit_icon from "@/public/icons/edit.svg";
+
 const UserIntroSection = ({ member }: UserIntroSectionProps) => {
   const { pickFromAlbum, fileInputRef, onHiddenFileChange, previewImage, isUpdating } =
     useUpdateTeamMemberProfileImage({
@@ -18,25 +21,27 @@ const UserIntroSection = ({ member }: UserIntroSectionProps) => {
     });
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 shrink-0 md:h-[275px] md:w-[200px]">
-      <div className="relative size-[200px] overflow-hidden rounded-full bg-gray-1200 border border-gray-1100">
-        <ImgPlayer
-          src={previewImage}
-          alt="프로필 이미지"
-          sizes="200px"
-          className="size-full object-cover object-bottom"
-        />
+    <div className="flex flex-col items-center justify-center shrink-0 md:h-[275px] md:w-[200px]">
+      <div className="relative size-[200px]">
+        <div className="size-full overflow-hidden rounded-full bg-gray-1200 border border-gray-1100">
+          <ImgPlayer
+            src={previewImage}
+            alt="프로필 이미지"
+            sizes="200px"
+            className="size-full object-cover object-bottom"
+          />
+        </div>
+        <PendingActionButton
+          type="button"
+          variant="ghost"
+          pending={isUpdating}
+          pendingLabel=""
+          className="absolute bottom-0 right-0 size-10 flex items-center justify-center bg-gray-1200 hover:bg-gray-1100 rounded-full border-none shadow-lg p-0"
+          onClick={pickFromAlbum}
+        >
+          <Icon src={edit_icon} width={20} height={20} className="text-gray-400" />
+        </PendingActionButton>
       </div>
-      <PendingActionButton
-        type="button"
-        variant="ghost"
-        pending={isUpdating}
-        pendingLabel="프로필 이미지 업로드 중"
-        className="h-9.5 w-auto px-3 text-sm font-semibold text-Label-Tertiary bg-gray-1000 hover:bg-gray-900 rounded-lg border-none"
-        onClick={pickFromAlbum}
-      >
-        수정하기
-      </PendingActionButton>
       <input
         ref={fileInputRef}
         type="file"

@@ -46,7 +46,7 @@ export default function AttackContributionSection() {
         </h2>
       </div>
 
-      <div className="rounded-3xl border border-gray-1100 bg-gray-1200 px-4 py-12">
+      <div className="rounded-3xl border border-gray-1100 bg-gray-1300 px-4 py-12">
         <AttackContributionLineChart data={DUMMY_HISTORY} />
       </div>
     </section>

@@ -8,11 +8,7 @@ interface OvrCardProps {
 export default function OvrCard({ ovrScore }: OvrCardProps) {
   return (
     <dl
-      className="flex-1 min-w-70 snap-start flex flex-col justify-between p-4 rounded-2xl border border-gray-1200 shrink-0 m-0"
-      style={{
-        backgroundImage:
-          "linear-gradient(135deg, rgba(184, 255, 18, 0.6) 0%, rgba(21, 21, 21, 0) 100%)",
-      }}
+      className="flex-1 min-w-70 snap-start flex flex-col justify-between p-4 rounded-2xl border border-gray-1100 shrink-0 m-0 bg-gray-1300"
     >
       <dt className="flex items-center gap-3 m-0 font-normal">
         <div
@@ -21,7 +17,7 @@ export default function OvrCard({ ovrScore }: OvrCardProps) {
         >
           <Icon src={icon} nofill width={30} height={30} alt="" />
         </div>
-        <span className="text-2xl font-bold text-gray-300">OVR</span>
+        <span className="text-xl font-bold text-gray-300">OVR</span>
       </dt>
       <dd className="self-end text-[3.125rem] font-bold text-[#b8ff12] leading-none m-0 tabular-nums">
         {ovrScore}

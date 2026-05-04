@@ -17,21 +17,12 @@ type TeamSelectButtonContainerProps = {
   members: ReadonlyArray<ProfileTeamMemberRow>;
 };
 
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Dropdown from "@/components/ui/Dropdown";
+
 const TeamSelectButtonContainer = ({
   members,
 }: TeamSelectButtonContainerProps) => {
-  return (
-    <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide">
-      <TeamListSection members={members} />
-    </div>
-  );
-};
-
-function TeamListSection({
-  members,
-}: {
-  members: ReadonlyArray<ProfileTeamMemberRow>;
-}) {
   const router = useBridgeRouter();
   const { selectedTeamId, setSelectedTeamId } = useSelectedTeamId();
 
@@ -59,13 +50,13 @@ function TeamListSection({
   ) => {
     const teamIdNum = parseNumericIdFromRelayGlobalId(teamId);
     setSelectedTeamId(teamId, teamIdNum, teamName, teamImageUrl);
-    router.refresh(); // 변경된 쿠키(팀 아이디)를 바탕으로 데이터 재조회
+    router.refresh();
   };
 
   return (
-    <>
+    <div className="flex gap-2 overflow-x-auto p-1 scrollbar-hide w-full">
       {teams.map((team) => (
-        <div key={team.id} className="flex gap-6 shrink-0 justify-center">
+        <div key={team.id} className="flex gap-4 shrink-0 justify-center">
           <TeamButton
             name={team.name}
             imageUrl={team.imageUrl ?? undefined}
@@ -74,8 +65,8 @@ function TeamListSection({
           />
         </div>
       ))}
-    </>
+    </div>
   );
-}
+};
 
 export default TeamSelectButtonContainer;

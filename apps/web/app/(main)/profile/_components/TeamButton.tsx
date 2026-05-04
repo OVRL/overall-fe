@@ -23,8 +23,8 @@ const TeamButton = ({
       className={cn(
         "flex w-full items-center h-17 gap-2 rounded-[0.875rem] pl-4 border-2 pr-6 transition-colors",
         selected
-          ? "border-Fill_AccentPrimary bg-Fill_AccentPrimary/20"
-          : "border-gray-1100 bg-gray-1200",
+          ? "border-Fill_AccentPrimary/30 bg-gray-1200"
+          : "border-transparent bg-gray-1200",
       )}
     >
       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -33,7 +33,7 @@ const TeamButton = ({
       <p
         className={cn(
           "text-base font-semibold leading-normal whitespace-nowrap truncate",
-          selected ? "text-Fill_AccentPrimary" : "text-white",
+          selected ? "text-white" : "text-gray-500",
         )}
       >
         {name}
