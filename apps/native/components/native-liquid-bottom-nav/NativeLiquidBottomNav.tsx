@@ -14,12 +14,15 @@ import { TabActiveSlidingHighlight } from "./TabActiveSlidingHighlight";
 type Props = {
   pathname: string;
   onNavigateToPath: (path: string) => void;
+  /** FAB(+) 탭 시 호출. 없으면 `plusHref`로 이동 */
+  onLiquidNavFabPress?: () => void;
   plusHref?: string;
 };
 
 function NativeLiquidBottomNavInner({
   pathname,
   onNavigateToPath,
+  onLiquidNavFabPress,
   plusHref = "/team-management",
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -38,8 +41,12 @@ function NativeLiquidBottomNavInner({
 
   const onPlus = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (onLiquidNavFabPress) {
+      onLiquidNavFabPress();
+      return;
+    }
     onNavigateToPath(plusHref);
-  }, [onNavigateToPath, plusHref]);
+  }, [onNavigateToPath, plusHref, onLiquidNavFabPress]);
 
   const bottomOffset = insets.bottom;
 

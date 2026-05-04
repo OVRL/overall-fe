@@ -51,6 +51,22 @@
   }
 }
 
+/*
+ * 네이티브 리퀴드 하단 네브바(NAV_BAR_HEIGHT)와 동기화.
+ * @see apps/native/components/native-liquid-bottom-nav/constants.ts (`NAV_BAR_HEIGHT`)
+ */
+:root {
+  --native-liquid-bottom-nav-bar-height: 3.875rem; /* 62px @ 16px root */
+}
+
+/* 인앱 WebView·리퀴드 탭 셸에서만 사용: 하단 홈 인디케이터 + 네브바 행 높이 */
+@utility pb-app-native-liquid-nav {
+  padding-bottom: calc(
+    env(safe-area-inset-bottom, 0px) +
+      var(--native-liquid-bottom-nav-bar-height)
+  );
+}
+
 /* 인앱 웹뷰·노치: viewport-fit=cover와 함께 env(safe-area-inset-*) 사용 */
 @utility pt-safe {
   padding-top: env(safe-area-inset-top, 0px);

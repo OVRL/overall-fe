@@ -524,6 +524,11 @@ export default function App() {
             <NativeLiquidBottomNav
               pathname={webPathname}
               onNavigateToPath={navigateWebViewToPath}
+              onLiquidNavFabPress={() =>
+                injectWebChromeMessage({
+                  type: "NATIVE_LIQUID_NAV_FAB_PRESS",
+                })
+              }
             />
           ) : null}
           </View>

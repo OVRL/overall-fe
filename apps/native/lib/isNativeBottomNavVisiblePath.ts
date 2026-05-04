@@ -4,6 +4,8 @@
  * 노출 대상은 `NativeLiquidBottomNav` 의 네 탭(홈·선수 기록·경기 기록·내 정보)과
  * 동일한 경로 트리로 맞춘다. 해당 구간에서는 사용자가 하단으로 주요 섹션을 옮겨 다닐 때
  * 네브바가 사라지지 않도록 한다.
+ *
+ * 웹 하단 예약 패딩: `apps/web/lib/native/nativeLiquidBottomNavShellPaths.ts` 와 동기화.
  */
 
 /** 탭 "홈" — `(main)/page.tsx` */

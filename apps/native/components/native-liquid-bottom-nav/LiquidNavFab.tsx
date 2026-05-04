@@ -18,7 +18,7 @@ export function LiquidNavFab({ onPress }: LiquidNavFabProps) {
     <View style={nativeLiquidBottomNavStyles.fabShadowWrap}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="빠른 메뉴"
+        accessibilityLabel="경기 등록"
         hitSlop={8}
         onPress={onPress}
         style={({ pressed }) => [
