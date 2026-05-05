@@ -29,6 +29,8 @@
 `index.tsx`에 모인 이벤트 이름(검색·필터용 키워드) 예시:  
 `auth_session_check_*`, `auth_phase_change`, `splash_timeout_15s_fired`, `splash_hide_gate_satisfied`, `prep_fallback_shown`, `app_first_layout_native_splash_hide`, `root_view_onLayout`, `webview_load_start` / `webview_load_end` / `webview_first_same_origin_load_complete`, `webview_load_error`, `webview_http_error`.
 
+**스플래시 숨김과 `native_login`**: 비로그인 분기(`authPhase === "native_login"`)에서는 메인 WebView를 올리지 않으므로, 커스텀 스플래시를 닫을 때 **`isWebViewCookiePrepDone`(쿠키 주입)** 을 기다리지 않는다. 그렇지 않으면 CookieManager·I/O가 느릴 때 **네이티브 소셜 로그인 화면만 보여 주면 될 케이스에서도** 스플래시가 불필요하게 길어질 수 있다.
+
 ---
 
 ## 3. 릴리스·프리뷰 빌드에서 `[SplashBoot]` 로그 켜기

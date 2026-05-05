@@ -288,10 +288,11 @@ export default function App() {
     authPhase === "native_login" ||
     (authPhase === "main" && isWebViewFirstLoadDone);
 
+  /** 비로그인(`native_login`)은 WebView를 쓰지 않으므로 쿠키 주입 완료를 기다릴 필요 없음 */
   const isAppReadyForSplashHide =
     authPhase !== "checking" &&
     isRootLayoutDone &&
-    isWebViewCookiePrepDone &&
+    (authPhase === "native_login" || isWebViewCookiePrepDone) &&
     splashContentReady;
 
   const showBlockingCustomSplash =
