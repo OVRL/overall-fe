@@ -19,11 +19,12 @@ jest.mock("@/hooks/useUpdateTeamMemberProfileImage", () => ({
 }));
 
 describe("UserIntroSection", () => {
-  it("프로필 이미지와 수정 버튼을 렌더링한다", () => {
+  it("프로필 이미지와 수정(앨범 선택) 버튼을 렌더링한다", () => {
     render(<UserIntroSection member={null} />);
 
     expect(screen.getByRole("img", { name: "프로필 이미지" })).toBeInTheDocument();
-    expect(screen.getByText("수정하기")).toBeInTheDocument();
+    // UI는 텍스트 대신 편집 아이콘만 노출됨
+    expect(screen.getByRole("button", { name: "icon" })).toBeInTheDocument();
   });
 
   it("이미지 수정 기능을 위한 hidden input이 존재해야 한다", () => {

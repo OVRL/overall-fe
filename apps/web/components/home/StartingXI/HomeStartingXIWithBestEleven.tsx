@@ -12,7 +12,10 @@ import type { FormationType } from "@/constants/formation";
 import type { Player as FormationPlayer } from "@/types/formation";
 import type { Player as HomePlayer } from "@/types/player";
 import type { Position } from "@/types/position";
-import { getPlayerPlaceholderSrc } from "@/lib/playerPlaceholderImage";
+import {
+  getPlayerPlaceholderSrc,
+  resolveTeamMemberCardImageUrl,
+} from "@/lib/playerPlaceholderImage";
 
 function mapFormationPlayerToHomePlayer(p: FormationPlayer): HomePlayer {
   const ovr = p.overall;
@@ -61,7 +64,7 @@ export default function HomeStartingXIWithBestEleven({
       out.push({
         id: tmId,
         name: m.user?.name || "알 수 없음",
-        image: m.user?.profileImage || "/images/player/img_player_1.webp",
+        image: resolveTeamMemberCardImageUrl(m),
         position: m.preferredPosition || "-",
         number: m.preferredNumber || 0,
         overall: m.overall?.ovr || 0,

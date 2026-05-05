@@ -4,6 +4,8 @@ import { Suspense, useMemo } from "react";
 import { useUserStore } from "@/contexts/UserContext";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 import {
+  getTeamMemberProfileImageFallbackUrl,
+  getTeamMemberProfileImageRawUrl,
   getUserProfileImageFallbackUrl,
   getUserProfileImageRawUrl,
 } from "@/lib/playerPlaceholderImage";
@@ -36,8 +38,14 @@ function ManagerInfoInner({ teamId }: { teamId: number }) {
   }, [managerMemberInfo]);
 
   const displayName = managerUser?.name?.trim() || user?.name?.trim() || "감독";
-  const rawUrl = managerUser?.profileImage ?? getUserProfileImageRawUrl(user);
-  const fallbackUrl = getUserProfileImageFallbackUrl(user);
+  /** 팀 멤버 단위 이미지 우선: `profileImg` → `user.profileImage`, 없으면 로그인 유저 프로필 */
+  const memberRaw = managerMemberInfo
+    ? getTeamMemberProfileImageRawUrl(managerMemberInfo)
+    : "";
+  const rawUrl = memberRaw || getUserProfileImageRawUrl(user);
+  const fallbackUrl = managerMemberInfo
+    ? getTeamMemberProfileImageFallbackUrl(managerMemberInfo)
+    : getUserProfileImageFallbackUrl(user);
 
   return (
     <div className="flex items-center justify-center gap-2">

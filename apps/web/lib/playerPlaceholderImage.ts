@@ -109,6 +109,17 @@ export function getTeamMemberProfileImageRawUrl(member: {
   return (member.profileImg ?? member.user?.profileImage ?? "").trim();
 }
 
+/**
+ * 홈 Starting XI·베스트11 패널 등 팀 멤버 카드의 **표시** URL.
+ * `TeamMemberModel.profileImg`만 사용하고, 비어 있으면 고정 기본 플레이스홀더(`img_player_1`).
+ */
+export function resolveTeamMemberCardImageUrl(member: {
+  profileImg?: string | null;
+}): string {
+  const raw = (member.profileImg ?? "").trim();
+  return raw.length > 0 ? raw : PLAYER_PLACEHOLDER_IMAGES[0];
+}
+
 /** 팀 멤버별 결정론적 플레이스홀더 URL만. */
 export function getTeamMemberProfileImageFallbackUrl(member: {
   id: number;

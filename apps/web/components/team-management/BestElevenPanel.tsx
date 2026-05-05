@@ -38,6 +38,7 @@ import { useDeleteBestElevenMutation } from "./hooks/useDeleteBestElevenMutation
 import { Suspense } from "react";
 import { type FormationType } from "@/constants/formation";
 import { getValidImageSrc, cn } from "@/lib/utils";
+import { resolveTeamMemberCardImageUrl } from "@/lib/playerPlaceholderImage";
 import { buildMatchFormationTacticsDocumentFromQuarters } from "@/lib/formation/buildMatchFormationTacticsDocument";
 import { buildQuarterDataFromTacticsDocument } from "@/lib/formation/buildQuarterDataFromTacticsDocument";
 import { createFormationLineupResolver } from "@/lib/formation/roster/createFormationLineupResolver";
@@ -234,7 +235,7 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
       out.push({
         id: tmId,
         name: m.user?.name || "알 수 없음",
-        image: m.user?.profileImage || "/images/player/img_player_1.webp",
+        image: resolveTeamMemberCardImageUrl(m),
         position: m.preferredPosition || "-",
         number: m.preferredNumber || 0,
         overall: m.overall?.ovr || 0,
@@ -311,7 +312,9 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
   const [manager, setManager] = useState({
     memberId: initialManagerId,
     name: initialManagerMember?.user?.name || "설정되지 않음",
-    image: getValidImageSrc(initialManagerMember?.user?.profileImage)
+    image: getValidImageSrc(
+      initialManagerMember?.profileImg ?? initialManagerMember?.user?.profileImage,
+    ),
   });
 
   // 감독 개인 매치 기여도(overall) 기반 승/무/패 산출
@@ -331,7 +334,9 @@ function BestElevenPanelInner({ teamId }: { teamId: number }) {
     setManager({
       memberId: initialManagerId,
       name: initialManagerMember?.user?.name || "설정되지 않음",
-      image: getValidImageSrc(initialManagerMember?.user?.profileImage),
+      image: getValidImageSrc(
+        initialManagerMember?.profileImg ?? initialManagerMember?.user?.profileImage,
+      ),
     });
     setHasChanges(false);
   }, [getInitialQuarters, initialManagerId, initialManagerMember]);

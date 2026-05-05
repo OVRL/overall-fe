@@ -11,6 +11,7 @@ export const useBestElevenFetchQuery = graphql`
         preferredNumber
         preferredPosition
         role
+        profileImg
         user {
           __typename
           id
