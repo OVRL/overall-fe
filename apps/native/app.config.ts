@@ -58,41 +58,11 @@ export default ({ config }: { config: ExpoConfig }): ExpoConfig => {
   const nativeSocial =
     (extra?.nativeSocialLogin as Record<string, string> | undefined) ?? {};
 
-  /**
-   * 릴리스에서 `[SplashBoot]` 콘솔 로그를 켤 때 사용.
-   * - `app.json` extra.splashBootTimelineLog: true
-   * - 또는 EAS/로컬 빌드 시 env: SPLASH_BOOT_TIMELINE_LOG=1 (또는 EXPO_PUBLIC_ 동일)
-   * - env 가 0|false|no 이면 extra 가 true여도 끔
-   */
-  const splashBootEnv = (
-    process.env.SPLASH_BOOT_TIMELINE_LOG ??
-    process.env.EXPO_PUBLIC_SPLASH_BOOT_TIMELINE_LOG ??
-    ""
-  )
-    .trim()
-    .toLowerCase();
-  let splashBootTimelineLog = extra?.splashBootTimelineLog === true;
-  if (
-    splashBootEnv === "1" ||
-    splashBootEnv === "true" ||
-    splashBootEnv === "yes"
-  ) {
-    splashBootTimelineLog = true;
-  }
-  if (
-    splashBootEnv === "0" ||
-    splashBootEnv === "false" ||
-    splashBootEnv === "no"
-  ) {
-    splashBootTimelineLog = false;
-  }
-
   return {
     ...config,
     plugins: withKakaoNativeAppKey(config.plugins, kakaoAppKey),
     extra: {
       ...extra,
-      splashBootTimelineLog,
       nativeSocialLogin: {
         ...nativeSocial,
         kakaoNativeAppKey: kakaoAppKey,

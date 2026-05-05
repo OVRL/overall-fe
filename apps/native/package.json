@@ -9,7 +9,11 @@
     "typecheck": "tsc --noEmit",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
+    "android:debug": "expo run:android --variant debug",
+    "android:release": "expo run:android --variant release",
     "ios": "expo run:ios",
+    "ios:debug": "expo run:ios --configuration Debug",
+    "ios:release": "expo run:ios --configuration Release",
     "web": "expo start --web",
     "lint": "expo lint",
     "splash:sync-static": "node ./scripts/extract-splash-static-from-login-logo.mjs",
@@ -62,6 +66,7 @@
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
+    "babel-preset-expo": "~54.0.10",
     "@types/react": "~19.2.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",

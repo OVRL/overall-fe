@@ -5,7 +5,6 @@
 
 **관련 문서**
 
-- 콜드 스타트·스플래시·부트 순서 디버깅(`[SplashBoot]` 로그, `extra.splashBootTimelineLog`·빌드 env로 릴리스 계측, 실기기 콘솔, 롤백): [`splash-boot-debug-maintenance-note.md`](./splash-boot-debug-maintenance-note.md)
 - 웹 소셜 OAuth·`socialLogin`·스냅샷: [`apps/web/docs/social-login-provider-flow.md`](../../web/docs/social-login-provider-flow.md)
 - 네이티브 로그인 셸 배경·히스토리: [`native-login-shell-and-auth-history.md`](./native-login-shell-and-auth-history.md)
 - 브리지·UA·계약: [`.agents/skills/native-web-bridge/SKILL.md`](../../../.agents/skills/native-web-bridge/SKILL.md)
@@ -32,6 +31,8 @@
 | 릴리스·프로덕션 | `getWebAppOrigin()` | `expo-constants` 의 `expoConfig.extra.webOrigin` (없으면 `https://ovr-log.com`). `app.json` 의 `extra.webOrigin` 과 일치시킬 것. |
 
 소셜 `fetch`·GraphQL·쿠키 주입·클리어 판별은 **모두 이 `webOrigin`과 동일한 origin** 을 전제로 동작한다.
+
+프로덕션에서 apex(`ovr-log.com`)와 `www` 간 리다이렉트가 있으면, WebView의 첫 로드 완료·`onLoadEnd` 처리에 쓰는 `isSameWebAppOrigin`(`lib/webViewViewportSync.ts`)은 **호스트만 한 번씩 `www.`를 제거해 비교**해 동일 웹앱으로 본다(스플래시·뷰포트 주입·경로 동기화가 막히지 않도록).
 
 ---
 
