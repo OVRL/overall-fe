@@ -52,6 +52,10 @@ import { useWebViewPhotoFlow } from "@/hooks/useWebViewPhotoFlow";
 import { NativeLiquidBottomNav } from "@/components/NativeLiquidBottomNav";
 import { AnimatedLiquidBottomNavShell } from "@/components/native-liquid-bottom-nav/AnimatedLiquidBottomNavShell";
 import { isNativeBottomNavVisiblePath } from "@/lib/isNativeBottomNavVisiblePath";
+import {
+  isSplashBootTimelineLogEnabled,
+  splashBootLog,
+} from "@/lib/splashBootDebug";
 
 /** 앱 루트·웹뷰 뒤 캔버스 — 다크 bg-primary 와 동일 (스플래시 전환 시 색 튐 방지) */
 const BACKGROUND = {
@@ -88,6 +92,9 @@ export default function App() {
 
   const webViewRef = useRef<WebView>(null);
   const pendingPrivacyHandoffRef = useRef<string | null>(null);
+  const splashHideGateLoggedRef = useRef(false);
+  const prepFallbackLoggedRef = useRef(false);
+  const prevAuthPhaseRef = useRef<AuthPhase | null>(null);
 
   const onNativeSessionReady = useCallback(() => {
     if (__DEV__) {
@@ -141,6 +148,20 @@ export default function App() {
   const [liquidNavModalOverlayHidden, setLiquidNavModalOverlayHidden] =
     useState(false);
 
+  /** `splash_timeout_15s` 콜백이 마운트 시점 한 번만 등록되므로, 발화 시점 스냅샷용 */
+  const splashBootStateRef = useRef({
+    authPhase: "checking" as AuthPhase,
+    isRootLayoutDone: false,
+    isWebViewCookiePrepDone: false,
+    isWebViewFirstLoadDone: false,
+  });
+  splashBootStateRef.current = {
+    authPhase,
+    isRootLayoutDone,
+    isWebViewCookiePrepDone,
+    isWebViewFirstLoadDone,
+  };
+
   const {
     isCameraVisible,
     setIsCameraVisible,
@@ -167,11 +188,21 @@ export default function App() {
   useEffect(() => {
     if (FORCE_NATIVE_LOGIN_UI_PREVIEW) return;
     let cancelled = false;
+    splashBootLog("auth_session_check_start");
+    const t0 = Date.now();
     void (async () => {
       try {
         const has = await hasNativeAuthSession();
+        splashBootLog("auth_session_check_done", {
+          ms: Date.now() - t0,
+          hasSession: has,
+        });
         if (!cancelled) setAuthPhase(has ? "main" : "native_login");
-      } catch {
+      } catch (e) {
+        splashBootLog("auth_session_check_error", {
+          ms: Date.now() - t0,
+          message: e instanceof Error ? e.message : String(e),
+        });
         if (!cancelled) setAuthPhase("native_login");
       }
     })();
@@ -185,6 +216,15 @@ export default function App() {
       setNativeChrome(null);
       setChromeMode("fullscreen");
       setWebPathname("");
+    }
+  }, [authPhase]);
+
+  useEffect(() => {
+    if (!isSplashBootTimelineLogEnabled()) return;
+    const prev = prevAuthPhaseRef.current;
+    if (prev !== authPhase) {
+      splashBootLog("auth_phase_change", { from: prev, to: authPhase });
+      prevAuthPhaseRef.current = authPhase;
     }
   }, [authPhase]);
 
@@ -232,6 +272,13 @@ export default function App() {
 
   useEffect(() => {
     const t = setTimeout(() => {
+      const s = splashBootStateRef.current;
+      splashBootLog("splash_timeout_15s_fired", {
+        ...s,
+        splashContentReady:
+          s.authPhase === "native_login" ||
+          (s.authPhase === "main" && s.isWebViewFirstLoadDone),
+      });
       setIsSplashTimedOut(true);
     }, 15000);
     return () => clearTimeout(t);
@@ -250,12 +297,48 @@ export default function App() {
   const showBlockingCustomSplash =
     !isAppReadyForSplashHide && !isSplashTimedOut;
 
+  const showPrepFallback = isSplashTimedOut && !isWebViewCookiePrepDone;
+
+  useEffect(() => {
+    if (!isSplashBootTimelineLogEnabled()) return;
+    if (!isAppReadyForSplashHide || splashHideGateLoggedRef.current) return;
+    splashHideGateLoggedRef.current = true;
+    splashBootLog("splash_hide_gate_satisfied", {
+      authPhase,
+      isRootLayoutDone,
+      isWebViewCookiePrepDone,
+      isWebViewFirstLoadDone,
+    });
+  }, [
+    isAppReadyForSplashHide,
+    authPhase,
+    isRootLayoutDone,
+    isWebViewCookiePrepDone,
+    isWebViewFirstLoadDone,
+  ]);
+
+  useEffect(() => {
+    if (!isSplashBootTimelineLogEnabled()) return;
+    if (!showPrepFallback) {
+      prepFallbackLoggedRef.current = false;
+      return;
+    }
+    if (prepFallbackLoggedRef.current) return;
+    prepFallbackLoggedRef.current = true;
+    splashBootLog("prep_fallback_shown", {
+      isWebViewCookiePrepDone,
+      isSplashTimedOut,
+    });
+  }, [showPrepFallback, isWebViewCookiePrepDone, isSplashTimedOut]);
+
   // 정적 네이티브 스플래시를 곧바로 닫고, 애니 WebP가 있는 커스텀 스플래시로 전환합니다.
   useLayoutEffect(() => {
+    splashBootLog("app_first_layout_native_splash_hide");
     void SplashScreen.hideAsync();
   }, []);
 
   const onLayoutRootView = useCallback(() => {
+    splashBootLog("root_view_onLayout");
     setIsRootLayoutDone(true);
     if (isAppReadyForSplashHide) {
       void SplashScreen.hideAsync();
@@ -384,6 +467,11 @@ export default function App() {
     (e: { nativeEvent: { url: string } }) => {
       const url = e.nativeEvent.url;
       const sameOrigin = isSameWebAppOrigin(url, webOrigin);
+      splashBootLog("webview_load_end", {
+        url,
+        sameOrigin,
+        pendingHandoff: pendingPrivacyHandoffRef.current != null,
+      });
       if (__DEV__) {
         // nid.naver.com·kauth.kakao.com 등 OAuth 호스트는 당연히 sameOrigin=false (외부 도메인).
         // console.warn 만 쓰면 LogBox가 스택처럼 붙어 혼동되므로 log 한 줄만 사용.
@@ -393,7 +481,12 @@ export default function App() {
       }
       if (!sameOrigin) return;
       try {
-        setWebPathname(new URL(url).pathname);
+        const pathname = new URL(url).pathname;
+        setWebPathname(pathname);
+        splashBootLog("webview_first_same_origin_load_complete", {
+          url,
+          pathname,
+        });
       } catch {
         /* 무시 */
       }
@@ -409,8 +502,6 @@ export default function App() {
     },
     [webOrigin],
   );
-
-  const showPrepFallback = isSplashTimedOut && !isWebViewCookiePrepDone;
 
   return (
     <View style={[styles.screenRoot, { backgroundColor }]} onLayout={onLayoutRootView}>
@@ -490,17 +581,25 @@ export default function App() {
             allowsBackForwardNavigationGestures={true}
             contentInsetAdjustmentBehavior="never"
             onLoadStart={(e) => {
+              splashBootLog("webview_load_start", {
+                url: e.nativeEvent.url,
+              });
               if (__DEV__) {
                 console.log("[WebView onLoadStart]", e.nativeEvent.url);
               }
             }}
             onError={(e) => {
+              const d = e.nativeEvent as {
+                description?: string;
+                domain?: string;
+                code?: number;
+              };
+              splashBootLog("webview_load_error", {
+                description: d.description,
+                domain: d.domain,
+                code: d.code,
+              });
               if (__DEV__) {
-                const d = e.nativeEvent as {
-                  description?: string;
-                  domain?: string;
-                  code?: number;
-                };
                 console.warn(
                   "[WebView onError]",
                   d.description ?? d,
@@ -510,6 +609,10 @@ export default function App() {
               }
             }}
             onHttpError={(e) => {
+              splashBootLog("webview_http_error", {
+                statusCode: e.nativeEvent.statusCode,
+                url: e.nativeEvent.url,
+              });
               if (__DEV__) {
                 console.warn(
                   "[WebView onHttpError]",

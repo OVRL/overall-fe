@@ -5,6 +5,7 @@
 
 **관련 문서**
 
+- 콜드 스타트·스플래시·부트 순서 디버깅(`[SplashBoot]` 로그, `extra.splashBootTimelineLog`·빌드 env로 릴리스 계측, 실기기 콘솔, 롤백): [`splash-boot-debug-maintenance-note.md`](./splash-boot-debug-maintenance-note.md)
 - 웹 소셜 OAuth·`socialLogin`·스냅샷: [`apps/web/docs/social-login-provider-flow.md`](../../web/docs/social-login-provider-flow.md)
 - 네이티브 로그인 셸 배경·히스토리: [`native-login-shell-and-auth-history.md`](./native-login-shell-and-auth-history.md)
 - 브리지·UA·계약: [`.agents/skills/native-web-bridge/SKILL.md`](../../../.agents/skills/native-web-bridge/SKILL.md)

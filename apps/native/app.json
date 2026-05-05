@@ -132,6 +132,7 @@
       "autolinkingModuleResolution": true
     },
     "extra": {
+      "splashBootTimelineLog": false,
       "router": {},
       "eas": {
         "projectId": "78f68efa-aa19-4a71-8850-141659221689"
