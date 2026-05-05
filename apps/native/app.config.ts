@@ -57,6 +57,26 @@ export default ({ config }: { config: ExpoConfig }): ExpoConfig => {
   const extra = config.extra as Record<string, unknown> | undefined;
   const nativeSocial =
     (extra?.nativeSocialLogin as Record<string, string> | undefined) ?? {};
+  const applovinMaxStatic =
+    (extra?.applovinMax as Record<string, string> | undefined) ?? {};
+  const applovinMax = {
+    sdkKey: (
+      process.env.APPLOVIN_MAX_SDK_KEY ??
+      process.env.EXPO_PUBLIC_APPLOVIN_MAX_SDK_KEY ??
+      applovinMaxStatic.sdkKey ??
+      ""
+    ).trim(),
+    bannerAdUnitIdIos: (
+      process.env.EXPO_PUBLIC_APPLOVIN_MAX_BANNER_AD_UNIT_ID_IOS ??
+      applovinMaxStatic.bannerAdUnitIdIos ??
+      ""
+    ).trim(),
+    bannerAdUnitIdAndroid: (
+      process.env.EXPO_PUBLIC_APPLOVIN_MAX_BANNER_AD_UNIT_ID_ANDROID ??
+      applovinMaxStatic.bannerAdUnitIdAndroid ??
+      ""
+    ).trim(),
+  };
 
   return {
     ...config,
@@ -67,6 +87,7 @@ export default ({ config }: { config: ExpoConfig }): ExpoConfig => {
         ...nativeSocial,
         kakaoNativeAppKey: kakaoAppKey,
       },
+      applovinMax,
     },
   };
 };

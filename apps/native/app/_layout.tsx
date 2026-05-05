@@ -7,6 +7,7 @@ import { StatusBar } from "react-native";
 import "../global.css";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useApplovinMaxBootstrap } from "@/hooks/useApplovinMaxBootstrap";
 
 // 네이티브 스플래시를 자동으로 숨기지 않고, WebView가 준비될 때까지 유지하기 위해
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +19,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? "dark";
+  useApplovinMaxBootstrap();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

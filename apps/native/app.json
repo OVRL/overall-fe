@@ -137,6 +137,11 @@
         "projectId": "78f68efa-aa19-4a71-8850-141659221689"
       },
       "webOrigin": "https://ovr-log.com",
+      "applovinMax": {
+        "sdkKey": "",
+        "bannerAdUnitIdIos": "",
+        "bannerAdUnitIdAndroid": ""
+      },
       "nativeSocialLogin": {
         "kakaoNativeAppKey": "42531423b6e6bd15d5806708e81c28c6",
         "naverConsumerKey": "HbhJjofPRxpTpWwynMuK",

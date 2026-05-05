@@ -3,6 +3,7 @@ import { View, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeGlobalHeaderState } from "@/types/nativeChrome";
+import { NativeWebTopBannerSlot } from "@/components/NativeWebTopBannerSlot";
 
 /** `apps/web/public/icons/logo_OVR.svg` → `assets/topbar` 복사본 (expo-image로 디코딩) */
 const LOGO_OVR = require("@/assets/topbar/logo_OVR.svg") as number;
@@ -17,6 +18,7 @@ type Props = {
 
 /**
  * 웹 `Header variant="global"` 상단 행과 유사 — 가운데 로고(SVG) + 우측 팀 관리 액션.
+ * 하단에 Axon(AppLovin) MAX 배너 슬롯(`NativeWebTopBannerSlot`)을 붙인다.
  * SvgXml(RNSVGView)는 일부 iOS Fabric에서 "Unimplemented"가 나와 expo-image로 표시한다.
  */
 function NativeWebGlobalHeaderInner({
@@ -70,6 +72,7 @@ function NativeWebGlobalHeaderInner({
           )}
         </View>
       </View>
+      <NativeWebTopBannerSlot visible />
     </View>
   );
 }
